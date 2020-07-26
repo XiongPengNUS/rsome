@@ -2,31 +2,20 @@
 
 ROAD, as Robust Optimization with Array-like Data, is an open-source toolbox designed for implementing and prototyping robust optimization models. The package is consistent with the NumPy package in terms of indexing, N-dimensional array operations, and matrix calculation rules, and it provides a convenient interface in specifying model features. The constructed model can be automatically converted into a counterpart formulation, which can be solved by integrated commercial solvers, such as Gurobi. 
 
-## The Dao of ROAD
-
-
 ```python
 from road import dao
 ```
 
-
-The Dao of ROAD: 
-
-
-
-[ROME](https://robustopt.com/) was not built in one day. 
-
-
-
-All [ROAD](https://github.com/XiongPengNUS/ROAD)s lead to [ROME](https://robustopt.com/).
-
-
-
-Matlab is [RSOME](https://www.rsomerso.com/). 
-
-
-
-The [ROAD](https://github.com/XiongPengNUS/ROAD) in Python is more than [RSOME](https://www.rsomerso.com/).
+    ROME: https://robustopt.com/
+    RSOME: https://www.rsomerso.com
+    ROAD: https://github.com/XiongPengNUS/road
+    
+    
+    The DAO of ROAD: 
+    ROME was not built in one day.
+    All ROADs lead to ROME.
+    Matlab is RSOME!
+    The ROAD in Python is more than RSOME!
 
 
 ## Examples
