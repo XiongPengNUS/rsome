@@ -159,7 +159,7 @@ plt.show()
 ```
 
 
-<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_11_0.png" width=450>
+<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_11_0.png">
 
 
 ### Robust portfolio optimization
