@@ -54,7 +54,6 @@ model.solve(grb)                    # Solve the model by Gurobi
 ```
 
     Using license file /Users/pengxiong/gurobi.lic
-    Academic license - for non-commercial use only
     Being solved by Gurobi...
     Solution status: 2
     Running time: 0.0003s
