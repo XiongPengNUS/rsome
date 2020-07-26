@@ -203,7 +203,7 @@ plt.show()
 ```
 
 
-<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_17_0.png" width=450>
+<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_17_0.png" >
 
 
 ### Robust optimization for a lot-sizing problem
@@ -271,7 +271,7 @@ plt.show()
 ```
 
 
-<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_23_0.png" width=450>
+<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_23_0.png">
 
 
 
@@ -406,7 +406,7 @@ plt.show()
 ```
 
 
-<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_35_0.png" width=450>
+<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_35_0.png">
 
-<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_35_1.png" width=450>
+<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_35_1.png">
 
