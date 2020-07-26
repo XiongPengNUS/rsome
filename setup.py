@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='road',
-     version='0.0.0',
+     version='0.0.1',
      author="Peng Xiong and Zhi Chen",
      author_email="xiongpengnus@gmail.com",
      description="Robust Optimization with Array-like Data",
