@@ -1,15 +1,15 @@
 from .socp import Model as SOCModel
 from .ro import Model as ROModel
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
-from .lp import Vars, VarSub, Affine, Convex
-from .lp import RoAffine, RoConstr
+# from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
+from .lp import Vars, VarSub    # , Affine, Convex
+# from .lp import RoAffine, RoConstr
 from .subroutines import *
 import numpy as np
 import pandas as pd
-import scipy.sparse as sp
-from numbers import Real
-from scipy.sparse import csr_matrix
-from collections import Iterable
+# import scipy.sparse as sp
+# from numbers import Real
+# from scipy.sparse import csr_matrix
+from collections import Iterable, Sized
 
 
 class Model:
@@ -20,7 +20,7 @@ class Model:
         self.vt_model = SOCModel(mtype='V')
         self.sup_model = SOCModel(nobj=True, mtype='S')
         self.exp_model = SOCModel(nobj=True, mtype='E')
-        #self.pro_model = SOCModel(nobj=True, mtype='P')
+        # self.pro_model = SOCModel(nobj=True, mtype='P')
         self.pro_model = None
 
         self.all_constr = []
@@ -43,6 +43,8 @@ class Model:
 
         self.solution = None
 
+        self.name = name
+
     def rvar(self, shape=(1,), name=None):
 
         sup_var = self.sup_model.dvar(shape, 'C', name)
@@ -54,7 +56,6 @@ class Model:
         dec_var = self.vt_model.dvar(shape, vtype, name)
         return DecVar(self, dec_var, name)
 
-
     def ambiguity(self, scens=1):
 
         if self.all_constr:
@@ -64,9 +65,11 @@ class Model:
         if isinstance(scens, int):
             num_scen = scens
             series = pd.Series(range(num_scen), dtype=np.int32)
-        else:
+        elif isinstance(scens, Sized):
             num_scen = len(scens)
             series = pd.Series(range(num_scen), index=scens, dtype=np.int32)
+        else:
+            raise ValueError('Incorrect scenarios.')
 
         return Ambiguity(self, num_scen, series)
 
@@ -75,12 +78,11 @@ class Model:
         bou_set = self.ambiguity()
         for arg in args:
             if arg.model is not self.sup_model:
-                raise ValueError('Constraints are not defined for the support.')
+                raise ValueError('Constraints are not for this support.')
 
         self.sup_constr[0] = tuple(args)
 
         return bou_set
-
 
     def wks(self, *args):
 
@@ -112,6 +114,7 @@ class DecVar(Vars):
         self.rsome_model = model
         self.event_adapt = None
         self.rand_adapt = None
+        self.name = name
 
     def __getitem__(self, item):
 
@@ -178,7 +181,7 @@ class DecVarSub(VarSub):
         if self.rand_adapt is None:
             sup_model = self.rsome_model.sup_model
             self.rand_adapt = np.zeros((self.size, sup_model.vars[-1].last),
-                                        dtype=np.int8)
+                                       dtype=np.int8)
 
         dec_indices = self.indices
         dec_indices = dec_indices.reshape((dec_indices.size, 1))
@@ -259,7 +262,7 @@ class Ambiguity:
                                  index=self.s.series.index))
             table.loc[defined, 'support'] = 'defined'
 
-        exp_cosntr = self.model.exp_constr
+        # exp_cosntr = self.model.exp_constr
         exp_constr_indices = self.model.exp_constr_indices
         count = 0
         if exp_constr_indices is not None:
@@ -304,11 +307,11 @@ class Ambiguity:
         self.model.pro_constr = [pr >= 0, pr.sum() == 1] + list(args)
 
 
-class Scen():
+class Scen:
 
     def __init__(self, ambset, series, pr):
 
-        #super().__init__(data=series.values, index=series.index)
+        # super().__init__(data=series.values, index=series.index)
         self.ambset = ambset
         self.series = series
         self.p = pr
@@ -340,9 +343,9 @@ class Scen():
 
         for arg in args:
             if arg.model is not self.ambset.model.sup_model:
-                raise ValueError('Constraints are not defined for the support.')
+                raise ValueError('Constraints are not for this support.')
 
-        #for i in self.series:
+        # for i in self.series:
         indices = (self.series if isinstance(self.series, pd.Series)
                    else [self.series])
         for i in indices:

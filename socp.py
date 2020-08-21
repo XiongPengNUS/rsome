@@ -1,11 +1,9 @@
 from .lp import Model as LPModel
 from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
-from .lp import Vars, VarSub, Affine, Convex, LinProg
+from .lp import LinProg
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from numbers import Real
-from scipy.sparse import csr_matrix
 from collections import Iterable
 
 
@@ -171,11 +169,11 @@ class SOCProg(LinProg):
         super().__init__(linear, const, sense, vtype, ub, lb, obj)
         self.qmat = qmat
 
-    def __repr__(self):
+    def __repr__(self, header=False):
 
         qmat = self.qmat
         string = 'Second order cone program object:\n'
-        string += super().__repr__(header=False)
+        string += super().__repr__(header=header)
         string += '---------------------------------------------\n'
         string += 'Number of SOC constraints:    {0}\n'.format(len(qmat))
 

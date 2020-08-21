@@ -2,6 +2,7 @@ import numpy as np
 import scipy.sparse as sp
 from numbers import Real
 from scipy.sparse import csr_matrix
+# from .lp import SparseVec
 
 
 def index_array(shape):
@@ -98,6 +99,7 @@ def square(affine):
 def sumsqr(affine):
 
     return affine.to_affine().sumsqr()
+
 
 def E(expr):
 

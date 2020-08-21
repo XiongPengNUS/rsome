@@ -1,13 +1,9 @@
 from .socp import Model as SOCModel
-from .lp import Vars
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
+from .lp import LinConstr, Bounds, CvxConstr
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import RoAffine, RoConstr
 from .subroutines import *
 import numpy as np
-import pandas as pd
-import scipy.sparse as sp
-from numbers import Real
 from scipy.sparse import csr_matrix
 from collections import Iterable
 
@@ -35,6 +31,8 @@ class Model:
         self.dupdate = True
 
         self.solution = None
+
+        self.name = name
 
     def dvar(self, shape=(1,), vtype='C', name=None, aux=False):
 
@@ -201,7 +199,7 @@ class Model:
         return self.sign * self.rc_model.solution.objval
 
 
-class DecRule():
+class DecRule:
 
     __array_priority__ = 102
 
@@ -348,7 +346,8 @@ class DecRule():
         else:
             if rvar.model.mtype != 'S':
                 ValueError('The input is not a random variable.')
-            ldr_coeff = np.zeros((self.size, self.model.rc_model.vars[-1].last))
+            ldr_coeff = np.zeros((self.size,
+                                  self.model.rc_model.vars[-1].last))
             rand_ind = rvar.get_ind()
             row_ind, col_ind = np.where(self.depend == 1)
             ldr_coeff[row_ind, col_ind] = self.var_coeff.get()
@@ -357,7 +356,7 @@ class DecRule():
             return ldr_coeff[:, rand_ind].reshape((size, ) + self.shape)
 
 
-class DecRuleSub():
+class DecRuleSub:
 
     __array_priority__ = 105
 
@@ -367,7 +366,6 @@ class DecRuleSub():
         self.shape = indices.shape
         self.indices = indices.flatten()
         self.item = item
-
 
     def adapt(self, rvar):
 

@@ -1,12 +1,11 @@
-from IPython.display import Markdown, display
+print('The DAO of ROAD: ')
+print('ROME was not built in one day.')
+print('All ROADs lead to ROME.')
+print('Matlab is RSOME!')
+print('The ROAD in Python is more than RSOME!')
 
-def printmd(string):
-    display(Markdown(string))
+print('\n')
 
-printmd('The Dao of ROAD: ')
-printmd('[ROME](https://robustopt.com/) was not built in one day. ')
-printmd('All [ROAD](https://github.com/XiongPengNUS/ROAD)s lead to ' +
-        '[ROME](https://robustopt.com/).')
-printmd('Matlab is [RSOME](https://www.rsomerso.com/). ')
-printmd('The [ROAD](https://github.com/XiongPengNUS/ROAD) in Python ' +
-        'is more than [RSOME](https://www.rsomerso.com/).')
+print('ROME: https://robustopt.com/')
+print('RSOME: https://www.rsomerso.com')
+print('ROAD: https://github.com/XiongPengNUS/road')

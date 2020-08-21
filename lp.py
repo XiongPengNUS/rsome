@@ -153,7 +153,7 @@ class Model:
                     last += item.linear.indptr[-1]
 
                     linear = csr_matrix((data, indices, indptr),
-                                    (len(indptr) - 1, self.last))
+                                        (len(indptr) - 1, self.last))
 
                     const_list = [item.const for item in
                                   self.lin_constr + self.aux_constr]
@@ -348,6 +348,19 @@ class Vars:
 
         return self.__str__()
 
+    def sv_array(self, index=False):
+
+        shape = self.shape
+        shape = shape if isinstance(shape, tuple) else (int(shape), )
+        size = np.prod(shape).item()
+
+        if index:
+            elements = [SparseVec([i], [1], size) for i in range(size)]
+        else:
+            elements = [SparseVec([i], [1.0], size) for i in range(size)]
+
+        return np.array(elements).reshape(shape)
+
     # noinspection PyPep8Naming
     @property
     def T(self):
@@ -367,7 +380,8 @@ class Vars:
         const = np.zeros(self.shape)
 
         if self.sparray is None:
-            self.sparray = sparse_array(self.shape)
+            # self.sparray = sparse_array(self.shape)
+            self.sparray = self.sv_array()
 
         return Affine(self.model, linear, const, self.sparray)
 
@@ -403,7 +417,8 @@ class Vars:
             indices = np.array([indices]).reshape((1, ) * self.ndim)
 
         if self.sparray is None:
-            self.sparray = sparse_array(self.shape)
+            # self.sparray = sparse_array(self.shape)
+            self.sparray = self.sv_array()
 
         return VarSub(self, indices)
 
@@ -572,7 +587,7 @@ class VarSub(Vars):
         upper = super().__le__(other)
         indices = self.indices.reshape((self.indices.size, ))
         bound_indices = upper.indices.reshape((upper.indices.size, ))[indices]
-        bound_values = upper.values.reshape((upper.values.size))[indices]
+        bound_values = upper.values.reshape(upper.values.size)[indices]
 
         return Bounds(upper.model, bound_indices, bound_values, 'U')
 
@@ -621,13 +636,15 @@ class Affine:
     def __getitem__(self, item):
 
         if self.sparray is None:
-            self.sparray = sparse_array(self.shape)
+            # self.sparray = sparse_array(self.shape)
+            self.sparray = self.sv_array()
 
         indices = self.sparray[item]
         if not isinstance(indices, np.ndarray):
             indices = np.array([indices]).reshape((1, ))
 
-        linear = array_to_sparse(indices) @ self.linear
+        # linear = array_to_sparse(indices) @ self.linear
+        linear = sv_to_csr(indices) @ self.linear
         const = self.const[item]
         if not isinstance(const, np.ndarray):
             const = np.array([const])
@@ -646,9 +663,9 @@ class Affine:
         num_dec = rc_model.last
 
         raffine = Affine(rc_model,
-                         csr_matrix(np.zeros((size*num_rand, num_dec))),
-                         np.array(reduced_linear.todense()))
-        affine = Affine(rc_model, csr_matrix(np.zeros((size, num_dec))),
+                         csr_matrix((size*num_rand, num_dec)),
+                         reduced_linear.toarray())
+        affine = Affine(rc_model, csr_matrix((size, num_dec)),
                         self.const)
 
         return RoAffine(raffine, affine, self.model)
@@ -666,15 +683,26 @@ class Affine:
 
         return np.array(elements).reshape(shape)
 
+    def sv_zeros(self, nvar):
+
+        shape = (self.shape if isinstance(self.shape, tuple) else
+                 (int(self.shape),))
+        size = np.prod(self.shape).item()
+        elements = [SparseVec([], [], nvar) for _ in range(size)]
+
+        return np.array(elements).reshape(shape)
+
     # noinspection PyPep8Naming
     @property
     def T(self):
 
         if self.sparray is None:
-            self.sparray = sparse_array(self.shape)
+            # self.sparray = sparse_array(self.shape)
+            self.sparray = self.sv_array()
 
         trans_sparray = self.sparray.T
-        linear = array_to_sparse(trans_sparray) @ self.linear
+        # linear = array_to_sparse(trans_sparray) @ self.linear
+        linear = sv_to_csr(trans_sparray) @ self.linear
         const = self.const.T
 
         return Affine(self.model, linear, const)
@@ -687,13 +715,15 @@ class Affine:
     def sum(self, axis=None):
 
         if self.sparray is None:
-            self.sparray = sparse_array(self.shape)
+            # self.sparray = sparse_array(self.shape)
+            self.sparray = self.sv_array()
 
         indices = self.sparray.sum(axis=axis)
         if not isinstance(indices, np.ndarray):
             indices = np.array([indices])
 
-        linear = array_to_sparse(indices) @ self.linear
+        # linear = array_to_sparse(indices) @ self.linear
+        linear = sv_to_csr(indices) @ self.linear
         const = self.const.sum(axis=axis)
         if not isinstance(const, np.ndarray):
             const = np.array([const])
@@ -856,8 +886,8 @@ class Affine:
                                       shape=(temp.size*other.size, self.size))
                 self_flat = self.reshape(self.size)
                 affine_temp = (csr_temp @ self_flat).reshape((temp.size,
-                                                               other.size))
-                raffine = (affine_temp) @ other.linear
+                                                              other.size))
+                raffine = affine_temp @ other.linear
 
                 return RoAffine(raffine, affine, other.model)
             elif self.model.mtype == 'S' and other.model.mtype == 'R':
@@ -888,7 +918,7 @@ class Affine:
                 other_flat = other.reshape(other.size)
                 affine_temp = (csr_temp @ other_flat).reshape((temp.size,
                                                                self.size))
-                raffine = (affine_temp) @ self.linear
+                raffine = affine_temp @ self.linear
 
                 return RoAffine(raffine, affine, self.model)
         else:
@@ -941,13 +971,23 @@ class Affine:
             if self.shape == other.shape:
                 new_linear = add_linear(self.linear, other.linear)
             else:
-                left_sparray = sparse_array(self.shape)
-                right_sparray = sparse_array(other.shape)
-                left_zero = np.zeros(self.shape)
-                right_zero = np.zeros(other.shape)
+                # left_sparray = sparse_array(self.shape)
+                # right_sparray = sparse_array(other.shape)
 
-                left_sparse = array_to_sparse(left_sparray + right_zero)
-                right_sparse = array_to_sparse(left_zero + right_sparray)
+                left_sparray = self.sv_array()
+                right_sparray = other.sv_array()
+
+                # left_zero = np.zeros(self.shape)
+                # right_zero = np.zeros(other.shape)
+
+                left_zero = self.sv_zeros(other.size)
+                right_zero = other.sv_zeros(self.size)
+
+                # left_sparse = array_to_sparse(left_sparray + right_zero)
+                # right_sparse = array_to_sparse(left_zero + right_sparray)
+
+                left_sparse = sv_to_csr(left_sparray + right_zero)
+                right_sparse = sv_to_csr(left_zero + right_sparray)
 
                 left_linear = left_sparse @ self.linear
                 right_linear = right_sparse @ other.linear
@@ -960,9 +1000,12 @@ class Affine:
             if self.shape == other.shape:
                 new_linear = self.linear
             else:
-                sparray = sparse_array(self.shape)
-                zero = np.zeros(other.shape)
-                sparse = array_to_sparse(sparray + zero)
+                # sparray = sparse_array(self.shape)
+                sparray = self.sv_array()
+                # zero = np.zeros(other.shape)
+                zero = self.sv_zeros(other.size)
+                # sparse = array_to_sparse(sparray + zero)
+                sparse = sv_to_csr(sparray + zero)
                 new_linear = sparse @ self.linear
         elif isinstance(other, Real):
             other = check_numeric(other)
@@ -1085,7 +1128,9 @@ class Convex:
             multiplier = abs(other)
         elif self.xtype in 'SQ':
             multiplier = abs(other) ** 0.5
-        return Convex(multiplier*self.affine_in, other*self.affine_out,
+        else:
+            raise ValueError('Unknown type of convex function.')
+        return Convex(multiplier * self.affine_in, other * self.affine_out,
                       self.xtype, np.sign(other)*self.sign)
 
     def __rmul__(self, other):
@@ -1096,7 +1141,7 @@ class Convex:
 
         left = self - other
         if left.sign == -1:
-            raise ValueError('Nonconvex constraints.')
+            raise ValueError('Non-convex constraints.')
 
         return CvxConstr(left.model, left.affine_in, left.affine_out,
                          left.xtype)
@@ -1126,12 +1171,36 @@ class RoAffine:
         self.affine = affine
         self.shape = affine.shape
 
+    def sv_array(self, index=False):
+
+        shape = self.shape
+        shape = shape if isinstance(shape, tuple) else (int(shape), )
+        size = np.prod(shape).item()
+
+        if index:
+            elements = [SparseVec([i], [1], size) for i in range(size)]
+        else:
+            elements = [SparseVec([i], [1.0], size) for i in range(size)]
+
+        return np.array(elements).reshape(shape)
+
+    def sv_zeros(self, nvar):
+
+        shape = (self.shape if isinstance(self.shape, tuple) else
+                 (int(self.shape),))
+        size = np.prod(self.shape).item()
+        elements = [SparseVec([], [], nvar) for _ in range(size)]
+
+        return np.array(elements).reshape(shape)
+
     @property
     def T(self):
 
-        sparray = sparse_array(self.shape)
+        # sparray = sparse_array(self.shape)
+        sparray = self.sv_array()
         trans_sparray = sparray.T
-        raffine = array_to_sparse(trans_sparray) @ self.raffine
+        # raffine = array_to_sparse(trans_sparray) @ self.raffine
+        raffine = sv_to_csr(trans_sparray) @ self.raffine
         affine = self.affine.T
 
         return RoAffine(raffine, affine, self.rand_model)
@@ -1354,10 +1423,7 @@ class RoConstr:
         dual_var = self.dec_model.dvar((num_constr, size_support))
 
         constr1 = (dual_var@support.obj +
-                   self.affine.reshape((num_constr)) <= 0)
-        #print((dual_var@support.obj).shape)
-        #print((dual_var@support.obj).shape, self.affine.shape)
-        #temp = dual_var@support.obj + self.affine.reshape(num_constr)
+                   self.affine.reshape(num_constr) <= 0)
 
         left = dual_var @ support.linear[:num_rand].T
         left = left + self.raffine * support.const[:num_rand]
