@@ -182,6 +182,10 @@ class SOCProg(LinProg):
     def showqc(self):
 
         n = len(self.qmat)
+
+        if n == 0:
+            return None
+
         indices = np.concatenate([item for item in self.qmat])
         values = np.concatenate([[-1.0] + [1.0]*(len(item)-1)
                                  for item in self.qmat])
@@ -189,7 +193,7 @@ class SOCProg(LinProg):
         for i in range(n):
             indptr[i+1] = indptr[i] + len(self.qmat[i])
 
-        var_names = ['q{0}'.format(i)
+        var_names = ['x{0}'.format(i)
                      for i in range(1, self.linear.shape[1] + 1)]
         constr_names = ['QC{0}'.format(j)
                         for j in range(1, n + 1)]
@@ -200,3 +204,24 @@ class SOCProg(LinProg):
         table['constants'] = [0.0] * n
 
         return table
+
+    def show(self):
+
+        table = self.showlc()
+        obj_row = pd.DataFrame(self.obj.reshape((1, self.obj.size)),
+                               columns=table.columns[:-2], index=['Obj'])
+        table = pd.concat([obj_row, table], axis=0)
+
+        table_qc = self.showqc()
+        if table_qc is not None:
+            table = pd.concat([table, table_qc], axis=0)
+
+        ub = pd.DataFrame(self.ub.reshape((1, self.ub.size)),
+                          columns=table.columns[:-2], index=['Upper'])
+        lb = pd.DataFrame(self.lb.reshape((1, self.lb.size)),
+                          columns=table.columns[:-2], index=['Lower'])
+        vtype = pd.DataFrame(self.vtype.reshape((1, self.vtype.size)),
+                             columns=table.columns[:-2], index=['Types'])
+        table = pd.concat([table, ub, lb, vtype], axis=0)
+
+        return table.fillna('-')

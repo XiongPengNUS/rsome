@@ -68,8 +68,7 @@ class Model:
         elif isinstance(scens, Sized):
             num_scen = len(scens)
             series = pd.Series(range(num_scen), index=scens, dtype=np.int32)
-        else:
-            raise ValueError('Incorrect scenarios.')
+        else:            raise ValueError('Incorrect scenarios.')
 
         return Ambiguity(self, num_scen, series)
 

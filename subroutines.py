@@ -2,7 +2,84 @@ import numpy as np
 import scipy.sparse as sp
 from numbers import Real
 from scipy.sparse import csr_matrix
-# from .lp import SparseVec
+
+
+def sparse_mul(ndarray, affine):
+
+    array_ones = np.ones(ndarray.shape, dtype='int')
+    affine_ind = np.arange(affine.size, dtype='int').reshape(affine.shape)
+    affine_ones = np.ones(affine.shape, dtype='int')
+
+    index = (array_ones * affine_ind).flatten()
+    values = (ndarray * affine_ones).flatten()
+
+    size = index.size
+
+    return csr_matrix((values, (np.arange(size), index)),
+                      shape=(size, affine.size))
+
+
+def sp_matmul(ndarray, affine, shape):
+
+    size = np.prod(shape)
+
+    left = (ndarray.reshape((ndarray.size//ndarray.shape[-1],
+                             ndarray.shape[-1])) if ndarray.ndim > 1
+            else ndarray.reshape((1, ndarray.size)))
+    right = (affine if len(affine.shape) > 1
+             else affine.reshape((affine.size, 1)))
+
+    row, inner = left.shape
+    column = right.shape[-1]
+
+    index = np.arange(affine.size).reshape(affine.shape)
+    indim = index.ndim
+    index = np.transpose(np.tile(index, (1, row)),
+                         axes=list(range(indim-2)) + [indim-1,
+                                                      indim-2]).flatten()
+    index = np.tile(index, (size*inner//index.size, ))
+
+    data = np.tile(ndarray, (1, column)).flatten()
+    data = np.tile(data, size*inner//data.size)
+
+    indptr = [inner*i for i in range(size+1)]
+
+    return csr_matrix((data, index, indptr), shape=[size, affine.size])
+
+
+def sp_lmatmul(ndarray, affine, shape):
+
+    size = int(np.prod(shape))
+
+    left = (affine.reshape((affine.size // affine.shape[-1],
+                            affine.shape[-1])) if len(affine.shape) > 1
+            else affine.reshape((1, affine.size)))
+    right = (ndarray if ndarray.ndim > 1
+             else ndarray.reshape((ndarray.size, 1)))
+
+    row, inner = left.shape
+    column = right.shape[-1]
+
+    index = np.tile(np.arange(left.size).reshape(left.shape),
+                    (1, column)).flatten()
+    index = np.tile(index, (size * inner // index.size))
+    andim = right.ndim
+    data = np.tile(np.transpose(right,
+                                axes=list(range(andim - 2)) + [andim - 1,
+                                                               andim - 2]),
+                   (size * inner // ndarray.size, 1)).flatten()
+    indptr = [inner * i for i in range(size + 1)]
+
+    return csr_matrix((data, index, indptr), shape=[size, affine.size])
+
+
+def sp_trans(affine):
+
+    index = np.arange(affine.size).reshape(affine.shape).T.flatten()
+    indptr = np.arange(affine.size + 1)
+    data = np.ones(affine.size)
+
+    return csr_matrix((data, index, indptr), shape=[affine.size, affine.size])
 
 
 def index_array(shape):
@@ -66,6 +143,7 @@ def sv_to_csr(array):
 def check_numeric(array):
 
     array = np.array(array.todense()) if sp.issparse(array) else array
+    array = np.array([array]) if not isinstance(array, np.ndarray) else array
 
     if isinstance(array, np.ndarray):
         if not isinstance(array.flat[0], np.number):

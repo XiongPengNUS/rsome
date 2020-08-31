@@ -35,11 +35,47 @@ class Model:
         self.name = name
 
     def dvar(self, shape=(1,), vtype='C', name=None, aux=False):
+        """
+        Returns an array of decision variables with the given shape
+        and variable type.
+
+        Parameters
+        ----------
+        shape : int or tuple
+            Shape of the variable array.
+        vtype : {'C', 'B', 'I'}
+            Type of the decision variables. 'C' means continuous; 'B'
+            means binary, and 'I" means integer.
+        name : str
+            Name of the variable array
+        aux : leave it unspecified.
+
+        Returns
+        -------
+        new_var : road.lp.Vars
+            An array of new decision variables
+        """
 
         new_var = self.rc_model.dvar(shape, vtype, name, aux)
         return new_var
 
     def rvar(self, shape=(1,), name=None):
+
+        """
+        Returns an array of random variables with the given shape.
+
+        Parameters
+        ----------
+        shape : int or tuple
+            Shape of the variable array.
+        name : str
+            Name of the variable array
+
+        Returns
+        -------
+        new_var : road.lp.Vars
+            An array of new random variables
+        """
 
         new_var = self.sup_model.dvar(shape, 'C', name)
         return new_var
@@ -119,31 +155,33 @@ class Model:
         self.pupdate = True
         self.dupdate = True
 
-    def st(self, constr):
+    def st(self, *arg):
 
-        if isinstance(constr, Iterable):
-            for item in constr:
-                self.rc_model.st(item)
-        elif isinstance(constr, (LinConstr, Bounds, CvxConstr)):
-            if (constr.model is not self.rc_model) or \
-               (constr.model.mtype != 'R'):
-                raise ValueError('Models mismatch.')
-            self.all_constr.append(constr)
-        elif isinstance(constr, RoConstr):
-            if (constr.dec_model is not self.rc_model) or \
-               (constr.rand_model is not self.sup_model):
-                raise ValueError('Models mismatch.')
-            if constr.sense == 0:
+        for constr in arg:
+            if isinstance(constr, Iterable):
+                for item in constr:
+                    self.st(item)
+
+            elif isinstance(constr, (LinConstr, Bounds, CvxConstr)):
+                if (constr.model is not self.rc_model) or \
+                        (constr.model.mtype != 'R'):
+                    raise ValueError('Models mismatch.')
                 self.all_constr.append(constr)
+            elif isinstance(constr, RoConstr):
+                if (constr.dec_model is not self.rc_model) or \
+                        (constr.rand_model is not self.sup_model):
+                    raise ValueError('Models mismatch.')
+                if constr.sense == 0:
+                    self.all_constr.append(constr)
+                else:
+                    left = RoAffine(constr.raffine, constr.affine,
+                                    constr.rand_model)
+                    right = RoAffine(-constr.raffine, -constr.affine,
+                                     constr.rand_model)
+                    self.all_constr.append(RoConstr(left, sense=0))
+                    self.all_constr.append(RoConstr(right, sense=0))
             else:
-                left = RoAffine(constr.raffine, constr.affine,
-                                constr.rand_model)
-                right = RoAffine(-constr.raffine, -constr.affine,
-                                 constr.rand_model)
-                self.all_constr.append(RoConstr(left, sense=0))
-                self.all_constr.append(RoConstr(right, sense=0))
-        else:
-            raise TypeError('Unknown type of constraints')
+                raise TypeError('Unknown type of constraints')
 
     def do_math(self, primal=True):
 
@@ -227,6 +265,10 @@ class DecRule:
     def __repr__(self):
 
         return self.__str__()
+
+    def reshape(self, shape):
+
+        return self.to_affine().reshape(shape)
 
     def adapt(self, rvar, ldr_indices=None):
 

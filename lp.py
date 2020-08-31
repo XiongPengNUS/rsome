@@ -159,7 +159,8 @@ class Model:
                                   self.lin_constr + self.aux_constr]
 
                     sense_list = [item.sense
-                                  for item in self.lin_constr + self.aux_constr]
+                                  for item in self.lin_constr
+                                  + self.aux_constr]
 
                 const = np.concatenate(tuple(const_list))
                 sense = np.concatenate(tuple(sense_list))
@@ -171,8 +172,11 @@ class Model:
             vtype = np.concatenate([np.array([item.vtype] * item.size)
                                     for item in self.vars + self.auxs])
 
-            ub = np.array([np.infty] * linear.shape[1])
-            lb = np.array([-np.infty] * linear.shape[1])
+            # ub = np.array([np.infty] * linear.shape[1])
+            # lb = np.array([-np.infty] * linear.shape[1])
+            ub = np.array([np.infty] * self.last)
+            lb = np.array([-np.infty] * self.last)
+
             for b in self.bounds + self.aux_bounds:
                 if b.btype == 'U':
                     ub[b.indices] = np.minimum(b.values, ub[b.indices])
@@ -379,9 +383,9 @@ class Vars:
                             shape=(dim, self.model.last))
         const = np.zeros(self.shape)
 
-        if self.sparray is None:
-            # self.sparray = sparse_array(self.shape)
-            self.sparray = self.sv_array()
+        # if self.sparray is None:
+        #     self.sparray = sparse_array(self.shape)
+        #     self.sparray = self.sv_array()
 
         return Affine(self.model, linear, const, self.sparray)
 
@@ -416,9 +420,9 @@ class Vars:
         if not isinstance(indices, np.ndarray):
             indices = np.array([indices]).reshape((1, ) * self.ndim)
 
-        if self.sparray is None:
-            # self.sparray = sparse_array(self.shape)
-            self.sparray = self.sv_array()
+        # if self.sparray is None:
+        #     self.sparray = sparse_array(self.shape)
+        #     self.sparray = self.sv_array()
 
         return VarSub(self, indices)
 
@@ -696,6 +700,8 @@ class Affine:
     @property
     def T(self):
 
+
+        """
         if self.sparray is None:
             # self.sparray = sparse_array(self.shape)
             self.sparray = self.sv_array()
@@ -703,6 +709,8 @@ class Affine:
         trans_sparray = self.sparray.T
         # linear = array_to_sparse(trans_sparray) @ self.linear
         linear = sv_to_csr(trans_sparray) @ self.linear
+        """
+        linear = sp_trans(self) @ self.linear
         const = self.const.T
 
         return Affine(self.model, linear, const)
@@ -774,8 +782,8 @@ class Affine:
 
         if isinstance(other, (Vars, VarSub, Affine)):
             if self.model.mtype == 'R' and other.model.mtype == 'S':
+                """
                 affine = self
-                # print(affine)
                 raffine = affine.reshape((affine.size, 1))
                 other = other.to_affine()
                 # raffine = raffine * np.array(other.linear.todense())
@@ -783,11 +791,27 @@ class Affine:
                 rvar_last = other.model.vars[-1].last
                 reduced_linear = other.linear[:, :rvar_last]
 
-                trans_sparray = (np.ones(affine.shape) *
+                trans_sparray = (np.ones(affine.size) *  ####################
                                  np.array([line for line in reduced_linear]))
 
                 raffine = raffine * array_to_sparse(trans_sparray)
-                affine = affine * other.const
+                """
+                other = other.to_affine()
+                if self.shape != other.shape:
+                    raffine = self * np.ones(other.to_affine().shape)
+                    other = np.ones(self.shape) * other.to_affine()
+                else:
+                    raffine = self
+                    other = other.to_affine()
+
+                raffine = raffine.reshape((raffine.size, 1))
+
+                rvar_last = other.model.vars[-1].last
+                reduced_linear = other.linear[:, :rvar_last]
+                trans_sparray = np.array([line for line in reduced_linear])
+
+                raffine = raffine * array_to_sparse(trans_sparray)
+                affine = self * other.const
 
                 return RoAffine(raffine, affine, other.model)
             else:
@@ -795,6 +819,9 @@ class Affine:
 
         else:
             other = check_numeric(other)
+
+            if isinstance(other, Real):
+                other = np.array([other])
 
             """
             if self.sparray is None:
@@ -806,11 +833,15 @@ class Affine:
             new_linear = array_to_sparse(new_sparray) @ self.linear
             """
 
+            """
             new_const = self.const * other
 
             svarray = self.sv_array()
             new_svarray = svarray * other
             new_linear = sv_to_csr(new_svarray) @ self.linear
+            """
+            new_linear = sparse_mul(other, self.to_affine()) @ self.linear
+            new_const = self.const * other
 
             return Affine(self.model, new_linear, new_const)
 
@@ -818,6 +849,7 @@ class Affine:
 
         if isinstance(other, (Vars, VarSub, Affine)):
             if self.model.mtype == 'R' and other.model.mtype == 'S':
+                """
                 affine = self
                 raffine = affine.reshape((affine.size, 1))
                 other = other.to_affine()
@@ -826,10 +858,24 @@ class Affine:
                 rvar_last = other.model.vars[-1].last
                 reduced_linear = other.linear[:, :rvar_last]
                 trans_sparray = (np.array([line for line in reduced_linear]) *
-                                 np.ones(affine.shape))
+                                 np.ones(affine.size))
+                """
+                other = other.to_affine()
+                if self.shape != other.shape:
+                    raffine = self * np.ones(other.to_affine().shape)
+                    other = np.ones(self.shape) * other.to_affine()
+                else:
+                    raffine = self
+                    other = other.to_affine()
+
+                raffine = raffine.reshape((raffine.size, 1))
+
+                rvar_last = other.model.vars[-1].last
+                reduced_linear = other.linear[:, :rvar_last]
+                trans_sparray = np.array([line for line in reduced_linear])
 
                 raffine = raffine * array_to_sparse(trans_sparray)
-                affine = other.const * affine
+                affine = self * other.const
 
                 return RoAffine(raffine, affine, other.model)
             else:
@@ -837,21 +883,19 @@ class Affine:
         else:
             other = check_numeric(other)
 
+            if isinstance(other, Real):
+                other = np.array([other])
+
             """
-            if self.sparray is None:
-                self.sparray = sparse_array(self.shape)
-
-            new_const = other * self.const
-
-            new_sparray = other * self.sparray
-            new_linear = array_to_sparse(new_sparray) @ self.linear
-            """
-
             new_const = other * self.const
 
             svarray = self.sv_array()
             new_svarray = other * svarray
             new_linear = sv_to_csr(new_svarray) @ self.linear
+            """
+
+            new_linear = sparse_mul(other, self.to_affine()) @ self.linear
+            new_const = self.const * other
 
             return Affine(self.model, new_linear, new_const)
 
@@ -862,12 +906,6 @@ class Affine:
 
                 other = other.to_affine()
                 affine = self @ other.const
-
-                """
-                temp = np.ones((affine.size, other.size))
-                temp = (self * temp).reshape(temp.shape)
-                raffine = temp @ other.linear
-                """
 
                 ind_array = self.sv_array()
                 temp = ind_array @ np.arange(other.size).reshape(other.shape)
@@ -893,6 +931,7 @@ class Affine:
             elif self.model.mtype == 'S' and other.model.mtype == 'R':
 
                 affine = self.const @ other
+                other = other.to_affine()
 
                 """
                 temp = np.ones((self.size, affine.size))
@@ -928,11 +967,15 @@ class Affine:
             if not isinstance(new_const, np.ndarray):
                 new_const = np.array([new_const])
 
+            """
             svarray = self.sv_array()
             new_svarray = svarray @ other
             if not isinstance(new_svarray, np.ndarray):
                 new_svarray = np.array([new_svarray])
             new_linear = sv_to_csr(new_svarray) @ self.linear
+            """
+
+            new_linear = sp_lmatmul(other, self, new_const.shape) @ self.linear
 
             return Affine(self.model, new_linear, new_const)
 
@@ -943,12 +986,15 @@ class Affine:
         new_const = other @ self.const
         if not isinstance(new_const, np.ndarray):
             new_const = np.array([new_const])
-
+        """
         svarray = self.sv_array()
         new_svarray = other @ svarray
         if not isinstance(new_svarray, np.ndarray):
             new_svarray = np.array([new_svarray])
         new_linear = sv_to_csr(new_svarray) @ self.linear
+        """
+
+        new_linear = sp_matmul(other, self, new_const.shape) @ self.linear
 
         return Affine(self.model, new_linear, new_const)
 
@@ -971,26 +1017,22 @@ class Affine:
             if self.shape == other.shape:
                 new_linear = add_linear(self.linear, other.linear)
             else:
-                # left_sparray = sparse_array(self.shape)
-                # right_sparray = sparse_array(other.shape)
-
+                """
                 left_sparray = self.sv_array()
                 right_sparray = other.sv_array()
 
-                # left_zero = np.zeros(self.shape)
-                # right_zero = np.zeros(other.shape)
-
                 left_zero = self.sv_zeros(other.size)
                 right_zero = other.sv_zeros(self.size)
-
-                # left_sparse = array_to_sparse(left_sparray + right_zero)
-                # right_sparse = array_to_sparse(left_zero + right_sparray)
 
                 left_sparse = sv_to_csr(left_sparray + right_zero)
                 right_sparse = sv_to_csr(left_zero + right_sparray)
 
                 left_linear = left_sparse @ self.linear
                 right_linear = right_sparse @ other.linear
+                """
+
+                left_linear = (self * np.ones(other.shape)).linear
+                right_linear = (other * np.ones(self.shape)).linear
 
                 new_linear = add_linear(left_linear, right_linear)
         elif isinstance(other, np.ndarray):
@@ -1000,13 +1042,14 @@ class Affine:
             if self.shape == other.shape:
                 new_linear = self.linear
             else:
-                # sparray = sparse_array(self.shape)
-                sparray = self.sv_array()
-                # zero = np.zeros(other.shape)
-                zero = self.sv_zeros(other.size)
-                # sparse = array_to_sparse(sparray + zero)
-                sparse = sv_to_csr(sparray + zero)
-                new_linear = sparse @ self.linear
+                if self.shape != other.shape:
+                    # sparray = self.sv_array()
+                    # zero = self.sv_zeros(other.size)
+                    # sparse = sv_to_csr(sparray + zero)
+
+                    new_linear = (self*np.ones(other.shape)).linear
+                else:
+                    new_linear = self.linear
         elif isinstance(other, Real):
             other = check_numeric(other)
             new_const = other + self.const
@@ -1041,7 +1084,7 @@ class Affine:
                              -left.const.reshape((left.const.size, )),
                              np.zeros(left.const.size))
         else:
-            return other.__ge__(self)
+            return left.__le__(0)
 
     def __ge__(self, other):
 
@@ -1051,7 +1094,7 @@ class Affine:
                              -left.const.reshape((left.const.size,)),
                              np.zeros(left.const.size))
         else:
-            return other.__le__(self)
+            return left.__le__(0)
 
     def __eq__(self, other):
 
@@ -1170,6 +1213,8 @@ class RoAffine:
         self.raffine = raffine
         self.affine = affine
         self.shape = affine.shape
+        self.ndim = len(affine.shape)
+        self.size = affine.size
 
     def sv_array(self, index=False):
 
@@ -1193,14 +1238,23 @@ class RoAffine:
 
         return np.array(elements).reshape(shape)
 
+    def reshape(self, shape):
+
+        return RoAffine(self.raffine, self.affine.reshape(shape),
+                        self.rand_model)
+
     @property
     def T(self):
 
+        """
         # sparray = sparse_array(self.shape)
         sparray = self.sv_array()
         trans_sparray = sparray.T
         # raffine = array_to_sparse(trans_sparray) @ self.raffine
         raffine = sv_to_csr(trans_sparray) @ self.raffine
+        """
+
+        raffine = sp_trans(self) @ self.raffine
         affine = self.affine.T
 
         return RoAffine(raffine, affine, self.rand_model)
@@ -1212,29 +1266,77 @@ class RoAffine:
     def __add__(self, other):
 
         if isinstance(other, RoAffine):
-            raffine = self.raffine + other.raffine
-            affine = self.affine + other.affine
+            if other.shape != self.shape:
+                left = self + np.zeros(other.shape)
+                right = other + np.zeros(self.shape)
+            else:
+                left = self
+                right = other
+            raffine = left.raffine + right.raffine
+            affine = left.affine + right.affine
             if self.dec_model is not other.dec_model or \
                self.rand_model is not other.rand_model:
                 raise ValueError('Models mismatch.')
             return RoAffine(raffine, affine, self.rand_model)
         elif isinstance(other, (Affine, Vars, VarSub)):
+            other = other.to_affine()
             if other.model == self.rand_model:
-                other_affine = other.to_affine()
-                right_term = other_affine.rand_to_roaffine(self.dec_model)
-                return self.__add__(right_term)
+                if other.shape != self.shape:
+                    left = self + np.zeros(other.shape)
+                    right = other + np.zeros(self.shape)
+                else:
+                    left = self
+                    right = other.to_affine()
+
+                right_term = right.rand_to_roaffine(left.dec_model)
+                return left.__add__(right_term)
             elif other.model == self.dec_model:
-                raffine = self.raffine + np.zeros((other.size,
-                                                   self.raffine.shape[1]))
-                affine = self.affine + other
+                # raffine = self.raffine + np.zeros((other.size,
+                #                                    self.raffine.shape[1]))
+                # affine = self.affine + other
+
+                # sparray = self.sv_array()
+                # zero = self.sv_zeros(other.size)
+                # sparse = sv_to_csr(sparray + zero)
+                # raffine = sparse @ self.raffine
+
+                if other.shape != self.shape:
+                    left = self * np.ones(other.shape)
+                    right = other + np.zeros(self.shape)
+                else:
+                    left = self
+                    right = other.to_affine()
+
+                raffine = left.raffine
+                affine = left.affine + right
+
                 return RoAffine(raffine, affine, self.rand_model)
             else:
                 raise TypeError('Unknown model types.')
         elif isinstance(other, (Real, np.ndarray)):
             if isinstance(other, Real):
                 other = np.array([other])
-            raffine = self.raffine + np.zeros((other.size,
-                                               self.raffine.shape[1]))
+            # raffine = self.raffine + np.zeros((other.size,
+            #                                   self.raffine.shape[1]))
+
+            if other.shape == self.shape:
+                raffine = self.raffine
+            else:
+                sparray = (np.arange(self.size).reshape(self.shape)
+                           + np.zeros(other.shape))
+                index = sparray.flatten()
+                size = sparray.size
+                sparse = csr_matrix(([1]*size, index, np.arange(size+1)),
+                                    shape=[size, self.size])
+                raffine = sparse @ self.raffine
+
+            """
+            sparray = self.sv_array()
+            zero = self.sv_zeros(other.size)
+            sparse = sv_to_csr(sparray + zero)
+            raffine = sparse @ self.raffine
+            """
+
             affine = self.affine + other
             return RoAffine(raffine, affine, self.rand_model)
         else:
@@ -1255,52 +1357,75 @@ class RoAffine:
     def __mul__(self, other):
 
         new_affine = self.affine * other
+        if isinstance(other, Real):
+            other = np.array([other])
 
+        """
         svarray = self.affine.sv_array()
         new_svarray = svarray * other
         if not isinstance(new_svarray, np.ndarray):
             new_svarray = np.array([new_svarray])
 
         new_raffine = sv_to_csr(new_svarray) @ self.raffine
+        """
+        new_raffine = sparse_mul(other, self) @ self.raffine
 
         return RoAffine(new_raffine, new_affine, self.rand_model)
 
     def __rmul__(self, other):
 
         new_affine = other * self.affine
+        if isinstance(other, Real):
+            other = np.array([other])
 
+        """
         svarray = self.affine.sv_array()
         new_svarray = other * svarray
         if not isinstance(new_svarray, np.ndarray):
             new_svarray = np.array([new_svarray])
 
         new_raffine = sv_to_csr(new_svarray) @ self.raffine
+        """
+
+        new_raffine = sparse_mul(other, self) @ self.raffine
 
         return RoAffine(new_raffine, new_affine, self.rand_model)
 
     def __matmul__(self, other):
 
+        other = check_numeric(other)
+
         new_affine = self.affine @ other
 
+        """
         svarray = self.affine.sv_array()
         new_svarray = svarray @ other
         if not isinstance(new_svarray, np.ndarray):
             new_svarray = np.array([new_svarray])
 
         new_raffine = sv_to_csr(new_svarray) @ self.raffine
+        """
+
+        new_raffine = sp_lmatmul(other, self, new_affine.shape) @ self.raffine
 
         return RoAffine(new_raffine, new_affine, self.rand_model)
 
     def __rmatmul__(self, other):
 
+        other = check_numeric(other)
+
         new_affine = other @ self.affine
 
+        """
         svarray = self.affine.sv_array()
         new_svarray = other @ svarray
         if not isinstance(new_svarray, np.ndarray):
             new_svarray = np.array([new_svarray])
 
         new_raffine = sv_to_csr(new_svarray) @ self.raffine
+        """
+
+        new_raffine = sp_matmul(other, self, new_affine.shape) @ self.raffine
 
         return RoAffine(new_raffine, new_affine, self.rand_model)
 
