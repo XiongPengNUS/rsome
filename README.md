@@ -42,6 +42,59 @@ from road import dao
 
 The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
 
+
+
+{
+ "metadata": {
+  "name": "Typesetting Math Using MathJax"
+ },
+ "nbformat": 3,
+ "nbformat_minor": 0,
+ "worksheets": [
+  {
+   "cells": [
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "The Markdown parser included in IPython is MathJax-aware.  This means that you can freely mix in mathematical expressions using the [MathJax subset of Tex and LaTeX](http://docs.mathjax.org/en/latest/tex.html#tex-support).  [Some examples from the MathJax site](http://www.mathjax.org/demos/tex-samples/) are reproduced below, as well as the Markdown+TeX source."
+     ]
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "# Motivating Examples\n",
+      "\n",
+      "---\n",
+      "\n",
+      "## The Lorenz Equations\n",
+      "### Source\n",
+      "```\\begin{aligned}\n",
+      "\\dot{x} & = \\sigma(y-x) \\\\\n",
+      "\\dot{y} & = \\rho x - y - xz \\\\\n",
+      "\\dot{z} & = -\\beta z + xy\n",
+      "\\end{aligned}\n",
+      "```\n",
+      "### Display\n",
+      "\\begin{aligned}\n",
+      "\\dot{x} & = \\sigma(y-x) \\\\\n",
+      "\\dot{y} & = \\rho x - y - xz \\\\\n",
+      "\\dot{z} & = -\\beta z + xy\n",
+      "\\end{aligned}"
+     ]
+    },
+   ],
+   "metadata": {}
+  }
+ ]
+}
+
+
+
+{
+ "worksheets": [
+  {
     {
      "cell_type": "markdown",
      "metadata": {},
@@ -57,6 +110,9 @@ The ROAD package supports specifying models using highly readable algebraic expr
       "\\end{align}"
      ]
     },
+    }]
+}
+    
 
 and it is used to illustrate the steps of solving optimization models. 
 
