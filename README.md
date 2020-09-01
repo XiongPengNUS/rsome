@@ -1,4 +1,4 @@
-<script src="//yihui.org/js/math-code.js"></script>
+- <img src="https://latex.codecogs.com/gif.latex?O_t=\text { Onset event at time bin } t " /> 
 
 <img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=75 align="left">
 
