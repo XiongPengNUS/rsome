@@ -1,5 +1,3 @@
-- <img src="https://latex.codecogs.com/gif.latex?O_t=\text { Onset event at time bin } t " /> 
-
 <img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=75 align="left">
 
 # ROAD: Robust Optimization for Array Data
@@ -42,16 +40,10 @@ from road import dao
 
 ### Getting started
 
-The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below, 
-`
-$$
-\max ~&3x + 4y \\
-\text{s.t.}~&2.5x + y \leq 20 \\
-&5x + 3y \leq 30 \\
-&x + 2y \leq 16 \\
-&|y| \leq 2, 
-$$
-`
+The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
+
+<img src="https://latex.codecogs.com/gif.latex?\begin{align} \max ~&3x + 4y \\ \text{s.t.}~&2.5x + y \leq 20 \\ &5x + 3y \leq 30 \\ &x + 2y \leq 16 \\ &|y| \leq 2, \end{align}" /> 
+
 and it is used to illustrate the steps of solving optimization models. 
 
 
