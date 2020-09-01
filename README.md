@@ -42,7 +42,7 @@ from road import dao
 
 The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
 
-<img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1">
+<img src="https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%7D%0A%5Cmax%20~%263x%20%2B%204y%20%5Cnonumber%20%5C%5C%0A%5Ctext%7Bs.t.%7D~%262.5x%20%2B%20y%20%5Cleq%2020%20%5Cnonumber%20%5C%5C%0A%265x%20%2B%203y%20%5Cleq%2030%20%5Cnonumber%20%5C%5C%0A%26x%20%2B%202y%20%5Cleq%2016%20%5Cnonumber%20%5C%5C%0A%26%7Cy%7C%20%5Cleq%202%2C%20%5Cnonumber%0A%5Cend%7Balign%7D">
 
 and it is used to illustrate the steps of solving optimization models. 
 
