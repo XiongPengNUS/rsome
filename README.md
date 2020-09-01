@@ -42,7 +42,7 @@ from road import dao
 
 The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
 
-<img src="https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%7D%0A%5Cmax%20~%263x%20%2B%204y%20%5Cnonumber%20%5C%5C%0A%5Ctext%7Bs.t.%7D~%262.5x%20%2B%20y%20%5Cleq%2020%20%5Cnonumber%20%5C%5C%0A%265x%20%2B%203y%20%5Cleq%2030%20%5Cnonumber%20%5C%5C%0A%26x%20%2B%202y%20%5Cleq%2016%20%5Cnonumber%20%5C%5C%0A%26%7Cy%7C%20%5Cleq%202%2C%20%5Cnonumber%0A%5Cend%7Balign%7D">
+<img src="https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%7D%0A%5Cmax%5Ctext%7B%20%7D%263x%20%2B%204y%20%5Cnonumber%20%5C%5C%0A%5Ctext%7Bs.t.%20%7D%262.5x%20%2B%20y%20%5Cleq%2020%20%5Cnonumber%20%5C%5C%0A%265x%20%2B%203y%20%5Cleq%2030%20%5Cnonumber%20%5C%5C%0A%26x%20%2B%202y%20%5Cleq%2016%20%5Cnonumber%20%5C%5C%0A%26%7Cy%7C%20%5Cleq%202%2C%20%5Cnonumber%0A%5Cend%7Balign%7D">
 
 and it is used to illustrate the steps of solving optimization models. 
 
@@ -769,13 +769,9 @@ dual.show()
 
 #### Mean-variance portfolio optimization
 
-In this example, we consider a portfolio construction problem discussed in [Robust Solutions of Uncertain Linear Programs](https://www2.isye.gatech.edu/~nemirovs/stablpn.pdf). Suppose there are $n=150$ stocks, and each stock $i$ has a random return $\tilde{p}_i$. Let $x_i$ be the fraction of wealth invested in stock $i$, the objective of the portfolio problem is to maximize the total return $\sum_{i=1}^n\tilde{p}_ix_i$. It is assumed that each stock $i$ is independent, and it has the mean return to be $p_i$ and the standard deviation is $\sigma_i$. A classic approach is to formulate the problem as a quadratic program, where a mean-variance objective function is maximized:
+In this example, we consider a portfolio construction problem discussed in [Robust Solutions of Uncertain Linear Programs](https://www2.isye.gatech.edu/~nemirovs/stablpn.pdf). Suppose there are <img src="https://render.githubusercontent.com/render/math?math=n%3D150"> stocks, and each stock <img src="https://render.githubusercontent.com/render/math?math=i"> has a random return <img src="https://render.githubusercontent.com/render/math?math=%5Ctilde%7Bp%7D_i">. Let <img src="https://render.githubusercontent.com/render/math?math=x_i"> be the fraction of wealth invested in stock <img src="https://render.githubusercontent.com/render/math?math=i">, the objective of the portfolio problem is to maximize the total return <img src="https://render.githubusercontent.com/render/math?math=%5Csum_%7Bi%3D1%7D%5En%5Ctilde%7Bp%7D_ix_i">. It is assumed that each stock <img src="https://render.githubusercontent.com/render/math?math=i"> is independent, and it has the mean return to be <img src="https://render.githubusercontent.com/render/math?math=p_i"> and the standard deviation is <img src="https://render.githubusercontent.com/render/math?math=%5Csigma_i">. A classic approach is to formulate the problem as a quadratic program, where a mean-variance objective function is maximized:
 
-\begin{align}
-\max~&\sum\limits_{i=1}^np_ix_i - \phi \sum\limits_{i=1}^n \sigma_i^2x_i^2 \\
-\text{s.t.}~&\sum\limits_{i=1}^nx_i = 1 \\
-& x_i \geq 1, ~\forall i = 1, 2, ..., n,
-\end{align}
+<img src="https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%7D%0A%5Cmax%26%5Csum%5Climits_%7Bi%3D1%7D%5Enp_ix_i%20-%20%5Cphi%20%5Csum%5Climits_%7Bi%3D1%7D%5En%20%5Csigma_i%5E2x_i%5E2%20%5C%5C%0A%5Ctext%7Bs.t.%20%7D%26%5Csum%5Climits_%7Bi%3D1%7D%5Enx_i%20%3D%201%20%5C%5C%0A%26%20x_i%20%5Cgeq%201%2C%20%5Cforall%20i%20%3D%201%2C%202%2C%20...%2C%20n%2C%0A%5Cend%7Balign%7D">
 
 with the constant $\phi=5$, and the means and standard deviations are specified to be
 \begin{align}
