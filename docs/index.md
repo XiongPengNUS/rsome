@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-## Welcome to GitHub Pages
+## Introduction
 
 You can use the [editor on GitHub](https://github.com/XiongPengNUS/road/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
 
@@ -9,6 +9,12 @@ Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://j
 \\[\sigma_1\\]
 
 A test: \\(\sigma_1\\)
+
+```python
+for item in a_list:
+  print(item)
+}
+```
 
 ### Markdown
 
