@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>ROAD by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=a85f596906459dc52d8998b2ea63dd7a27164294">
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>ROAD</h1>
+        <p>Robust Optimization for Array Data</p>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/road/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/road/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/road">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>ROAD (Robust Optimization for Array Data) is an open-source Python package for operations research and generic optimization modeling. ROAD models are constructed by variables, expressions, and constraints formatted as N-dimensional arrays, which are consistent with the NumPy library in syntax and operations, such as indexing and slicing, element-wise operations, broadcasting, and matrix calculation rules. It thus provides a convenient and highly readable way in developing optimization models and applications.</p>
+
+<p>The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with the Gurobi solver is also integrated for the solution of optimization models. Distributionally robust optimization modeling tools based on the <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R">robust stochastic optimization (RSO) framework</a> is now under development. Other solver interfaces will be included in the future.</p>
+
+<h3 id="installing-road-and-solvers">Installing ROAD and solvers</h3>
+
+<p>The ROAD package can be installed with the <code>pip</code> command:</p>
+
+<hr />
+
+<p><code class="language-plaintext highlighter-rouge">pip install road</code></p>
+
+<hr />
+
+<p>For the current version, the Gurobi solver is also needed for solving the optimization model, and you may follow <a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">these steps</a> to complete the solver installation.</p>
+
+<h3 id="the-dao-of-road">The Dao of ROAD</h3>
+
+<p>The ROAD package is largely inspired by <a href="https://robustopt.com/">ROME</a>, the very first software toolbox for robust optimization. We also learned many hard lessons in developing the MATLAB package <a href="https://www.rsomerso.com/">RSOME</a>, hence the “Dao of ROAD”, which can be imported from the ROAD package.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">dao</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The DAO of ROAD:
+ROME was not built in one day.
+All ROADs lead to ROME.
+Matlab is RSOME!
+The ROAD in Python is more than RSOME!
+
+
+ROME: https://robustopt.com/
+RSOME: https://www.rsomerso.com
+ROAD: https://github.com/XiongPengNUS/road
+</code></pre></div></div>
+
+<h3 id="getting-started">Getting started</h3>
+
+<p>The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,</p>
+
+\[\begin{align}
+\max ~&amp;3x + 4y \\
+\text{s.t.}~&amp;2.5x + y \leq 20 \\
+&amp;5x + 3y \leq 30 \\
+&amp;x + 2y \leq 16 \\
+&amp;|y| \leq 2,
+\end{align}\]
+
+<p>and it is used to illustrate the steps of solving optimization models.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">ro</span>                 <span class="c1"># Import the ro modeling tool
+</span><span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>  <span class="c1"># Import Gurobi solver interface
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'LP model'</span><span class="p">)</span>        <span class="c1"># Create a Model object
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                    <span class="c1"># Define a decision variable x
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                    <span class="c1"># Define a decision variable y
+</span>
+<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>                <span class="c1"># Maximize the objective function
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mf">2.5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">)</span>           <span class="c1"># Specify the 1st constriants
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">)</span>           <span class="c1"># Specify the 2nd constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">)</span>             <span class="c1"># Specify the 3rd constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># Specify the 4th constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># Solve the model with Gurobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Academic license - for non-commercial use only
+Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0005s
+</code></pre></div></div>
+
+<p>In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>road.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created by the method <code>dvar()</code>. These variables are then used in specifying the objective function and model constraints. The last step is calling the <code>solve()</code> method to solve the problem via the imported solver interface <code>grb</code>. Once the solution completes, a message showing the solution status and running time will be printed.</p>
+
+<p>According to the <a href="https://www.gurobi.com/documentation/9.0/refman/optimization_status_codes.html">Gurobi solution status</a>, the status code <code>2</code> suggests that the problem was solved to optimality (subject to tolerances), and an optimal solution is available. The optimal solution and the corresponding objective value can be attained by the <code>get()</code> method.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="s">'x:'</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'y:'</span><span class="p">,</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Objective:'</span><span class="p">,</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>x: [4.8]
+y: [2.]
+Objective: 22.4
+</code></pre></div></div>
+
+<p>The example above shows how to specify an optimization model with highly readable algebraic expressions. The package is capable of transforming the specified model into a standard formula, which can be recognized and solved by the solver.</p>
+
+<p>Users could retrieve the standard formula by calling the method <code>do_math()</code> of the model object.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">formula</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Second order cone program object:
+=============================================
+Number of variables:          3
+Continuous/binaries/integers: 3/0/0
+---------------------------------------------
+Number of linear constraints: 6
+Inequalities/equalities:      6/0
+Number of coefficients:       11
+---------------------------------------------
+Number of SOC constraints:    0
+</code></pre></div></div>
+
+<p>We also provide a debugging method <code>show()</code> to display the information of the standard formula as a data frame.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">formula</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x1</th>
+      <th>x2</th>
+      <th>x3</th>
+      <th>sense</th>
+      <th>constants</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Obj</th>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <th>LC1</th>
+      <td>0</td>
+      <td>2.5</td>
+      <td>1</td>
+      <td>&lt;=</td>
+      <td>20</td>
+    </tr>
+    <tr>
+      <th>LC2</th>
+      <td>0</td>
+      <td>5</td>
+      <td>3</td>
+      <td>&lt;=</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <th>LC3</th>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>&lt;=</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <th>LC4</th>
+      <td>-1</td>
+      <td>-3</td>
+      <td>-4</td>
+      <td>&lt;=</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>LC5</th>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>&lt;=</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>LC6</th>
+      <td>0</td>
+      <td>0</td>
+      <td>-1</td>
+      <td>&lt;=</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>Upper</th>
+      <td>inf</td>
+      <td>inf</td>
+      <td>inf</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <th>Lower</th>
+      <td>-inf</td>
+      <td>-inf</td>
+      <td>-inf</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <th>Types</th>
+      <td>C</td>
+      <td>C</td>
+      <td>C</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>
