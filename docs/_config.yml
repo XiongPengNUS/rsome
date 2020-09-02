@@ -1,11 +1,13 @@
 math: ture
 markdown: kramdown
-title: "ROAD"
+title: <img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=180> <br> ROAD Toolbox
 show_downloads: "true"
 logo: rologo.jpeg
 theme: jekyll-theme-minimal
 navigation:
   - title: Home
     url: /
+  - title: Quickstart Tutorial
+    url: quickstart_tutorial
   - title: About
     url: about

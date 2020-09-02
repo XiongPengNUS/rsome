@@ -4,16 +4,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>ROAD by XiongPengNUS</title>
+    <title><img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=180> <br> ROAD Toolbox by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=a85f596906459dc52d8998b2ea63dd7a27164294">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=62cf2e79bf6c569c4d25d4e8bbe511ad821c1f4c">
     <meta name="viewport" content="width=device-width">
   </head>
   <body>
     <div class="wrapper">
       <header>
-        <h1>ROAD</h1>
-        <p>Robust Optimization for Array Data</p>
+        <h1><img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=180> <br> ROAD Toolbox</h1>
+        <p>Robust Optimization with Array Data</p>
 
         <table>
           
@@ -22,7 +22,11 @@
             
           
             
-              <tr><th><a href="/about">About</a></th></tr>
+              <tr><th><a href="/quickstart_tutorial">Quickstart Tutorial</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About Us</a></th></tr>
             
           
         </table>
@@ -39,13 +43,13 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h2 id="introduction">Introduction</h2>
+<h1 id="introduction">Introduction</h1>
 
 <p>ROAD (Robust Optimization for Array Data) is an open-source Python package for operations research and generic optimization modeling. ROAD models are constructed by variables, expressions, and constraints formatted as N-dimensional arrays, which are consistent with the NumPy library in syntax and operations, such as indexing and slicing, element-wise operations, broadcasting, and matrix calculation rules. It thus provides a convenient and highly readable way in developing optimization models and applications.</p>
 
 <p>The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with the Gurobi solver is also integrated for the solution of optimization models. Distributionally robust optimization modeling tools based on the <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R">robust stochastic optimization (RSO) framework</a> is now under development. Other solver interfaces will be included in the future.</p>
 
-<h3 id="installing-road-and-solvers">Installing ROAD and solvers</h3>
+<h2 id="installing-road-and-solvers">Installing ROAD and solvers</h2>
 
 <p>The ROAD package can be installed with the <code>pip</code> command:</p>
 
@@ -57,9 +61,9 @@
 
 <p>For the current version, the Gurobi solver is also needed for solving the optimization model, and you may follow <a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">these steps</a> to complete the solver installation.</p>
 
-<h3 id="the-dao-of-road">The Dao of ROAD</h3>
+<h2 id="the-dao-of-road">The Dao of ROAD</h2>
 
-<p>The ROAD package is largely inspired by <a href="https://robustopt.com/">ROME</a>, the very first software toolbox for robust optimization. We also learned many hard lessons in developing the MATLAB package <a href="https://www.rsomerso.com/">RSOME</a>, hence the “Dao of ROAD”, which can be imported from the ROAD package.</p>
+<p>The ROAD package is largely inspired by <a href="https://robustopt.com/">ROME</a>, the very first software toolbox for robust optimization. We also learned many hard lessons in developing the MATLAB package <a href="https://www.rsomerso.com/">RSOME</a>, hence the “Dao of ROAD”, which is integrated in the ROAD package as an ester egg.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">dao</span>
 </code></pre></div></div>
@@ -76,7 +80,7 @@ RSOME: https://www.rsomerso.com
 ROAD: https://github.com/XiongPengNUS/road
 </code></pre></div></div>
 
-<h3 id="getting-started">Getting started</h3>
+<h2 id="a-linear-programming-example">A linear programming example</h2>
 
 <p>The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,</p>
 
@@ -98,7 +102,7 @@ ROAD: https://github.com/XiongPengNUS/road
 </span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                    <span class="c1"># Define a decision variable y
 </span>
 <span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>                <span class="c1"># Maximize the objective function
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mf">2.5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">)</span>           <span class="c1"># Specify the 1st constriants
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mf">2.5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">)</span>           <span class="c1"># Specify the 1st constraints
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">)</span>           <span class="c1"># Specify the 2nd constraints
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">)</span>             <span class="c1"># Specify the 3rd constraints
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># Specify the 4th constraints
@@ -106,8 +110,7 @@ ROAD: https://github.com/XiongPengNUS/road
 <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># Solve the model with Gurobi
 </span></code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Academic license - for non-commercial use only
-Being solved by Gurobi...
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
 Solution status: 2
 Running time: 0.0005s
 </code></pre></div></div>
@@ -146,11 +149,12 @@ Number of coefficients:       11
 Number of SOC constraints:    0
 </code></pre></div></div>
 
-<p>We also provide a debugging method <code>show()</code> to display the information of the standard formula as a data frame.</p>
+<p>We also provide a debugging method <code>show()</code> to display the information of the standard formula as a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> type table.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">formula</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div></div>
 
+<div>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -245,6 +249,7 @@ Number of SOC constraints:    0
     </tr>
   </tbody>
 </table>
+</div>
 
 
       </section>

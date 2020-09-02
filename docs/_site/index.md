@@ -1,12 +1,12 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-## Introduction
+# Introduction
 
 ROAD (Robust Optimization for Array Data) is an open-source Python package for operations research and generic optimization modeling. ROAD models are constructed by variables, expressions, and constraints formatted as N-dimensional arrays, which are consistent with the NumPy library in syntax and operations, such as indexing and slicing, element-wise operations, broadcasting, and matrix calculation rules. It thus provides a convenient and highly readable way in developing optimization models and applications.
 
 The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with the Gurobi solver is also integrated for the solution of optimization models. Distributionally robust optimization modeling tools based on the [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R) is now under development. Other solver interfaces will be included in the future.
 
-### Installing ROAD and solvers
+## Installing ROAD and solvers
 
 The ROAD package can be installed with the <code>pip</code> command:
 
@@ -18,9 +18,9 @@ The ROAD package can be installed with the <code>pip</code> command:
 
 For the current version, the Gurobi solver is also needed for solving the optimization model, and you may follow [these steps](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) to complete the solver installation.
 
-### The Dao of ROAD
+## The Dao of ROAD
 
-The ROAD package is largely inspired by [ROME](https://robustopt.com/), the very first software toolbox for robust optimization. We also learned many hard lessons in developing the MATLAB package [RSOME](https://www.rsomerso.com/), hence the "Dao of ROAD", which can be imported from the ROAD package.
+The ROAD package is largely inspired by [ROME](https://robustopt.com/), the very first software toolbox for robust optimization. We also learned many hard lessons in developing the MATLAB package [RSOME](https://www.rsomerso.com/), hence the "Dao of ROAD", which is integrated in the ROAD package as an ester egg.
 
 
 ```python
@@ -39,7 +39,7 @@ from road import dao
     ROAD: https://github.com/XiongPengNUS/road
 
 
-### Getting started
+## A linear programming example
 
 The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
 
@@ -65,7 +65,7 @@ x = model.dvar()                    # Define a decision variable x
 y = model.dvar()                    # Define a decision variable y
 
 model.max(3*x + 4*y)                # Maximize the objective function
-model.st(2.5*x + y <= 20)           # Specify the 1st constriants
+model.st(2.5*x + y <= 20)           # Specify the 1st constraints
 model.st(5*x + 3*y <= 30)           # Specify the 2nd constraints
 model.st(x + 2*y <= 16)             # Specify the 3rd constraints
 model.st(abs(y) <= 2)               # Specify the 4th constraints
@@ -73,7 +73,7 @@ model.st(abs(y) <= 2)               # Specify the 4th constraints
 model.solve(grb)                    # Solve the model with Gurobi
 ```
 
-    Academic license - for non-commercial use only
+
     Being solved by Gurobi...
     Solution status: 2
     Running time: 0.0005s
@@ -118,7 +118,7 @@ print(formula)
 
 
 
-We also provide a debugging method <code>show()</code> to display the information of the standard formula as a data frame.
+We also provide a debugging method <code>show()</code> to display the information of the standard formula as a `pandas.DataFrame` type table.
 
 
 ```python
@@ -126,8 +126,7 @@ formula.show()
 ```
 
 
-
-
+<div>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -222,3 +221,4 @@ formula.show()
     </tr>
   </tbody>
 </table>
+</div>

@@ -67,8 +67,10 @@ blockquote {
 }
 
 code, pre {
-  font-family:Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal, Consolas, Liberation Mono, DejaVu Sans Mono, Courier New, monospace;
+  font-family:Courier New, monospace, Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal, Consolas, Liberation Mono, DejaVu Sans Mono;
+  font-size:95%;
   color:#333;
+  background: #f8f8f8;
 }
 
 pre {
@@ -80,7 +82,6 @@ pre {
 }
 
 table {
-  width:100%;
   border-collapse:collapse;
 }
 
@@ -88,6 +89,7 @@ th, td {
   text-align:left;
   padding:5px 10px;
   border-bottom:1px solid #e5e5e5;
+  font-size:90%
 }
 
 dt {
@@ -227,6 +229,24 @@ footer {
     right:50px;
     top:52px;
   }
+}
+
+.highlight .nb {
+    color: #008000;
+}
+
+.highlight .kn {
+    color: #008001;
+    font-weight: bold;
+}
+
+.highlight .nn {
+    color: #0000FF;
+    font-weight: bold;
+}
+
+.highlight .mi {
+    color: #208050;
 }
 
 @media print, screen and (max-width: 720px) {
