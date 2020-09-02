@@ -1,4 +1,5 @@
 math: ture
 markdown: kramdown
-
+title: "ROAD: Robust Optimization for Array Data"
+logo: rologo.jpeg
 theme: jekyll-theme-dinky

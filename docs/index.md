@@ -8,7 +8,7 @@ Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://j
 
 \\[\sigma_1\\]
 
-A test: \\(sigma_1\\)
+A test: \\(\sigma_1\\)
 
 ### Markdown
 
