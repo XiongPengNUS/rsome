@@ -4,3 +4,8 @@ title: "ROAD"
 show_downloads: "true"
 logo: rologo.jpeg
 theme: jekyll-theme-minimal
+navigation:
+  - title: Home
+    url: /
+  - title: Setup
+    url: setup
