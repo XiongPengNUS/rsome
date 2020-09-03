@@ -2,7 +2,7 @@
 
 # ROAD: Robust Optimization with Array Data
 
-ROAD (Robust Optimization with Array Data) is an open-source Python package for generic modeling optimization problems. Models in ROAD are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. It thus provides a convenient and highly readable way in developing optimization models and applications.
+ROAD (Robust Optimization with Array Data) is an open-source Python package for generic modeling optimization problems. Models in ROAD are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, ROAD provides a convenient platform to facilitate developments of optimization models, as well as their applications.
 
 The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with Gurobi solver is also integrated for the solution of optimization models. Distributionally robust optimization modeling tools based on the [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R) is now under development. Other solver interfaces will be included in the future.
 
