@@ -4,32 +4,30 @@
 
 ROAD (Robust Optimization with Array Data) is an open-source Python package for generic modeling optimization problems. Models in ROAD are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, ROAD provides a convenient platform to facilitate developments of optimization models and their applications.
 
-The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with Gurobi solver is integrated for solving optimization models in ROAD. Distributionally robust optimization modeling tools based on the [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R) and interfaces with other solvers are under development.
+The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with Gurobi solver is integrated for solving the optimization models in ROAD. Distributionally robust optimization modeling tools based on the [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R) and interfaces with other solvers are under development.
 
 ## Introduction
 
 ### Installing ROAD and solvers
 
-The ROAD package can be installed with the <code>pip</code> command:
+The ROAD package can be installed by using the <code>pip</code> command:
 ***
 **`pip install road`**
 ***
 
-For the current version, the Gurobi solve is also needed for solving the optimization model, and you may follow [these steps](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) to complete the solver installation.
+The current version of ROAD requires Gurobi solver for solving the optimization models. You may follow [these steps](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) to complete Gurobi installation.
 
 ### The Dao of ROAD
 
-The ROAD package is largely inspired by [ROME](https://robustopt.com/), the very first software toolbox for robust optimization. We also learned many hard lessons in developing the MATLAB package [RSOME](https://www.rsomerso.com/), hence the "Dao of ROAD", which is integrated in the ROAD package as an ester egg.
+ROAD is largely inspired by [ROME](https://robustopt.com/), a pioneering algebraic modeling toolbox designed to solve robust optimization problems. We also learned many hard lessons in developing the MATLAB package [RSOME](https://www.rsomerso.com/) for distributionally robust optimization based on the RSO framework. Hence in ROAD we hide the "Dao of ROAD" as an easter egg.
 
 ```python
 from road import dao
 ```
 
     The DAO of ROAD:
-    ROME was not built in one day.
-    All ROADs lead to ROME.
-    Matlab is RSOME!
-    The ROAD in Python is more than RSOME!
+    ROME was not built in one day. All ROADs lead to ROME.
+    Matlab is RSOME. ROAD in Python is more than RSOME!
 
 
     ROME: https://robustopt.com/
