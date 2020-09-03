@@ -601,7 +601,7 @@ class VarSub(Vars):
     def __ge__(self, other):
 
         if not isinstance(other, (Real, np.ndarray)):
-            return self.to_affine().__le__(other)
+            return self.to_affine().__ge__(other)
 
         lower = super().__ge__(other)
         indices = self.indices.reshape((self.indices.size, ))
