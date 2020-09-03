@@ -80,7 +80,7 @@ class Model(LPModel):
                     aux_right = self.dvar(constr.affine_out.shape, aux=True)
                     self.aux_constr.append(constr.affine_in - aux_left == 0)
                     self.aux_constr.append(constr.affine_out - aux_right == 0)
-                    # self.aux_bounds.append(aux_right >= 0)
+                    self.aux_bounds.append(aux_right >= 0)
                     qmat.append([aux_right.first] +
                                 list([aux_left.first + index
                                       for index in range(aux_left.size)]))
