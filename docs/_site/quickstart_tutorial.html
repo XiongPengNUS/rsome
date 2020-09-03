@@ -4,16 +4,31 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title><img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=180> <br> ROAD Toolbox by XiongPengNUS</title>
+    <title>ROAD Toolbox by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=62cf2e79bf6c569c4d25d4e8bbe511ad821c1f4c">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9faf81e33a58fd4a499e730213aefbcd0ea6e7dc">
     <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
   </head>
   <body>
     <div class="wrapper">
       <header>
-        <h1><img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=180> <br> ROAD Toolbox</h1>
-        <p>Robust Optimization with Array Data</p>
+
+        
+          <img src="/rologo.jpeg" alt="Logo" />
+        
+
+        <h1>ROAD Toolbox</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
 
         <table>
           
@@ -26,7 +41,7 @@
             
           
             
-              <tr><th><a href="/about">About Us</a></th></tr>
+              <tr><th><a href="/about">About</a></th></tr>
             
           
         </table>
@@ -38,6 +53,7 @@
             <li><a href="https://github.com/XiongPengNUS/road">View On <strong>GitHub</strong></a></li>
           </ul>
         
+
       </header>
       <section>
 
@@ -236,7 +252,7 @@ name : str
 </code></pre></div></div>
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe mystyle">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -391,7 +407,7 @@ name : str
 </code></pre></div></div>
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe mystyle">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -511,11 +527,12 @@ name : str
 &amp; x_i \geq 1, ~\forall i = 1, 2, ..., n,
 \end{align}\]
 
-<p>with the constant \(\phi=5\), and the means and standard deviations are specified to be
-\begin{align}
-&amp;p_i = 1.15 + i\frac{0.05}{150} <br />
+<p>with the constant \(\phi=5\), and the means and standard deviations are specified to be</p>
+
+\[\begin{align}
+&amp;p_i = 1.15 + i\frac{0.05}{150} \\
 &amp;\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)}.
-\end{align}</p>
+\end{align}\]
 
 <p>The quadratic program can be implemented by the following code segment.</p>
 

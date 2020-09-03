@@ -45,7 +45,7 @@ def solve(formula, display=True, export=False):
         grb.write("out.lp")
 
     try:
-        solution =  Solution(grb.ObjVal, grb.getAttr('X'), grb.Status)
+        solution = Solution(grb.ObjVal, grb.getAttr('X'), grb.Status)
     except:
         warnings.warn('No feasible solution can be found.')
         solution = None

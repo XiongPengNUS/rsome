@@ -1,7 +1,6 @@
 print('The DAO of ROAD: ')
-print('All ROADs lead to ROME, which was not built in one day.')
+print('All ROADs lead to ROME, and ROME was not built in one day.')
 print('MATLAB is RSOME. ROAD in Python is more than RSOME!')
-print('The ROAD in Python is more than RSOME!')
 
 print('\n')
 

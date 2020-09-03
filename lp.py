@@ -502,11 +502,6 @@ class Vars:
 
         return self.to_affine() == other
 
-    @property
-    def E(self):
-
-        return ExpVar()
-
 
 class VarSub(Vars):
     """
@@ -1634,7 +1629,7 @@ class LinProg:
         table = pd.DataFrame(self.linear.todense(), columns=var_names,
                              index=constr_names)
         table['sense'] = ['==' if sense else '<=' for sense in self.sense]
-        table['constants'] = self.const
+        table['constant'] = self.const
 
         return table
 

@@ -215,7 +215,7 @@ primal.show()
 
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe mystyle">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -377,7 +377,7 @@ dual.show()
 
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe mystyle">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -502,10 +502,13 @@ $$
 $$
 
 with the constant \\(\phi=5\\), and the means and standard deviations are specified to be
+
+$$
 \begin{align}
 &p_i = 1.15 + i\frac{0.05}{150} \\
 &\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)}.
 \end{align}
+$$
 
 The quadratic program can be implemented by the following code segment.
 

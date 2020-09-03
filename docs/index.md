@@ -28,10 +28,8 @@ from road import dao
 ```
 
     The DAO of ROAD:
-    ROME was not built in one day.
-    All ROADs lead to ROME.
-    Matlab is RSOME!
-    The ROAD in Python is more than RSOME!
+    All ROADs lead to ROME, and ROME was not built in one day.
+    Matlab is RSOME! ROAD in Python is more than RSOME!
 
 
     ROME: https://robustopt.com/
@@ -127,7 +125,7 @@ formula.show()
 
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe mystyle">
   <thead>
     <tr style="text-align: right;">
       <th></th>

@@ -229,6 +229,7 @@ class Model:
     def solve(self, solver, display=True, export=False):
 
         self.rc_model.solution = solver.solve(self.do_math(), display, export)
+        model.solution = self.rc_model.solution
 
     def get(self):
 
@@ -274,7 +275,7 @@ class DecRule:
 
         if self.roaffine is not None:
             raise SyntaxError('Adaptation must be defined ' +
-                              'before used in constriants')
+                              'before used in constraints')
 
         if self.depend is None:
             self.depend = np.zeros((self.size,

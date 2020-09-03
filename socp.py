@@ -201,7 +201,7 @@ class SOCProg(LinProg):
                              (n, self.linear.shape[1])).todense(),
                              index=constr_names, columns=var_names)
         table['sense'] = ['<='] * n
-        table['constants'] = [0.0] * n
+        table['constant'] = [0.0] * n
 
         return table
 
@@ -217,11 +217,11 @@ class SOCProg(LinProg):
             table = pd.concat([table, table_qc], axis=0)
 
         ub = pd.DataFrame(self.ub.reshape((1, self.ub.size)),
-                          columns=table.columns[:-2], index=['Upper'])
+                          columns=table.columns[:-2], index=['UB'])
         lb = pd.DataFrame(self.lb.reshape((1, self.lb.size)),
-                          columns=table.columns[:-2], index=['Lower'])
+                          columns=table.columns[:-2], index=['LB'])
         vtype = pd.DataFrame(self.vtype.reshape((1, self.vtype.size)),
-                             columns=table.columns[:-2], index=['Types'])
+                             columns=table.columns[:-2], index=['Type'])
         table = pd.concat([table, ub, lb, vtype], axis=0)
 
         return table.fillna('-')

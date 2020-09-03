@@ -5,15 +5,15 @@
 ### The Dao of ROAD
 
 The DAO of ROAD:
-ROME was not built in one day.
-All ROADs lead to ROME.
-Matlab is RSOME!
-The ROAD in Python is more than RSOME!
+
+All ROADs lead to ROME, and ROME was not built in one day.
+
+Matlab is RSOME! The ROAD in Python is more than RSOME!
 
 
 ### Resources
 - [ROAD Github](https://github.com/XiongPengNUS/road)
-- [ROAD Pypi](https://pypi.org/project/road/)
+- [ROAD PyPI](https://pypi.org/project/road/)
 - [ROME](https://robustopt.com/)
 - [RSOME](https://www.rsomerso.com/)
 
