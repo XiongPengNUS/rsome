@@ -37,12 +37,10 @@ from road import dao
 
 ### Getting started
 
-The ROAD package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
+In ROAD, models can be specified by using highly readable algebraic expressions that are consistent with NumPy syntax. Below we provide a simple linear program as an example to illustrate the steps of modeling and solving an optimization problem.
+
 
 ![](https://latex.codecogs.com/gif.latex?%5Cdpi%7B120%7D%20%5Cbg_white%20%5Cbegin%7Balign%7D%20%5Cmax%20%7E%263x%20&plus;%204y%20%5Cnonumber%20%5C%5C%20%5Ctext%7Bs.t.%7D%7E%262.5x%20&plus;%20y%20%5Cleq%2020%20%5Cnonumber%20%5C%5C%20%265x%20&plus;%203y%20%5Cleq%2030%20%5Cnonumber%20%5C%5C%20%26x%20&plus;%202y%20%5Cleq%2016%20%5Cnonumber%20%5C%5C%20%26%7Cy%7C%20%5Cleq%202%2C%20%5Cnonumber%20%5Cend%7Balign%7D)
-
-
-and it is used to illustrate the steps of solving optimization models.
 
 
 ```python
@@ -54,10 +52,10 @@ x = model.dvar()                    # Define a decision variable x
 y = model.dvar()                    # Define a decision variable y
 
 model.max(3*x + 4*y)                # Maximize the objective function
-model.st(2.5*x + y <= 20)           # Specify the 1st constraints
-model.st(5*x + 3*y <= 30)           # Specify the 2nd constraints
-model.st(x + 2*y <= 16)             # Specify the 3rd constraints
-model.st(abs(y) <= 2)               # Specify the 4th constraints
+model.st(2.5*x + y <= 20)           # Specify the 1st constraint
+model.st(5*x + 3*y <= 30)           # Specify the 2nd constraint
+model.st(x + 2*y <= 16)             # Specify the 3rd constraint
+model.st(abs(y) <= 2)               # Specify the 4th constraint
 
 model.solve(grb)                    # Solve the model with Gurobi
 ```
@@ -67,9 +65,9 @@ model.solve(grb)                    # Solve the model with Gurobi
     Running time: 0.0005s
 
 
-In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>road.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created by the method <code>dvar()</code>. These variables are then used in specifying the objective function and model constraints. The last step is calling the <code>solve()</code> method to solve the problem via the imported solver interface <code>grb</code>. Once the solution completes, a message showing the solution status and running time will be printed.
+In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>road.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created with the method <code>dvar()</code>. Variables are then used in specifying the objective function and constraints. The last step is to call the <code>solve()</code> method to solve the problem via the imported solver interface <code>grb</code>. Once the solution procedure completes, a message showing the solution status and running time will be printed.
 
-According to the [Gurobi solution status](https://www.gurobi.com/documentation/9.0/refman/optimization_status_codes.html), the status code <code>2</code> suggests that the problem was solved to optimality (subject to tolerances), and an optimal solution is available. The optimal solution and the corresponding objective value can be attained by the <code>get()</code> method.
+According to the [Gurobi solution status](https://www.gurobi.com/documentation/9.0/refman/optimization_status_codes.html), the status code <code>2</code> suggests that the problem was solved to optimality (subject to tolerances) and an optimal solution is available. The optimal solution and the corresponding objective value can be obtained by the <code>get()</code> method.
 
 
 ```python
@@ -83,9 +81,7 @@ print('Objective:', model.get())
     Objective: 22.4
 
 
-The example above shows how to specify an optimization model with highly readable algebraic expressions. The package is capable of transforming the specified model into a standard formula, which can be recognized and solved by the solver.
-
-Users could retrieve the standard formula by calling the method <code>do_math()</code> of the model object.
+ROAD is also capable of transforming the specified optimization model into a standard formula that can be recognized and solved by the solver. Users could retrieve the standard formula by calling the method <code>do_math()</code> of the model object.
 
 
 ```python
@@ -112,8 +108,6 @@ We also provide a debugging method <code>show()</code> to display the informatio
 ```python
 formula.show()
 ```
-
-
 
 
 <table border="1" class="dataframe">
