@@ -588,6 +588,9 @@ class VarSub(Vars):
 
     def __le__(self, other):
 
+        if not isinstance(other, (Real, np.ndarray)):
+            return self.to_affine().__le__(other)
+
         upper = super().__le__(other)
         indices = self.indices.reshape((self.indices.size, ))
         bound_indices = upper.indices.reshape((upper.indices.size, ))[indices]
@@ -596,6 +599,9 @@ class VarSub(Vars):
         return Bounds(upper.model, bound_indices, bound_values, 'U')
 
     def __ge__(self, other):
+
+        if not isinstance(other, (Real, np.ndarray)):
+            return self.to_affine().__le__(other)
 
         lower = super().__ge__(other)
         indices = self.indices.reshape((self.indices.size, ))
