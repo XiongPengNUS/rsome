@@ -1,6 +1,6 @@
 <img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=75 align="left">
 
-# ROAD: Robust Optimization with Array Data
+# ROAD: Robust Optimization for Array Data
 
 ROAD (Robust Optimization with Array Data) is an open-source Python package for operations research and generic optimization modeling. ROAD models are constructed by variables, expressions, and constraints formatted as N-dimensional arrays, which are consistent with the NumPy library in syntax and operations, such as indexing and slicing, element-wise operations, broadcasting, and matrix calculation rules. It thus provides a convenient and highly readable way in developing optimization models and applications.
 
