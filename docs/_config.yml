@@ -9,5 +9,7 @@ navigation:
     url: /
   - title: Quickstart Tutorial
     url: quickstart_tutorial
+  - title: Robust Optimization with rsome
+    url: ro_rsome
   - title: About
     url: about

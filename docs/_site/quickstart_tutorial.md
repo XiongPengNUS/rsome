@@ -567,7 +567,7 @@ model.solve(msk)
 
 
 
-The other two arguments control the display and export options of the solution. Since there is no significant difference in calling various solvers, we would constantly use the Gurobi solver in the remaining part of the manual for demonstration.
+The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.  
 
 
 ## Application examples
@@ -588,8 +588,8 @@ with the constant \\(\phi=5\\), and the means and standard deviations are specif
 
 $$
 \begin{align}
-&p_i = 1.15 + i\frac{0.05}{150} \\
-&\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)}.
+&p_i = 1.15 + i\frac{0.05}{150} & \forall i = 1, 2, ..., n\\
+&\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)} & \forall i = 1, 2, ..., n.
 \end{align}
 $$
 

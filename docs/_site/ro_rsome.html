@@ -1,0 +1,433 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=378eb9db053dc45bb59be180ee4e60425a11d9de">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" />
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/quickstart_tutorial">Quickstart Tutorial</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/ro_rsome">Robust Optimization with rsome</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h1 id="robust-optimization-with-rsome">Robust optimization with RSOME</h1>
+
+<h2 id="general-robust-optimization-formulation">General robust optimization formulation</h2>
+
+<p>The RSOME package is capable of formulating the robust optimization problems as</p>
+
+\[\begin{align}
+\min\limits_{\pmb{x}} ~ &amp;\max\limits_{\pmb{z}\in\mathcal{Z}_0} ~\pmb{z}^T\pmb{A}_0\pmb{x} + \pmb{b}_0^T\pmb{x} + \pmb{c}_0^T\pmb{z} + d_0 &amp;&amp;\\
+\text{s.t.}~&amp;\pmb{z}^T\pmb{A}_1\pmb{x}+ \pmb{b}_1^T\pmb{x} + \pmb{c}_1^T\pmb{z} + d_1 \leq 0, &amp;&amp;\forall \pmb{z}\in\mathcal{Z}_1 \\
+&amp;\pmb{z}^T\pmb{A}_2\pmb{x}+ \pmb{b}_2^T\pmb{x} + \pmb{c}_2^T\pmb{z} + d_2 \leq 0, &amp;&amp;\forall \pmb{z}\in\mathcal{Z}_2 \\
+&amp; \vdots \\
+&amp;\pmb{z}^T\pmb{A}_m\pmb{x}+ \pmb{b}_m^T\pmb{x} + \pmb{c}_m^T\pmb{z} + d_m \leq 0, &amp;&amp;\forall \pmb{z}\in\mathcal{Z}_m \\
+&amp; \pmb{x} \in \mathcal{X}.
+\end{align}\]
+
+<p>where \(\pmb{x}\) is the array decision variables, and \(\pmb{z}$\) is the array of random variables. The generic formula above suggests that we are minimizing (or maximizing) the objective function under the worst-case realization of the uncertainty set \(\mathcal{Z}_0\), subject to the worst-case constraints over each uncertainty set \(\mathcal{Z}_j\), \(\forall j \in 1, 2, …, m\). The RSOME package provides rich algebraic tools for specifying random variables arrays, uncertainty sets, the worst-case objective and constraints of the robust model.</p>
+
+<h2 id="random-variables">Random variables</h2>
+
+<p>Random variables of a robust optimization model can be defined by the method <code>rvar()</code> of the model object.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rvar(shape=(1,), name=None) method of rsome.ro.Model instance
+    Returns an array of random variables with the given shape.
+
+    Parameters
+    ----------
+    shape : int or tuple
+        Shape of the variable array.
+    name : str
+        Name of the variable array
+
+    Returns
+    -------
+    new_var : rsome.lp.Vars
+        An array of new random variables
+</code></pre></div></div>
+
+<p>Similar to decision variables, random variables are also formulated as arrays, and all array operations and functions aforementioned, including operations between decision and random variables, could be applied.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>          <span class="c1"># Create a model object
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>      <span class="c1"># A 1x5 array of decision varaibles
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>      <span class="c1"># A 2x1 array of decision variables
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>      <span class="c1"># A 2x5 array of random variables
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">z</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>        <span class="c1"># Multiplication with broadcasting
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span><span class="p">.</span><span class="n">T</span><span class="o">@</span><span class="n">z</span> <span class="o">-</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>    <span class="c1"># Matrix multiplication
+</span></code></pre></div></div>
+
+<h2 id="uncertainty-sets">Uncertainty sets</h2>
+
+<p>The uncertainty set \(\mathcal{Z}_0\) for the objective function can be specified by the method <code>minmax()</code> and <code>maxmin()</code>. Take the following uncertainty set \(\mathcal{Z}_0\) for example,</p>
+
+\[\begin{align}
+\mathcal{Z}_0 = \left\{\pmb{z}:
+\|\pmb{z}\|_{\infty} \leq 1,
+\|\pmb{z}\|_1 \leq 1.5  
+\right\},
+\end{align}\]
+
+<p>it is used to define the worst-case objective functions, which can be written as the following code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>          
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>      
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    
+
+<span class="c1"># Define uncertainty set Z0 as a tuple
+</span><span class="n">z_set0</span> <span class="o">=</span> <span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>   
+          <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>
+
+<span class="c1"># Minimize the worst-case objective over the uncertainty set Z0
+</span><span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">(),</span> <span class="n">z_set0</span><span class="p">)</span>    
+
+<span class="c1"># Maximize the worst-case objective over the uncertainty set Z0
+</span><span class="n">model</span><span class="p">.</span><span class="n">maxmin</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">(),</span> <span class="n">z_set0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>In the functions <code>minmax()</code> and <code>maxmin()</code>, the first argument is the objective function, and all the remaining arguments are used to specify the constraints of the uncertainty set \(\mathcal{Z}_0\).</p>
+
+<p>For constraints, uncertainty sets can be specified by the <code>forall()</code> method of constraints involving random variables, as shown by the following example.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Define uncertainty set Z1 as a tuple
+</span><span class="n">z_set1</span> <span class="o">=</span> <span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">,</span>
+          <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># The constraints over the uncertainty set Z1
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span> <span class="o">+</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">z_set1</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Please note that if the uncertainty set of a robust constraint is not defined, then by default, its uncertainty set is \(\mathcal{Z}_0\), defined by the <code class="language-plaintext highlighter-rouge">minmax()</code> or <code class="language-plaintext highlighter-rouge">maxmin()</code> methods for the objective. The code below demonstrates a case where one uncertainty set \(\mathcal{Z}_0\) applies to the objective function and all constraints.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>          
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>      
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    
+
+<span class="c1"># Define uncertainty set Z0 as a tuple
+</span><span class="n">z_set0</span> <span class="o">=</span> <span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>   
+          <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>
+
+<span class="c1"># Define objective function and the uncertainty set
+</span><span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">(),</span> <span class="n">z_set0</span><span class="p">)</span>  
+
+<span class="c1"># The uncertainty set Z0 applies to all constraints below
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">z</span> <span class="o">+</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">z</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">z</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>It can be seen that uncertainty sets of the robust model can be flexibly specified. More application examples are presented in the next section.</p>
+
+<h2 id="application-examples">Application examples</h2>
+
+<h3 id="robust-portfolio-optimization">Robust portfolio optimization</h3>
+
+<p>In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper <a href="https://www.researchgate.net/publication/220244391_The_Price_of_Robustness">The Price of Robustness</a>. The robust model is presented below.</p>
+
+\[\begin{align}
+\max~&amp;\min\limits_{\pmb{z}\in\mathcal{Z}} \sum\limits_{i=1}^n\left(p_i + \delta_iz_i \right)x_i \\
+\text{s.t.}~&amp;\sum\limits_{i=1}^nx_i = 1 \\
+&amp;x_i \geq 0, ~\forall i = 1, 2, ..., n,
+\end{align}\]
+
+<p>where the affine term \(p_i + \delta_iz_i\) represents the random stock return, and the random variable is between \([-1, 1]\), so the stock return has an arbitrary distribution in the interval \([p_i - \delta_i, p_i + \delta_i]\). The uncertainty set \(\mathcal{Z}\) is given below,</p>
+
+\[\begin{align}
+\mathcal{Z} = \left\{\pmb{z}: \|\pmb{z}\|_{\infty} \leq 1, \|\pmb{z}\|_1 \leq \Gamma\right\},
+\end{align}\]
+
+<p>where \(\Gamma\) is the budget of uncertainty parameter. Values of the budget of uncertainty and other parameters are presented as follows.</p>
+
+\[\begin{align}
+&amp; \Gamma = 5 &amp;\\
+&amp; p_i = 1.15 + i\frac{0.05}{150}, &amp;\forall i = 1, 2, ..., n \\
+&amp; \delta_i = \frac{0.05}{450}\sqrt{2in(n+1)}, &amp;\forall i = 1, 2, ..., n.
+\end{align}\]
+
+<p>The robust optimization model can be implemented by the following Python code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                 <span class="c1"># Number of stocks
+</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Indices of stocks
+</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                   <span class="c1"># Mean returns
+</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>   <span class="c1"># Deviations of returns
+</span><span class="n">Gamma</span> <span class="o">=</span> <span class="mi">5</span>                               <span class="c1"># Budget of uncertainty
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>              
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Fractions of investment
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Random variables
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">maxmin</span><span class="p">((</span><span class="n">p</span> <span class="o">+</span> <span class="n">delta</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span><span class="p">,</span>         <span class="c1"># The max-min objective
+</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">infty</span><span class="p">)</span> <span class="o">&lt;=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Uncertainty set constraints
+</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>   <span class="c1"># Uncertainty set constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Summation of x is one
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                        <span class="c1"># x is non-negative
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                        <span class="c1"># Solve the model by Gurobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0038s
+</code></pre></div></div>
+
+<p>The optimal investment decision can be visualized by the diagram below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">obj_val</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>               <span class="c1"># The optimal objective value
+</span><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>                     <span class="c1"># The optimal investment decision
+</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">x_sol</span><span class="p">,</span>
+         <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Stocks'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Fraction of investment'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Objective value: {0:0.4f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">obj_val</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><img src="example_ro.png" alt="png" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Objective value: 1.1709
+</code></pre></div></div>
+
+<h3 id="the-robust-and-robustness-knapsack-problems">The robust and robustness knapsack problems</h3>
+
+<p>In this example, we will use the RSOME package to implement the robust knapsack model introduced in the paper <a href="https://www.researchgate.net/publication/220244391_The_Price_of_Robustness">The Price of Robustness</a>, and the robustness model described in the paper <a href="http://www.optimization-online.org/DB_FILE/2019/11/7456.pdf">The Dao of Robustness</a>. In the knapsack problem, the weight coefficient \(\tilde{w}_i\) is assumed to be randomly distributed in the range \([w_i - \delta_i, ~ w_i + \delta_i]\). Suppose that each good has a value of \(c_i\), then the objective is to maximize the total value of goods. The robust model can be thus written as</p>
+
+\[\begin{align}
+\max~&amp;\sum\limits_{i=1}^nc_i x_i \\
+\text{s.t.}~&amp;\sum\limits_{i=1}^n({w}_i + z_i\delta_i)x_i \leq b, \forall \pmb{z} \in \mathcal{Z} \\
+&amp;\pmb{x} \in \{0, 1\}^n
+\end{align}\]
+
+<p>with the array \(\pmb{z}\) representing random variables, which are constrained by an uncertainty set</p>
+
+\[\begin{align}
+\mathcal{Z}=\left\{\pmb{z}: \|\pmb{z}\|_{\infty} \leq 1, \|\pmb{z}\|_{1} \leq r\right\}.
+\end{align}\]
+
+<p>The parameter $r$ is the budget of uncertainty. The robustness optimization model can be formulated by introducing auxiliary random variables \(\pmb{u}\), such that</p>
+
+\[\begin{align}
+\min~&amp;k\\
+\text{s.t.}~&amp;\sum\limits_{i=1}^nc_i x_i \geq \tau \\
+&amp;\sum\limits_{i=1}^n({w}_i + z_i\delta_i)x_i - b \leq k \sum\limits_{i=1}^nu_i, \forall (\pmb{z}, \pmb{u}) \in \overline{\mathcal{Z}} \\
+&amp;\pmb{x} \in \{0, 1\}^n
+\end{align}\]
+
+<p>with \(\tau\) to a target of the objective value, and the random variables \(\pmb{z}\) and \(\pmb{u}\) constrained by an lifted uncertainty set
+\(\begin{align}
+\overline{\mathcal{Z}}=\left\{(\pmb{z}, \pmb{u}): |z_i|\leq u_i\leq 1, \forall i=1, 2, ..., n \right\}.
+\end{align}\)</p>
+
+<p>Following the aforementioned papers, parameters \(\pmb{c}\), \({\pmb{w}}\), and \(\pmb{\delta}\) are randomly generated by the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">b</span> <span class="o">=</span> <span class="mi">2000</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># Profit coefficients
+</span><span class="n">w</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">41</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>   <span class="c1"># Nominal weights
+</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">w</span>                               <span class="c1"># Maximum deviations
+</span></code></pre></div></div>
+
+<p>The robust optimization model for a given budget of uncertainty \(r\) is written as a function named <code>robust()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+    <span class="s">"""
+    The function robust implements the robust optimiztion model,
+    given the budget of uncertainty r
+    """</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'robust'</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'B'</span><span class="p">)</span>    
+    <span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>              
+
+    <span class="n">z_set</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">c</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(((</span><span class="n">w</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">z_set</span><span class="p">))</span>
+
+    <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="c1"># Disable solution message
+</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>     <span class="c1"># Optimal objective and solution
+</span></code></pre></div></div>
+
+<p>Similarly, the robustness optimization model for a given target of profit \(\tau\) can also be written as a function <code>robustness()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">robustness</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+    <span class="s">"""
+    The function robustness implements the robustness optimization
+    model, given the profit target tau.
+    """</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'robustness'</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'B'</span><span class="p">)</span>    
+    <span class="n">k</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>              
+    <span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>           
+    <span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>           
+
+    <span class="n">z_set</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">,</span> <span class="n">u</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">c</span> <span class="o">@</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">tau</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(((</span><span class="n">w</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span> <span class="o">-</span> <span class="n">b</span> <span class="o">&lt;=</span> <span class="n">k</span><span class="o">*</span><span class="n">u</span><span class="p">.</span><span class="nb">sum</span><span class="p">()).</span><span class="n">forall</span><span class="p">(</span><span class="n">z_set</span><span class="p">))</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="c1"># Disable solution message
+</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>     <span class="c1"># Optimal objective and solution
+</span></code></pre></div></div>
+
+<p>Given a decision \(\pmb{x}\) and a sample of the random variable \(\pmb{z}\), we write a function <code>sim()</code> to calculate the probability of constraint violation, as an indicator of the performance of solutions.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sim</span><span class="p">(</span><span class="n">x_sol</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+    <span class="s">"""
+    The function sim is for calculating the probability of violation
+    via simulations.
+        x_sol: solution of the Knapsack problem
+        zs: random sample of the random variable z
+    """</span>
+
+    <span class="n">ws</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">zs</span><span class="o">*</span><span class="n">delta</span>   <span class="c1"># Random samples of uncertain weights
+</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ws</span> <span class="o">@</span> <span class="n">x_sol</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
+
+</code></pre></div></div>
+
+<p>According to the paper <a href="http://www.optimization-online.org/DB_FILE/2019/11/7456.pdf">The Dao of Robustness</a>, the robust models are solved first under different budgets of uncertainty. The corresponding objective values are then used as total value targets in the robustness optimization models. Solutions of the robust and robustness models are assessed via simulation to find out the probabilities of violations.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">step</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>         <span class="c1"># All budgets of uncertainty
+</span><span class="n">num_samp</span> <span class="o">=</span> <span class="mi">20000</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_samp</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>           <span class="c1"># Random samples for z
+</span>
+<span class="s">"""Robust optimization"""</span>
+<span class="n">outputs_rb</span> <span class="o">=</span> <span class="p">[</span><span class="n">robust</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">]</span>
+<span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+           <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rb</span><span class="p">]</span>    <span class="c1"># RO Objective as targets
+</span><span class="n">pv_rb</span> <span class="o">=</span> <span class="p">[</span><span class="n">sim</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zs</span><span class="p">)</span>
+         <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rb</span><span class="p">]</span>      <span class="c1"># Prob. of violations
+</span>
+<span class="s">"""Robustness optimization"""</span>
+<span class="n">outputs_rbn</span> <span class="o">=</span> <span class="p">[</span><span class="n">robustness</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">]</span>   
+<span class="n">pv_rbn</span> <span class="o">=</span> <span class="p">[</span><span class="n">sim</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zs</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rbn</span><span class="p">]</span>    <span class="c1"># Prob. of violations
+</span></code></pre></div></div>
+
+<p>Finally, the probabilities of violations for both methods are visualized by the following diagrams.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">pv_rb</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'b'</span><span class="p">,</span>
+         <span class="n">label</span><span class="o">=</span><span class="s">'Robust Optimization'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">pv_rbn</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'r'</span><span class="p">,</span>
+         <span class="n">label</span><span class="o">=</span><span class="s">'Robustness Optimization'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Parameter r in robust optimization'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Prob. violation'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">pv_rb</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'b'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s">'Robust Optimization'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">pv_rbn</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'r'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s">'Robustness Optimization'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">r'Target return $\tau$'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Prob. violation'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="output_27_0.png" alt="png" /></p>
+
+<p><img src="output_27_1.png" alt="png" /></p>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

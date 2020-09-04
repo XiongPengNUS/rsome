@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=9a496955a40f2a1453790bb9d91dce823b663232">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=378eb9db053dc45bb59be180ee4e60425a11d9de">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -38,6 +38,10 @@
           
             
               <tr><th><a href="/quickstart_tutorial">Quickstart Tutorial</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/ro_rsome">Robust Optimization with rsome</a></th></tr>
             
           
             
@@ -586,7 +590,7 @@ Solution status: optimal
 Running time: 0.0210s
 </code></pre></div></div>
 
-<p>The other two arguments control the display and export options of the solution. Since there is no significant difference in calling various solvers, we would constantly use the Gurobi solver in the remaining part of the manual for demonstration.</p>
+<p>The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.</p>
 
 <h2 id="application-examples">Application examples</h2>
 
@@ -603,8 +607,8 @@ Running time: 0.0210s
 <p>with the constant \(\phi=5\), and the means and standard deviations are specified to be</p>
 
 \[\begin{align}
-&amp;p_i = 1.15 + i\frac{0.05}{150} \\
-&amp;\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)}.
+&amp;p_i = 1.15 + i\frac{0.05}{150} &amp; \forall i = 1, 2, ..., n\\
+&amp;\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)} &amp; \forall i = 1, 2, ..., n.
 \end{align}\]
 
 <p>The quadratic program can be implemented by the following code segment.</p>

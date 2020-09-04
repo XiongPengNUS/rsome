@@ -52,7 +52,7 @@ class Model:
 
         Returns
         -------
-        new_var : road.lp.Vars
+        new_var : rsome.lp.Vars
             An array of new decision variables
         """
 
@@ -73,7 +73,7 @@ class Model:
 
         Returns
         -------
-        new_var : road.lp.Vars
+        new_var : rsome.lp.Vars
             An array of new random variables
         """
 
