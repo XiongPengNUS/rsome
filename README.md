@@ -1,4 +1,4 @@
-![](rsologo =200x)
+![](./rsologo =200x)
 
 # RSOME: Robust Stochastic Optimization Made Easy
 
