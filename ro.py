@@ -229,7 +229,7 @@ class Model:
     def solve(self, solver, display=True, export=False):
 
         self.rc_model.solution = solver.solve(self.do_math(), display, export)
-        model.solution = self.rc_model.solution
+        self.solution = self.rc_model.solution
 
     def get(self):
 

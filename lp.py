@@ -1636,3 +1636,12 @@ class LinProg:
     def solve(self, solver):
 
         return solver.solve(self)
+
+
+class Solution:
+
+    def __init__(self, objval, x, stats):
+
+        self.objval = objval
+        self.x = x
+        self.stats = stats

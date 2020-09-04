@@ -2,6 +2,7 @@ import gurobipy as gp
 import numpy as np
 import warnings
 from .socp import SOCProg
+from .lp import Solution
 
 
 def solve(formula, display=True, export=False):
@@ -51,12 +52,3 @@ def solve(formula, display=True, export=False):
         solution = None
 
     return solution
-
-
-class Solution:
-
-    def __init__(self, objval, x, stats):
-
-        self.objval = objval
-        self.x = x
-        self.stats = stats
