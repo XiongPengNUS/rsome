@@ -1,51 +1,34 @@
-<img src="https://github.com/XiongPengNUS/test/blob/master/rologo.jpeg?raw=true![image.png](attachment:image.png)" width=75 align="left">
+![](rsologo =200x)
 
-# ROAD: Robust Optimization with Array Data
+# RSOME: Robust Stochastic Optimization Made Easy
 
-ROAD (Robust Optimization with Array Data) is an open-source Python package for generic modeling optimization problems. Models in ROAD are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, ROAD provides a convenient platform to facilitate developments of optimization models and their applications.
+RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
 
-The current version of ROAD supports deterministic linear/second-order cone programs and robust optimization problems. An interface with Gurobi solver is integrated for solving the optimization models in ROAD. Distributionally robust optimization modeling tools based on the [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R) and interfaces with other solvers are under development.
+The current version of RSOME supports deterministic linear/second-order cone programs and robust optimization problems. Interfaces with Gurobi and MOSEK solvers are integrated for solving the optimization models in RSOME. Distributionally robust optimization modeling tools based on the [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R) and interfaces with other solvers are under development.
 
 ## Introduction
 
-### Installing ROAD and solvers
+### Installing RSOME and solvers
 
-The ROAD package can be installed by using the <code>pip</code> command:
+The RSOME package can be installed by using the <code>pip</code> command:
 ***
-**`pip install road`**
+**`pip install rsome`**
 ***
 
-The current version of ROAD requires Gurobi solver for solving the optimization models. You may follow [these steps](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) to complete Gurobi installation.
-
-### The Dao of ROAD
-
-ROAD is largely inspired by [ROME](https://robustopt.com/), a pioneering algebraic modeling toolbox designed to solve robust optimization problems. We also learned many hard lessons in developing the MATLAB package [RSOME](https://www.rsomerso.com/) for distributionally robust optimization based on the RSO framework. Hence in ROAD we hide the "Dao of ROAD" as an easter egg.
-
-```python
-from road import dao
-```
-
-    The DAO of ROAD:
-    All ROADs lead to ROME, which was not built in one day.
-    MATLAB is RSOME. ROAD in Python is more than RSOME!
-
-
-    ROME: https://robustopt.com/
-    RSOME: https://www.rsomerso.com
-    ROAD: https://github.com/XiongPengNUS/road
+The current version of RSOME requires the Gurobi or MOSEK solver for solving the formatted models. You may follow [these steps](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) to complete Gurobi installation. The MOSEK solver can be installed via steps in [this link](https://docs.mosek.com/9.2/pythonapi/install-interface.html).
 
 
 ### Getting started
 
-In ROAD, models can be specified by using highly readable algebraic expressions that are consistent with NumPy syntax. Below we provide a simple linear program as an example to illustrate the steps of modeling and solving an optimization problem.
+In RSOME, models can be specified by using highly readable algebraic expressions that are consistent with NumPy syntax. Below we provide a simple linear program as an example to illustrate the steps of modeling and solving an optimization problem.
 
 
 ![](https://latex.codecogs.com/gif.latex?%5Cdpi%7B120%7D%20%5Cbg_white%20%5Cbegin%7Balign%7D%20%5Cmax%20%7E%263x%20&plus;%204y%20%5Cnonumber%20%5C%5C%20%5Ctext%7Bs.t.%7D%7E%262.5x%20&plus;%20y%20%5Cleq%2020%20%5Cnonumber%20%5C%5C%20%265x%20&plus;%203y%20%5Cleq%2030%20%5Cnonumber%20%5C%5C%20%26x%20&plus;%202y%20%5Cleq%2016%20%5Cnonumber%20%5C%5C%20%26%7Cy%7C%20%5Cleq%202%2C%20%5Cnonumber%20%5Cend%7Balign%7D)
 
 
 ```python
-from road import ro                 # Import the ro modeling tool
-from road import grb_solver as grb  # Import Gurobi solver interface
+from rsome import ro                 # Import the ro modeling tool
+from rsome import grb_solver as grb  # Import Gurobi solver interface
 
 model = ro.Model('LP model')        # Create a Model object
 x = model.dvar()                    # Define a decision variable x
@@ -65,7 +48,7 @@ model.solve(grb)                    # Solve the model with Gurobi
     Running time: 0.0005s
 
 
-In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>road.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created with the method <code>dvar()</code>. Variables are then used in specifying the objective function and constraints. The last step is to call the <code>solve()</code> method to solve the problem via the imported solver interface <code>grb</code>. Once the solution procedure completes, a message showing the solution status and running time will be printed.
+In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>rsome.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created with the method <code>dvar()</code>. Variables are then used in specifying the objective function and constraints. The last step is to call the <code>solve()</code> method to solve the problem via the imported solver interface <code>grb</code>. Once the solution procedure completes, a message showing the solution status and running time will be printed.
 
 According to the [Gurobi solution status](https://www.gurobi.com/documentation/9.0/refman/optimization_status_codes.html), the status code <code>2</code> suggests that the problem was solved to optimality (subject to tolerances) and an optimal solution is available. The optimal solution and the corresponding objective value can be obtained by the <code>get()</code> method.
 
@@ -81,7 +64,7 @@ print('Objective:', model.get())
     Objective: 22.4
 
 
-ROAD is also capable of transforming the specified optimization model into a standard formula that can be recognized and solved by the solver. Users could retrieve the standard formula by calling the method <code>do_math()</code> of the model object.
+The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the Gurobi (or MOSEK) solver. The basic information of the standard form can be retrieved by calling the <code>do_math()</code> method of the RSOME model object.
 
 
 ```python
@@ -99,108 +82,3 @@ print(formula)
     Number of coefficients:       11
     ---------------------------------------------
     Number of SOC constraints:    0
-
-
-
-We also provide a debugging method <code>show()</code> to display the information of the standard formula as a data frame.
-
-
-```python
-formula.show()
-```
-
-
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>x1</th>
-      <th>x2</th>
-      <th>x3</th>
-      <th>sense</th>
-      <th>constants</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Obj</th>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>-</td>
-      <td>-</td>
-    </tr>
-    <tr>
-      <th>LC1</th>
-      <td>0</td>
-      <td>2.5</td>
-      <td>1</td>
-      <td>&lt;=</td>
-      <td>20</td>
-    </tr>
-    <tr>
-      <th>LC2</th>
-      <td>0</td>
-      <td>5</td>
-      <td>3</td>
-      <td>&lt;=</td>
-      <td>30</td>
-    </tr>
-    <tr>
-      <th>LC3</th>
-      <td>0</td>
-      <td>1</td>
-      <td>2</td>
-      <td>&lt;=</td>
-      <td>16</td>
-    </tr>
-    <tr>
-      <th>LC4</th>
-      <td>-1</td>
-      <td>-3</td>
-      <td>-4</td>
-      <td>&lt;=</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>LC5</th>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>&lt;=</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>LC6</th>
-      <td>0</td>
-      <td>0</td>
-      <td>-1</td>
-      <td>&lt;=</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>Upper</th>
-      <td>inf</td>
-      <td>inf</td>
-      <td>inf</td>
-      <td>-</td>
-      <td>-</td>
-    </tr>
-    <tr>
-      <th>Lower</th>
-      <td>-inf</td>
-      <td>-inf</td>
-      <td>-inf</td>
-      <td>-</td>
-      <td>-</td>
-    </tr>
-    <tr>
-      <th>Types</th>
-      <td>C</td>
-      <td>C</td>
-      <td>C</td>
-      <td>-</td>
-      <td>-</td>
-    </tr>
-  </tbody>
-</table>
