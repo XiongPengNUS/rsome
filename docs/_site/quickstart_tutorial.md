@@ -770,4 +770,4 @@ is_fixed = puzzle > 0
 model.st(x[is_fixed, puzzle[is_fixed]-1] == 1)
 ```
 
-The variable `is_fixed` an array with elements to be `True` if the number is fixed and `False` if the number is unknown. Such a boolean type array can also be used as indices, thus defining the same constraints.
+The variable `is_fixed` is an array with elements to be `True` if the numbers are fixed and `False` if the numbers are unknown. Such an array with boolean data can also be used as indices, thus defining the same constraints.
