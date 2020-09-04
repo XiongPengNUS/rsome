@@ -251,23 +251,40 @@ footer {
   }
 }
 
-.highlight .nb {
-    color: #008000;
-}
 
-.highlight .kn {
-    color: #008001;
+
+.highlight .kn  {
+    color: #008000;
     font-weight: bold;
 }
 
-.highlight .nn {
-    color: #0000FF;
+.highlight .nb  {
+    color: #008000;
+}
+
+.highlight .k {
+    color: #008000;
     font-weight: bold;
 }
 
 .highlight .mi {
     color: #208050;
 }
+
+.highlight .c1 {
+    color: #007979;
+    font-style: italic;
+}
+
+.highlight .s {
+    color: #BA2121;
+}
+
+.highlight .o {
+    color: #AA22FF;
+    font-weight: bold;
+}
+
 
 @media print, screen and (max-width: 720px) {
   body {
