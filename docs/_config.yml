@@ -1,8 +1,8 @@
 math: ture
 markdown: kramdown
-title: ROAD Toolbox
+title: RSOME for Python
 show_downloads: "true"
-logo: rologo.jpeg
+logo: rso_left.png
 theme: jekyll-theme-minimal
 navigation:
   - title: Home

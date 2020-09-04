@@ -4,11 +4,11 @@
 
 ## Models
 
-In ROAD, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>road.ro</code> toolbox.
+In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> toolbox.
 
 
 ```python
-from road import ro             # Import the ro modeling tool
+from rsome import ro            # Import the ro modeling tool
 
 model = ro.Model('My model')    # Create a Model object
 ```
@@ -19,7 +19,7 @@ The code above defines a new <code>Model</code> object <code>model</code>, with 
 
 Decision variables of a model can be defined by the method <code>dvar()</code>.
 ```
-Model.dvar(shape=(1,), vtype='C', name=None, aux=False)
+dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
     Returns an array of decision variables with the given shape
     and variable type.
 
@@ -36,12 +36,12 @@ Model.dvar(shape=(1,), vtype='C', name=None, aux=False)
 
     Returns
     -------
-    new_var : road.lp.Vars
+    new_var : rsome.lp.Vars
         An array of new decision variables
 ```
 
 
-Similar to the <code>numpy.ndarray</code> data objects, variables in ROAD can be formatted as N-dimensional arrays, and the dimensional number is determined by the length of the tuple type attribute <code>shape</code>. Some important attributes of ROAD variables are provided below. It can be seen that they are consistent with the <code>numpy.ndarray</code> class.
+Similar to the <code>numpy.ndarray</code> data objects, variables in RSOME can be formatted as N-dimensional arrays, and the dimensional number is determined by the length of the tuple type attribute <code>shape</code>. Some important attributes of RSOME variables are provided below. It can be seen that they are consistent with the <code>numpy.ndarray</code> class.
 
 ```
 Affine
@@ -84,8 +84,7 @@ type(3*x + 1)               # Display the Affine type
 
 
 
-
-    road.lp.Affine
+    rsome.lp.Affine
 
 
 
@@ -146,7 +145,7 @@ model.st(x[i] <= i
 
 ## Convex functions and convex constraints
 
-The ROAD package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.
+The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.
 
 - **<code>abs()</code> for absolute values**: the function <code>abs()</code> returns the element-wise absolute value of an array of variables or affine expressions.
 
@@ -158,38 +157,37 @@ The ROAD package also supports several convex functions for specifying convex co
 
 
 ```python
-import road as ra
+import rsome as rso
 from numpy import inf
 
 model.st(abs(z) <= 2)               # Constraints with absolute terms
-model.st(ra.sumsqr(x) <= 10)        # A onstraint with sum of squares
-model.st(ra.square(y) <= 5)         # Constraints with squared terms
-model.st(ra.norm(z[:, 2, 0]) <= 1)  # A onstraint with 2-norm terms
-model.st(ra.norm(x, 1) <= y[0, 0])  # A onstraint with 1-norm terms
-model.st(ra.norm(x, inf) <= x[0])   # A Constratin with infinity norm
+model.st(rso.sumsqr(x) <= 10)       # A Constraint with sum of squares
+model.st(rso.square(y) <= 5)        # Constraints with squared terms
+model.st(rso.norm(z[:, 2, 0]) <= 1) # A Constraint with 2-norm terms
+model.st(rso.norm(x, 1) <= y[0, 0]) # A Constraint with 1-norm terms
+model.st(rso.norm(x, inf) <= x[0])  # A Constraint with infinity norm
 ```
 
 Please note that all functions above can only be used in convex functions, so convex function cannot be applied in equality constraints, and these functions cannot be used for concave inequalities, such as <code>abs(x) >= 2</code> is invalid and gives an error message.
 
-## Standard formula and solutions
+## Standard form and solutions
 
 As mentioned in the previous sections, an optimization model is transformed into a standard form, which is then solved via the solver interface. The standard form can be retrieved by the <code>do_math()</code> method of the model object.
 
 ```
 Model.do_math(primal=True)
-    Returns a SOCProg type object representing the standard
-    formula as a second-order cone program. The parameter primal
-    controls the returned formula is for the primal or the dual
-    problem
+    Returns a SOCProg type object representing the standard form
+    as a second-order cone program. The parameter primal controls
+    the returned formula is for the primal or the dual problem.
 ```
 
-You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard formula, i.e., the objective function, linear and second-order cone constraints, bounds and variable types.
+You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, i.e., the objective function, linear and second-order cone constraints, bounds and variable types.
 
 
 ```python
-import road as ra
+import rsome as rso
 import numpy.random as rd
-from road import ro
+from rsome import ro
 
 n = 3
 c = rd.normal(size=n)
@@ -198,13 +196,51 @@ model = ro.Model()
 x = model.dvar(n)
 
 model.max(c @ x)
-model.st(ra.norm(x) <= 1)
+model.st(rso.norm(x) <= 1)
 
-primal = model.do_math()            # Formula of the primal problem
-dual = model.do_math(primal=False)  # Formula of the dual problem
+primal = model.do_math()            # Standard form of the primal problem
+dual = model.do_math(primal=False)  # Standard form of the dual problem
 ```
 
-Information on the primal and dual problems are displayed below.
+The variables `primal` and `dual` represent the standard forms of the primal and dual problems, respectively.
+
+```python
+primal
+```
+
+
+
+
+    Second order cone program object:
+    =============================================
+    Number of variables:          8
+    Continuous/binaries/integers: 8/0/0
+    ---------------------------------------------
+    Number of linear constraints: 5
+    Inequalities/equalities:      1/4
+    Number of coefficients:       11
+    ---------------------------------------------
+    Number of SOC constraints:    1
+
+
+```python
+dual
+```
+
+
+    Second order cone program object:
+    =============================================
+    Number of variables:          5
+    Continuous/binaries/integers: 5/0/0
+    ---------------------------------------------
+    Number of linear constraints: 4
+    Inequalities/equalities:      0/4
+    Number of coefficients:       7
+    ---------------------------------------------
+    Number of SOC constraints:    1
+
+
+More details on the standard forms can be retrieved by the method `show()`, and the problem information is summarized in a `pandas.DataFrame` table.
 
 
 ```python
@@ -228,7 +264,7 @@ primal.show()
       <th>x7</th>
       <th>x8</th>
       <th>sense</th>
-      <th>constants</th>
+      <th>constant</th>
     </tr>
   </thead>
   <tbody>
@@ -293,16 +329,16 @@ primal.show()
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>-1</td>
+      <td>1</td>
       <td>==</td>
       <td>1</td>
     </tr>
     <tr>
       <th>LC5</th>
       <td>-1</td>
-      <td>-0.770245</td>
-      <td>-0.269588</td>
-      <td>-1.27978</td>
+      <td>0.585058</td>
+      <td>0.0693541</td>
+      <td>-0.7489</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -324,7 +360,7 @@ primal.show()
       <td>0</td>
     </tr>
     <tr>
-      <th>Upper</th>
+      <th>UB</th>
       <td>inf</td>
       <td>inf</td>
       <td>inf</td>
@@ -337,7 +373,7 @@ primal.show()
       <td>-</td>
     </tr>
     <tr>
-      <th>Lower</th>
+      <th>LB</th>
       <td>-inf</td>
       <td>-inf</td>
       <td>-inf</td>
@@ -345,12 +381,12 @@ primal.show()
       <td>-inf</td>
       <td>-inf</td>
       <td>-inf</td>
-      <td>-inf</td>
+      <td>0</td>
       <td>-</td>
       <td>-</td>
     </tr>
     <tr>
-      <th>Types</th>
+      <th>Type</th>
       <td>C</td>
       <td>C</td>
       <td>C</td>
@@ -387,7 +423,7 @@ dual.show()
       <th>x4</th>
       <th>x5</th>
       <th>sense</th>
-      <th>constants</th>
+      <th>constant</th>
     </tr>
   </thead>
   <tbody>
@@ -417,7 +453,7 @@ dual.show()
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>-0.770245</td>
+      <td>0.585058</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -427,7 +463,7 @@ dual.show()
       <td>1</td>
       <td>0</td>
       <td>0</td>
-      <td>-0.269588</td>
+      <td>0.0693541</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -437,7 +473,7 @@ dual.show()
       <td>0</td>
       <td>1</td>
       <td>0</td>
-      <td>-1.27978</td>
+      <td>-0.7489</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -452,7 +488,7 @@ dual.show()
       <td>0</td>
     </tr>
     <tr>
-      <th>Upper</th>
+      <th>UB</th>
       <td>inf</td>
       <td>inf</td>
       <td>inf</td>
@@ -462,7 +498,7 @@ dual.show()
       <td>-</td>
     </tr>
     <tr>
-      <th>Lower</th>
+      <th>LB</th>
       <td>-inf</td>
       <td>-inf</td>
       <td>-inf</td>
@@ -472,7 +508,7 @@ dual.show()
       <td>-</td>
     </tr>
     <tr>
-      <th>Types</th>
+      <th>Type</th>
       <td>C</td>
       <td>C</td>
       <td>C</td>
@@ -485,6 +521,53 @@ dual.show()
 </table>
 </div>
 
+The standard form of the model can be solved via calling the `solve()` method of the model object. Arguments of the `solve()` method are listed below.
+
+    solve(solver, display=True, export=False) method of rsome.ro.Model instance
+        Solve the model with the selected solver interface.
+
+        Parameters
+        ----------
+            solver : {grb_solver, msk_solver}
+                Solver interface used for model solution.
+            display : bool
+                Display option of the solver interface.
+            export : bool
+                Export option of the solver interface. A standard model file
+                is generated if the option is True.
+
+
+
+It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version of RSOME provides solver interfaces for Gurobi and MOSEK.
+
+```python
+from rsome import grb_solver as grb
+from rsome import msk_solver as msk
+```
+
+The interfaces can be used to attain the solution.
+
+```python
+model.solve(grb)
+```
+
+    Being solved by Gurobi...
+    Solution status: 2
+    Running time: 0.0009s
+
+
+
+```python
+model.solve(msk)
+```
+
+    Being solved by Mosek...
+    Solution status: optimal
+    Running time: 0.0210s
+
+
+
+The other two arguments control the display and export options of the solution. Since there is no significant difference in calling various solvers, we would constantly use the Gurobi solver in the remaining part of the manual for demonstration.
 
 
 ## Application examples
@@ -514,24 +597,24 @@ The quadratic program can be implemented by the following code segment.
 
 
 ```python
-import road as ra
+import rsome as rso
 import numpy as np
-from road import ro
-from road import grb_solver as grb
+from rsome import ro
+from rsome import grb_solver as grb
 
-n = 150                                 # Number of stocks
-i = np.arange(1, n+1)                   # Indices of stocks
-p = 1.15 + i*0.05/150                   # Mean returns
-sigma = 0.05/450 * (2*i*n*(n+1))**0.5   # S.T.D. of returns
-phi = 5                                 # Constant phi
+n = 150                                     # Number of stocks
+i = np.arange(1, n+1)                       # Indices of stocks
+p = 1.15 + i*0.05/150                       # Mean returns
+sigma = 0.05/450 * (2*i*n*(n+1))**0.5       # Standard deviations of returns
+phi = 5                                     # Constant phi
 
 model = ro.Model('mv-portfolio')
 
-x = model.dvar(n)                       # Fractions of investment
+x = model.dvar(n)                           # Fractions of investment
 
-model.max(p@x - phi*ra.sumsqr(sigma*x)) # Mean-variance objective
-model.st(x.sum() == 1)                  # Summation of x is one
-model.st(x >= 0)                        # x is non-negative
+model.max(p@x - phi*rso.sumsqr(sigma*x))    # Mean-variance objective
+model.st(x.sum() == 1)                      # Summation of x is one
+model.st(x >= 0)                            # x is non-negative
 
 model.solve(grb)
 ```
@@ -559,15 +642,15 @@ print('Objective value: {0:0.4f}'.format(obj_val))
 ```
 
 
-<img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_11_0.png">
+![](example_socp.png)
 
 
     Objective value: 1.1853
 
 
-#### Integer programming for Sudoku
+### Integer programming for Sudoku
 
-In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) game to illustrate how to use integer and multi-dimensional arrays in ROAD. Sudoku is a popular number puzzle. The goal is to place the digits in \[1,9\] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:
+In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in \[1,9\] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:
 
 1. Each cell contains an integer in \[1,9\].
 2. Each row must contain each of the integers in \[1,9\].
@@ -591,14 +674,14 @@ $$
 \end{align}
 $$
 
-In the following code, we are using ROAD to implement such a model.
+In the following code, we are using RSOME to implement such a model.
 
 
 ```python
-import road as ra
+import rsome as rso
 import numpy as np
-from road import ro
-from road import grb_solver as grb
+from rsome import ro
+from rsome import grb_solver as grb
 
 # A Sudoku puzzle
 # Zeros represent unknown numbers
@@ -625,11 +708,8 @@ model.st(x.sum(axis=0) == 1,
          x.sum(axis=2) == 1)
 
 # Constraints 4
-for i in range(9):
-    for j in range(9):
-        a_ij = puzzle[i, j]
-        if a_ij > 0:
-            model.st(x[i, j, a_ij -1] == 1)
+i, j = np.where(puzzle)
+model.st(x[i, j, puzzle[i, j]-1] == 1)
 
 # Constraints 5
 for i in range(0, 9, 3):
@@ -645,7 +725,7 @@ model.solve(grb)
     Running time: 0.0017s
 
 
-The binary variable \\(x_{ijk}\\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in ROAD, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in ROAD is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.
+The binary variable \\(x_{ijk}\\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.
 
 The Sudoku problem and the its solution are presented below.
 
@@ -681,3 +761,13 @@ print((x_sol * np.arange(1, 10).reshape((1, 1, 9))).sum(axis=2))
      [9 6 1 5 3 7 2 8 4]
      [2 8 7 4 1 9 6 3 5]
      [3 4 5 2 8 6 1 7 9]]
+
+Please note that in defining "Constraints 4", variables `i` and `j` represent the row and column indices of the fixed elements, which can be retrieved by the `np.where()` function. An alternative approach is to use the boolean indexing of arrays, as the code below.
+
+```python
+# An alternative approach for Constraints 4
+is_fixed = puzzle > 0
+model.st(x[is_fixed, puzzle[is_fixed]-1] == 1)
+```
+
+The variable `is_fixed` an array with elements to be `True` if the number is fixed and `False` if the number is unknown. Such a boolean type array can also be used as indices, thus defining the same constraints.

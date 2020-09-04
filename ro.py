@@ -227,6 +227,19 @@ class Model:
         return formula
 
     def solve(self, solver, display=True, export=False):
+        """
+        Solve the model with the selected solver interface.
+
+        Parameters
+        ----------
+            solver : {grb_solver, msk_solver}
+                Solver interface used for model solution.
+            display : bool
+                Display option of the solver interface.
+            export : bool
+                Export option of the solver interface. A standard model file
+                is generated if the option is True.
+        """
 
         self.rc_model.solution = solver.solve(self.do_math(), display, export)
         self.solution = self.rc_model.solution

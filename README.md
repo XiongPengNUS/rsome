@@ -30,17 +30,17 @@ In RSOME, models can be specified by using highly readable algebraic expressions
 from rsome import ro                 # Import the ro modeling tool
 from rsome import grb_solver as grb  # Import Gurobi solver interface
 
-model = ro.Model('LP model')        # Create a Model object
-x = model.dvar()                    # Define a decision variable x
-y = model.dvar()                    # Define a decision variable y
+model = ro.Model('LP model')         # Create a Model object
+x = model.dvar()                     # Define a decision variable x
+y = model.dvar()                     # Define a decision variable y
 
-model.max(3*x + 4*y)                # Maximize the objective function
-model.st(2.5*x + y <= 20)           # Specify the 1st constraint
-model.st(5*x + 3*y <= 30)           # Specify the 2nd constraint
-model.st(x + 2*y <= 16)             # Specify the 3rd constraint
-model.st(abs(y) <= 2)               # Specify the 4th constraint
+model.max(3*x + 4*y)                 # Maximize the objective function
+model.st(2.5*x + y <= 20)            # Specify the 1st constraint
+model.st(5*x + 3*y <= 30)            # Specify the 2nd constraint
+model.st(x + 2*y <= 16)              # Specify the 3rd constraint
+model.st(abs(y) <= 2)                # Specify the 4th constraint
 
-model.solve(grb)                    # Solve the model with Gurobi
+model.solve(grb)                     # Solve the model with Gurobi
 ```
 
     Being solved by Gurobi...

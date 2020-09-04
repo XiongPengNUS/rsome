@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>ROAD Toolbox by XiongPengNUS</title>
+    <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=9faf81e33a58fd4a499e730213aefbcd0ea6e7dc">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9a496955a40f2a1453790bb9d91dce823b663232">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -17,10 +17,10 @@
       <header>
 
         
-          <img src="/rologo.jpeg" alt="Logo" />
+          <img src="/rso_left.png" alt="Logo" />
         
 
-        <h1>ROAD Toolbox</h1>
+        <h1>RSOME for Python</h1>
 
         <table>
           <tr>
@@ -48,9 +48,9 @@
 
         
           <ul>
-            <li><a href="https://github.com/XiongPengNUS/road/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
-            <li><a href="https://github.com/XiongPengNUS/road/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
-            <li><a href="https://github.com/XiongPengNUS/road">View On <strong>GitHub</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
           </ul>
         
 
@@ -63,9 +63,9 @@
 
 <h2 id="models">Models</h2>
 
-<p>In ROAD, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>road.ro</code> toolbox.</p>
+<p>In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> toolbox.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">ro</span>             <span class="c1"># Import the ro modeling tool
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>            <span class="c1"># Import the ro modeling tool
 </span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'My model'</span><span class="p">)</span>    <span class="c1"># Create a Model object
 </span></code></pre></div></div>
@@ -75,7 +75,7 @@
 <h2 id="decision-variables">Decision variables</h2>
 
 <p>Decision variables of a model can be defined by the method <code>dvar()</code>.</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.dvar(shape=(1,), vtype='C', name=None, aux=False)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
     Returns an array of decision variables with the given shape
     and variable type.
 
@@ -92,11 +92,11 @@
 
     Returns
     -------
-    new_var : road.lp.Vars
+    new_var : rsome.lp.Vars
         An array of new decision variables
 </code></pre></div></div>
 
-<p>Similar to the <code>numpy.ndarray</code> data objects, variables in ROAD can be formatted as N-dimensional arrays, and the dimensional number is determined by the length of the tuple type attribute <code>shape</code>. Some important attributes of ROAD variables are provided below. It can be seen that they are consistent with the <code>numpy.ndarray</code> class.</p>
+<p>Similar to the <code>numpy.ndarray</code> data objects, variables in RSOME can be formatted as N-dimensional arrays, and the dimensional number is determined by the length of the tuple type attribute <code>shape</code>. Some important attributes of RSOME variables are provided below. It can be seen that they are consistent with the <code>numpy.ndarray</code> class.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Affine
     An Affine type object as the transpose of the variable array
@@ -132,7 +132,7 @@ name : str
 <span class="nb">type</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>               <span class="c1"># Display the Affine type
 </span></code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>road.lp.Affine
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rsome.lp.Affine
 </code></pre></div></div>
 
 <p>The <code>Affine</code> objects are also compatible with the standard NumPy array syntax, like reshaping, element-wise operations, matrix calculation rules, broadcasting, indexing and slicing. A few examples are provided below.</p>
@@ -186,7 +186,7 @@ name : str
 
 <h2 id="convex-functions-and-convex-constraints">Convex functions and convex constraints</h2>
 
-<p>The ROAD package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.</p>
+<p>The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.</p>
 
 <ul>
   <li>
@@ -203,35 +203,34 @@ name : str
   </li>
 </ul>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">road</span> <span class="k">as</span> <span class="n">ra</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
 
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># Constraints with absolute terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ra</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>        <span class="c1"># A onstraint with sum of squares
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ra</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>         <span class="c1"># Constraints with squared terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ra</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># A onstraint with 2-norm terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ra</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># A onstraint with 1-norm terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ra</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>   <span class="c1"># A Constratin with infinity norm
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>       <span class="c1"># A Constraint with sum of squares
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>        <span class="c1"># Constraints with squared terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># A Constraint with 2-norm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># A Constraint with 1-norm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># A Constraint with infinity norm
 </span></code></pre></div></div>
 
 <p>Please note that all functions above can only be used in convex functions, so convex function cannot be applied in equality constraints, and these functions cannot be used for concave inequalities, such as <code>abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
 
-<h2 id="standard-formula-and-solutions">Standard formula and solutions</h2>
+<h2 id="standard-form-and-solutions">Standard form and solutions</h2>
 
 <p>As mentioned in the previous sections, an optimization model is transformed into a standard form, which is then solved via the solver interface. The standard form can be retrieved by the <code>do_math()</code> method of the model object.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.do_math(primal=True)
-    Returns a SOCProg type object representing the standard
-    formula as a second-order cone program. The parameter primal
-    controls the returned formula is for the primal or the dual
-    problem
+    Returns a SOCProg type object representing the standard form
+    as a second-order cone program. The parameter primal controls
+    the returned formula is for the primal or the dual problem.
 </code></pre></div></div>
 
-<p>You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard formula, i.e., the objective function, linear and second-order cone constraints, bounds and variable types.</p>
+<p>You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, i.e., the objective function, linear and second-order cone constraints, bounds and variable types.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">road</span> <span class="k">as</span> <span class="n">ra</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
-<span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
 
 <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">rd</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
@@ -240,13 +239,45 @@ name : str
 <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
 <span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">c</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ra</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="n">primal</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">()</span>            <span class="c1"># Formula of the primal problem
-</span><span class="n">dual</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">(</span><span class="n">primal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1"># Formula of the dual problem
+<span class="n">primal</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">()</span>            <span class="c1"># Standard form of the primal problem
+</span><span class="n">dual</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">(</span><span class="n">primal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1"># Standard form of the dual problem
 </span></code></pre></div></div>
 
-<p>Information on the primal and dual problems are displayed below.</p>
+<p>The variables <code class="language-plaintext highlighter-rouge">primal</code> and <code class="language-plaintext highlighter-rouge">dual</code> represent the standard forms of the primal and dual problems, respectively.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">primal</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Second order cone program object:
+=============================================
+Number of variables:          8
+Continuous/binaries/integers: 8/0/0
+---------------------------------------------
+Number of linear constraints: 5
+Inequalities/equalities:      1/4
+Number of coefficients:       11
+---------------------------------------------
+Number of SOC constraints:    1
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dual</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Second order cone program object:
+=============================================
+Number of variables:          5
+Continuous/binaries/integers: 5/0/0
+---------------------------------------------
+Number of linear constraints: 4
+Inequalities/equalities:      0/4
+Number of coefficients:       7
+---------------------------------------------
+Number of SOC constraints:    1
+</code></pre></div></div>
+
+<p>More details on the standard forms can be retrieved by the method <code class="language-plaintext highlighter-rouge">show()</code>, and the problem information is summarized in a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> table.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">primal</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div></div>
@@ -265,7 +296,7 @@ name : str
       <th>x7</th>
       <th>x8</th>
       <th>sense</th>
-      <th>constants</th>
+      <th>constant</th>
     </tr>
   </thead>
   <tbody>
@@ -330,16 +361,16 @@ name : str
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>-1</td>
+      <td>1</td>
       <td>==</td>
       <td>1</td>
     </tr>
     <tr>
       <th>LC5</th>
       <td>-1</td>
-      <td>-0.770245</td>
-      <td>-0.269588</td>
-      <td>-1.27978</td>
+      <td>0.585058</td>
+      <td>0.0693541</td>
+      <td>-0.7489</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -361,7 +392,7 @@ name : str
       <td>0</td>
     </tr>
     <tr>
-      <th>Upper</th>
+      <th>UB</th>
       <td>inf</td>
       <td>inf</td>
       <td>inf</td>
@@ -374,7 +405,7 @@ name : str
       <td>-</td>
     </tr>
     <tr>
-      <th>Lower</th>
+      <th>LB</th>
       <td>-inf</td>
       <td>-inf</td>
       <td>-inf</td>
@@ -382,12 +413,12 @@ name : str
       <td>-inf</td>
       <td>-inf</td>
       <td>-inf</td>
-      <td>-inf</td>
+      <td>0</td>
       <td>-</td>
       <td>-</td>
     </tr>
     <tr>
-      <th>Types</th>
+      <th>Type</th>
       <td>C</td>
       <td>C</td>
       <td>C</td>
@@ -417,7 +448,7 @@ name : str
       <th>x4</th>
       <th>x5</th>
       <th>sense</th>
-      <th>constants</th>
+      <th>constant</th>
     </tr>
   </thead>
   <tbody>
@@ -447,7 +478,7 @@ name : str
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>-0.770245</td>
+      <td>0.585058</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -457,7 +488,7 @@ name : str
       <td>1</td>
       <td>0</td>
       <td>0</td>
-      <td>-0.269588</td>
+      <td>0.0693541</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -467,7 +498,7 @@ name : str
       <td>0</td>
       <td>1</td>
       <td>0</td>
-      <td>-1.27978</td>
+      <td>-0.7489</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -482,7 +513,7 @@ name : str
       <td>0</td>
     </tr>
     <tr>
-      <th>Upper</th>
+      <th>UB</th>
       <td>inf</td>
       <td>inf</td>
       <td>inf</td>
@@ -492,7 +523,7 @@ name : str
       <td>-</td>
     </tr>
     <tr>
-      <th>Lower</th>
+      <th>LB</th>
       <td>-inf</td>
       <td>-inf</td>
       <td>-inf</td>
@@ -502,7 +533,7 @@ name : str
       <td>-</td>
     </tr>
     <tr>
-      <th>Types</th>
+      <th>Type</th>
       <td>C</td>
       <td>C</td>
       <td>C</td>
@@ -514,6 +545,48 @@ name : str
   </tbody>
 </table>
 </div>
+
+<p>The standard form of the model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver, display=True, export=False) method of rsome.ro.Model instance
+    Solve the model with the selected solver interface.
+
+    Parameters
+    ----------
+        solver : {grb_solver, msk_solver}
+            Solver interface used for model solution.
+        display : bool
+            Display option of the solver interface.
+        export : bool
+            Export option of the solver interface. A standard model file
+            is generated if the option is True.
+</code></pre></div></div>
+
+<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version of RSOME provides solver interfaces for Gurobi and MOSEK.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+</code></pre></div></div>
+
+<p>The interfaces can be used to attain the solution.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0009s
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0210s
+</code></pre></div></div>
+
+<p>The other two arguments control the display and export options of the solution. Since there is no significant difference in calling various solvers, we would constantly use the Gurobi solver in the remaining part of the manual for demonstration.</p>
 
 <h2 id="application-examples">Application examples</h2>
 
@@ -536,24 +609,24 @@ name : str
 
 <p>The quadratic program can be implemented by the following code segment.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">road</span> <span class="k">as</span> <span class="n">ra</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
-<span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 
-<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                 <span class="c1"># Number of stocks
-</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Indices of stocks
-</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                   <span class="c1"># Mean returns
-</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>   <span class="c1"># S.T.D. of returns
-</span><span class="n">phi</span> <span class="o">=</span> <span class="mi">5</span>                                 <span class="c1"># Constant phi
+<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                     <span class="c1"># Number of stocks
+</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                       <span class="c1"># Indices of stocks
+</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                       <span class="c1"># Mean returns
+</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>       <span class="c1"># Standard deviations of returns
+</span><span class="n">phi</span> <span class="o">=</span> <span class="mi">5</span>                                     <span class="c1"># Constant phi
 </span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'mv-portfolio'</span><span class="p">)</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Fractions of investment
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                           <span class="c1"># Fractions of investment
 </span>
-<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">phi</span><span class="o">*</span><span class="n">ra</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">sigma</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="c1"># Mean-variance objective
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                  <span class="c1"># Summation of x is one
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                        <span class="c1"># x is non-negative
+<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">phi</span><span class="o">*</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">sigma</span><span class="o">*</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># Mean-variance objective
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                      <span class="c1"># Summation of x is one
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># x is non-negative
 </span>
 <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
 </code></pre></div></div>
@@ -578,14 +651,14 @@ Running time: 0.0028s
 <span class="k">print</span><span class="p">(</span><span class="s">'Objective value: {0:0.4f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">obj_val</span><span class="p">))</span>
 </code></pre></div></div>
 
-<p><img src="https://raw.githubusercontent.com/XiongPengNUS/road/master/output_11_0.png" /></p>
+<p><img src="/example_socp.png" alt="" /></p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Objective value: 1.1853
 </code></pre></div></div>
 
-<h4 id="integer-programming-for-sudoku">Integer programming for Sudoku</h4>
+<h3 id="integer-programming-for-sudoku">Integer programming for Sudoku</h3>
 
-<p>In this section we will use a <a href="https://en.wikipedia.org/wiki/Sudoku">Sudoku</a> game to illustrate how to use integer and multi-dimensional arrays in ROAD. Sudoku is a popular number puzzle. The goal is to place the digits in [1,9] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:</p>
+<p>In this section we will use a <a href="https://en.wikipedia.org/wiki/Sudoku">Sudoku</a> game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in [1,9] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:</p>
 
 <ol>
   <li>Each cell contains an integer in [1,9].</li>
@@ -609,12 +682,12 @@ Running time: 0.0028s
 &amp; \sum\limits_{m=0}^2\sum\limits_{n=0}^2x_{(i+m), (j+m), k} = 1, \forall i \in \{0, 3, 6\}, j \in \{0, 3, 6\}, k \in [0, 8]
 \end{align}\]
 
-<p>In the following code, we are using ROAD to implement such a model.</p>
+<p>In the following code, we are using RSOME to implement such a model.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">road</span> <span class="k">as</span> <span class="n">ra</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
-<span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">road</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 
 <span class="c1"># A Sudoku puzzle
 # Zeros represent unknown numbers
@@ -641,11 +714,8 @@ Running time: 0.0028s
          <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Constraints 4
-</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
-        <span class="n">a_ij</span> <span class="o">=</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">a_ij</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">a_ij</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">puzzle</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Constraints 5
 </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
@@ -661,7 +731,7 @@ Solution status: 2
 Running time: 0.0017s
 </code></pre></div></div>
 
-<p>The binary variable \(x_{ijk}\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in ROAD, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in ROAD is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.</p>
+<p>The binary variable \(x_{ijk}\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.</p>
 
 <p>The Sudoku problem and the its solution are presented below.</p>
 
@@ -694,6 +764,15 @@ Running time: 0.0017s
  [2 8 7 4 1 9 6 3 5]
  [3 4 5 2 8 6 1 7 9]]
 </code></pre></div></div>
+
+<p>Please note that in defining “Constraints 4”, variables <code class="language-plaintext highlighter-rouge">i</code> and <code class="language-plaintext highlighter-rouge">j</code> represent the row and column indices of the fixed elements, which can be retrieved by the <code class="language-plaintext highlighter-rouge">np.where()</code> function. An alternative approach is to use the boolean indexing of arrays, as the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># An alternative approach for Constraints 4
+</span><span class="n">is_fixed</span> <span class="o">=</span> <span class="n">puzzle</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">is_fixed</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">is_fixed</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The variable <code class="language-plaintext highlighter-rouge">is_fixed</code> an array with elements to be <code class="language-plaintext highlighter-rouge">True</code> if the number is fixed and <code class="language-plaintext highlighter-rouge">False</code> if the number is unknown. Such a boolean type array can also be used as indices, thus defining the same constraints.</p>
 
 
       </section>
