@@ -1,4 +1,4 @@
-![](rsologo.png =200x)
+<img src="https://github.com/XiongPengNUS/rsome/blob/master/rsologo.png?raw=true" width=75>
 
 # RSOME: Robust Stochastic Optimization Made Easy
 
