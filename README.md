@@ -1,4 +1,5 @@
-<img src="https://github.com/XiongPengNUS/rsome/blob/master/rsologo.png?raw=true" width=75>
+<img src="https://github.com/XiongPengNUS/rsome/blob/master/rsologo.png?raw=true" width=100>
+
 # RSOME: Robust Stochastic Optimization Made Easy
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
