@@ -5,7 +5,7 @@ import scipy.sparse as sp
 import warnings
 from numbers import Real
 from scipy.sparse import csr_matrix
-from collections import Iterable
+from collections import Iterable, Sized
 
 
 class Model:
@@ -170,6 +170,8 @@ class Model:
                 sense = np.array([1])
 
             vtype = np.concatenate([np.array([item.vtype] * item.size)
+                                    if len(item.vtype) == 1
+                                    else np.array(list(item.vtype))
                                     for item in self.vars + self.auxs])
 
             # ub = np.array([np.infty] * linear.shape[1])
@@ -339,7 +341,8 @@ class Vars:
 
     def __str__(self):
 
-        if self.vtype not in ['C', 'B', 'I']:
+        vtype = self.vtype
+        if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
             raise ValueError('Unknown variable type.')
 
         var_name = '' if self.name is None else self.name + ': '
@@ -350,8 +353,10 @@ class Vars:
                       'Expectation set' if self.model.mtype == 'E' else
                       'Probability set')
         """
-        var_type = ('continuous' if self.vtype == 'C' else
-                    'binary' if self.vtype == 'B' else 'integer')
+        var_type = ('continuous' if vtype == 'C' else
+                    'binary' if vtype == 'B' else
+                    'integer' if vtype == 'I' else
+                    'Mixed-type')
         suffix = 's' if np.prod(self.shape) > 1 else ''
 
         string = var_name
@@ -491,7 +496,8 @@ class Vars:
 
     def __le__(self, other):
 
-        if isinstance(other, (Real, np.ndarray)) or sp.issparse(other):
+        if ((isinstance(other, (Real, np.ndarray)) or sp.issparse(other))
+                and self.model.mtype not in 'EP'):
             upper = other + np.zeros(self.shape)
             upper = upper.reshape((upper.size, ))
             indices = np.arange(self.first, self.first + self.size,
@@ -502,7 +508,8 @@ class Vars:
 
     def __ge__(self, other):
 
-        if isinstance(other, (Real, np.ndarray)) or sp.issparse(other):
+        if ((isinstance(other, (Real, np.ndarray)) or sp.issparse(other))
+                and self.model.mtype not in 'EP'):
             lower = other + np.zeros(self.shape)
             lower = lower.reshape((lower.size, ))
             indices = np.arange(self.first, self.first + self.size,
@@ -714,16 +721,6 @@ class Affine:
     @property
     def T(self):
 
-
-        """
-        if self.sparray is None:
-            # self.sparray = sparse_array(self.shape)
-            self.sparray = self.sv_array()
-
-        trans_sparray = self.sparray.T
-        # linear = array_to_sparse(trans_sparray) @ self.linear
-        linear = sv_to_csr(trans_sparray) @ self.linear
-        """
         linear = sp_trans(self) @ self.linear
         const = self.const.T
 
@@ -795,21 +792,7 @@ class Affine:
     def __mul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if self.model.mtype == 'R' and other.model.mtype == 'S':
-                """
-                affine = self
-                raffine = affine.reshape((affine.size, 1))
-                other = other.to_affine()
-                # raffine = raffine * np.array(other.linear.todense())
-
-                rvar_last = other.model.vars[-1].last
-                reduced_linear = other.linear[:, :rvar_last]
-
-                trans_sparray = (np.ones(affine.size) *  ####################
-                                 np.array([line for line in reduced_linear]))
-
-                raffine = raffine * array_to_sparse(trans_sparray)
-                """
+            if self.model.mtype in 'VR' and other.model.mtype in 'SM':
                 other = other.to_affine()
                 if self.shape != other.shape:
                     raffine = self * np.ones(other.to_affine().shape)
@@ -837,23 +820,6 @@ class Affine:
             if isinstance(other, Real):
                 other = np.array([other])
 
-            """
-            if self.sparray is None:
-                self.sparray = sparse_array(self.shape)
-
-            new_const = self.const * other
-
-            new_sparray = self.sparray * other
-            new_linear = array_to_sparse(new_sparray) @ self.linear
-            """
-
-            """
-            new_const = self.const * other
-
-            svarray = self.sv_array()
-            new_svarray = svarray * other
-            new_linear = sv_to_csr(new_svarray) @ self.linear
-            """
             new_linear = sparse_mul(other, self.to_affine()) @ self.linear
             new_const = self.const * other
 
@@ -862,18 +828,8 @@ class Affine:
     def __rmul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if self.model.mtype == 'R' and other.model.mtype == 'S':
-                """
-                affine = self
-                raffine = affine.reshape((affine.size, 1))
-                other = other.to_affine()
-                # raffine = np.array(other.linear.todense()) * raffine
+            if self.model.mtype in 'VR' and other.model.mtype == 'S':
 
-                rvar_last = other.model.vars[-1].last
-                reduced_linear = other.linear[:, :rvar_last]
-                trans_sparray = (np.array([line for line in reduced_linear]) *
-                                 np.ones(affine.size))
-                """
                 other = other.to_affine()
                 if self.shape != other.shape:
                     raffine = self * np.ones(other.to_affine().shape)
@@ -900,14 +856,6 @@ class Affine:
             if isinstance(other, Real):
                 other = np.array([other])
 
-            """
-            new_const = other * self.const
-
-            svarray = self.sv_array()
-            new_svarray = other * svarray
-            new_linear = sv_to_csr(new_svarray) @ self.linear
-            """
-
             new_linear = sparse_mul(other, self.to_affine()) @ self.linear
             new_const = self.const * other
 
@@ -916,10 +864,11 @@ class Affine:
     def __matmul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if self.model.mtype == 'R' and other.model.mtype == 'S':
+            if self.model.mtype in 'VR' and other.model.mtype in 'SM':
 
                 other = other.to_affine()
                 affine = self @ other.const
+                num_rand = other.model.vars[-1].last
 
                 ind_array = self.sv_array()
                 temp = ind_array @ np.arange(other.size).reshape(other.shape)
@@ -939,19 +888,14 @@ class Affine:
                 self_flat = self.reshape(self.size)
                 affine_temp = (csr_temp @ self_flat).reshape((temp.size,
                                                               other.size))
-                raffine = affine_temp @ other.linear
+                raffine = affine_temp @ other.linear[:, :num_rand]
 
                 return RoAffine(raffine, affine, other.model)
-            elif self.model.mtype == 'S' and other.model.mtype == 'R':
+            elif self.model.mtype in 'SM' and other.model.mtype in 'VR':
 
                 affine = self.const @ other
                 other = other.to_affine()
-
-                """
-                temp = np.ones((self.size, affine.size))
-                temp = (other * temp).reshape(temp.shape)
-                raffine = temp @ self.linear
-                """
+                num_rand = self.model.vars[-1].last
 
                 ind_array = self.sv_array()
                 temp = ind_array @ np.arange(other.size).reshape(other.shape)
@@ -971,23 +915,20 @@ class Affine:
                 other_flat = other.reshape(other.size)
                 affine_temp = (csr_temp @ other_flat).reshape((temp.size,
                                                                self.size))
-                raffine = affine_temp @ self.linear
+                raffine = affine_temp @ self.linear[:, :num_rand]
 
-                return RoAffine(raffine, affine, self.model)
+                roaffine = RoAffine(raffine, affine, self.model)
+
+                if isinstance(other, DecAffine):
+                    return DecRoAffine(roaffine, other.event_adapt, 'R')
+                else:
+                    return roaffine
         else:
             other = check_numeric(other)
 
             new_const = self.const @ other
             if not isinstance(new_const, np.ndarray):
                 new_const = np.array([new_const])
-
-            """
-            svarray = self.sv_array()
-            new_svarray = svarray @ other
-            if not isinstance(new_svarray, np.ndarray):
-                new_svarray = np.array([new_svarray])
-            new_linear = sv_to_csr(new_svarray) @ self.linear
-            """
 
             new_linear = sp_lmatmul(other, self, new_const.shape) @ self.linear
 
@@ -1000,13 +941,6 @@ class Affine:
         new_const = other @ self.const
         if not isinstance(new_const, np.ndarray):
             new_const = np.array([new_const])
-        """
-        svarray = self.sv_array()
-        new_svarray = other @ svarray
-        if not isinstance(new_svarray, np.ndarray):
-            new_svarray = np.array([new_svarray])
-        new_linear = sv_to_csr(new_svarray) @ self.linear
-        """
 
         new_linear = sp_matmul(other, self, new_const.shape) @ self.linear
 
@@ -1015,14 +949,17 @@ class Affine:
     def __add__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if isinstance(other, (Vars, VarSub)):
-                other = other.to_affine()
+            # if isinstance(other, (Vars, VarSub)):
+            other = other.to_affine()
 
             if self.model.mtype != other.model.mtype:
-                if self.model.mtype == 'R':
+                if self.model.mtype in 'VR':
                     return other.rand_to_roaffine(self.model).__add__(self)
-                elif other.model.mtype == 'R':
-                    return self.rand_to_roaffine(other.model).__add__(other)
+                # elif other.model.mtype == 'R':
+                #     return self.rand_to_roaffine(other.model).__add__(other)
+                elif other.model.mtype in 'VR':
+                    temp = self.rand_to_roaffine(other.model)
+                    return other.__add__(temp)
                 else:
                     raise ValueError('Models mismatch.')
 
@@ -1031,19 +968,6 @@ class Affine:
             if self.shape == other.shape:
                 new_linear = add_linear(self.linear, other.linear)
             else:
-                """
-                left_sparray = self.sv_array()
-                right_sparray = other.sv_array()
-
-                left_zero = self.sv_zeros(other.size)
-                right_zero = other.sv_zeros(self.size)
-
-                left_sparse = sv_to_csr(left_sparray + right_zero)
-                right_sparse = sv_to_csr(left_zero + right_sparray)
-
-                left_linear = left_sparse @ self.linear
-                right_linear = right_sparse @ other.linear
-                """
 
                 left_linear = (self * np.ones(other.shape)).linear
                 right_linear = (other * np.ones(self.shape)).linear
@@ -1093,7 +1017,7 @@ class Affine:
     def __le__(self, other):
 
         left = self - other
-        if isinstance(left, Affine):
+        if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size, )),
                              np.zeros(left.const.size))
@@ -1103,7 +1027,7 @@ class Affine:
     def __ge__(self, other):
 
         left = other - self
-        if isinstance(left, Affine):
+        if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size,)),
                              np.zeros(left.const.size))
@@ -1116,6 +1040,7 @@ class Affine:
         return LinConstr(left.model, left.linear,
                          -left.const.reshape((left.const.size,)),
                          np.ones(left.const.size))
+        ##########
 
 
 class Convex:
@@ -1260,14 +1185,6 @@ class RoAffine:
     @property
     def T(self):
 
-        """
-        # sparray = sparse_array(self.shape)
-        sparray = self.sv_array()
-        trans_sparray = sparray.T
-        # raffine = array_to_sparse(trans_sparray) @ self.raffine
-        raffine = sv_to_csr(trans_sparray) @ self.raffine
-        """
-
         raffine = sp_trans(self) @ self.raffine
         affine = self.affine.T
 
@@ -1330,8 +1247,6 @@ class RoAffine:
         elif isinstance(other, (Real, np.ndarray)):
             if isinstance(other, Real):
                 other = np.array([other])
-            # raffine = self.raffine + np.zeros((other.size,
-            #                                   self.raffine.shape[1]))
 
             if other.shape == self.shape:
                 raffine = self.raffine
@@ -1594,6 +1509,635 @@ class RoConstr:
         return constr_tuple
 
 
+class DecVar(Vars):
+
+    def __init__(self, dro_model, dvars, fixed=True, name=None):
+
+        super().__init__(dvars.model, dvars.first, dvars.shape,
+                         dvars.vtype, dvars.name)
+        self.dro_model = dro_model
+        self.event_adapt = [list(range(dro_model.num_scen))]
+        self.rand_adapt = None
+        self.ro_first = None
+        self.fixed = fixed
+        self.name = name
+
+    def __getitem__(self, item):
+
+        item_array = index_array(self.shape)
+        indices = item_array[item]
+        if not isinstance(indices, np.ndarray):
+            indices = np.array([indices]).reshape((1, ) * self.ndim)
+
+        return DecVarSub(self.dro_model, self, indices)
+
+    def to_affine(self):
+
+        expr = super().to_affine()
+        return DecAffine(self.dro_model, expr, self.event_adapt, self.fixed)
+
+    def adapt(self, to):
+
+        if isinstance(to, (Scen, Sized, int)):
+            self.evtadapt(to)
+        elif isinstance(to, (RandVar, RandVarSub)):
+            self.affadapt(to)
+        else:
+            raise ValueError('Can not define adaption for the inputs.')
+
+    def evtadapt(self, scens):
+
+        # self.fixed = False
+        if self.event_adapt is None:
+            self.event_adapt = [list(range(self.dro_model.num_scen))]
+
+        if isinstance(scens, Scen):
+            events = scens.series
+        else:
+            events = scens
+        # events = list(events) if isinstance(events, Iterable) else [events]
+        events = [events] if isinstance(events, (str, Real)) else list(events)
+
+        for event in events:
+            index = self.dro_model.series_scen[event]
+            if index in self.event_adapt[0]:
+                self.event_adapt[0].remove(index)
+            else:
+                raise ValueError('Wrong scenario index or {0} '.format(event) +
+                                 'has been redefined.')
+
+        if not self.event_adapt[0]:
+            self.event_adapt.pop(0)
+
+        self.event_adapt.append(list(self.dro_model.series_scen[events]))
+
+    def affadapt(self, rvars):
+
+        self.fixed = False
+        self[:].affadapt(rvars)
+
+    def __le__(self, other):
+
+        return self.to_affine().__le__(other)
+
+    def __ge__(self, other):
+
+        return self.to_affine().__ge__(other)
+
+    def __eq__(self, other):
+
+        return self.to_affine().__eq__(other)
+
+    def get(self, rvar=None):
+
+        dro_model = self.dro_model
+        var_sol = dro_model.ro_model.rc_model.vars[1].get()
+        if rvar is None:
+            num_scen = dro_model.num_scen
+            edict = event_dict(self.event_adapt)
+            outputs = []
+            for eindex in range(len(self.event_adapt)):
+                indices = (self.ro_first + eindex*self.size
+                           + np.arange(self.size, dtype=int))
+                outputs.append(var_sol[indices].reshape(self.shape))
+
+            if len(outputs) > 1:
+                ind_label = self.dro_model.series_scen.index
+                return pd.Series(outputs, index=ind_label)
+            else:
+                return outputs[0]
+
+    @property
+    def E(self):
+
+        return DecAffine(self.dro_model, self.to_affine(), ctype='E')
+
+
+class DecVarSub(VarSub):
+
+    def __init__(self, dro_model, dvars, indices, fixed=True):
+
+        super().__init__(dvars, indices)
+        self.dro_model = dro_model
+        self.event_adapt = dvars.event_adapt
+        self.rand_adapt = dvars.rand_adapt
+        self.dvars = dvars
+        self.fixed = fixed
+
+    def to_affine(self):
+
+        expr = super().to_affine()
+        return DecAffine(self.dro_model, expr, self.event_adapt, self.fixed)
+
+    def adapt(self, rvars):
+
+        self.fixed = False
+        if not isinstance(rvars, (RandVar, RandVarSub)):
+            raise TypeError('Affine adaptation requires a random variable.')
+
+        self.affadapt(rvars)
+
+    def affadapt(self, rvars):
+
+        self.fixed = False
+        if self.rand_adapt is None:
+            sup_model = self.dro_model.sup_model
+            self.rand_adapt = np.zeros((self.size, sup_model.vars[-1].last),
+                                       dtype=np.int8)
+
+        dec_indices = self.indices
+        dec_indices = dec_indices.reshape((dec_indices.size, 1))
+        rand_indices = rvars.get_ind()
+        rand_indices = rand_indices.reshape(rand_indices.size)
+
+        dec_indices_flat = (dec_indices *
+                            np.ones(rand_indices.shape, dtype=int)).flatten()
+        rand_indices_flat = (np.ones(dec_indices.shape, dtype=int) *
+                             rand_indices).flatten()
+
+        if self.rand_adapt[dec_indices_flat, rand_indices_flat].any():
+            raise SyntaxError('Redefinition of adaptation is not allowed.')
+
+        self.rand_adapt[dec_indices_flat, rand_indices_flat] = 1
+        self.dvars.rand_adapt = self.rand_adapt
+
+    def __le__(self, other):
+
+        if isinstance(other, (Real, np.ndarray)):
+            bounds = super().__le__(other)
+            return DecBounds(bounds, self.event_adapt)
+        else:
+            return self.to_affine().__le__(other)
+
+    def __ge__(self, other):
+
+        if isinstance(other, (Real, np.ndarray)):
+            bounds = super().__ge__(other)
+            return DecBounds(bounds, self.event_adapt)
+        else:
+            return self.to_affine().__ge__(other)
+
+    @property
+    def E(self):
+
+        return DecAffine(self.dro_model, self.to_affine(), ctype='E')
+
+
+class RandVar(Vars):
+
+    def __init__(self, svars, evars):
+
+        super().__init__(svars.model, svars.first,
+                         svars.shape, svars.vtype, svars.name, svars.sparray)
+        self.e = evars
+
+    @property
+    def E(self):
+
+        return self.e
+
+    def __getitem__(self, item):
+
+        item_array = index_array(self.shape)
+        indices = item_array[item]
+        if not isinstance(indices, np.ndarray):
+            indices = np.array([indices]).reshape((1, ) * self.ndim)
+
+        return RandVarSub(self, indices)
+
+    def __add__(self, other):
+
+        expr = super().__add__(other)
+        if isinstance(expr, RoAffine):
+            expr = DecRoAffine(expr, other.event_adapt, other.ctype)
+
+        return expr
+
+    def __neg__(self):
+
+        return super().__neg__()
+
+    def __mul__(self, other):
+
+        return super().__mul__(other)
+
+    def __matmul__(self, other):
+
+        return super().__matmul__(other)
+
+    def __rmatmul__(self, other):
+
+        return super().__rmatmul__(other)
+
+
+class RandVarSub(VarSub):
+
+    def __init__(self, rvars, indices):
+
+        super().__init__(rvars, indices)
+        self.e = VarSub(rvars.e, indices)
+
+    @property
+    def E(self):
+
+        return self.e
+
+
+class DecAffine(Affine):
+
+    def __init__(self, dro_model, affine,
+                 event_adapt=None, fixed=True, ctype='R'):
+
+        super().__init__(affine.model, affine.linear,
+                         affine.const, affine.sparray)
+        self.dro_model = dro_model
+        self.event_adapt = (event_adapt if event_adapt else
+                            [list(range(dro_model.num_scen))])
+        self.fixed = fixed
+        self.ctype = ctype
+
+    def reshape(self, shape):
+
+        expr = super().reshape(shape)
+
+        return DecAffine(self.dro_model, expr,
+                         self.event_adapt, self.fixed, self.ctype)
+
+    def to_affine(self):
+
+        expr = super().to_affine()
+
+        return DecAffine(self.dro_model, expr, self.event_adapt,
+                         self.fixed, self.ctype)
+
+    @property
+    def T(self):
+
+        expr = super().T
+
+        return DecAffine(self.dro_model, expr, self.event_adapt,
+                         self.fixed, self.ctype)
+
+    def __mul__(self, other):
+
+        expr = super().__mul__(other)
+        if isinstance(expr, Affine):
+            return DecAffine(self.dro_model, expr,
+                             event_adapt=self.event_adapt,
+                             ctype=self.ctype, fixed=self.fixed)
+        elif isinstance(expr, RoAffine):
+            return DecRoAffine(expr, self.event_adapt, 'R')
+
+    def __rmul__(self, other):
+
+        return self.__mul__(other)
+
+    def __matmul__(self, other):
+
+        expr = super().__matmul__(other)
+        if isinstance(expr, Affine):
+            return DecAffine(self.dro_model, expr,
+                             event_adapt=self.event_adapt,
+                             ctype=self.ctype, fixed=self.fixed)
+        elif isinstance(expr, RoAffine):
+            return DecRoAffine(expr, self.event_adapt, 'R')
+
+    def __rmatmul__(self, other):
+
+        if isinstance(other, (Real, np.ndarray)) or sp.issparse(other):
+            expr = super().__rmatmul__(other)
+        else:
+            expr = other.__matmul__(super().to_affine())
+
+        if isinstance(expr, Affine):
+            return DecAffine(self.dro_model, expr,
+                             event_adapt=self.event_adapt,
+                             ctype=self.ctype, fixed=self.fixed)
+        elif isinstance(expr, RoAffine):
+            return DecRoAffine(expr, self.event_adapt, 'R')
+
+    def __neg__(self):
+
+        expr = super().__neg__()
+
+        return DecAffine(self.dro_model, expr,
+                         event_adapt=self.event_adapt,
+                         ctype=self.ctype, fixed=self.fixed)
+
+    def __add__(self, other):
+
+        expr = super().__add__(other)
+        if isinstance(other, (DecAffine, DecVar, DecVarSub)):
+            other = other.to_affine()
+            self_is_fixed = self.fixed and len(self.event_adapt) == 1
+            other_is_fixed = other.fixed and len(other.event_adapt) == 1
+            if self.ctype == 'E' and other.ctype == 'R' and not other_is_fixed:
+                raise TypeError('Incorrect expectation expressions.')
+            if other.ctype == 'E' and self.ctype == 'R' and not self_is_fixed:
+                raise TypeError('Incorrect expectation expressions.')
+            event_adapt = comb_set(self.event_adapt, other.event_adapt)
+            ctype = other.ctype
+        elif isinstance(other, DecRoAffine):
+            event_adapt = comb_set(self.event_adapt, other.event_adapt)
+            ctype = other.ctype
+        elif isinstance(other, (Real, np.ndarray, Affine, RoAffine,
+                                Vars, VarSub)) or sp.issparse(other):
+            event_adapt = self.event_adapt
+            ctype = 'R'
+        else:
+            return other.__add__(self)
+
+        if len(event_adapt) == 1:
+            fixed = True
+        else:
+            fixed = False
+
+        fixed = fixed and self.fixed
+        ctype = 'E' if 'E' in (self.ctype + ctype) else 'R'
+
+        if isinstance(expr, Affine):
+            return DecAffine(self.dro_model, expr,
+                             event_adapt=event_adapt,
+                             ctype=ctype, fixed=fixed)
+        elif isinstance(expr, RoAffine):
+            if isinstance(other, DecRoAffine):
+                ctype = other.ctype
+            else:
+                ctype = 'R'
+            return DecRoAffine(expr, event_adapt, ctype)
+
+    def __abs__(self):
+
+        expr = super().__abs__()
+
+        return DecConvex(expr, self.event_adapt)
+
+    def abs(self):
+
+        return self.__abs__()
+
+    def norm(self, degree):
+
+        if not self.fixed:
+            raise SyntaxError('Incorrect convex expressions.')
+
+        expr = super().norm(degree)
+
+        return DecConvex(expr, self.event_adapt)
+
+    def square(self):
+
+        if not self.fixed:
+            raise SyntaxError('Incorrect convex expressions.')
+
+        expr = super().square()
+
+        return DecConvex(expr, self.event_adapt)
+
+    def sumsqr(self):
+
+        if not self.fixed:
+            raise SyntaxError('Incorrect convex expressions.')
+
+        expr = super().sumsqr()
+
+        return DecConvex(expr, self.event_adapt)
+
+    def sum(self, axis=None):
+
+        expr = super().sum(axis)
+
+        return DecAffine(self.dro_model, expr, self.event_adapt, self.fixed)
+
+    def __le__(self, other):
+
+        left = self - other
+
+        if isinstance(left, DecAffine):
+            return DecLinConstr(left.model, left.linear, left.const,
+                                np.zeros(left.size), left.event_adapt,
+                                left.ctype)
+        elif isinstance(left, DecRoAffine):
+            return DecRoConstr(left, 0, left.event_adapt, left.ctype)
+
+    def __ge__(self, other):
+
+        left = other - self
+
+        if isinstance(left, DecAffine):
+            return DecLinConstr(left.model, left.linear, left.const,
+                                np.zeros(left.size), left.event_adapt,
+                                left.ctype)
+        elif isinstance(left, DecRoAffine):
+            return DecRoConstr(left, 0, left.event_adapt, left.ctype)
+
+    def __eq__(self, other):
+
+        left = self - other
+        if isinstance(left, DecAffine):
+            return DecLinConstr(left.model, left.linear, left.const,
+                                np.ones(left.size), left.event_adapt)
+        elif isinstance(left, DecRoAffine):
+            return DecRoConstr(left, 1, left.event_adapt, left.ctype)
+
+    @property
+    def E(self):
+
+        affine = Affine(self.model, self.linear, self.const)
+        return DecAffine(self.dro_model, affine, ctype='E')
+
+
+class DecConvex(Convex):
+
+    def __init__(self, convex, event_adapt):
+
+        super().__init__(convex.affine_in, convex.affine_out,
+                         convex.xtype, convex.sign)
+        self.event_adapt = event_adapt
+
+    def __neg__(self):
+
+        expr = super().__neg__()
+        return DecConvex(expr, self.event_adapt)
+
+    def __add__(self, other):
+
+        expr = super().__add__(other)
+
+        if isinstance(other, (Real, np.ndarray)) or sp.issparse(other):
+            event_adapt = self.event_adapt
+        else:
+            event_adapt = comb_set(self.event_adapt, other.event_adapt)
+
+        return DecConvex(expr, event_adapt)
+
+    def __mul__(self, other):
+
+        expr = super().__mul__(other)
+
+        return DecConvex(expr, self.event_adapt)
+
+    def __rmul__(self, other):
+
+        expr = super().__rmul__(other)
+
+        return DecConvex(expr, self.event_adapt)
+
+    def __le__(self, other):
+
+        constr = super().__le__(other)
+
+        return DecCvxConstr(constr, self.event_adapt)
+
+    def __ge__(self, other):
+
+        constr = super().__ge__(other)
+
+        return DecCvxConstr(constr, self.event_adapt)
+
+
+class DecRoAffine(RoAffine):
+
+    def __init__(self, roaffine, event_adapt, ctype):
+
+        super().__init__(roaffine.raffine, roaffine.affine,
+                         roaffine.rand_model)
+
+        self.event_adapt = event_adapt
+        self.ctype = ctype
+
+    def __neg__(self):
+
+        expr = super().__neg__()
+
+        return DecRoAffine(expr, self.event_adapt, self.ctype)
+
+    def __add__(self, other):
+
+        if isinstance(other, (DecVar, DecVarSub, DecAffine, DecRoAffine)):
+            if isinstance(other, DecRoAffine):
+                if self.ctype != other.ctype:
+                    raise TypeError('Incorrect expectation expressions.')
+            else:
+                other = other.to_affine()
+                if self.ctype != other.ctype:
+                    if ((self.ctype == 'E'
+                         and (not other.fixed or len(other.event_adapt) > 1))
+                            or other.ctype == 'E'):
+                        raise TypeError('Incorrect expectation expressions.')
+                other = other.to_affine()
+            event_adapt = comb_set(self.event_adapt, other.event_adapt)
+            ctype = 'E' if 'E' in self.ctype + other.ctype else 'R'
+        elif (isinstance(other, (Real, np.ndarray, RoAffine))
+              or sp.issparse(other)):
+            event_adapt = self.event_adapt
+            ctype = self.ctype
+        elif isinstance(other, (Vars, VarSub, Affine)):
+            if other.model.mtype != 'V':
+                if self.ctype == 'E':
+                    raise SyntaxError('Incorrect affine expressions.')
+            event_adapt = self.event_adapt
+            ctype = self.ctype
+        else:
+            raise TypeError('Unknown expression type.')
+
+        expr = super().__add__(other)
+
+        return DecRoAffine(expr, event_adapt, ctype)
+
+    def __sub__(self, other):
+
+        return self.__add__(-other)
+
+    def __mul__(self, other):
+
+        expr = super().__mul__(other)
+
+        return DecRoAffine(expr, self.event_adapt, self.ctype)
+
+    def __rmul__(self, other):
+
+        expr = super().__rmul__(other)
+
+        return DecRoAffine(expr, self.event_adapt, self.ctype)
+
+    def __matmul__(self, other):
+
+        expr = super().__matmul__(other)
+
+        return DecRoAffine(expr, self.event_adapt, self.ctype)
+
+    def __rmatmul__(self, other):
+
+        expr = super().__rmatmul__(other)
+
+        return DecRoAffine(expr, self.event_adapt, self.ctype)
+
+    def __le__(self, other):
+
+        left = self - other
+
+        return DecRoConstr(left, 0, left.event_adapt, left.ctype)
+
+    def __ge__(self, other):
+
+        left = other - self
+
+        return DecRoConstr(left, 0, left.event_adapt, left.ctype)
+
+    @property
+    def E(self):
+
+        roaffine = RoAffine(self.raffine, self.affine, self.rand_model)
+        return DecRoAffine(roaffine, self.event_adapt, ctype='E')
+
+
+class DecLinConstr(LinConstr):
+
+    def __init__(self, model, linear, const, sense,
+                 event_adapt=None, ctype='R'):
+
+        super().__init__(model, linear, const, sense)
+        self.event_adapt = event_adapt
+        self.ctype = ctype
+        self.ambset = None
+
+
+class DecBounds(Bounds):
+
+    def __init__(self, bounds, event_adapt=None):
+
+        super().__init__(bounds.model, bounds.indices, bounds.values,
+                         bounds.btype)
+        self.event_adapt = event_adapt
+
+
+class DecCvxConstr(CvxConstr):
+
+    def __init__(self, constr, event_adapt):
+
+        super().__init__(constr.model, constr.affine_in,
+                         constr.affine_out, constr.xtype)
+        self.event_adapt = event_adapt
+
+
+class DecRoConstr(RoConstr):
+
+    def __init__(self, roaffine, sense, event_adapt, ctype):
+
+        super().__init__(roaffine, sense)
+
+        self.event_adapt = event_adapt
+        self.ctype = ctype
+        self.ambset = None
+
+    def forall(self, ambset):
+
+        self.ambset = ambset
+
+        return self
+
+
 class LinProg:
     """
     The LinProg class creates an object of linear program
@@ -1658,3 +2202,90 @@ class Solution:
         self.objval = objval
         self.x = x
         self.stats = stats
+
+
+class Scen:
+
+    def __init__(self, ambset, series, pr):
+
+        # super().__init__(data=series.values, index=series.index)
+        self.ambset = ambset
+        self.series = series
+        self.p = pr
+
+    def __str__(self):
+
+        return 'Scenario indices: \n' + self.series.__str__()
+
+    def __repr__(self):
+
+        return self.__str__()
+
+    def __getitem__(self, indices):
+
+        indices_p = self.series[indices]
+        return Scen(self.ambset, self.series[indices], self.p[indices_p])
+
+    @property
+    def loc(self):
+
+        return ScenLoc(self)
+
+    @property
+    def iloc(self):
+
+        return ScenILoc(self)
+
+    def suppset(self, *args):
+
+        for arg in args:
+            if arg.model is not self.ambset.model.sup_model:
+                raise ValueError('Constraints are not for this support.')
+
+        # for i in self.series:
+        indices = (self.series if isinstance(self.series, pd.Series)
+                   else [self.series])
+        for i in indices:
+            self.ambset.sup_constr[i] = tuple(args)
+
+    def exptset(self, *args):
+
+        for arg in args:
+            if arg.model is not self.ambset.model.exp_model:
+                raise ValueError('Constraints are not defined for ' +
+                                 'expectation sets.')
+
+        self.ambset.exp_constr.append(tuple(args))
+        if not isinstance(self.series, Iterable):
+            indices = [self.series]
+        else:
+            indices = self.series
+        self.ambset.exp_constr_indices.append(indices)
+
+
+class ScenLoc:
+
+    def __init__(self, scens):
+
+        self.scens = scens
+        self.indices = []
+
+    def __getitem__(self, indices):
+
+        indices_s = self.scens.series.loc[indices]
+
+        return Scen(self.scens.ambset, indices_s, self.scens.p[indices_s])
+
+
+class ScenILoc:
+
+    def __init__(self, scens):
+
+        self.scens = scens
+        self.indices = []
+
+    def __getitem__(self, indices):
+
+        indices_s = self.scens.series.iloc[indices]
+
+        return Scen(self.scens.ambset, indices_s, self.scens.p[indices_s])

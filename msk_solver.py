@@ -95,7 +95,6 @@ def solve(form, display=True, export=False):
             solsta = None
             for stype in [soltype.bas, soltype.itr, soltype.itg]:
                 try:
-                    # prosta = task.getprosta(mosek.soltype.itr)
                     solsta = task.getsolsta(stype)
                     if display:
                         print('Solution status: {0}'.format(solsta.__repr__()))

@@ -164,6 +164,40 @@ def add_linear(left, right):
     return left + right
 
 
+def event_dict(event_set):
+
+    output = {}
+    count = 0
+    for item in event_set:
+        for element in item:
+            output[element] = count
+
+        count += 1
+
+    return output
+
+
+def comb_set(s1, s2):
+
+    d1 = event_dict(s1)
+    d2 = event_dict(s2)
+
+    dc = {item: str(d1[item]) + '-' + str(d2[item])
+          for item in range(len(d1))}
+
+    values = []
+    output = []
+    for key in dc:
+        if dc[key] in values:
+            index = values.index(dc[key])
+            output[index].append(key)
+        else:
+            output.append([key])
+            values.append(dc[key])
+
+    return output
+
+
 def norm(affine, degree=2):
 
     return affine.norm(degree)

@@ -80,7 +80,11 @@ class Model(LPModel):
                     aux_right = self.dvar(constr.affine_out.shape, aux=True)
                     self.aux_constr.append(constr.affine_in - aux_left == 0)
                     self.aux_constr.append(constr.affine_out + aux_right == 0)
-                    self.aux_bounds.append(aux_right >= 0)
+                    bounds = (aux_right >= 0)
+                    if isinstance(bounds, Bounds):
+                        self.aux_bounds.append(bounds)
+                    else:
+                        self.aux_constr.append(bounds)
                     qmat.append([aux_right.first] +
                                 list([aux_left.first + index
                                       for index in range(aux_left.size)]))
@@ -93,7 +97,11 @@ class Model(LPModel):
                     self.aux_constr.append(aux2 - constr.affine_in == 0)
                     self.aux_constr.append(aux3 - 0.5 * (1-constr.affine_out)
                                            == 0)
-                    self.aux_bounds.append(aux3 >= 0)
+                    bounds = (aux3 >= 0)
+                    if isinstance(bounds, Bounds):
+                        self.aux_bounds.append(bounds)
+                    else:
+                        self.aux_constr.append(bounds)
                     for i in range(constr.affine_in.size):
                         qmat.append([aux3.first + i] +
                                     [aux1.first + i, aux2.first + i])
@@ -106,7 +114,11 @@ class Model(LPModel):
                     self.aux_constr.append(aux2 - constr.affine_in == 0)
                     self.aux_constr.append(aux3 - 0.5 * (1-constr.affine_out)
                                            == 0)
-                    self.aux_bounds.append(aux3 >= 0)
+                    bounds = (aux3 >= 0)
+                    if isinstance(bounds, Bounds):
+                        self.aux_bounds.append(bounds)
+                    else:
+                        self.aux_constr.append(bounds)
                     qmat.append([aux3.first] + [aux1.first] +
                                 list(aux2.first + np.arange(aux2.size)))
 

@@ -1,36 +1,48 @@
 from .socp import Model as SOCModel
 from .ro import Model as ROModel
-# from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
-from .lp import Vars, VarSub    # , Affine, Convex
-# from .lp import RoAffine, RoConstr
+from .lp import LinConstr, ConeConstr, CvxConstr
+from .lp import Vars, Affine
+from .lp import RoAffine, RoConstr
+from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr
+from .lp import DecRoConstr
+from .lp import Scen
 from .subroutines import *
 import numpy as np
 import pandas as pd
-# import scipy.sparse as sp
-# from numbers import Real
-# from scipy.sparse import csr_matrix
-from collections import Iterable, Sized
+from collections import Sized, Iterable
 
 
 class Model:
 
-    def __init__(self, name=None):
+    def __init__(self, scens=1, name=None):
 
         self.ro_model = ROModel()
         self.vt_model = SOCModel(mtype='V')
-        self.sup_model = SOCModel(nobj=True, mtype='S')
+        self.sup_model = self.ro_model.sup_model
         self.exp_model = SOCModel(nobj=True, mtype='E')
-        # self.pro_model = SOCModel(nobj=True, mtype='P')
-        self.pro_model = None
+        self.pro_model = SOCModel(nobj=True, mtype='P')
 
+        self.obj_ambiguity = None
+
+        if isinstance(scens, int):
+            num_scen = scens
+            series = pd.Series(np.arange(num_scen).astype(int))
+        elif isinstance(scens, Sized):
+            num_scen = len(scens)
+            series = pd.Series(np.arange(num_scen).astype(int), index=scens)
+        else:
+            raise ValueError('Incorrect scenarios.')
+        self.num_scen = num_scen
+        self.series_scen = series
+
+        self.dec_vars = [DecVar(self, self.vt_model.vars[0])]
+        self.rand_vars = []
         self.all_constr = []
+        self.var_ev_list = None
+        # self.affadapt_mat = None
 
-        self.num_scen = 1
-        self.sup_constr = []
-        self.exp_constr = []
-        self.exp_constr_indices = []
-        self.pro_constr = []
-        self.pr = None
+        pr = self.pro_model.dvar(num_scen, name='probabilities')
+        self.p = pr
 
         self.obj = None
         self.sign = 1
@@ -49,41 +61,47 @@ class Model:
 
         sup_var = self.sup_model.dvar(shape, 'C', name)
         exp_var = self.exp_model.dvar(shape, 'C', name)
-        return RandVar(sup_var, exp_var)
+        rand_var = RandVar(sup_var, exp_var)
+        self.rand_vars.append(rand_var)
+
+        return rand_var
 
     def dvar(self, shape=(1,), vtype='C', name=None):
 
         dec_var = self.vt_model.dvar(shape, vtype, name)
-        return DecVar(self, dec_var, name)
+        dec_var = DecVar(self, dec_var, name=name)
+        self.dec_vars.append(dec_var)
 
-    def ambiguity(self, scens=1):
+        return dec_var
+
+    def ambiguity(self):
 
         if self.all_constr:
             raise SyntaxError('Ambiguity set must be specified ' +
                               'before defining constraints.')
 
-        if isinstance(scens, int):
-            num_scen = scens
-            series = pd.Series(range(num_scen), dtype=np.int32)
-        elif isinstance(scens, Sized):
-            num_scen = len(scens)
-            series = pd.Series(range(num_scen), index=scens, dtype=np.int32)
-        else:            raise ValueError('Incorrect scenarios.')
-
-        return Ambiguity(self, num_scen, series)
+        return Ambiguity(self)
 
     def bou(self, *args):
+
+        if self.num_scen != 1:
+            raise ValueError('The uncertainty set can only be applied '
+                             'to a one-scenario model')
 
         bou_set = self.ambiguity()
         for arg in args:
             if arg.model is not self.sup_model:
                 raise ValueError('Constraints are not for this support.')
 
-        self.sup_constr[0] = tuple(args)
+        bou_set.sup_constr = [tuple(args)]
 
         return bou_set
 
     def wks(self, *args):
+
+        if self.num_scen != 1:
+            raise ValueError('The WKS ambiguity set can only be applied '
+                             'to a one-scenario model')
 
         wks_set = self.ambiguity()
         sup_constr = []
@@ -97,185 +115,445 @@ class Model:
                 raise ValueError('Constraints are not defined for the '
                                  'ambiguity support.')
 
-        self.sup_constr = [tuple(sup_constr)]
-        self.exp_constr = [tuple(exp_constr)]
-        self.exp_constr_indices = [np.array([0], dtype=np.int32)]
+        wks_set.sup_constr = [tuple(sup_constr)]
+        wks_set.exp_constr = [tuple(exp_constr)]
+        wks_set.exp_constr_indices = [np.array([0], dtype=np.int32)]
 
         return wks_set
 
+    def rule_var(self):
 
-class DecVar(Vars):
+        if self.var_ev_list is not None:
+            return self.var_ev_list
 
-    def __init__(self, model, dvars, name=None):
+        total = sum(dvar.size*len(dvar.event_adapt)
+                    for dvar in self.dec_vars)
+        vtype = ''.join([dvar.vtype * dvar.size * len(dvar.event_adapt)
+                         if len(dvar.vtype) == 1
+                         else dvar.vtype * len(dvar.event_adapt)
+                         for dvar in self.dec_vars])
+        var_const = self.ro_model.dvar(total, vtype=vtype)
 
-        super().__init__(dvars.model, dvars.first, dvars.shape,
-                         dvars.vtype, dvars.name)
-        self.rsome_model = model
-        self.event_adapt = None
-        self.rand_adapt = None
-        self.name = name
+        count = 0
+        for dvar in self.dec_vars:
+            dvar.ro_first = count
+            count += dvar.size*len(dvar.event_adapt)
 
-    def __getitem__(self, item):
+        num_scen = self.num_scen
+        self.var_ev_list = []
+        for s in range(num_scen):
+            start = 0
+            index = []
+            total_size = 0
+            total_col = 0
+            for dvar in self.dec_vars:
+                edict = event_dict(dvar.event_adapt)
+                size = dvar.size
+                index.extend(list(start + size * edict[s]
+                                  + np.arange(size, dtype=int)))
 
-        item_array = index_array(self.shape)
-        indices = item_array[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ) * self.ndim)
+                start += size * len(dvar.event_adapt)
+                total_size += size
+                total_col += size * len(dvar.event_adapt)
+            """
+            tr_mat = csr_matrix(([1.0] * total_size, index,
+                                 range(total_size + 1)),
+                                shape=(total_size, total_col))
 
-        return DecVarSub(self.rsome_model, self, indices)
+            self.var_ev_list.append(tr_mat @ var_const)
+            """
 
-    def adapt(self, to):
+            self.var_ev_list.append(var_const[index].to_affine())
 
-        if isinstance(to, Scen):
-            self.evtadapt(to)
-        elif isinstance(to, (RandVar, RandVarSub)):
-            self.affadapt(to)
-        else:
-            raise ValueError('Can not define adaption for the inputs.')
+        if self.sup_model.vars:
 
-    def evtadapt(self, scens):
+            adapt_list = [dvar.rand_adapt if dvar.rand_adapt is not None else
+                          np.zeros((dvar.size, self.sup_model.vars[-1].last))
+                          for dvar in self.dec_vars]
+            depend_mat = np.concatenate(adapt_list, axis=0)
+            if depend_mat.sum() > 0:
 
-        if self.event_adapt is None:
-            self.event_adapt = [list(range(self.rsome_model.num_scen))]
+                num_depend = np.array([int(dvar.rand_adapt.sum())
+                                       if dvar.rand_adapt is not None else 0
+                                       for dvar in self.dec_vars])
+                scen_depend = np.array([len(dvar.event_adapt)
+                                        for dvar in self.dec_vars])
+                total_depend = num_depend @ scen_depend
+                each_depend = num_depend.sum()
+                var_linear = self.ro_model.dvar(total_depend)
+                nz_rows = np.where(depend_mat.flatten())[0]
+                for s in range(num_scen):
+                    start = 0
+                    index = []
+                    total_var = 0
+                    for dvar, num, scen in zip(self.dec_vars,
+                                               num_depend, scen_depend):
+                        if num == 0:
+                            continue
+                        edict = event_dict(dvar.event_adapt)
+                        index.extend(list(start + num * edict[s]
+                                     + np.arange(num, dtype=int)))
+                        start += num * scen
+                        total_var += num
 
-        events = scens.series
-        events = list(events) if isinstance(events, Iterable) else [events]
+                    """
+                    tr_mat = csr_matrix(([1.0] * total_var, index,
+                                         range(total_var + 1)),
+                                        shape=(total_var, total_depend))
+                    depend_affine = tr_mat @ var_linear
+                    
+                    tr_mat = csr_matrix(([1.0] * total_var, range(total_var),
+                                         range(total_var + 1)),
+                                        shape=(total_var, total_var))
+                    """
+                    depend_affine = var_linear[index].to_affine()
 
-        for event in events:
-            if event in self.event_adapt[0]:
-                self.event_adapt[0].remove(event)
+                    nz_cols = depend_affine.linear.indices
+                    last = depend_affine.linear.shape[1]
+
+                    ra_linear = sp.csr_matrix(([1.0] * each_depend,
+                                               (nz_rows, nz_cols)),
+                                              shape=(depend_mat.size, last))
+                    ra_const = np.zeros(depend_mat.shape)
+                    raffine = Affine(self.ro_model.rc_model,
+                                     ra_linear, ra_const)
+                    self.var_ev_list[s] = RoAffine(raffine,
+                                                   self.var_ev_list[s],
+                                                   self.ro_model.sup_model)
+
+        return self.var_ev_list
+
+    def min(self, obj):
+
+        if obj.size > 1:
+            raise ValueError('Incorrect function dimension.')
+
+        self.obj = obj
+        self.sign = 1
+        self.pupdate = True
+        self.dupdate = True
+
+    def max(self, obj):
+
+        if obj.size > 1:
+            raise ValueError('Incorrect function dimension.')
+
+        self.obj = obj
+        self.sign = - 1
+        self.pupdate = True
+        self.dupdate = True
+
+    def minsup(self, obj, ambset):
+
+        if np.prod(obj.shape) > 1:
+            raise ValueError('Incorrect function dimension.')
+
+        self.obj = obj
+        self.obj_ambiguity = ambset
+        self.sign = 1
+        self.pupdate = True
+        self.dupdate = True
+
+    def maxinf(self, obj, ambset):
+
+        if np.prod(obj.shape) > 1:
+            raise ValueError('Incorrect function dimension.')
+
+        self.obj = obj
+        self.obj_ambiguity = ambset
+        self.sign = - 1
+        self.pupdate = True
+        self.dupdate = True
+
+    def st(self, *arg):
+
+        for constr in arg:
+            if isinstance(constr, Iterable):
+                for item in constr:
+                    self.st(item)
             else:
-                raise ValueError('The scenario indexed by {0} '.foramt(event) +
-                                 'is redefined.')
+                self.all_constr.append(constr)
 
-        if not self.event_adapt[0]:
-            self.event_adapt.pop(0)
+    def do_math(self, primal=True):
 
-        self.event_adapt.append(events)
+        if primal:
+            if self.primal is not None and not self.pupdate:
+                return self.primal
+        else:
+            if self.dual is not None and not self.dupdate:
+                return self.dual
 
-    def affadapt(self, rvars):
+        self.ro_model.rc_model.reset()
+        self.rule_var()
 
-        self[:].affadapt(rvars)
+        # Event-wise objective function
+        self.ro_model.min(self.ro_model.rc_model.vars[1][0].to_affine())
+        sign = self.sign
+        constr = (self.dec_vars[0] >= self.obj * sign)
+        if isinstance(constr, DecCvxConstr):
+            ro_constr_list = self.ro_to_roc(constr)
+        elif constr.ctype == 'R':
+            ro_constr_list = self.ro_to_roc(constr)
+        elif constr.ctype == 'E':
+            ro_constr_list = self.dro_to_roc(constr)
+        else:
+            raise SyntaxError('Syntax error.')
 
+        self.ro_model.st(ro_constr_list)
 
-class DecVarSub(VarSub):
+        # Event-wise Constraints
+        for constr in self.all_constr:
+            if isinstance(constr, DecCvxConstr):
+                ro_constr_list = self.ro_to_roc(constr)
+            elif constr.ctype == 'R':
+                ro_constr_list = self.ro_to_roc(constr)
+            elif constr.ctype == 'E':
+                ro_constr_list = self.dro_to_roc(constr)
+            else:
+                raise SyntaxError('Syntax error')
+            self.ro_model.st(ro_constr_list)
 
-    def __init__(self, model, dvars, indices):
+        formula = self.ro_model.do_math(primal)
+        if primal:
+            self.primal = formula
+            self.pupdate = False
+        else:
+            self.dual = formula
+            self.dupdate = False
 
-        super().__init__(dvars, indices)
-        self.rsome_model = model
-        self.event_adapt = dvars.event_adapt
-        self.rand_adapt = dvars.rand_adapt
-        self.dvars = dvars
+        return formula
 
-    def adapt(self, rvars):
+    def ro_to_roc(self, constr):
 
-        if not isinstance(rvars, (RandVar, RandVarSub)):
-            raise TypeError('Affine adaptation requires a random variable.')
+        drule_list = self.rule_var()
+        num_var = self.vt_model.vars[-1].last
 
-        self.affadapt(rvars)
+        ro_constr = []
+        for event in constr.event_adapt:
+            drule = drule_list[event[0]]
+            if isinstance(constr, DecRoConstr):
+                raf_linear, aff_linear = (constr.raffine.linear[:, :num_var],
+                                          constr.affine.linear[:, :num_var])
 
-    def affadapt(self, rvars):
+                row_ind = np.unique(raf_linear.indices)
+                if isinstance(drule, RoAffine):
+                    if len(row_ind) > 0:
+                        if (drule.raffine[row_ind].linear.nnz > 0 or
+                                np.any(drule.raffine[row_ind].const)):
+                            raise SyntaxError('Incorrect affine expressions.')
 
-        if self.rand_adapt is None:
-            sup_model = self.rsome_model.sup_model
-            self.rand_adapt = np.zeros((self.size, sup_model.vars[-1].last),
-                                       dtype=np.int8)
+                    raffine = raf_linear @ drule.affine
+                    raffine = (raffine.reshape(constr.raffine.shape)
+                               + constr.raffine.const)
+                    roaffine = RoAffine(raffine, np.zeros(aff_linear.shape[0]),
+                                        self.sup_model)
+                    roaffine = roaffine + aff_linear@drule
+                    ew_constr = RoConstr(roaffine, constr.sense)
 
-        dec_indices = self.indices
-        dec_indices = dec_indices.reshape((dec_indices.size, 1))
-        rand_indices = rvars.get_ind()
+                elif isinstance(drule, Affine):
+                    raffine = raf_linear @ drule
+                    raffine = (raffine.reshape(constr.raffine.shape)
+                               + constr.raffine.const)
+                    roaffine = RoAffine(raffine, aff_linear@drule,
+                                        self.sup_model)
+                    ew_constr = RoConstr(roaffine, constr.sense)
+                else:
+                    raise TypeError('Unknown type.')
 
-        if self.rand_adapt[dec_indices, rand_indices].any():
-            raise SyntaxError('Redefinition of adaptation is not allowed.')
+            elif isinstance(constr, DecLinConstr):
+                linear = constr.linear
+                const = constr.const
+                roaffine = linear @ drule - const.reshape(const.size)
+                if isinstance(roaffine, RoAffine):
+                    ew_constr = RoConstr(roaffine, constr.sense)
+                elif isinstance(roaffine, Affine):
+                    ew_constr = LinConstr(roaffine.model, roaffine.linear,
+                                          roaffine.const, constr.sense)
+                else:
+                    raise TypeError('Unknown type.')
+            elif isinstance(constr, DecCvxConstr):
+                linear_in = constr.affine_in.linear
+                const_in = constr.affine_in.const
+                aff_in = linear_in@drule + const_in.reshape(const_in.size)
+                if isinstance(aff_in, RoAffine):
+                    if (aff_in.raffine.linear.nnz > 0 or
+                            np.any(aff_in.raffine.const)):
+                        raise SyntaxError('Incorrect convex expressions.')
+                    aff_in = aff_in.affine
+                linear_out = constr.affine_out.linear
+                const_out = constr.affine_out.const
+                aff_out = linear_out@drule + const_out.reshape(const_out.size)
+                if isinstance(aff_out, RoAffine):
+                    if (aff_out.raffine.linear.nnz > 0 or
+                            np.any(aff_out.raffine.const)):
+                        raise SyntaxError('Incorrect convex expressions.')
+                    aff_out = aff_out.affine
+                ew_constr = CvxConstr(aff_in.model, aff_in, aff_out,
+                                      constr.xtype)
+            else:
+                raise TypeError('Unknown constraint type.')
 
-        self.rand_adapt[dec_indices, rand_indices] = 1
-        print(self.rand_adapt)
-        self.dvars.rand_adapt = self.rand_adapt
+            if isinstance(ew_constr, RoConstr):
+                if (ew_constr.raffine.linear.nnz > 0 or
+                        np.any(ew_constr.raffine.const)):
+                    if constr.ambset is None:
+                        if self.obj_ambiguity is None:
+                            raise SyntaxError('The Ambiguity set is '
+                                              'undefined.')
+                        else:
+                            ambset = self.obj_ambiguity
+                            support = ambset.sup_constr[event[0]]
+                    else:
+                        support = constr.ambset.sup_constr[event[0]]
+                    ew_constr = ew_constr.forall(support)
+                else:
+                    ew_constr = LinConstr(ew_constr.affine.model,
+                                          ew_constr.affine.linear,
+                                          ew_constr.affine.const,
+                                          ew_constr.sense)
 
+            ro_constr.append(ew_constr)
 
-class RandVar(Vars):
+        return ro_constr
 
-    def __init__(self, svars, evars):
+    def dro_to_roc(self, constr):
 
-        super().__init__(svars.model, svars.first,
-                         svars.shape, svars.vtype, svars.name, svars.sparray)
-        self.e = evars
+        drule_list = self.rule_var()
+        num_var = self.vt_model.vars[-1].last
+        num_scen = self.num_scen
+        num_rand = self.sup_model.vars[-1].last
 
-    @property
-    def E(self):
+        # Ambiguity set of the constr
+        ambset = constr.ambset if constr.ambset else self.obj_ambiguity
+        if not ambset:
+            raise ValueError('The ambiguity set is undefined.')
+        mixed_support = ambset.mix_support(primal=False)
+        p = ambset.mix_model.vars[0][:num_scen]
+        var_exp_list = ambset.mix_model.vars[1:]
+        num_event = len(ambset.exp_constr)
 
-        return self.e
+        # Constraint components
+        if isinstance(constr, DecLinConstr):
+            linear = constr.linear
+            const = constr.const
+            raffine = None
+        else:
+            linear = constr.affine.linear
+            const = constr.affine.const
+            raffine = constr.raffine
 
-    def __getitem__(self, item):
+        # Standardize constraints
+        ro_constr = []
+        for i in range(linear.shape[0]):
+            alpha = self.ro_model.dvar(num_scen)
+            beta = self.ro_model.dvar((num_rand, num_event))
 
-        item_array = index_array(self.shape)
-        indices = item_array[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ) * self.ndim)
+            left = alpha @ p
+            for j in range(num_event):
+                left += var_exp_list[j][:num_rand] @ beta[:, j]
+            ro_constr.extend((left <= 0).le_to_rc(mixed_support))
 
-        return RandVarSub(self, indices)
+            z = Vars(self.sup_model, 0, (num_rand,), 'C', None)
+            for s in range(num_scen):
+                drule = drule_list[s]
+                left = linear[i, :num_var] @ drule + const[i]
+                if raffine:
+                    if isinstance(drule, RoAffine):
+                        temp = drule.affine
+                    elif isinstance(drule, Affine):
+                        temp = drule
+                    else:
+                        raise TypeError('Incorrect data type.')
+                    row_ind = i*num_rand + np.arange(num_rand, dtype=int)
+                    new_raffine = raffine.linear[row_ind] @ temp
+                    new_raffine = new_raffine.reshape((1, new_raffine.size))
+                    left = RoAffine(new_raffine + raffine.const[i, :num_rand],
+                                    left, constr.rand_model)
+                event_indices = [k for k in range(num_event)
+                                 if s in ambset.exp_constr_indices[k]]
+                if len(event_indices) > 0:
+                    right = alpha[s] + (z @ beta[:, event_indices]).sum()
+                else:
+                    right = alpha[s]
+                inequality = (left <= right)
+                if isinstance(inequality, RoConstr):
+                    ro_constr.append(inequality.forall(ambset.sup_constr[s]))
+                elif isinstance(inequality, LinConstr):
+                    ro_constr.append(inequality)
+                else:
+                    raise TypeError('Incorrect data type.')
 
+        return ro_constr
 
-class RandVarSub(VarSub):
+    def solve(self, solver, display=True, export=False):
+        """
+        Solve the model with the selected solver interface.
 
-    def __init__(self, rvars, indices):
+        Parameters
+        ----------
+            solver : {grb_solver, msk_solver}
+                Solver interface used for model solution.
+            display : bool
+                Display option of the solver interface.
+            export : bool
+                Export option of the solver interface. A standard model file
+                is generated if the option is True.
+        """
 
-        super().__init__(rvars, indices)
-        self.e = VarSub(rvars.e, indices)
+        solution = solver.solve(self.do_math(), display, export)
+        self.ro_model.solution = solution
+        self.ro_model.rc_model.solution = solution
+        self.solution = solution
 
-    @property
-    def E(self):
+    def get(self):
 
-        return self.e
+        if self.solution is None:
+            raise SyntaxError('The model is unsolved or no feasible solution.')
+        return self.sign * self.solution.objval
 
 
 class Ambiguity:
 
-    def __init__(self, model, num_scen, scens):
+    def __init__(self, model):
 
-        model.num_scen = num_scen
         self.model = model
 
-        model.sup_constr = [None] * num_scen
-        model.exp_constr = []
-        model.pro_model = SOCModel(nobj=True, mtype='P')
-        pr = model.pro_model.dvar(num_scen, name='probabilities')
-        self.p = pr
-        model.pro_constr = [pr >= 0, pr.sum() == 1]
+        self.sup_constr = [None] * model.num_scen
+        self.exp_constr = []
+        self.exp_constr_indices = []
+        self.mix_model = None
 
-        self.s = Scen(self, scens, self.p)
+        p = self.model.p
+        self.pro_constr = [p >= 0, sum(p) == 1]
+        self.s = Scen(self, self.model.series_scen, self.model.p)
 
-    def __getitem__(self, indices):
-
-        return self.s[indices]
+        self.update = True
 
     def showevents(self):
 
         num_scen = self.model.num_scen
         table = pd.DataFrame(['undefined']*num_scen,
-                             columns=['support'], index=self.s.series.index)
-        sup_constr = self.model.sup_constr
-        if sup_constr is not None:
-            defined = pd.notnull(pd.Series(sup_constr,
-                                 index=self.s.series.index))
-            table.loc[defined, 'support'] = 'defined'
+                             columns=['support'],
+                             index=self.s.series.index)
+        sup_constr = self.sup_constr
+        defined = pd.notnull(pd.Series(sup_constr,
+                                       index=self.s.series.index))
+        table.loc[defined, 'support'] = 'defined'
 
         # exp_cosntr = self.model.exp_constr
-        exp_constr_indices = self.model.exp_constr_indices
+        exp_constr_indices = self.exp_constr_indices
         count = 0
-        if exp_constr_indices is not None:
-            for indices in exp_constr_indices:
-                column = 'expectation {0}'.format(count)
-                count += 1
-                table[column] = False
-                table.iloc[indices, count] = True
+        for indices in exp_constr_indices:
+            column = 'expectation {0}'.format(count)
+            count += 1
+            table[column] = False
+            table.iloc[indices, count] = True
 
         return table
 
-    def scenarios(self):
+    def __getitem__(self, indices):
 
-        return self.s, self.p
+        return self.s[indices]
 
     @property
     def loc(self):
@@ -289,101 +567,59 @@ class Ambiguity:
 
     def suppset(self, *args):
 
+        self.update = True
         return self.s.suppset(*args)
 
     def exptset(self, *args):
 
+        self.update = True
         return self.s.exptset(*args)
 
     def probset(self, *args):
 
+        self.update = True
         for arg in args:
             if arg.model is not self.model.pro_model:
                 raise ValueError('Constraints are not defined for the ' +
                                  'probability set.')
 
-        pr = self.p
-        self.model.pro_constr = [pr >= 0, pr.sum() == 1] + list(args)
+        pr = self.model.p
+        self.pro_constr = [pr >= 0, pr.sum() == 1] + list(args)
 
+    def mix_support(self, primal=True):
 
-class Scen:
+        if not self.update and self.mix_model is not None:
+            return self.mix_model.do_math(primal)
 
-    def __init__(self, ambset, series, pr):
+        self.model.pro_model.reset()
+        self.model.pro_model.st(self.pro_constr)
+        pro_support = self.model.pro_model.do_math()
+        self.mix_model = SOCModel(nobj=True, mtype='M')
 
-        # super().__init__(data=series.values, index=series.index)
-        self.ambset = ambset
-        self.series = series
-        self.p = pr
+        # Constraints for probabilities
+        p = self.mix_model.dvar(pro_support.linear.shape[1])
+        constr = LinConstr(self.mix_model,
+                           pro_support.linear, pro_support.const,
+                           pro_support.sense)
+        self.mix_model.st(constr)
+        for q in pro_support.qmat:
+            cconstr = ConeConstr(self.mix_model, p, q[1:], p, q[0])
+            self.mix_model.st(cconstr)
 
-    def __str__(self):
+        # Constraints for expectations
+        for econstr, indices in zip(self.exp_constr, self.exp_constr_indices):
+            self.model.exp_model.reset()
+            self.model.exp_model.st(econstr)
+            exp_support = self.model.exp_model.do_math()
+            exp_var = self.mix_model.dvar(exp_support.linear.shape[1])
+            affine = (exp_support.linear @ exp_var
+                      - p[indices].sum() * exp_support.const)
+            constr = LinConstr(affine.model, affine.linear, affine.const,
+                               exp_support.sense)
+            self.mix_model.st(constr)
+            for q in exp_support.qmat:
+                cconstr = ConeConstr(self.mix_model, exp_var, q[1:],
+                                     exp_var, q[0])
+                self.mix_model.st(cconstr)
 
-        return 'Scenario indices: \n' + self.series.__str__()
-
-    def __repr__(self):
-
-        return self.__str__()
-
-    def __getitem__(self, indices):
-
-        indices_p = self.series[indices]
-        return Scen(self.ambset, self.series[indices], self.p[indices_p])
-
-    @property
-    def loc(self):
-
-        return ScenLoc(self)
-
-    @property
-    def iloc(self):
-
-        return ScenILoc(self)
-
-    def suppset(self, *args):
-
-        for arg in args:
-            if arg.model is not self.ambset.model.sup_model:
-                raise ValueError('Constraints are not for this support.')
-
-        # for i in self.series:
-        indices = (self.series if isinstance(self.series, pd.Series)
-                   else [self.series])
-        for i in indices:
-            self.ambset.model.sup_constr[i] = tuple(args)
-
-    def exptset(self, *args):
-
-        for arg in args:
-            if arg.model is not self.ambset.model.exp_model:
-                raise ValueError('Constraints are not defined for ' +
-                                 'expectation sets.')
-
-        self.ambset.model.exp_constr.append(tuple(args))
-        self.ambset.model.exp_constr_indices.append(self.series)
-
-
-class ScenLoc:
-
-    def __init__(self, scens):
-
-        self.scens = scens
-        self.indices = []
-
-    def __getitem__(self, indices):
-
-        indices_s = self.scens.series.loc[indices]
-
-        return Scen(self.scens.ambset, indices_s, self.scens.p[indices_s])
-
-
-class ScenILoc:
-
-    def __init__(self, scens):
-
-        self.scens = scens
-        self.indices = []
-
-    def __getitem__(self, indices):
-
-        indices_s = self.scens.series.iloc[indices]
-
-        return Scen(self.scens.ambset, indices_s, self.scens.p[indices_s])
+        return self.mix_model.do_math(primal)

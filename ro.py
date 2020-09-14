@@ -171,7 +171,10 @@ class Model:
                 if (constr.dec_model is not self.rc_model) or \
                         (constr.rand_model is not self.sup_model):
                     raise ValueError('Models mismatch.')
-                if constr.sense == 0:
+                sense = (constr.sense[0] if isinstance(constr.sense,
+                                                       np.ndarray)
+                         else constr.sense)
+                if sense == 0:
                     self.all_constr.append(constr)
                 else:
                     left = RoAffine(constr.raffine, constr.affine,
@@ -293,14 +296,18 @@ class DecRule:
         if self.depend is None:
             self.depend = np.zeros((self.size,
                                     self.model.sup_model.vars[-1].last),
-                                   dtype=np.int8)
+                                   dtype=int)
 
         indices = rvar.get_ind()
         if ldr_indices is None:
-            ldr_indices = np.arange(self.depend.shape[0], dtype=np.int8)
+            ldr_indices = np.arange(self.depend.shape[0], dtype=int)
         ldr_indices = ldr_indices.reshape((ldr_indices.size, 1))
 
-        if self.depend[ldr_indices, indices].any():
+        row_ind = (ldr_indices *
+                   np.ones(indices.shape, dtype=int)).flatten()
+        col_ind = (np.ones(ldr_indices.shape, dtype=int) * indices).flatten()
+
+        if self.depend[row_ind, col_ind].any():
             raise SyntaxError('Redefinition of adaptation is not allowed.')
 
         self.depend[ldr_indices, indices] = 1
