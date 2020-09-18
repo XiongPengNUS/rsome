@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=f94e31578a91f4a6ec767d2e952b3f25e6fc1208">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <h3 id="integer-programming-for-sudoku">Integer programming for Sudoku</h3>
+
+<p>In this section we will use a <a href="https://en.wikipedia.org/wiki/Sudoku">Sudoku</a> game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in [1,9] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:</p>
+
+<ol>
+  <li>Each cell contains an integer in [1,9].</li>
+  <li>Each row must contain each of the integers in [1,9].</li>
+  <li>Each column must contain each of the integers in [1,9].</li>
+  <li>Each of the nine 3x3 squares with bold outlines must contain each of the integers in [1,9].</li>
+</ol>
+
+<p align="center">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg/1280px-Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg.png" width="200" />
+</p>
+
+<p>The Sudoku game can be considered as a optimization with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \(x_{ijk}\in {0, 1}\), where \(\forall i \in [0, 8]\), \(j \in [0, 8]\), \(k \in [0, 8]\). It equals to one if an integer \(k+1\) is placed in a cell at the \(i\)th row and \(j\)th column. Let \(a_{ij}\) be the known number at the \(i\)th row and \(j\)th column, where \(i\in\mathcal{I}\) and \(j\in\mathcal{J}\), the Sudoku game can be written as the following integer programming problem</p>
+
+\[\begin{align}
+\min~&amp;0 \\
+\text{s.t.}~&amp; \sum\limits_{i=0}^8x_{ijk} = 1, \forall j \in [0, 8], k \in [0, 8] \\
+&amp; \sum\limits_{j=0}^8x_{ijk} = 1, \forall i \in [0, 8], k \in [0, 8] \\
+&amp; \sum\limits_{k=0}^8x_{ijk} = 1, \forall i \in [0, 8], j \in [0, 8] \\
+&amp; x_{ij(a_{ij}-1)} = 1, \forall i \in \mathcal{I}, j \in \mathcal{J} \\
+&amp; \sum\limits_{m=0}^2\sum\limits_{n=0}^2x_{(i+m), (j+m), k} = 1, \forall i \in \{0, 3, 6\}, j \in \{0, 3, 6\}, k \in [0, 8]
+\end{align}\]
+
+<p>In the following code, we are using RSOME to implement such a model.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+
+<span class="c1"># A Sudoku puzzle
+# Zeros represent unknown numbers
+</span><span class="n">puzzle</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">]])</span>
+
+<span class="c1"># Create model and binary decision variables
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'B'</span><span class="p">)</span>
+
+<span class="c1"># Objective is set to be zero
+</span><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>
+
+<span class="c1"># Constraints 1 to 3
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
+         <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
+         <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Constraints 4
+</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">puzzle</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Constraints 5
+</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">j</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="p">:].</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Solve the integer programming problem
+</span><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0017s
+</code></pre></div></div>
+
+<p>The binary variable \(x_{ijk}\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.</p>
+
+<p>The Sudoku problem and the its solution are presented below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">puzzle</span><span class="p">)</span>                   <span class="c1"># Display the Sudoku puzzle
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[[5 3 0 0 7 0 0 0 2]
+ [6 0 0 1 9 5 0 0 0]
+ [0 9 8 0 0 0 0 6 0]
+ [8 0 0 0 6 0 0 0 3]
+ [4 0 0 8 0 3 0 0 1]
+ [7 0 0 0 2 0 0 0 6]
+ [0 6 0 0 0 0 2 8 0]
+ [0 0 0 4 1 9 0 0 5]
+ [0 0 0 0 8 0 0 7 9]]
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">astype</span><span class="p">(</span><span class="s">'int'</span><span class="p">)</span>   <span class="c1"># Retrieve the solution as integers
+</span>
+<span class="k">print</span><span class="p">((</span><span class="n">x_sol</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">))).</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[[5 3 4 6 7 8 9 1 2]
+ [6 7 2 1 9 5 3 4 8]
+ [1 9 8 3 4 2 5 6 7]
+ [8 5 9 7 6 1 4 2 3]
+ [4 2 6 8 5 3 7 9 1]
+ [7 1 3 9 2 4 8 5 6]
+ [9 6 1 5 3 7 2 8 4]
+ [2 8 7 4 1 9 6 3 5]
+ [3 4 5 2 8 6 1 7 9]]
+</code></pre></div></div>
+
+<p>Please note that in defining “Constraints 4”, variables <code class="language-plaintext highlighter-rouge">i</code> and <code class="language-plaintext highlighter-rouge">j</code> represent the row and column indices of the fixed elements, which can be retrieved by the <code class="language-plaintext highlighter-rouge">np.where()</code> function. An alternative approach is to use the boolean indexing of arrays, as the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># An alternative approach for Constraints 4
+</span><span class="n">is_fixed</span> <span class="o">=</span> <span class="n">puzzle</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">is_fixed</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">is_fixed</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The variable <code class="language-plaintext highlighter-rouge">is_fixed</code> is an array with elements to be <code class="language-plaintext highlighter-rouge">True</code> if the numbers are fixed and <code class="language-plaintext highlighter-rouge">False</code> if the numbers are unknown. Such an array with boolean data can also be used as indices, thus defining the same constraints.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

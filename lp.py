@@ -1763,6 +1763,13 @@ class DecAffine(Affine):
         return DecAffine(self.dro_model, expr,
                          self.event_adapt, self.fixed, self.ctype)
 
+    def sum(self, axis=None):
+
+        expr = super().sum(axis)
+
+        return DecAffine(expr.dro_model, expr,
+                         self.event_adapt, self.fixed, self.ctype)
+
     def to_affine(self):
 
         expr = super().to_affine()
@@ -2006,6 +2013,12 @@ class DecRoAffine(RoAffine):
         self.event_adapt = event_adapt
         self.ctype = ctype
 
+    def sum(self, axis=None):
+
+        expr = super().sum(axis)
+
+        return DecRoAffine(expr, self.event_adapt, self.ctype)
+
     def __neg__(self):
 
         expr = super().__neg__()
@@ -2215,7 +2228,10 @@ class Scen:
 
     def __str__(self):
 
-        return 'Scenario indices: \n' + self.series.__str__()
+        if isinstance(self.series, Sized):
+            return 'Scenario indices: \n' + self.series.__str__()
+        else:
+            return 'Scenario index: \n' + self.series.__str__()
 
     def __repr__(self):
 

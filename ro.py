@@ -82,6 +82,23 @@ class Model:
 
     def ldr(self, shape=(1,), name=None):
 
+        """
+        Returns an array with the given shape of linear decision rule
+        variables.
+
+        Parameters
+        ----------
+        shape : int or tuple
+            Shape of the variable array.
+        name : str
+            Name of the variable array
+
+        Returns
+        -------
+        new_var : rsome.ro.DecRule
+            An array of new linear decision rule variables
+        """
+
         new_ldr = DecRule(self, shape, name)
         return new_ldr
 
@@ -317,8 +334,8 @@ class DecRule:
         if self.roaffine is not None:
             return self.roaffine
         else:
-            num_ones = self.depend.sum()
-            if num_ones:
+            if self.depend is not None:
+                num_ones = self.depend.sum()
                 var_coeff = self.model.dvar(num_ones)
                 self.var_coeff = var_coeff
                 row_ind = np.where(self.depend.flatten() == 1)[0]

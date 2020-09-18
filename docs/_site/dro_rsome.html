@@ -1,0 +1,578 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=f94e31578a91f4a6ec767d2e952b3f25e6fc1208">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h1 id="distributionally-robust-optimization">Distributionally robust optimization</h1>
+
+<h2 id="the-general-formulation-for-distributionally-robust-optimization-models-">The general formulation for distributionally robust optimization models <a name="section3.1"></a></h2>
+
+<p>The RSOME package supports optimization models that fit the general formulation below</p>
+
+\[\begin{align}
+\min ~~ &amp;\sup\limits_{\mathbb{P}\in\mathcal{F}_0} \mathbb{E}_{\mathbb{P}} \left\{\pmb{a}_0^T(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_0^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_0(\tilde{s}, \tilde{\pmb{z}})\right\} &amp;&amp;\\
+\text{s.t.} ~~ &amp; \mathbb{E}_{\mathbb{P}}\left\{\pmb{a}_m^T(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_m^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_m(\tilde{s}, \tilde{\pmb{z}})\right\} \leq 0, &amp;&amp; \forall \mathbb{P}\in\mathcal{F}_m, \forall m\in \mathcal{M}_1 \\
+&amp;\pmb{a}_m^T(s, \pmb{z})\pmb{x}(s) + \pmb{b}_m^T\pmb{y}(s, \pmb{z}) + c_m(s, \pmb{z}) \leq 0, &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_{sm}, \forall s \in \mathcal{S}, \forall m\in \mathcal{M}_2 \\
+&amp; \pmb{x}(s) \in \mathcal{X}_s &amp;&amp; s \in \mathcal{S} \\
+&amp; x_i \in \mathcal{A}\left(\mathcal{C}_x^i\right) &amp;&amp; \forall i \in \mathcal{I} \\
+&amp; y_n \in \overline{\mathcal{A}}\left(\mathcal{C}_y^n, \mathcal{J}_y^n\right) &amp;&amp; \forall n \in \mathcal{N}
+\end{align}\]
+
+<p>with \(s\in\mathcal{S}\) the indices of discrete scenarios, \(\pmb{z}\in\mathbb{R}^J\) an array of random variables. Decision variables \(\pmb{x}(s)\in\mathbb{R}^I\), \(\pmb{y}(s, \pmb{z})\in\mathbb{R}^N\), and other problem parameters may vary according to different scenarios. The formulation above minimizes (or maximizes) the worst-case expectation of the objective function over an ambiguity set \(\mathcal{F}_0\), subject to a number of constraints that consider the worst-case expectations or worst-case realizations.</p>
+
+<p>The adaptation of decision \(x_i(\cdot)\) is captured by an event-wise static rule \(\mathcal{A}\left(\mathcal{C}\right)\), expressed as</p>
+
+\[\mathcal{A}\left(\mathcal{C}\right) = \left\{
+x: |\mathcal{S}| \mapsto \mathbb{R} \left|
+\begin{array}
+~x(s)=x^{\mathcal{E}}, \mathcal{E}=\mathcal{H}_{\mathcal{C}}(s) \\
+\text{for some } x^{\mathcal{E}} \in \mathbb{R}
+\end{array}
+\right.
+\right\},\]
+
+<p>where \(\mathcal{C}\) is a collection of mutually exclusive and collectively exhaustive (MECE) events. Note that if \(C\) is a one-event set \(\{\mathcal{S}\}\), the decision \(\pmb{x}\) is non-adaptive because it is fixed for all scenarios.</p>
+
+<p>The adaptation of decision \(y_n(\cdot)\) is captured by an event-wise affine rule \(\overline{\mathcal{A}}\left(\mathcal{C}, \mathcal{J}\right)\), expressed as</p>
+
+\[\overline{\mathcal{A}}\left(\mathcal{C}, \mathcal{J}\right) = \left\{
+y: |\mathcal{S}|\times\mathbb{R}^{|\mathcal{J}|} \mapsto \mathbb{R}
+\left|
+\begin{array}
+~y(s, \pmb{z}) = y^0(s) + \sum\limits_{j\in\mathcal{J}}y_j^z(s)z_j \\
+\text{for some }y^0, y_j^z \in \mathcal{A}\left(\mathcal{C}\right), j\in\mathcal{J}
+\end{array}
+\right.
+\right\},\]
+
+<p>where \(\mathcal{J}\) is a subset of all random variables, so the decision \(y_n(\cdot)\) is affinely adaptive to random variables specified by \(\mathcal{J}\).</p>
+
+<p>The event-wise ambiguity set \(\mathcal{F}_m\) is defined as</p>
+
+\[\begin{align}
+\mathcal{F}_m = \left\{
+\mathbb{P}\in\mathcal{P}_0\left(\mathbb{R}^{J}\times|\mathcal{S}|\right)
+\left|
+\begin{array}
+~\left(\tilde{\pmb{z}}, \tilde{s}\right) \sim \mathbb{P} &amp; \\
+\mathbb{E}_{\mathbb{P}}[\tilde{\pmb{z}}|\tilde{s}\in\mathcal{E}_{km}] \in \mathcal{Q}_{km} &amp; \forall k \in [K] \\
+\mathbb{P}[\tilde{\pmb{z}}\in \mathcal{Z}_{sm}| \tilde{s}=s]=1 &amp; \forall s \in \mathcal{S} \\
+\mathbb{P}[\tilde{s}=s] = p_s &amp; \forall s \in \mathcal{S} \\
+\text{for some } \pmb{p} \in \mathcal{P}_m &amp;
+\end{array}
+\right.
+\right\},~~~
+\forall m \in \mathcal{M}_1
+\end{align},\]
+
+<p>for given events \(\mathcal{E}_{km}\) and closed and convex sets \(\mathcal{Q}_{km}\), \(\mathcal{Z}_{sm}\), and \(\mathcal{P}_m\subseteq\{\pmb{p}\in \mathbb{R}_{++}^{|\mathcal{S}|}|\sum_{s\in\mathcal{S}}p_s=1\}\). The interpretation of each line of the ambiguity set is:</p>
+
+<ol>
+  <li>The array \(\tilde{\pmb{z}}\) of random variables and an random senario index \(\tilde{s}\) follows the distribution \(\mathcal{P}\).</li>
+  <li>The conditional expectation of \(\tilde{\pmb{z}}\) under an event \(\mathcal{E}_{km}\) is defined by a closed and convex set \(\mathcal{Q}_{km}\).</li>
+  <li>The support of \(\tilde{\pmb{z}}\) in each scenario \(s\) is defined by a closed and convex set \(\mathcal{Z}_{sm}\).</li>
+  <li>The probability of each scenario is denoted by a probability variable \(p_s\).</li>
+  <li>The array \(\pmb{p}\) of all probability variables is defined by the set \(\mathcal{P}_m\).</li>
+</ol>
+
+<p>In the remaining part of the guide, we will introduce the RSOME code for for specifying the event-wise recourse adaptation and the ambiguity set.</p>
+
+<h2 id="introduction-to-the-rsomedro-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.dro</code> environment <a name="section3.2"></a></h2>
+
+<p>In general, the <code class="language-plaintext highlighter-rouge">rsome.dro</code> modeling environment is very similar to <code class="language-plaintext highlighter-rouge">rsome.ro</code> discussed in the section <a href="get_start#section1.2">Introduction to the <code>rsome.ro</code> environment</a>, so almost all array operations, indexing and slicing syntax could be applied to <code class="language-plaintext highlighter-rouge">dro</code> models. The unique features of the <code class="language-plaintext highlighter-rouge">dro</code> model mainly come from the scenario-representation of uncertainties and a different way of specifying the event-wise adaptation of decision variables.</p>
+
+<h3 id="models">Models</h3>
+<p>Similar to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> modeling environment, the <code class="language-plaintext highlighter-rouge">dro</code> models are all defined upon <code class="language-plaintext highlighter-rouge">Model</code> type objects, which are created by the constructor <code class="language-plaintext highlighter-rouge">Model()</code> imported from the sub-packaage <code class="language-plaintext highlighter-rouge">rsome.dro</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Model(builtins.object)
+ |  Model(scens=1, name=None)
+ |  
+ |  Returns a model object with the given number of scenarios.
+ |  
+ |  Parameters
+ |  ----------
+ |  scens : int or array-like objects
+ |      The number of scenarios, if it is an integer. It could also be
+ |      an array of scenario indices.
+ |  name : str
+ |      Name of the model
+ |  
+ |  Returns
+ |  -------
+ |  model : rsome.dro.Model
+ |      A model object
+</code></pre></div></div>
+
+<p>It can be seen that the <code class="language-plaintext highlighter-rouge">dro</code> models are different from the <code class="language-plaintext highlighter-rouge">ro</code> models in the first argument <code class="language-plaintext highlighter-rouge">scens</code>, which specifies the scenario-representation of uncertainties. The <code class="language-plaintext highlighter-rouge">scens</code> argument can be specified as an integer, indicating the number of scenarios, or an array of scenario indices, as shown by the following sample code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+
+<span class="n">model1</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>       <span class="c1"># A DRO model with 5 scenarios
+</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model2</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>  <span class="c1"># A DRO model with 5 scenarios: 'sunny', 'cloudy', ...
+</span></code></pre></div></div>
+
+<h3 id="decision-variables">Decision variables</h3>
+
+<p>In the general formulation, decision variables \(\pmb{x}(s)\) are event-wise static and \(\pmb{y}(s, \pmb{z})\) are event-wise affinely adaptive. The <code class="language-plaintext highlighter-rouge">dro</code> modeling environment does not differentiate the two in creating these variables. Both types of decision variables are created by the <code class="language-plaintext highlighter-rouge">dvar()</code> method of the model object, with the same syntax as the <code class="language-plaintext highlighter-rouge">rsome.ro</code> models.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(shape=(1,), vtype='C', name=None) method of rsome.dro.Model instance
+    Returns an array of decision variables with the given shape
+    and variable type.
+
+    Parameters
+    ----------
+    shape : int or tuple
+        Shape of the variable array.
+    vtype : {'C', 'B', 'I'}
+        Type of the decision variables. 'C' means continuous; 'B'
+        means binary, and 'I" means integer.
+    name : str
+        Name of the variable array
+
+    Returns
+    -------
+    new_var : rsome.lp.DecVar
+        An array of new decision variables
+</code></pre></div></div>
+
+<p>All decision variables are created to be non-adaptive at first. The event-wise and affine adaptation can be then specified by the method <code class="language-plaintext highlighter-rouge">adapt()</code> of the variable object. Details of specifying the adaptive decisions are provided in the section <a href="#section3.3">Event-wise recourse adaptations</a></p>
+
+<h3 id="random-variables">Random variables</h3>
+<p>The syntax of creating random variables for a <code class="language-plaintext highlighter-rouge">dro</code> model is exactly the same as the <code class="language-plaintext highlighter-rouge">ro</code> models. You may refer to the section <a href="ro_rsome#section2.2">Random variables and uncertainty sets</a> for more details.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">dro</code> model supports the expectation of random variables, so that we could define the expectation sets \(\mathcal{Q}_{km}\) in the ambiguity set \(\mathcal{F}_m\). This is different from <code class="language-plaintext highlighter-rouge">ro</code> models. The expectation is indicated by the <code class="language-plaintext highlighter-rouge">E()</code> function imported from <code class="language-plaintext highlighter-rouge">rsome</code>, as demonstrated by the sample code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>     <span class="c1"># Import E as the expectation operator
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>  <span class="c1"># z is a 3x5 random variable
+</span>
+<span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span>               <span class="c1"># E(z) is smaller than or equal to zero
+</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span>              <span class="c1"># E(z) is larger than or equal to -1
+</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>         <span class="c1"># Sum of E(z) is zero
+</span></code></pre></div></div>
+
+<h2 id="event-wise-ambiguity-set-">Event-wise ambiguity set <a name="section3.3"></a></h2>
+
+<h3 id="create-an-ambiguity-set">Create an ambiguity set</h3>
+
+<p>Ambiguity sets \(\mathcal{F}_m\) of a <code class="language-plaintext highlighter-rouge">dro</code> model can be created by the <code class="language-plaintext highlighter-rouge">ambiguity()</code> method. The associated scenario indices of the ambiguity set can be accessed by the <code class="language-plaintext highlighter-rouge">s</code> attribute of the ambiguity set object, as shown by the following sample code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>     <span class="c1"># Create a model with 5 scenarios
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>      <span class="c1"># Create an ambiguity set of the model
+</span><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">)</span>                   <span class="c1"># Print scenarios of the model (ambiguity set)
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario indices:
+sunny     0
+cloudy    1
+rainy     2
+windy     3
+snowy     4
+dtype: int64
+</code></pre></div></div>
+<p>In the example above, strings in the list <code class="language-plaintext highlighter-rouge">lables</code> become the labels of the scenario indices. If an integer instead of an array is used to specify the <code class="language-plaintext highlighter-rouge">scens</code> argument of the <code class="language-plaintext highlighter-rouge">Model()</code> constructor, then the labels will be the same as the integer values. Similar to the <code class="language-plaintext highlighter-rouge">pandas.Series</code> data structure, labels of the scenario indices could be any hashable data types.</p>
+
+<p>RSOME supports indexing and slicing of the scenarios via either the labels or the integer-positions, as shown by the following code segments.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>          <span class="c1"># The third scenario
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario index:
+2
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">[</span><span class="s">'rainy'</span><span class="p">])</span>    <span class="c1"># The third scenario
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario index:
+2
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>         <span class="c1"># The first three scenarios
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario indices:
+sunny     0
+cloudy    1
+rainy     2
+dtype: int64
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">[:</span><span class="s">'rainy'</span><span class="p">])</span>   <span class="c1"># The first three scenarios
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario indices:
+sunny     0
+cloudy    1
+rainy     2
+dtype: int64
+</code></pre></div></div>
+
+<p>RSOME is also consistent with the <code class="language-plaintext highlighter-rouge">pandas.Sereis</code> data type in using the <code class="language-plaintext highlighter-rouge">iloc</code> and <code class="language-plaintext highlighter-rouge">loc</code> indexers for accessing label-based or integer-position based indices.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>            <span class="c1"># The first two scenarios via the iloc indexer
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario indices:
+sunny     0
+cloudy    1
+dtype: int64
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">fset</span><span class="p">.</span><span class="n">loc</span><span class="p">[:</span><span class="s">'cloudy'</span><span class="p">])</span>      <span class="c1"># The first two scenarios via the loc indexer
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Scenario indices:
+sunny     0
+cloudy    1
+dtype: int64
+</code></pre></div></div>
+
+<p>The indices of the scenarios are crucial in defining components of the ambiguity set, such as sets \(\mathcal{Q}_{km}\), \(\mathcal{Z}_{sm}\), and \(\mathcal{P}_m\), which will be discussed next.</p>
+
+<h3 id="mathcalq_km-as-the-support-of-conditional-expectations">\(\mathcal{Q}_{km}\) as the support of conditional expectations</h3>
+
+<p>According to the formulation of the ambiguity set \(\mathcal{F}_m\) presented in the section <a href="#section3.1">The general formulation for distributionally robust optimization models</a>, \(\mathcal{Q}_{km}\) is a closed convex set defined as the support of the conditional expectation of random variables under event \(k\), where the event is a collection of scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \(\mathcal{Q}_{km}\) are defined by the <code class="language-plaintext highlighter-rouge">exptset()</code> method. For example, the conditional expectations of the random variable \(\tilde{\pmb{z}}\in\mathbb{R}^3\) are defined as follows</p>
+
+\[\begin{align}
+&amp;\mathbb{E}\left[\tilde{\pmb{z}}|s\in\mathcal{E}_{1}\right] \in \left\{\pmb{z}: \mathbb{R}^3 \left|
+\begin{array}
+~|\pmb{z}| \leq 1 \\
+\|\pmb{z}\|_1 \leq 1.5
+\end{array}
+\right.
+\right\}, &amp;&amp; \mathcal{E}_1 = \{\text{sunny}, \text{cloudy}, \text{rainy}, \text{windy}, \text{snowy}\} \\
+&amp;\mathbb{E}\left[\tilde{\pmb{z}}|s\in\mathcal{E}_{2}\right] \in \left\{\pmb{z}: \mathbb{R}^3 \left|
+\begin{array}
+~\pmb{z} = 0
+\end{array}
+\right.
+\right\}, &amp;&amp; \mathcal{E}_2 = \{\text{sunny}, \text{rainy}, \text{snowy}\},
+\end{align}\]
+
+<p>where the first event \(\mathcal{E}_1\) is a collection of all scenarios, and the second event \(\mathcal{E}_2\) includes scenarios “sunny”, “rainy”, and “snowy”. The supports of the conditional expectations can be specified by the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+             <span class="n">norm</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>   <span class="c1"># The 1st support of conditional expectations
+</span><span class="n">fset</span><span class="p">.</span><span class="n">loc</span><span class="p">[::</span><span class="mi">2</span><span class="p">].</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>     <span class="c1"># The 2nd support of conditional expectations
+</span></code></pre></div></div>
+
+<p>The ambiguity set <code class="language-plaintext highlighter-rouge">fset</code> itself represents the event \(\mathcal{E}_1\) of all scenarios, and the <code class="language-plaintext highlighter-rouge">loc</code> indexer is used to form the event \(\mathcal{E}_2\) with three scenarios to be included. Besides <code class="language-plaintext highlighter-rouge">loc</code>, other indexing and slicing expressions described in the previous section can also be used to construct the events for the support sets of the expectations.</p>
+
+<h3 id="mathcalz_sm-as-the-support-of-random-variables">\(\mathcal{Z}_{sm}\) as the support of random variables</h3>
+
+<p>The support \(\mathcal{Z}_{sm}\) of random variables can be specified by the method <code class="language-plaintext highlighter-rouge">suppset()</code> method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. Take the following supports of random variables \(\tilde{\pmb{z}}\in\mathbb{R}^3\) for example,</p>
+
+\[\begin{align}
+&amp;\mathbb{P}\left[\tilde{\pmb{z}}\in \left\{
+  \left.
+  \pmb{z}: \mathbb{R}^3 \left|
+  \begin{array}
+  ~|\pmb{z}| \leq 1 \\
+  \|\pmb{z}\| \leq 1.5
+  \end{array}
+  \right.
+\right\}
+\right|
+\tilde{s}=s
+\right]=1, &amp;\forall s \in \{\text{sunny}, \text{rainy},  \text{snowy}\} \\
+&amp;\mathbb{P}\left[\tilde{\pmb{z}}\in \left\{
+  \left.
+  \pmb{z}: \mathbb{R}^3 \left|
+  \begin{array}
+  ~\sum\limits_{j=1}^3z_j = 0
+  \end{array}
+  \right.
+\right\}
+\right|
+\tilde{s}=s
+\right]=1, &amp;\forall s \in \{\text{cloudy}, \text{windy}\},
+\end{align}\]
+
+<p>the RSOME code for specifying the supports can be written as follows.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">iloc</span><span class="p">[::</span><span class="mi">2</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># The support of z in scenarios 0, 2, 4
+</span><span class="n">fset</span><span class="p">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">z</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>      <span class="c1"># The support of z in scenarios 1, 3
+</span></code></pre></div></div>
+
+<p>Please note that a valid ambiguity set must have the support sets for all scenarios to be specified. An error message will be given in solving the model if any of the supports are unspecified. RSOME provides a method called <code class="language-plaintext highlighter-rouge">showevents()</code> to display the specified supports for random variables and their expectations in a data frame, in order to help users check their ambiguity set.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">iloc</span><span class="p">[::</span><span class="mi">2</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>  
+<span class="n">fset</span><span class="p">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">z</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>      
+<span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+             <span class="n">norm</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>   
+<span class="n">fset</span><span class="p">.</span><span class="n">loc</span><span class="p">[::</span><span class="mi">2</span><span class="p">].</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>     
+
+<span class="n">fset</span><span class="p">.</span><span class="n">showevents</span><span class="p">()</span>            <span class="c1"># Display how the ambiguity set is specified
+</span></code></pre></div></div>
+
+<div>
+<table border="1" class="dataframe mystyle">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>support</th>
+      <th>expectation 0</th>
+      <th>expectation 1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>sunny</th>
+      <td>defined</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>cloudy</th>
+      <td>defined</td>
+      <td>True</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>rainy</th>
+      <td>defined</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>windy</th>
+      <td>defined</td>
+      <td>True</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>snowy</th>
+      <td>defined</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>As the example above shows, supports for all scenarios have been defined, and there are two supports defined for the conditional expectations.</p>
+
+<h3 id="mathcalp_m-as-the-support-of-scenario-probabilities">\(\mathcal{P}_m\) as the support of scenario probabilities</h3>
+
+<p>In the event-wise ambiguity set, the support of scenario probabilities can also be specified via the calling the method <code class="language-plaintext highlighter-rouge">probset()</code>, as demonstrated by the following sample code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                         <span class="c1"># p is the array of scenario probabilities
+</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mf">0.2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">)</span>   <span class="c1"># Define the support of the array p
+</span></code></pre></div></div>
+
+<p>The scenario probabilities are formatted as an array, which can be accessed via the attribute <code class="language-plaintext highlighter-rouge">p</code> of the model object. Please note that two constraints for probabilities: \(p_s \geq 0\), \(\forall s \in \mathcal{S}\), and \(\sum_{s\in\mathcal{S}}p_s=1\), are already integrated in the ambiguity set, so there is no need to specify them in defining the probability support.</p>
+
+<h3 id="special-cases">Special cases</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">rsome.dro</code> model supports a rather generic event-wise ambiguity set where several different types of support sets are specified separately. In order to make the code more concise and readable, we also provide tools for specifying a few special cases of the generic event-wise ambiguity set.</p>
+
+<p>One of the special cases is the uncertainty set used in conventional robust optimization models. It can be considered as a one-scenario ambiguity set with only the support to be specified. Such an uncertainty set can be specified by the <code class="language-plaintext highlighter-rouge">bou()</code> method, which meaning “budget of uncertainty”, of the model object. For example, the sample code below defines a conventional uncertainty set.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                     <span class="c1"># This is a one-scenario model
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">bou</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>     <span class="c1"># Define an uncertainty set
+</span></code></pre></div></div>
+
+<p>Another special case is the generalized-moment ambiguity set introduced in the paper <a href="http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf">Distributionally robust convex optimization</a>, or the WKS ambiguity, as named after the authors. This is again a one-scenario ambiguity set. It can be defined by the <code class="language-plaintext highlighter-rouge">wks()</code> method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                         <span class="c1"># This is a one-scenario model
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">wks</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">,</span> <span class="n">u</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">,</span>
+                 <span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.5</span><span class="p">)</span>    <span class="c1"># Define a WKS ambiguity set
+</span></code></pre></div></div>
+
+<h3 id="the-worst-case-expectations">The worst-case expectations</h3>
+
+<p>Once the ambiguity sets \(\mathcal{F}_m\) are defined, they can be used to specify the worst-case expectations in the objective function or constraints. The ambiguity set of the objective function can be specified by the <code class="language-plaintext highlighter-rouge">minsup()</code> method, for minimizing, or the <code class="language-plaintext highlighter-rouge">maxinf()</code> method, for maximizing the worst-case expectation of the objective function. The ambiguity set of constraints can be specified by the <code class="language-plaintext highlighter-rouge">forall()</code>, which is similar to <code class="language-plaintext highlighter-rouge">ro</code> models in specifying the uncertainty sets. The sample code below is used to illustrate the worst-case expectations.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                    <span class="c1"># This is a one-scenario model
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">wks</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">,</span> <span class="n">u</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">,</span>
+                 <span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.5</span><span class="p">)</span>          <span class="c1"># Define a WKS ambiguity set
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>     <span class="c1"># Minimizing the worst-case exp. over fset
+</span><span class="n">model</span><span class="p">.</span><span class="n">maxinf</span><span class="p">(</span><span class="n">E</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>     <span class="c1"># Minimizing the worst-case exp. over fset
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">E</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">fset</span><span class="p">))</span> <span class="c1"># The worst-case exp. constraints over fset
+</span></code></pre></div></div>
+
+<p>Similar to the <code class="language-plaintext highlighter-rouge">ro</code> models, if the ambiguity set is unspecified for a constraint, then by default, its ambiguity set of this constriant is the same as the objective function, so the sample code above is equivalent to the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                    <span class="c1"># This is a one-scenario model
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">wks</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">,</span> <span class="n">u</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">,</span>
+                 <span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.5</span><span class="p">)</span>          <span class="c1"># Define a WKS ambiguity set
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>     <span class="c1"># Minimizing the worst-case exp. over fset
+</span><span class="n">model</span><span class="p">.</span><span class="n">maxinf</span><span class="p">(</span><span class="n">E</span><span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>     <span class="c1"># Minimizing the worst-case exp. over fset
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>                <span class="c1"># The worst-case exp. constraints over fset
+</span></code></pre></div></div>
+
+<h2 id="event-wise-recourse-adaptations-">Event-wise recourse adaptations <a name="section3.4"></a></h2>
+
+<p>This section introduces how to specify the event-wise static adaptation \(\mathcal{A}(\mathcal{C})\) and the event-wise affine adaptation \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\). As we mentioned in prior sections, a decision variable is created to be non-adaptive, in the sense that the event set \(\mathcal{C} = \{\mathcal{S}\}\) and the dependent set \(\mathcal{J}=\varnothing\). These two sets can be modified by the <code class="language-plaintext highlighter-rouge">adapt()</code> method of the decision variable object, as demonstrated by the following sample code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">'sunny'</span><span class="p">,</span> <span class="s">'cloudy'</span><span class="p">,</span> <span class="s">'rainy'</span><span class="p">,</span> <span class="s">'windy'</span><span class="p">,</span> <span class="s">'snowy'</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">x</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="s">'sunny'</span><span class="p">)</span>        <span class="c1"># A new event that includes the scenario sunny
+</span><span class="n">x</span><span class="p">.</span><span class="n">adapt</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>         <span class="c1"># A new event that includes scenarios rainy and windy
+</span>
+<span class="n">x</span><span class="p">[:</span><span class="mi">1</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>      <span class="c1"># x[:1] is affinely adaptive to z[:2]
+</span></code></pre></div></div>
+
+<p>In the code segment above, the set \(\mathcal{C}\) is specified as \(\{\{\text{cloudy}, \text{snowy}\}, \{\text{sunny}\}, \{\text{rainy}, \text{windy}\}\}\), and the decision variable <code class="language-plaintext highlighter-rouge">x[0]</code> is affinely adaptive to random variables <code class="language-plaintext highlighter-rouge">z[:2]</code>.</p>
+
+<h2 id="application-examples-">Application examples <a name="section3.5"></a></h2>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

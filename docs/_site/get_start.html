@@ -63,11 +63,27 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h1 id="quickstart-tutorial">Quickstart Tutorial</h1>
+<h1 id="getting-started">Getting Started</h1>
 
-<h2 id="models">Models</h2>
+<p>RSOME is an open-source algebraic library for generic optimization modeling. It is aimed at providing a fast and highly readable modeling environment for the state-of-the-art robust stochastic optimization framework.</p>
 
-<p>In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> toolbox.</p>
+<p>This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. As for the package and solver installation, please refer to our <a href="index">home page</a> for more information.</p>
+
+<h2 id="modeling-environments-">Modeling environments <a name="section1.1"></a></h2>
+
+<p>The current version of RSOME provides several layers of modeling environments, as illustrated by the structure diagram below.</p>
+
+<p><img src="rsome_modules.png" width="600" /></p>
+
+<p>The structure diagram also shows that <code class="language-plaintext highlighter-rouge">lp</code> for linear programs is a bottom layer modeling environment. Problems can be solved by the <code class="language-plaintext highlighter-rouge">lp</code> layer are a subset of the <code class="language-plaintext highlighter-rouge">socp</code> layer. Similarly, problems can be solved by the <code class="language-plaintext highlighter-rouge">socp</code> layer are a subset of the higher level <code class="language-plaintext highlighter-rouge">ro</code> environment. The top layer <code class="language-plaintext highlighter-rouge">dro</code> for distributionally robust optimization is the most general modeling environment, with all lower layers to be special cases of this general framework.</p>
+
+<p>The syntax rules of <code class="language-plaintext highlighter-rouge">lp</code>, <code class="language-plaintext highlighter-rouge">socp</code>, and <code class="language-plaintext highlighter-rouge">ro</code> are very similar, so we would focus on <code class="language-plaintext highlighter-rouge">ro</code> as a more general modeling environment for all robust and deterministic optimization problems. The <code class="language-plaintext highlighter-rouge">dro</code> is specially designed for distributionally robust optimization problems, with the worst-case expectations to be considered in the objective function or constraints. It will be introduced separately.</p>
+
+<h2 id="introduction-to-the-rsomero-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> environment <a name="section1.2"></a></h2>
+
+<h3 id="models">Models</h3>
+
+<p>In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> modeling environment.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>            <span class="c1"># Import the ro modeling tool
 </span>
@@ -76,7 +92,7 @@
 
 <p>The code above defines a new <code>Model</code> object <code>model</code>, with the name specified to be <code>'My model'</code>. You could also leave the name unspecified and the default name is <code>None</code>.</p>
 
-<h2 id="decision-variables">Decision variables</h2>
+<h3 id="decision-variables">Decision variables</h3>
 
 <p>Decision variables of a model can be defined by the method <code>dvar()</code>.</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
@@ -123,7 +139,7 @@ name : str
 </span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    <span class="c1"># Continuous variables as a 4D array
 </span></code></pre></div></div>
 
-<h2 id="affine-operations-and-linear-constraints">Affine operations and linear constraints</h2>
+<h3 id="affine-operations-and-linear-constraints">Affine operations and linear constraints</h3>
 
 <p>Any affine operations of a variable array would create an <code>Affine</code> type object, as shown by the sample code below.</p>
 
@@ -188,7 +204,7 @@ name : str
          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="c1"># Define constraints via comprehension
 </span></code></pre></div></div>
 
-<h2 id="convex-functions-and-convex-constraints">Convex functions and convex constraints</h2>
+<h3 id="convex-functions-and-convex-constraints">Convex functions and convex constraints</h3>
 
 <p>The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.</p>
 
@@ -220,9 +236,9 @@ name : str
 
 <p>Please note that all functions above can only be used in convex functions, so convex function cannot be applied in equality constraints, and these functions cannot be used for concave inequalities, such as <code>abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
 
-<h2 id="standard-form-and-solutions">Standard form and solutions</h2>
+<h2 id="standard-forms-and-solutions-">Standard forms and solutions <a name="section1.3"></a></h2>
 
-<p>As mentioned in the previous sections, an optimization model is transformed into a standard form, which is then solved via the solver interface. The standard form can be retrieved by the <code>do_math()</code> method of the model object.</p>
+<p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code>do_math()</code> method of the model object.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.do_math(primal=True)
     Returns a SOCProg type object representing the standard form
@@ -592,191 +608,10 @@ Running time: 0.0210s
 
 <p>The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.</p>
 
-<h2 id="application-examples">Application examples</h2>
+<h2 id="application-examples-">Application examples <a name="section1.4"></a></h2>
 
-<h3 id="mean-variance-portfolio-optimization">Mean-variance portfolio optimization</h3>
-
-<p>In this example, we consider a portfolio construction problem discussed in <a href="https://www2.isye.gatech.edu/~nemirovs/stablpn.pdf">Robust Solutions of Uncertain Linear Programs</a>. Suppose there are \(n=150\) stocks, and each stock \(i\) has the mean return to be \(p_i\) and the standard deviation to be \(\sigma_i\). Let \(x_i\) be the fraction of wealth invested in stock \(i\), a classic approach is to formulate the problem as a quadratic program, where a mean-variance objective function is maximized:</p>
-
-\[\begin{align}
-\max~&amp;\sum\limits_{i=1}^np_ix_i - \phi \sum\limits_{i=1}^n \sigma_i^2x_i^2 \\
-\text{s.t.}~&amp;\sum\limits_{i=1}^nx_i = 1 \\
-&amp; x_i \geq 1, ~\forall i = 1, 2, ..., n,
-\end{align}\]
-
-<p>with the constant \(\phi=5\), and the means and standard deviations are specified to be</p>
-
-\[\begin{align}
-&amp;p_i = 1.15 + i\frac{0.05}{150} &amp; \forall i = 1, 2, ..., n\\
-&amp;\sigma_i = \frac{0.05}{450}\sqrt{2in(n+1)} &amp; \forall i = 1, 2, ..., n.
-\end{align}\]
-
-<p>The quadratic program can be implemented by the following code segment.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
-
-<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                     <span class="c1"># Number of stocks
-</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                       <span class="c1"># Indices of stocks
-</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                       <span class="c1"># Mean returns
-</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>       <span class="c1"># Standard deviations of returns
-</span><span class="n">phi</span> <span class="o">=</span> <span class="mi">5</span>                                     <span class="c1"># Constant phi
-</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'mv-portfolio'</span><span class="p">)</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                           <span class="c1"># Fractions of investment
-</span>
-<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">phi</span><span class="o">*</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">sigma</span><span class="o">*</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># Mean-variance objective
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                      <span class="c1"># Summation of x is one
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># x is non-negative
-</span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0028s
-</code></pre></div></div>
-
-<p>The optimal investment decision and the mean-variance objective value are shown below.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-
-<span class="n">obj_val</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>               <span class="c1"># The optimal objective value
-</span><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>                     <span class="c1"># The optimal investment decision
-</span>
-<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">x_sol</span><span class="p">,</span>
-         <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">)</span>
-<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Stocks'</span><span class="p">)</span>
-<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Fraction of investment'</span><span class="p">)</span>
-<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
-<span class="k">print</span><span class="p">(</span><span class="s">'Objective value: {0:0.4f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">obj_val</span><span class="p">))</span>
-</code></pre></div></div>
-
-<p><img src="/example_socp.png" alt="" /></p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Objective value: 1.1853
-</code></pre></div></div>
-
-<h3 id="integer-programming-for-sudoku">Integer programming for Sudoku</h3>
-
-<p>In this section we will use a <a href="https://en.wikipedia.org/wiki/Sudoku">Sudoku</a> game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in [1,9] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:</p>
-
-<ol>
-  <li>Each cell contains an integer in [1,9].</li>
-  <li>Each row must contain each of the integers in [1,9].</li>
-  <li>Each column must contain each of the integers in [1,9].</li>
-  <li>Each of the nine 3x3 squares with bold outlines must contain each of the integers in [1,9].</li>
-</ol>
-
-<p align="center">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg/1280px-Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg.png" width="200" />
-</p>
-
-<p>The Sudoku game can be considered as a optimization with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \(x_{ijk}\in {0, 1}\), where \(\forall i \in [0, 8]\), \(j \in [0, 8]\), \(k \in [0, 8]\). It equals to one if an integer \(k+1\) is placed in a cell at the \(i\)th row and \(j\)th column. Let \(a_{ij}\) be the known number at the \(i\)th row and \(j\)th column, where \(i\in\mathcal{I}\) and \(j\in\mathcal{J}\), the Sudoku game can be written as the following integer programming problem</p>
-
-\[\begin{align}
-\min~&amp;0 \\
-\text{s.t.}~&amp; \sum\limits_{i=0}^8x_{ijk} = 1, \forall j \in [0, 8], k \in [0, 8] \\
-&amp; \sum\limits_{j=0}^8x_{ijk} = 1, \forall i \in [0, 8], k \in [0, 8] \\
-&amp; \sum\limits_{k=0}^8x_{ijk} = 1, \forall i \in [0, 8], j \in [0, 8] \\
-&amp; x_{ij(a_{ij}-1)} = 1, \forall i \in \mathcal{I}, j \in \mathcal{J} \\
-&amp; \sum\limits_{m=0}^2\sum\limits_{n=0}^2x_{(i+m), (j+m), k} = 1, \forall i \in \{0, 3, 6\}, j \in \{0, 3, 6\}, k \in [0, 8]
-\end{align}\]
-
-<p>In the following code, we are using RSOME to implement such a model.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
-
-<span class="c1"># A Sudoku puzzle
-# Zeros represent unknown numbers
-</span><span class="n">puzzle</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
-                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">]])</span>
-
-<span class="c1"># Create model and binary decision variables
-</span><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'B'</span><span class="p">)</span>
-
-<span class="c1"># Objective is set to be zero
-</span><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>
-
-<span class="c1"># Constraints 1 to 3
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
-         <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
-         <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="c1"># Constraints 4
-</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">puzzle</span><span class="p">)</span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="c1"># Constraints 5
-</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-        <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">j</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="p">:].</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="c1"># Solve the integer programming problem
-</span><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0017s
-</code></pre></div></div>
-
-<p>The binary variable \(x_{ijk}\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.</p>
-
-<p>The Sudoku problem and the its solution are presented below.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">puzzle</span><span class="p">)</span>                   <span class="c1"># Display the Sudoku puzzle
-</span></code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[[5 3 0 0 7 0 0 0 2]
- [6 0 0 1 9 5 0 0 0]
- [0 9 8 0 0 0 0 6 0]
- [8 0 0 0 6 0 0 0 3]
- [4 0 0 8 0 3 0 0 1]
- [7 0 0 0 2 0 0 0 6]
- [0 6 0 0 0 0 2 8 0]
- [0 0 0 4 1 9 0 0 5]
- [0 0 0 0 8 0 0 7 9]]
-</code></pre></div></div>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">astype</span><span class="p">(</span><span class="s">'int'</span><span class="p">)</span>   <span class="c1"># Retrieve the solution as integers
-</span>
-<span class="k">print</span><span class="p">((</span><span class="n">x_sol</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">))).</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[[5 3 4 6 7 8 9 1 2]
- [6 7 2 1 9 5 3 4 8]
- [1 9 8 3 4 2 5 6 7]
- [8 5 9 7 6 1 4 2 3]
- [4 2 6 8 5 3 7 9 1]
- [7 1 3 9 2 4 8 5 6]
- [9 6 1 5 3 7 2 8 4]
- [2 8 7 4 1 9 6 3 5]
- [3 4 5 2 8 6 1 7 9]]
-</code></pre></div></div>
-
-<p>Please note that in defining “Constraints 4”, variables <code class="language-plaintext highlighter-rouge">i</code> and <code class="language-plaintext highlighter-rouge">j</code> represent the row and column indices of the fixed elements, which can be retrieved by the <code class="language-plaintext highlighter-rouge">np.where()</code> function. An alternative approach is to use the boolean indexing of arrays, as the code below.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># An alternative approach for Constraints 4
-</span><span class="n">is_fixed</span> <span class="o">=</span> <span class="n">puzzle</span> <span class="o">&gt;</span> <span class="mi">0</span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">is_fixed</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">[</span><span class="n">is_fixed</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>The variable <code class="language-plaintext highlighter-rouge">is_fixed</code> is an array with elements to be <code class="language-plaintext highlighter-rouge">True</code> if the numbers are fixed and <code class="language-plaintext highlighter-rouge">False</code> if the numbers are unknown. Such an array with boolean data can also be used as indices, thus defining the same constraints.</p>
+<h3 id="mean-variance-portfolio-optimization"><a href="example_mv_portfolio">Mean-variance portfolio optimization</a></h3>
+<h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer programming for Sudoku</a></h3>
 
 
       </section>

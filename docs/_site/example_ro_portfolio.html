@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=f94e31578a91f4a6ec767d2e952b3f25e6fc1208">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="robust-portfolio-optimization">Robust portfolio optimization</h3>
+
+<p>In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper <a href="https://www.researchgate.net/publication/220244391_The_Price_of_Robustness">The Price of Robustness</a>. The robust model is presented below.</p>
+
+\[\begin{align}
+\max~&amp;\min\limits_{\pmb{z}\in\mathcal{Z}} \sum\limits_{i=1}^n\left(p_i + \delta_iz_i \right)x_i \\
+\text{s.t.}~&amp;\sum\limits_{i=1}^nx_i = 1 \\
+&amp;x_i \geq 0, ~\forall i = 1, 2, ..., n,
+\end{align}\]
+
+<p>where the affine term \(p_i + \delta_iz_i\) represents the random stock return, and the random variable is between \([-1, 1]\), so the stock return has an arbitrary distribution in the interval \([p_i - \delta_i, p_i + \delta_i]\). The uncertainty set \(\mathcal{Z}\) is given below,</p>
+
+\[\begin{align}
+\mathcal{Z} = \left\{\pmb{z}: \|\pmb{z}\|_{\infty} \leq 1, \|\pmb{z}\|_1 \leq \Gamma\right\},
+\end{align}\]
+
+<p>where \(\Gamma\) is the budget of uncertainty parameter. Values of the budget of uncertainty and other parameters are presented as follows.</p>
+
+\[\begin{align}
+&amp; \Gamma = 5 &amp;\\
+&amp; p_i = 1.15 + i\frac{0.05}{150}, &amp;\forall i = 1, 2, ..., n \\
+&amp; \delta_i = \frac{0.05}{450}\sqrt{2in(n+1)}, &amp;\forall i = 1, 2, ..., n.
+\end{align}\]
+
+<p>The robust optimization model can be implemented by the following Python code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                 <span class="c1"># Number of stocks
+</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Indices of stocks
+</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                   <span class="c1"># Mean returns
+</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>   <span class="c1"># Deviations of returns
+</span><span class="n">Gamma</span> <span class="o">=</span> <span class="mi">5</span>                               <span class="c1"># Budget of uncertainty
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>              
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Fractions of investment
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Random variables
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">maxmin</span><span class="p">((</span><span class="n">p</span> <span class="o">+</span> <span class="n">delta</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span><span class="p">,</span>         <span class="c1"># The max-min objective
+</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">infty</span><span class="p">)</span> <span class="o">&lt;=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Uncertainty set constraints
+</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>   <span class="c1"># Uncertainty set constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Summation of x is one
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                        <span class="c1"># x is non-negative
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                        <span class="c1"># Solve the model by Gurobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0038s
+</code></pre></div></div>
+
+<p>The optimal investment decision can be visualized by the diagram below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">obj_val</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>               <span class="c1"># The optimal objective value
+</span><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>                     <span class="c1"># The optimal investment decision
+</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">x_sol</span><span class="p">,</span>
+         <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Stocks'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Fraction of investment'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Objective value: {0:0.4f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">obj_val</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><img src="/example_ro.png" alt="png" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Objective value: 1.1709
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

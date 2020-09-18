@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=f94e31578a91f4a6ec767d2e952b3f25e6fc1208">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="adaptive-robust-optimization-for-a-lot-sizing-problem">Adaptive robust optimization for a lot-sizing problem</h3>
+
+<p>In this example, we consider a lot-sizing problem described in <a href="https://www.fransderuiter.com/papers/BertsimasdeRuiter2016.pdf">Duality in Two-Stage Adaptive Linear Optimization: Faster Computation and Stronger Bounds</a>. In a network with \(N\) stores, the stock allocation \(x_i\) for each store \(i\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \(d\),  is uncertain and assumed to be in a budget uncertainty set</p>
+
+\[\mathcal{U}=\left\{\pmb{d}: \pmb{0}\leq \pmb{d} \leq d_{\text{max}}\pmb{e}, \pmb{e}^T\pmb{d} \leq \Gamma\right\}.\]
+
+<p>After the demand realization of demand is observed, stock \(y_{ij}\) could be transported from store \(i\) to store \(j\) at a cost of \(t_{ij}\), in order to meet all demand. The objective is to minimize the worst-case total cost, expressed as the storage cost (with unit cost \(c_i\) for each store \(i\)) and cost of shifting products from one store to another. Such an adaptive model can be written as</p>
+
+\[\begin{align}
+\min~&amp;\max\limits_{\pmb{d}\in\mathcal{U}} \sum\limits_{i=1}^Nc_ix_i + \sum\limits_{i=1}^N\sum\limits_{j=1}^Nt_{ij}y_{ij}  &amp;&amp; &amp;\\
+\text{s.t.}~&amp;d_i \leq \sum\limits_{j=1}^Ny_{ji} - \sum\limits_{j=1}^Ny_{ij} + x_i, &amp;&amp;i=1, 2, ..., N, &amp; \forall \pmb{d} \in \mathcal{U} \\
+&amp;0\leq x_i\leq K_i, &amp;&amp;i = 1, 2, ..., N &amp;
+\end{align}\]
+
+<p>with \(K_i\) to be the stock capacity at each location, and the adaptive decision $y_{ij}$ to be approximated by the affine decision rule</p>
+
+\[y_{ij}(\pmb{d}) = y_{ij}^0 + \sum\limits_{k=1}^Ny_{ijk}^dd_k.\]
+
+<p>For a test case, we pick $N=30$ locations uniformly at random from \([0, 10]^2\). The shifting cost \(t_{ij}\) is calculated as the Euclidean distance between the stores \(i\) and \(j\), and the storage cost \(c_i\) is assumed to be 20. The maximum demand \(d_{\text{max}}\) and the stock capacity \(K_i\) are both set to be 20 units, and the parameter \(\Gamma\) in the uncertainty set is set to \(20\sqrt{N}\). Such an adaptive model can be implemented by the following Python code using RSOME.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome.grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="c1"># Parameters of the lot-sizing problem
+</span><span class="n">N</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">dmax</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">Gamma</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="n">xy</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+<span class="n">t</span> <span class="o">=</span> <span class="p">((</span><span class="n">xy</span><span class="p">[[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[[</span><span class="mi">0</span><span class="p">]].</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+     <span class="o">+</span> <span class="p">(</span><span class="n">xy</span><span class="p">[[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[[</span><span class="mi">1</span><span class="p">]].</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>      <span class="c1"># Define a model
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>       <span class="c1"># Define location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ldr</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>   <span class="c1"># Define decision rule as the shifted quantities
+</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>       <span class="c1"># Define random variables as the demand
+</span>
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>              <span class="c1"># The decision rule y affinely depends on d
+</span>
+<span class="c1"># Define the uncertainty set
+</span><span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">dmax</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>
+
+<span class="c1"># Define model objective and constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">((</span><span class="n">c</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">t</span><span class="o">*</span><span class="n">y</span><span class="p">).</span><span class="nb">sum</span><span class="p">(),</span> <span class="n">uset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 2.8133s
+</code></pre></div></div>
+
+<p>The solution is displayed by the following figure, with the bubble size indicating the stock allocations at each location.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s">'w'</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s">'k'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">c</span><span class="o">=</span><span class="s">'k'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'equal'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+<p><img src="/lot-sizing_results.png" alt="" /></p>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

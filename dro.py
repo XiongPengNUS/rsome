@@ -13,6 +13,22 @@ from collections import Sized, Iterable
 
 
 class Model:
+    """
+    Returns a model object with the given number of scenarios.
+
+    Parameters
+    ----------
+    scens : int or array-like objects
+        The number of scenarios, if it is an integer. It could also be
+        an array of scenario indices.
+    name : str
+        Name of the model
+
+    Returns
+    -------
+    model : rsome.dro.Model
+        A model object
+    """
 
     def __init__(self, scens=1, name=None):
 
@@ -67,6 +83,25 @@ class Model:
         return rand_var
 
     def dvar(self, shape=(1,), vtype='C', name=None):
+        """
+        Returns an array of decision variables with the given shape
+        and variable type.
+
+        Parameters
+        ----------
+        shape : int or tuple
+            Shape of the variable array.
+        vtype : {'C', 'B', 'I'}
+            Type of the decision variables. 'C' means continuous; 'B'
+            means binary, and 'I" means integer.
+        name : str
+            Name of the variable array
+
+        Returns
+        -------
+        new_var : rsome.lp.DecVar
+            An array of new decision variables
+        """
 
         dec_var = self.vt_model.dvar(shape, vtype, name)
         dec_var = DecVar(self, dec_var, name=name)
@@ -196,16 +231,6 @@ class Model:
                         start += num * scen
                         total_var += num
 
-                    """
-                    tr_mat = csr_matrix(([1.0] * total_var, index,
-                                         range(total_var + 1)),
-                                        shape=(total_var, total_depend))
-                    depend_affine = tr_mat @ var_linear
-                    
-                    tr_mat = csr_matrix(([1.0] * total_var, range(total_var),
-                                         range(total_var + 1)),
-                                        shape=(total_var, total_var))
-                    """
                     depend_affine = var_linear[index].to_affine()
 
                     nz_cols = depend_affine.linear.indices
@@ -528,6 +553,14 @@ class Ambiguity:
         self.s = Scen(self, self.model.series_scen, self.model.p)
 
         self.update = True
+
+    def __str__(self):
+
+        return self.s.__str__()
+
+    def __repr__(self):
+
+        return self.s.__repr__()
 
     def showevents(self):
 

@@ -15,6 +15,10 @@ p, ul, ol, table, pre, dl {
   margin:0 0 20px;
 }
 
+ul.a {
+  list-style-type: circle
+}
+
 h1, h2, h3 {
   line-height:1.1;
 }
@@ -110,7 +114,17 @@ th, td {
   text-align:left;
   padding:5px 10px;
   border-bottom:1px solid #e5e5e5;
+}
+
+td {
   font-size:90%
+}
+
+toc {
+  font-size: 16px;
+  font-weight: bold;
+  padding:5px 10px;
+  text-align:left;
 }
 
 dt {
