@@ -196,7 +196,7 @@ class Model:
             if self.dual is not None and not self.dupdate:
                 return self.dual
 
-            primal = self.do_math()
+            primal = self.do_math(obj=obj)
             if 'B' in primal.vtype or 'I' in primal.vtype:
                 string = '\nIntegers detected.'
                 string += '\nDual of the continuous relaxtion is returned'
@@ -603,6 +603,7 @@ class VarSub(Vars):
 
     def __le__(self, other):
 
+        """
         if not isinstance(other, (Real, np.ndarray)):
             return self.to_affine().__le__(other)
 
@@ -612,9 +613,23 @@ class VarSub(Vars):
         bound_values = upper.values.reshape(upper.values.size)[indices]
 
         return Bounds(upper.model, bound_indices, bound_values, 'U')
+        """
+
+        upper = super().__le__(other)
+        if isinstance(upper, Bounds):
+            indices = self.indices.reshape((self.indices.size, ))
+            bound_indices = upper.indices.reshape((upper.indices.size, ))[indices]
+            bound_values = upper.values.reshape(upper.values.size)[indices]
+
+            return Bounds(upper.model, bound_indices, bound_values, 'U')
+        else:
+            return self.to_affine().__le__(other)
+
 
     def __ge__(self, other):
 
+
+        """
         if not isinstance(other, (Real, np.ndarray)):
             return self.to_affine().__ge__(other)
 
@@ -624,6 +639,17 @@ class VarSub(Vars):
         bound_values = lower.values.reshape((lower.indices.size, ))[indices]
 
         return Bounds(lower.model, bound_indices, bound_values, 'L')
+        """
+
+        lower = super().__ge__(other)
+        if isinstance(lower, Bounds):
+            indices = self.indices.reshape((self.indices.size, ))
+            bound_indices = lower.indices.reshape((lower.indices.size, ))[indices]
+            bound_values = lower.values.reshape((lower.indices.size, ))[indices]
+
+            return Bounds(lower.model, bound_indices, bound_values, 'L')
+        else:
+            return self.to_affine().__ge__(other)
 
 
 class Affine:
@@ -1501,10 +1527,19 @@ class RoConstr:
                                 sense3)
             constr_tuple = constr1, constr2, constr3, bounds
 
+        """
         for qconstr in support.qmat:
             cone_constr = ConeConstr(self.dec_model, dual_var, qconstr[1:],
                                      dual_var, qconstr[0])
             constr_tuple = constr_tuple + (cone_constr,)
+        """
+
+        for n in range(num_constr):
+            for qconstr in support.qmat:
+                indices = np.array(qconstr, dtype=int) + n*size_support
+                cone_constr = ConeConstr(self.dec_model, dual_var, indices[1:],
+                                         dual_var, indices[0])
+                constr_tuple = constr_tuple + (cone_constr,)
 
         return constr_tuple
 

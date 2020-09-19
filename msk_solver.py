@@ -65,7 +65,7 @@ def solve(form, display=True, export=False):
                                     [mosek.variabletype.type_int]
                                     * len(ind_bin))
 
-            task.putcslice(0, numvar, form.obj[0])
+            task.putcslice(0, numvar, form.obj.flatten())
             task.putobjsense(mosek.objsense.minimize)
 
             coo = coo_matrix(form.linear)

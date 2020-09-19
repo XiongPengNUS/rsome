@@ -34,6 +34,15 @@ class Model:
 
         self.name = name
 
+    def reset(self):
+
+        self.all_constr = []
+        self.pupdate = True
+        self.dupdate = True
+        self.primal = None
+        self.dual = None
+        self.rc_model.reset()
+
     def dvar(self, shape=(1,), vtype='C', name=None, aux=False):
         """
         Returns an array of decision variables with the given shape

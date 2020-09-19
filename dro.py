@@ -308,7 +308,7 @@ class Model:
             if self.dual is not None and not self.dupdate:
                 return self.dual
 
-        self.ro_model.rc_model.reset()
+        self.ro_model.reset()
         self.rule_var()
 
         # Event-wise objective function
@@ -494,6 +494,7 @@ class Model:
                     new_raffine = new_raffine.reshape((1, new_raffine.size))
                     left = RoAffine(new_raffine + raffine.const[i, :num_rand],
                                     left, constr.rand_model)
+
                 event_indices = [k for k in range(num_event)
                                  if s in ambset.exp_constr_indices[k]]
                 if len(event_indices) > 0:

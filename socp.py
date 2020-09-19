@@ -139,13 +139,15 @@ class Model(LPModel):
             if self.dual is not None and not self.dupdate:
                 return self.dual
 
-            primal = self.do_math()
+            primal = self.do_math(obj=obj)
 
-            dual_lp = super().do_math(primal=False, refresh=False)
+            dual_lp = super().do_math(primal=False, refresh=False, obj=obj)
             if len(primal.qmat) == 0:
-                return SOCProg(dual_lp.linear, dual_lp.const, dual_lp.sense,
-                               dual_lp.vtype, dual_lp.ub, dual_lp.lb,
-                               [], dual_lp.obj)
+                formula = SOCProg(dual_lp.linear, dual_lp.const, dual_lp.sense,
+                                  dual_lp.vtype, dual_lp.ub, dual_lp.lb,
+                                  [], dual_lp.obj)
+                self.dual = formula
+                return formula
 
             eye_indices = [item for inner in primal.qmat for item in inner]
             lin_indices = [ind for ind in range(primal.linear.shape[1])
