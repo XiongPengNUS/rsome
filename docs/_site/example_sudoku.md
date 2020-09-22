@@ -1,3 +1,5 @@
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
 ### Integer programming for Sudoku
 
 In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in \[1,9\] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:

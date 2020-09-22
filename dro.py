@@ -471,7 +471,10 @@ class Model:
         ro_constr = []
         for i in range(linear.shape[0]):
             alpha = self.ro_model.dvar(num_scen)
-            beta = self.ro_model.dvar((num_rand, num_event))
+            if num_event:
+                beta = self.ro_model.dvar((num_rand, num_event))
+            else:
+                beta = 0
 
             left = alpha @ p
             for j in range(num_event):

@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=f3374f5090001bd5b081bb0953d4bcabbaae1aee">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="a-multi-item-newsvendor-problem-considering-the-wasserstein-ambiguity-set">A multi-item newsvendor problem considering the Wasserstein ambiguity set</h3>
+
+<p>In this example, we consider the multi-item newsvendor problem discussed in the paper <a href="http://www.optimization-online.org/DB_FILE/2017/06/6055.pdf">Robust stochastic optimization made easy with RSOME</a>. This newsvendor problem determines the order quantity \(w_i\) of each of the \(I\) products under a total budget \(d\). The unit selling price and ordering cost for each product item are denoted by \(p_i\) and \(c_i\), respectively. The uncertain demand of each product item is denoted by the random variable \(\tilde{z}_i\). Once the demand realizes, the selling quantity \(y_i\) is expressed as \(\min{x_i, z_i}\), and the newsvendor problem can be written as the following distributionally robust optimization model,</p>
+
+\[\begin{align}
+\min~&amp; -\pmb{p}^T\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] &amp;&amp; \\
+\text{s.t.}~&amp;\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, &amp;&amp; \forall \pmb{z} \in \mathcal{Z} \\
+&amp; \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} &amp;&amp; \forall \pmb{z} \in \mathcal{Z}\\
+&amp; \pmb{c}^T\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
+\end{align}\]
+
+<p>with \(s\) the scenario index, and \(u\) the auxiliary random variable. The recourse decision \(y_i\) is approximated by the decision rule \(y_i(s, \pmb{z}, u)\) which adapts to different scenarios \(s\) and is affinely adaptive to the random variables \(\pmb{z}\) and the auxiliary variable \(u\). The model maximizes the worst-case expectation over a Wasserstein ambiguity set \(\mathcal{F}\), expressed as follows.</p>
+
+\[\begin{align}
+\mathcal{F}(\theta) = \left\{
+\mathbb{P} \in \mathcal{P}_0\left(\mathbb{R}^I\times\mathbb{R}\times [S]\right) \left|
+\begin{array}
+~(\tilde{\pmb{z}}, \tilde{u}, \tilde{s}) \in \mathbb{P} &amp;\\
+\mathbb{E}_{\mathbb{P}}\left[\tilde{u} | \tilde{s} \in [S]\right] \leq \theta &amp; \\
+\mathbb{P}\left[\left.\pmb{0}\leq \pmb{z} \leq \overline{\pmb{z}}, \|\pmb{z} - \hat{\pmb{z}}_s\|_2 \leq u ~\right| \tilde{s} = s\right] = 1, &amp; \forall s \in [S] \\
+\mathbb{P}\left[\tilde{s} = s\right] = \frac{1}{S} &amp;
+\end{array}
+\right.
+\right\}
+\end{align}\]
+
+<p>with \(\theta \geq 0\) the parameter capturing the distance between the distribution \(\mathbb{P}\) and the empirical distribution \(\hat{\pmb{z}}\). In this numerical experiment, parameters of the model and the ambiguity set are specified as follows:</p>
+
+<ul>
+  <li>The number of products: \(I=2\);</li>
+  <li>Sample size: \(S=50\);</li>
+  <li>The unit cost of each product: \(c_i=1\)</li>
+  <li>The unit price of each product: \(p_i\) is randomly generatd from a uniform distribution on \([1, 5]\).</li>
+  <li>The upper bound of demand: the array \(\overline{\pmb{z}}\) is randomly generated from the uniform distribution on \([0, 100]^I\);</li>
+  <li>The sample data of demands: the array \(\hat{\pmb{z}}\in\mathbb{R}^{S\times I}\) is randomly generated from the uniform distribution on \([\pmb{0}, \overline{\pmb{u}}]\);</li>
+  <li>The budget \(d=50 I\);</li>
+  <li>The Wasserstein metric parameter \(\theta=0.01 \min\{\overline{\pmb{z}}\}\).</li>
+</ul>
+
+<p>The RSOME code for implementing the model above is given as follows.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
+
+<span class="c1"># Model and ambiguity set parameters
+</span><span class="n">I</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">S</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">I</span>
+<span class="n">p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+<span class="n">zbar</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+<span class="n">zhat</span> <span class="o">=</span> <span class="n">zbar</span> <span class="o">*</span> <span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">zbar</span><span class="p">.</span><span class="nb">min</span><span class="p">()</span>
+
+<span class="c1"># Modeling with RSOME
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                        <span class="c1"># Create a DRO model with S scenarios
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># Random demand z
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>                            <span class="c1"># Auxiliary random variable
+</span>
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                    <span class="c1">#
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">,</span> <span class="n">z</span> <span class="o">&lt;=</span> <span class="n">zbar</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">zhat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span> <span class="c1"># Define the support for each scenario
+</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">theta</span><span class="p">)</span>                 <span class="c1"># The Wasserstein metric constraint
+</span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                <span class="c1"># An array of scenario probabilities
+</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>                     <span class="c1"># Support of scenario probabilities
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># Define first-stage decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># Define decision rule variables
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>                                  <span class="c1"># y affinely adapts to z
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                  <span class="c1"># y affinely adapts to u
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                              <span class="c1"># y adapts to each scenario s
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>           <span class="c1"># Worst-case expectation over fset
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># Constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>                        <span class="c1"># Constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># Constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">c</span><span class="o">@</span><span class="n">x</span> <span class="o">==</span> <span class="n">d</span><span class="p">)</span>                          <span class="c1"># Constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                            <span class="c1"># Solve the model by Gurobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0271s
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

@@ -534,6 +534,8 @@ x.adapt([2, 3])         # A new event that includes scenarios rainy and windy
 x[:1].adapt(z[:2])      # x[:1] is affinely adaptive to z[:2]
 ```
 
-In the code segment above, the set \\(\mathcal{C}\\) is specified as \\(\\{\\{\text{cloudy}, \text{snowy}\\}, \\{\text{sunny}\\}, \\{\text{rainy}, \text{windy}\\}\\}\\), and the decision variable `x[0]` is affinely adaptive to random variables `z[:2]`. 
+In the code segment above, the set \\(\mathcal{C}\\) is specified as \\(\\{\\{\text{cloudy}, \text{snowy}\\}, \\{\text{sunny}\\}, \\{\text{rainy}, \text{windy}\\}\\}\\), and the decision variable `x[0]` is affinely adaptive to random variables `z[:2]`.
 
 ## Application examples <a name="section3.5"></a>
+### [Distributionally robust optimization for medical appointment scheduling](example_dro_mas)
+### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)

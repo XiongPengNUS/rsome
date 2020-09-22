@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=f3374f5090001bd5b081bb0953d4bcabbaae1aee">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="distributionally-robust-optimization-for-medical-appointment-scheduling">Distributionally robust optimization for medical appointment scheduling</h3>
+
+<p>In this example,  we consider a medical appointment scheduling problem described in <a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>, where \(N\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.</p>
+
+<p>A distributionally robust optimization model presented below is used to minimize the worst-case expected total cost of patients waiting and physician overtime over a partial cross moment ambiguity set.</p>
+
+\[\begin{align}
+\min~&amp;\sup\limits_{\mathbb{P}\in\mathcal{F}}~\mathbb{E}_{\mathbb{P}}\left[\sum\limits_{j=1}^N y_i(\tilde{\pmb{z}}, \tilde{\pmb{u}}) + \gamma y_{N+1}(\tilde{\pmb{z}}, \tilde{\pmb{u}})\right] &amp;&amp; \\
+\text{s.t.}~&amp;y_j(\pmb{z}, \pmb{u}) - y_{j-1}(\pmb{z}, \pmb{u}) + x_{j+1} \geq z_{j-1} &amp;&amp; \forall (\pmb{z}, \pmb{u})\in \mathcal{Z}, ~\forall j \in \{2, 3, ..., N+1\} \\
+&amp;\pmb{y}(\pmb{z}, \pmb{u}) \geq \pmb{0}, &amp;&amp; \forall (\pmb{z}, \pmb{u})\in \mathcal{Z} \\
+&amp;\pmb{x} \geq \pmb{0},~\sum\limits_{j=1}^N x_j \leq T &amp;&amp; \\
+\end{align}\]
+
+<p>with the random variable \(\tilde{z}_j\) representing the uncertain consultation time of each patient. The first-stage decision \(x_j\) denotes the inter-interval time between patient \(j\) to the adjacent patient \(j+1\), for \(j\in[N-1]\), and \(x_N\) is the arrival of the last patient and the scheduled completion time for the physician before overtime commences. The second-stage decision \(y_j\) denotes the waiting time of patient \(j\), with \(i \in [N]\) and \(y_{N+1}\) represents the overtime of the physician. In order to achieve a tractable formulation, it is approximated by the decision rule \(\pmb{y}(\pmb{z}, \pmb{u})\) which affinely adapts to random variables \(\pmb{z}\) and auxiliary variables \(\pmb{u}\).</p>
+
+<p>In this numerical experiment, we consider the lifted form of the partial cross moment ambiguity set \(\mathcal{F}\) given below.</p>
+
+\[\begin{align}
+\mathcal{F} =
+\left\{
+\mathbb{P}\in\mathcal{P}(\mathbb{R}^N\times\mathbb{R}^{N+1})
+\left|
+\begin{array}
+~(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
+\pmb{z} \geq \pmb{0} &amp; \\
+(z_j - \mu_j)^2 \leq u_j, &amp; \forall j \in [N] \\
+(\pmb{1}^T(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
+\mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} &amp; \\
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j, &amp; \forall j \in [N] \\
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_N) \leq \pmb{1}^T\pmb{\Sigma}\pmb{1}
+\end{array}
+\right.
+\right\}.
+\end{align}\]
+
+<p>Values of model and ambiguity set parameters are specified as follows:</p>
+<ul>
+  <li>Number of patients: \(N=8\),</li>
+  <li>Unit cost of physician overtime: \(\gamma=2\),</li>
+  <li>Correlation parameter: \(\alpha=0.25\),</li>
+  <li>Expected consultation times: \(\pmb{\mu}\) are random numbers uniformly distributed between \([30, 60]\),</li>
+  <li>Standard deviations of the consultation times: \(\sigma_j=\mu_j\epsilon_j\), where \(\epsilon_j\) is a random number uniformly distributed between [0, 0.3],</li>
+  <li>The scheduled completion time for the physician before overtime commences:</li>
+</ul>
+
+\[T=\sum\limits_{j=1}^N\mu_j + 0.5\sqrt{\sum\limits_{j=1}^N\sigma_j^2},\]
+
+<ul>
+  <li>Covariance matrix: \(\pmb{\Sigma}\), with its elements to be:</li>
+</ul>
+
+\[\left[\pmb{\Sigma}\right]_{ij} =
+\begin{cases}
+\alpha \sigma_i\sigma_j &amp; \text{if }i\not=j \\
+\sigma_j^2 &amp; \text{otherwise}.
+\end{cases}\]
+
+<p>The RSOME code for implementing this distributionally robust optimization model is given below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
+
+
+<span class="c1"># Model and ambiguity set parameters
+</span><span class="n">N</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">gamma</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">30</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">*</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">mu</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span><span class="o">**</span><span class="mf">0.5</span>
+
+<span class="n">mul</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="n">alpha</span>
+<span class="n">Sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma</span><span class="p">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">mul</span>
+
+<span class="c1"># Modeling with RSOMEb
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                                  <span class="c1"># Define a DRO model
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># Random variable z
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># Auxiliary variable u
+</span>
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">wks</span><span class="p">(</span><span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">square</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                 <span class="n">square</span><span class="p">((</span><span class="n">z</span><span class="o">-</span><span class="n">mu</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>      <span class="c1"># Support of random variables
+</span>                 <span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">,</span> <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">Sigma</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>            <span class="c1"># Support of expectations
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># The first-stage decision
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># The decision rule
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>                                           <span class="c1"># Define affine adaptation
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                           <span class="c1"># Define affine adaptation
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">gamma</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">fset</span><span class="p">)</span>    <span class="c1"># Worst-case expected cost
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">z</span><span class="p">)</span>                    <span class="c1"># Constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                     <span class="c1"># Constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                     <span class="c1"># Constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">T</span><span class="p">)</span>                               <span class="c1"># Constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                                     <span class="c1"># Solve the model by Gurobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0516s
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

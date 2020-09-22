@@ -19,4 +19,12 @@
   <li> <a href="example_ls">Adaptive robust optimization for a lot-sizing problem </a></li>
 </ul>
 </toc></th></tr>
+
+<tr><th><toc>
+<li> Distributionally robust optimizaiton models </li>
+<ul class="a">
+  <li> <a href="example_dro_mas">Distributionally robust optimization for medical appointment scheduling </a></li>
+  <li> <a href="example_dro_nv">A multi-item newsvendor problem considering the Wasserstein ambiguity set </a></li>
+</ul>
+</toc></th></tr>
 </table>
