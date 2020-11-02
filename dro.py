@@ -488,6 +488,7 @@ class Model:
                 if raffine:
                     if isinstance(drule, RoAffine):
                         temp = drule.affine
+                        left = left.affine.reshape(left.shape)
                     elif isinstance(drule, Affine):
                         temp = drule
                     else:
@@ -496,7 +497,8 @@ class Model:
                     new_raffine = raffine.linear[row_ind] @ temp
                     new_raffine = new_raffine.reshape((1, new_raffine.size))
                     left = RoAffine(new_raffine + raffine.const[i, :num_rand],
-                                    left, constr.rand_model)
+                                    left, constr.rand_model) ######################
+                    
 
                 event_indices = [k for k in range(num_event)
                                  if s in ambset.exp_constr_indices[k]]
