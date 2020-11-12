@@ -1956,7 +1956,7 @@ class DecAffine(Affine):
         left = self - other
 
         if isinstance(left, DecAffine):
-            return DecLinConstr(left.model, left.linear, left.const,
+            return DecLinConstr(left.model, left.linear, -left.const,
                                 np.zeros(left.size), left.event_adapt,
                                 left.ctype)
         elif isinstance(left, DecRoAffine):
@@ -1967,7 +1967,7 @@ class DecAffine(Affine):
         left = other - self
 
         if isinstance(left, DecAffine):
-            return DecLinConstr(left.model, left.linear, left.const,
+            return DecLinConstr(left.model, left.linear, -left.const,
                                 np.zeros(left.size), left.event_adapt,
                                 left.ctype)
         elif isinstance(left, DecRoAffine):
@@ -1977,7 +1977,7 @@ class DecAffine(Affine):
 
         left = self - other
         if isinstance(left, DecAffine):
-            return DecLinConstr(left.model, left.linear, left.const,
+            return DecLinConstr(left.model, left.linear, -left.const,
                                 np.ones(left.size), left.event_adapt)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 1, left.event_adapt, left.ctype)

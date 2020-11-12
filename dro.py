@@ -390,10 +390,17 @@ class Model:
                 const = constr.const
                 roaffine = linear @ drule - const.reshape(const.size)
                 if isinstance(roaffine, RoAffine):
-                    ew_constr = RoConstr(roaffine, constr.sense)
+                    if (roaffine.raffine.linear.nnz == 0 and
+                        not roaffine.raffine.const.any()):
+                        ew_constr = LinConstr(roaffine.dec_model,
+                                              roaffine.affine.linear,
+                                              - roaffine.affine.const,
+                                              constr.sense)
+                    else:
+                        ew_constr = RoConstr(roaffine, constr.sense)
                 elif isinstance(roaffine, Affine):
                     ew_constr = LinConstr(roaffine.model, roaffine.linear,
-                                          roaffine.const, constr.sense)
+                                          -roaffine.const, constr.sense)
                 else:
                     raise TypeError('Unknown type.')
             elif isinstance(constr, DecCvxConstr):
@@ -498,7 +505,6 @@ class Model:
                     new_raffine = new_raffine.reshape((1, new_raffine.size))
                     left = RoAffine(new_raffine + raffine.const[i, :num_rand],
                                     left, constr.rand_model) ######################
-                    
 
                 event_indices = [k for k in range(num_event)
                                  if s in ambset.exp_constr_indices[k]]
