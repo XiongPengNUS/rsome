@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=f3374f5090001bd5b081bb0953d4bcabbaae1aee">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=09819b507a210014d888173d39e38e1b74a17140">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -67,7 +67,7 @@
 
 <p>RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.</p>
 
-<p>The current version of RSOME supports models that fit the state-of-the-art robust stochastic optimization framework, proposed in the paper <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R">robust stochastic optimization (RSO) framework</a>. Such robust models can be reformulated into their robust counterparts in forms of linear or second-order cone programming problems, then solved by commercial solvers like Gurobi or MOSEK via the integrated solver interfaces.</p>
+<p>The current version of RSOME supports models that fit the state-of-the-art robust stochastic optimization framework, proposed in the paper <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R">robust stochastic optimization (RSO) framework</a>. The default solver of RSOME is the linear programming (LP) solver <code class="language-plaintext highlighter-rouge">linprog()</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package. We also provide interfaces with commercial solvers like <a href="https://www.gurobi.com/">Gurobi</a> and <a href="https://www.mosek.com/">MOSEK</a> so that we can solve problems with integer variables and second-order cone constraints.</p>
 
 <h2 id="installing-rsome-and-solvers">Installing RSOME and solvers</h2>
 
@@ -79,7 +79,7 @@
 
 <hr />
 
-<p>For the current version, the solution of the optimization model requires the Gurobi or MOSEK solver, and you may follow <a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Installing the Anaconda Python distribution</a> or <a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">Installation - MOSEK optimizer API for Python</a> to complete the solver installation.</p>
+<p>For the current version, the <code class="language-plaintext highlighter-rouge">scipy.optimize.linprog() </code> function is used as a default solver for LP problems. Interfaces with other solvers like Gurobi and MOSEK are also integrated in RSOME, and you may follow <a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Installing the Anaconda Python distribution</a> or <a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">Installation - MOSEK optimizer API for Python</a> to complete the solver installation.</p>
 
 <h2 id="a-linear-programming-example">A linear programming example</h2>
 
@@ -96,7 +96,6 @@
 <p>and it is used to illustrate the steps of solving optimization models.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>                <span class="c1"># Import the ro modeling tool
-</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span> <span class="c1"># Import Gurobi solver interface
 </span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'LP model'</span><span class="p">)</span>        <span class="c1"># Create a Model object
 </span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                    <span class="c1"># Define a decision variable x
@@ -108,12 +107,12 @@
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">)</span>             <span class="c1"># Specify the 3rd constraints
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># Specify the 4th constraints
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># Solve the model with Gurobi
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>                       <span class="c1"># Solve the model by the default solver
 </span></code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0005s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.0426s
 </code></pre></div></div>
 
 <p>In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>rsome.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created by the method <code>dvar()</code>. These variables are then used in specifying the objective function and model constraints. The last step is calling the <code>solve()</code> method to solve the problem via the imported solver interface <code>grb</code>. Once the solution completes, a message showing the solution status and running time will be printed.</p>
@@ -122,7 +121,7 @@ Running time: 0.0005s
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="s">'x:'</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
 <span class="k">print</span><span class="p">(</span><span class="s">'y:'</span><span class="p">,</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
-<span class="k">print</span><span class="p">(</span><span class="s">'Objective:'</span><span class="p">,</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Objective:'</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
 </code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>x: [4.8]

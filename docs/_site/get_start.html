@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=f3374f5090001bd5b081bb0953d4bcabbaae1aee">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=09819b507a210014d888173d39e38e1b74a17140">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -568,13 +568,14 @@ Number of SOC constraints:    1
 
 <p>The standard form of the model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver, display=True, export=False) method of rsome.ro.Model instance
-    Solve the model with the selected solver interface.
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, export=False) method of rsome.ro.Model instance
+Solve the model with the selected solver interface.
 
     Parameters
     ----------
-        solver : {grb_solver, msk_solver}
-            Solver interface used for model solution.
+        solver : {None, lpg_solver, grb_solver, msk_solver}
+            Solver interface used for model solution. Use default solver
+            if solver=None.
         display : bool
             Display option of the solver interface.
         export : bool
@@ -582,7 +583,7 @@ Number of SOC constraints:    1
             is generated if the option is True.
 </code></pre></div></div>
 
-<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version of RSOME provides solver interfaces for Gurobi and MOSEK.</p>
+<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version RSOME uses the default LP solver if  <code class="language-plaintext highlighter-rouge">solver=None</code> or <code class="language-plaintext highlighter-rouge">solver=lpg_solver</code>. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please specify <code class="language-plaintext highlighter-rouge">solver=grb_solver</code> or <code class="language-plaintext highlighter-rouge">solver=msk_solver</code> respectively for activating Gurobi or MOSEK solvers.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>

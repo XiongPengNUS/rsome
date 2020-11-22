@@ -2,10 +2,12 @@ from .socp import Model as SOCModel
 from .lp import LinConstr, Bounds, CvxConstr
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import RoAffine, RoConstr
+from .lp import Solution
 from .subroutines import *
 import numpy as np
 from scipy.sparse import csr_matrix
 from collections import Iterable
+from .lpg_solver import solve as def_sol
 
 
 class Model:
@@ -255,14 +257,15 @@ class Model:
 
         return formula
 
-    def solve(self, solver, display=True, export=False):
+    def solve(self, solver=None, display=True, export=False):
         """
         Solve the model with the selected solver interface.
 
         Parameters
         ----------
-            solver : {grb_solver, msk_solver}
-                Solver interface used for model solution.
+            solver : {None, lpg_solver, grb_solver, msk_solver}
+                Solver interface used for model solution. Use default solver
+                if solver=None.
             display : bool
                 Display option of the solver interface.
             export : bool
@@ -270,8 +273,19 @@ class Model:
                 is generated if the option is True.
         """
 
-        self.rc_model.solution = solver.solve(self.do_math(), display, export)
+        if solver is None:
+            solution = def_sol(self.do_math(), display, export)
+        else:
+            solution = solver.solve(self.do_math(), display, export)
+
+        if isinstance(solution, Solution):
+            self.rc_model.solution = solution
+        else:
+            x = solution.x
+            self.rc_model.solution = Solution(x[0], x, solution.status)
+
         self.solution = self.rc_model.solution
+
 
     def get(self):
 

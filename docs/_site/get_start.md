@@ -539,13 +539,14 @@ dual.show()
 
 The standard form of the model can be solved via calling the `solve()` method of the model object. Arguments of the `solve()` method are listed below.
 
-    solve(solver, display=True, export=False) method of rsome.ro.Model instance
-        Solve the model with the selected solver interface.
+    solve(solver=None, display=True, export=False) method of rsome.ro.Model instance
+    Solve the model with the selected solver interface.
 
         Parameters
         ----------
-            solver : {grb_solver, msk_solver}
-                Solver interface used for model solution.
+            solver : {None, lpg_solver, grb_solver, msk_solver}
+                Solver interface used for model solution. Use default solver
+                if solver=None.
             display : bool
                 Display option of the solver interface.
             export : bool
@@ -554,7 +555,7 @@ The standard form of the model can be solved via calling the `solve()` method of
 
 
 
-It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version of RSOME provides solver interfaces for Gurobi and MOSEK.
+It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version RSOME uses the default LP solver if  `solver=None` or `solver=lpg_solver`. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please specify `solver=grb_solver` or `solver=msk_solver` respectively for activating Gurobi or MOSEK solvers.
 
 ```python
 from rsome import grb_solver as grb

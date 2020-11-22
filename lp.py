@@ -6,6 +6,7 @@ import warnings
 from numbers import Real
 from scipy.sparse import csr_matrix
 from collections import Iterable, Sized
+from .lpg_solver import solve as def_sol
 
 
 class Model:
@@ -256,14 +257,15 @@ class Model:
 
             return formula
 
-    def solve(self, solver, display=True, export=False):
+    def solve(self, solver=None, display=True, export=False):
         """
         Solve the model with the selected solver interface.
 
         Parameters
         ----------
-            solver : {grb_solver, msk_solver}
-                Solver interface used for model solution.
+            solver : {None, lpg_solver, grb_solver, msk_solver}
+                Solver interface used for model solution. Use default solver
+                if solver=None.
             display : bool
                 Display option of the solver interface.
             export : bool
@@ -271,7 +273,16 @@ class Model:
                 is generated if the option is True.
         """
 
-        self.solution = solver.solve(self.do_math(obj=True), display, export)
+        if solver is None:
+            solution = def_sol(self.do_math(obj=True), display, export)
+        else:
+            solution = solver.solve(self.do_math(obj=True), display, export)
+
+        if instance(solution, Solution):
+            self.solution = solution
+        else:
+            x = solution.x
+            self.solution = Solution(x[0], x, solution.status)
 
     def get(self):
 

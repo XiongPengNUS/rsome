@@ -6,6 +6,8 @@ from .lp import RoAffine, RoConstr
 from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr
 from .lp import DecRoConstr
 from .lp import Scen
+from .lp import Solution
+from .lpg_solver import solve as def_sol
 from .subroutines import *
 import numpy as np
 import pandas as pd
@@ -522,14 +524,15 @@ class Model:
 
         return ro_constr
 
-    def solve(self, solver, display=True, export=False):
+    def solve(self, solver=None, display=True, export=False):
         """
         Solve the model with the selected solver interface.
 
         Parameters
         ----------
-            solver : {grb_solver, msk_solver}
-                Solver interface used for model solution.
+            solver : {None, lpg_solver, grb_solver, msk_solver}
+                Solver interface used for model solution. Use default solver
+                if solver=None.
             display : bool
                 Display option of the solver interface.
             export : bool
@@ -537,8 +540,17 @@ class Model:
                 is generated if the option is True.
         """
 
-        solution = solver.solve(self.do_math(), display, export)
-        self.ro_model.solution = solution
+        if solver is None:
+            solution = def_sol(self.do_math(), display, export)
+        else:
+            solution = solver.solve(self.do_math(), display, export)
+
+        if isinstance(solution, Solution):
+            self.ro_model.solution = solution
+        else:
+            x = solution.x
+            self.ro_model.solution = Solution(x[0], x, solution.status)
+
         self.ro_model.rc_model.solution = solution
         self.solution = solution
 
