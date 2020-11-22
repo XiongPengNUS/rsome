@@ -6,6 +6,16 @@ import time
 
 def solve(formula, display=True, export=False):
 
+    if export:
+        warnings.warn('Cannot export model by the linprog() function. ')
+    try:
+        if formula.qmat:
+            warnings.warn('SOC constriants are ignored in the LP solver. ')
+    except:
+        pass
+    if any(np.array(formula.vtype)!='C'):
+        warnings.warn('Integrality constraints are ignored in the LP solver. ')
+
     nv = formula.linear.shape[1]
     vtype = list(formula.vtype)
 
@@ -39,17 +49,14 @@ def solve(formula, display=True, export=False):
         print('Solution status: {0}'.format(res.status))
         print('Running time: {0:0.4f}s'.format(stime))
 
-    if export:
-        warnings.warn('Cannot export model by the linprog() function. ')
-    try:
-        if formula.qmat:
-            warnings.warn('SOC constriants are ignored in the LP solver. ')
-    except:
-        pass
-    if any(np.array(formula.vtype)!='C'):
-        warnings.warn('Integrality constraints are ignored in the LP solver. ')
 
-    # x = res.x
-    # solution = Solution(x[0], x, res.status)
+    if res.status == 1:
+        warnings.warn('Iteration limit reached. ')
+    if res.status == 2:
+        warnings.warn('Problem appears to be infeasible. ')
+    if res.status == 3:
+        warnings.warn('Problem appears to be unbounded. ')
+    if res.status == 4:
+        warnings.warn('Numerical difficulties encountered. ')
 
     return res
