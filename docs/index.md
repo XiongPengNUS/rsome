@@ -74,7 +74,7 @@ print('Objective:', round(model.get(), 2))
     Objective: 22.4
 
 
-The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the Gurobi (or MOSEK) solver. The basic information of the standard form can be retrieved by calling the <code>do_math()</code> method of the RSOME model object.
+The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the integrated solver. The basic information of the standard form can be retrieved by calling the <code>do_math()</code> method of the RSOME model object.
 
 
 ```python

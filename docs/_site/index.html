@@ -129,7 +129,7 @@ y: [2.]
 Objective: 22.4
 </code></pre></div></div>
 
-<p>The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the Gurobi (or MOSEK) solver. The basic information of the standard form can be retrieved by calling the <code>do_math()</code> method of the RSOME model object.</p>
+<p>The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the integrated solver. The basic information of the standard form can be retrieved by calling the <code>do_math()</code> method of the RSOME model object.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">formula</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">()</span>
 <span class="k">print</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
