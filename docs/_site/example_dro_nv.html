@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=09819b507a210014d888173d39e38e1b74a17140">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=afac662a92bf64514cc71b65ca65399fd15bba91">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -69,8 +69,8 @@
 
 \[\begin{align}
 \min~&amp; -\pmb{p}^T\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] &amp;&amp; \\
-\text{s.t.}~&amp;\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, &amp;&amp; \forall \pmb{z} \in \mathcal{Z} \\
-&amp; \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} &amp;&amp; \forall \pmb{z} \in \mathcal{Z}\\
+\text{s.t.}~&amp;\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S] \\
+&amp; \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S]\\
 &amp; \pmb{c}^T\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
 \end{align}\]
 

@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=09819b507a210014d888173d39e38e1b74a17140">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=afac662a92bf64514cc71b65ca65399fd15bba91">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -77,11 +77,11 @@
 &amp;0\leq x_i\leq K_i, &amp;&amp;i = 1, 2, ..., N &amp;
 \end{align}\]
 
-<p>with \(K_i\) to be the stock capacity at each location, and the adaptive decision $y_{ij}$ to be approximated by the affine decision rule</p>
+<p>with \(K_i\) to be the stock capacity at each location, and the adaptive decision \(y_{ij}\) to be approximated by the affine decision rule</p>
 
 \[y_{ij}(\pmb{d}) = y_{ij}^0 + \sum\limits_{k=1}^Ny_{ijk}^dd_k.\]
 
-<p>For a test case, we pick $N=30$ locations uniformly at random from \([0, 10]^2\). The shifting cost \(t_{ij}\) is calculated as the Euclidean distance between the stores \(i\) and \(j\), and the storage cost \(c_i\) is assumed to be 20. The maximum demand \(d_{\text{max}}\) and the stock capacity \(K_i\) are both set to be 20 units, and the parameter \(\Gamma\) in the uncertainty set is set to \(20\sqrt{N}\). Such an adaptive model can be implemented by the following Python code using RSOME.</p>
+<p>For a test case, we pick \(N=30\) locations uniformly at random from \([0, 10]^2\). The shifting cost \(t_{ij}\) is calculated as the Euclidean distance between the stores \(i\) and \(j\), and the storage cost \(c_i\) is assumed to be 20. The maximum demand \(d_{\text{max}}\) and the stock capacity \(K_i\) are both set to be 20 units, and the parameter \(\Gamma\) in the uncertainty set is set to \(20\sqrt{N}\). Such an adaptive model can be implemented by the following Python code using RSOME.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
 <span class="kn">import</span> <span class="nn">rsome.grb_solver</span> <span class="k">as</span> <span class="n">grb</span>

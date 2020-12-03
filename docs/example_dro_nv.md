@@ -7,8 +7,8 @@ In this example, we consider the multi-item newsvendor problem discussed in the 
 $$
 \begin{align}
 \min~& -\pmb{p}^T\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] && \\
-\text{s.t.}~&\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, && \forall \pmb{z} \in \mathcal{Z} \\
-& \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} && \forall \pmb{z} \in \mathcal{Z}\\
+\text{s.t.}~&\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, && \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S] \\
+& \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} && \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S]\\
 & \pmb{c}^T\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
 \end{align}
 $$    
