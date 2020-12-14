@@ -161,7 +161,12 @@ class Model(LPModel):
             lb = dual_lp.lb
             qmat = []
             for qc in primal.qmat:
-                ub[dual_lp.linear[qc[0], :].indices] = 0
+                lbz_index = dual_lp.linear[qc[0], :].indices
+                lb[lbz_index] = 0
+                linear[:, lbz_index] = - linear[:, lbz_index]
+                obj[lbz_index] = - obj[lbz_index]
+                # ub[dual_lp.linear[qc[0], :].indices] = 0
+                ################## To update in the future
                 qmat.append(list(dual_lp.linear[qc, :].indices))
 
             formula = SOCProg(linear, const, sense,

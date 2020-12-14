@@ -281,8 +281,11 @@ class Model:
         if isinstance(solution, Solution):
             self.rc_model.solution = solution
         else:
-            x = solution.x
-            self.rc_model.solution = Solution(x[0], x, solution.status)
+            if solution is None:
+                self.rc_model.solution = None
+            else:
+                x = solution.x
+                self.rc_model.solution = Solution(x[0], x, solution.status)
 
         self.solution = self.rc_model.solution
 

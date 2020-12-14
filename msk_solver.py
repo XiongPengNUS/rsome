@@ -50,6 +50,7 @@ def solve(form, display=True, export=False):
                 task.putvarboundlist(ind_ra,
                                      [mosek.boundkey.ra] * len(ind_ra),
                                      form.lb[ind_ra], form.ub[ind_ra])
+
             if ind_fr.size:
                 task.putvarboundlist(ind_fr,
                                      [mosek.boundkey.fr] * len(ind_fr),
