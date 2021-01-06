@@ -1525,7 +1525,11 @@ class RoConstr:
                             sense2)
 
         index_pos = (support.ub == 0)
-        bounds = (dual_var[:, index_pos] <= 0)
+        if any(index_pos):
+            bounds = (dual_var[:, index_pos] <= 0)
+        index_neg = (support.lb == 0)
+        if any(index_neg):
+            bounds = (dual_var[:, index_neg] >= 0)
 
         if num_rand == support.linear.shape[0]:
             constr_tuple = constr1, constr2, bounds
