@@ -112,7 +112,7 @@ def solve(form, display=True, export=False):
                 task.writedata("out.mps")
 
             if solsta in [mosek.solsta.optimal, mosek.solsta.integer_optimal]:
-                solution = Solution(xx[0], xx, solsta)
+                solution = Solution(xx @ form.obj.flatten(), xx, solsta)
             else:
                 warnings.warn('No feasible solution can be found.')
                 solution = None

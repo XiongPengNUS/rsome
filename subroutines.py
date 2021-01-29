@@ -2,6 +2,18 @@ import numpy as np
 import scipy.sparse as sp
 from numbers import Real
 from scipy.sparse import csr_matrix
+from collections import Iterable
+
+
+def flat(a_list):
+    flat_list = []
+    for item in a_list:
+        if isinstance(item, Iterable):
+            flat_list.extend(flat(item))
+        else:
+            flat_list.append(item)
+
+    return flat_list
 
 
 def sparse_mul(ndarray, affine):

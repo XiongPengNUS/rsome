@@ -11,6 +11,7 @@ from .lpg_solver import solve as def_sol
 from .subroutines import *
 import numpy as np
 import pandas as pd
+import warnings
 from collections import Sized, Iterable
 
 
@@ -309,6 +310,9 @@ class Model:
         else:
             if self.dual is not None and not self.dupdate:
                 return self.dual
+            else:
+                self.do_math(primal=True)
+                return self.ro_model.do_math(False)
 
         self.ro_model.reset()
         self.rule_var()
@@ -359,6 +363,19 @@ class Model:
         for event in constr.event_adapt:
             drule = drule_list[event[0]]
             if isinstance(constr, DecRoConstr):
+                is_equal = (all(constr.sense) if
+                            isinstance(constr.sense, Iterable) else
+                            constr.sense == 1)
+                if is_equal:
+                    left = DecRoConstr(constr.roaffine, 0,
+                                       constr.event_adapt, constr.ctype)
+                    left.ambset = constr.ambset
+                    right = DecRoConstr(-constr.roaffine, 0,
+                                        constr.event_adapt, constr.ctype)
+                    right.ambset = constr.ambset
+
+                    return self.ro_to_roc(left) + self.ro_to_roc(right)
+
                 raf_linear, aff_linear = (constr.raffine.linear[:, :num_var],
                                           constr.affine.linear[:, :num_var])
 
@@ -374,14 +391,18 @@ class Model:
                                + constr.raffine.const)
                     roaffine = RoAffine(raffine, np.zeros(aff_linear.shape[0]),
                                         self.sup_model)
-                    roaffine = roaffine + aff_linear@drule
+                    this_const = constr.affine.const
+                    this_const = this_const.flatten()
+                    roaffine = roaffine + aff_linear@drule + this_const
                     ew_constr = RoConstr(roaffine, constr.sense)
 
                 elif isinstance(drule, Affine):
                     raffine = raf_linear @ drule
                     raffine = (raffine.reshape(constr.raffine.shape)
                                + constr.raffine.const)
-                    roaffine = RoAffine(raffine, aff_linear@drule,
+                    this_const = constr.affine.const
+                    this_const = this_const.flatten()
+                    roaffine = RoAffine(raffine, aff_linear@drule + this_const,
                                         self.sup_model)
                     ew_constr = RoConstr(roaffine, constr.sense)
                 else:
@@ -392,6 +413,19 @@ class Model:
                 const = constr.const
                 roaffine = linear @ drule - const.reshape(const.size)
                 if isinstance(roaffine, RoAffine):
+                    is_equal = (all(constr.sense) if
+                                isinstance(constr.sense, Iterable) else
+                                constr.sense == 1)
+                    if is_equal == 1:
+
+                        left = DecLinConstr(constr.model,
+                                            constr.linear, constr.const, 0,
+                                            constr.event_adapt, constr.ctype)
+                        right = DecLinConstr(constr.model,
+                                             -constr.linear, -constr.const, 0,
+                                             constr.event_adapt, constr.ctype)
+                        return self.ro_to_roc(left) + self.ro_to_roc(right)
+
                     if (roaffine.raffine.linear.nnz == 0 and
                         not roaffine.raffine.const.any()):
                         ew_constr = LinConstr(roaffine.dec_model,
@@ -438,7 +472,11 @@ class Model:
                             ambset = self.obj_ambiguity
                             support = ambset.sup_constr[event[0]]
                     else:
-                        support = constr.ambset.sup_constr[event[0]]
+                        ambset = constr.ambset
+                        if isinstance(ambset, Ambiguity):
+                            support = constr.ambset.sup_constr[event[0]]
+                        elif isinstance(ambset, Iterable):
+                            support = ambset
                     ew_constr = ew_constr.forall(support)
                 else:
                     ew_constr = LinConstr(ew_constr.affine.model,
@@ -496,17 +534,19 @@ class Model:
                 left = linear[i, :num_var] @ drule + const[i]
                 if raffine:
                     if isinstance(drule, RoAffine):
+                        extra = left.raffine
                         temp = drule.affine
                         left = left.affine.reshape(left.shape)
                     elif isinstance(drule, Affine):
+                        extra = 0
                         temp = drule
                     else:
                         raise TypeError('Incorrect data type.')
                     row_ind = i*num_rand + np.arange(num_rand, dtype=int)
                     new_raffine = raffine.linear[row_ind] @ temp
                     new_raffine = new_raffine.reshape((1, new_raffine.size))
-                    left = RoAffine(new_raffine + raffine.const[i, :num_rand],
-                                    left, constr.rand_model) ######################
+                    new_raffine += raffine.const[i, :num_rand] + extra
+                    left = RoAffine(new_raffine, left, constr.rand_model) #####
 
                 event_indices = [k for k in range(num_event)
                                  if s in ambset.exp_constr_indices[k]]
@@ -548,8 +588,11 @@ class Model:
         if isinstance(solution, Solution):
             self.ro_model.solution = solution
         else:
-            x = solution.x
-            self.ro_model.solution = Solution(x[0], x, solution.status)
+            if not solution:
+                warnings.warn('No feasible solutions can be found.')
+            else:
+                x = solution.x
+                self.ro_model.solution = Solution(x[0], x, solution.status)
 
         self.ro_model.rc_model.solution = solution
         self.solution = solution

@@ -42,8 +42,17 @@ class Model:
     def dvar(self, shape=(1,), vtype='C', name=None, aux=False):
 
         if not isinstance(shape, tuple):
-            shape = (int(shape), )
-        new_var = Vars(self, self.last, shape, vtype, name)
+            shape = (shape, )
+
+        new_shape = ()
+        for item in shape:
+            if not isinstance(item, (int, np.int8, np.int16,
+                                     np.int32, np.int64)):
+                raise TypeError('Shape dimensions must be int type!')
+            new_shape += (item, )
+
+        new_var = Vars(self, self.last, new_shape, vtype, name)
+
         if not aux:
             self.vars.append(new_var)
         else:
@@ -160,6 +169,8 @@ class Model:
                                   self.lin_constr + self.aux_constr]
 
                     sense_list = [item.sense
+                                  if isinstance(item.sense, np.ndarray) else
+                                  np.array([item.sense])
                                   for item in self.lin_constr
                                   + self.aux_constr]
 
@@ -281,8 +292,11 @@ class Model:
         if instance(solution, Solution):
             self.solution = solution
         else:
-            x = solution.x
-            self.solution = Solution(x[0], x, solution.status)
+            if not solution:
+                warnings.warn('No feasible solutions can be found.')
+            else:
+                x = solution.x
+                self.solution = Solution(x[0], x, solution.status)
 
     def get(self):
 
@@ -575,7 +589,7 @@ class VarSub(Vars):
     def get_ind(self):
 
         indices_all = super().get_ind()
-        return indices_all[self.indices]
+        return indices_all[self.indices].flatten()
 
     def __getitem__(self, item):
 
@@ -1233,6 +1247,8 @@ class RoAffine:
 
     def __add__(self, other):
 
+        if isinstance(other, (DecRule, DecRuleSub)):
+            return self.__add__(other.to_affine())
         if isinstance(other, RoAffine):
             if other.shape != self.shape:
                 left = self + np.zeros(other.shape)
@@ -1418,6 +1434,11 @@ class RoAffine:
         right = other - self
         return RoConstr(right, sense=0)
 
+    def __eq__(self, other):
+
+        left = self - other
+        return RoConstr(left, sense=1)
+
 
 class LinConstr:
     """
@@ -1524,15 +1545,19 @@ class RoConstr:
                             -left.const.reshape(num_rc_constr),
                             sense2)
 
+        bounds = ()
         index_pos = (support.ub == 0)
         if any(index_pos):
-            bounds = (dual_var[:, index_pos] <= 0)
+            bounds += (dual_var[:, index_pos] <= 0, )
         index_neg = (support.lb == 0)
         if any(index_neg):
-            bounds = (dual_var[:, index_neg] >= 0)
+            bounds += (dual_var[:, index_neg] >= 0, )
 
         if num_rand == support.linear.shape[0]:
-            constr_tuple = constr1, constr2, bounds
+            constr_tuple = constr1, constr2
+            constr_tuple += () if bounds is None else (bounds,)
+            # constr_tuple = ((constr1, constr2) if bounds is None else
+            #                     (constr1, constr2, bounds))
         else:
             left = dual_var @ support.linear[num_rand:].T
             sense3 = np.tile(support.sense[num_rand:], num_constr)
@@ -1540,14 +1565,10 @@ class RoConstr:
             constr3 = LinConstr(left.model, left.linear,
                                 left.const.reshape(num_rc_constr),
                                 sense3)
-            constr_tuple = constr1, constr2, constr3, bounds
-
-        """
-        for qconstr in support.qmat:
-            cone_constr = ConeConstr(self.dec_model, dual_var, qconstr[1:],
-                                     dual_var, qconstr[0])
-            constr_tuple = constr_tuple + (cone_constr,)
-        """
+            # constr_tuple= ((constr1, constr2, constr3) if bounds is None else
+            #                 (constr1, constr2, constr3, bounds))
+            constr_tuple = constr1, constr2, constr3
+            constr_tuple += () if bounds is None else (bounds,)
 
         for n in range(num_constr):
             for qconstr in support.qmat:
@@ -1976,6 +1997,8 @@ class DecAffine(Affine):
                                 left.ctype)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 0, left.event_adapt, left.ctype)
+        elif isinstance(left, DecConvex):
+            return DecCvxConstr(left, left.event_adapt)
 
     def __ge__(self, other):
 
@@ -1987,6 +2010,8 @@ class DecAffine(Affine):
                                 left.ctype)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 0, left.event_adapt, left.ctype)
+        elif isinstance(left, DecConvex):
+            return DecCvxConstr(left, left.event_adapt)
 
     def __eq__(self, other):
 
@@ -2200,6 +2225,254 @@ class DecRoConstr(RoConstr):
 
         return self
 
+class DecRule:
+
+    __array_priority__ = 102
+
+    def __init__(self, model, shape=(1,), name=None,):
+
+        self.model = model
+        self.name = name
+        self.fixed = model.dvar(shape, 'C')
+        self.shape = self.fixed.shape
+        self.size = np.prod(self.shape)
+        self.depend = None
+        self.roaffine = None
+        self.var_coeff = None
+
+    def __str__(self):
+
+        suffix = 's' if np.prod(self.shape) > 1 else ''
+
+        string = '' if self.name is None else self.name + ': '
+        string += 'x'.join([str(size) for size in self.shape]) + ' '
+        string += 'decision rule variable' + suffix
+
+        return string
+
+    def __repr__(self):
+
+        return self.__str__()
+
+    def reshape(self, shape):
+
+        return self.to_affine().reshape(shape)
+
+    def adapt(self, rvar, ldr_indices=None):
+
+        if self.roaffine is not None:
+            raise SyntaxError('Adaptation must be defined ' +
+                              'before used in constraints')
+
+        if self.depend is None:
+            self.depend = np.zeros((self.size,
+                                    self.model.sup_model.vars[-1].last),
+                                   dtype=int)
+
+        indices = rvar.get_ind()
+        if ldr_indices is None:
+            ldr_indices = np.arange(self.depend.shape[0], dtype=int)
+        ldr_indices = ldr_indices.reshape((ldr_indices.size, 1))
+
+        row_ind = (ldr_indices *
+                   np.ones(indices.shape, dtype=int)).flatten()
+        col_ind = (np.ones(ldr_indices.shape, dtype=int) * indices).flatten()
+
+        if self.depend[row_ind, col_ind].any():
+            raise SyntaxError('Redefinition of adaptation is not allowed.')
+
+        self.depend[ldr_indices, indices] = 1
+
+    def to_affine(self):
+
+        if self.roaffine is not None:
+            return self.roaffine
+        else:
+            if self.depend is not None:
+                num_ones = self.depend.sum()
+                var_coeff = self.model.dvar(num_ones)
+                self.var_coeff = var_coeff
+                row_ind = np.where(self.depend.flatten() == 1)[0]
+                col_ind = var_coeff.get_ind()
+                num_rand = self.model.sup_model.vars[-1].last
+                row = self.size * num_rand
+                col = self.model.rc_model.vars[-1].last
+                raffine_linear = csr_matrix((np.ones(num_ones),
+                                             (row_ind, col_ind)),
+                                            shape=(row, col))
+                raffine = Affine(self.model.rc_model,
+                                 raffine_linear,
+                                 np.zeros((self.size, num_rand)))
+                roaffine = RoAffine(raffine, np.zeros(self.shape),
+                                    self.model.sup_model)
+                self.roaffine = self.fixed + roaffine
+
+            else:
+                self.roaffine = self.fixed.to_affine()
+
+            return self.roaffine
+
+    def __getitem__(self, item):
+
+        item_array = index_array(self.shape)
+        indices = item_array[item]
+        if not isinstance(indices, np.ndarray):
+            indices = np.array([indices]).reshape((1, ) * indices.ndim)
+
+        return DecRuleSub(self, indices, item)
+
+    def __neg__(self):
+
+        return - self.to_affine()
+
+    def __add__(self, other):
+
+        return self.to_affine().__add__(other)
+
+    def __sub__(self, other):
+
+        return self.to_affine().__sub__(other)
+
+    def __rsub__(self, other):
+
+        return self.to_affine().__rsub__(other)
+
+    def __mul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__mul__(other)
+
+    def __rmul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__rmul__(other)
+
+    def __matmul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__matmul__(other)
+
+    def __rmatmul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__rmatmul__(other)
+
+    def sum(self, axis=None):
+
+        return self.to_affine().sum(axis)
+
+    def __le__(self, other):
+
+        return (self - other).__le__(0)
+
+    def __ge__(self, other):
+
+        return (other - self).__le__(0)
+
+    def __eq__(self, other):
+
+        return (self - other).__eq__(0)
+
+    def get(self, rvar=None):
+
+        if rvar is None:
+            return self.fixed.get()
+        else:
+            if rvar.model.mtype != 'S':
+                ValueError('The input is not a random variable.')
+            ldr_coeff = np.zeros((self.size,
+                                  self.model.rc_model.vars[-1].last))
+            rand_ind = rvar.get_ind()
+            row_ind, col_ind = np.where(self.depend == 1)
+            ldr_coeff[row_ind, col_ind] = self.var_coeff.get()
+
+            size = rvar.to_affine().size
+            return ldr_coeff[:, rand_ind].reshape((size, ) + self.shape)
+
+
+class DecRuleSub:
+
+    __array_priority__ = 105
+
+    def __init__(self, dec_rule, indices, item):
+
+        self.dec_rule = dec_rule
+        self.shape = indices.shape
+        self.indices = indices.flatten()
+        self.item = item
+
+    def adapt(self, rvar):
+
+        self.dec_rule.adapt(rvar, self.indices)
+
+    def to_affine(self):
+
+        roaffine = self.dec_rule.to_affine()
+        raffine = roaffine.raffine[self.indices, :]
+        affine = roaffine.affine[self.item]
+
+        return RoAffine(raffine, affine, self.dec_rule.model.sup_model)
+
+    def __neg__(self):
+
+        return - self.to_affine()
+
+    def __add__(self, other):
+
+        return self.to_affine().__add__(other)
+
+    def __sub__(self, other):
+
+        return self.to_affine().__sub__(other)
+
+    def __rsub__(self, other):
+
+        return self.to_affine().__rsub__(other)
+
+    def __mul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__mul__(other)
+
+    def __rmul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__rmul__(other)
+
+    def __matmul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__matmul__(other)
+
+    def __rmatmul__(self, other):
+
+        check_numeric(other)
+
+        return self.to_affine().__rmatmul__(other)
+
+    def sum(self, axis=None):
+
+        return self.to_affine().sum(axis)
+
+    def __le__(self, other):
+
+        return (self - other).__le__(0)
+
+    def __ge__(self, other):
+
+        return (other - self).__le__(0)
+
+    def __eq__(self, other):
+
+        return (self - other).__eq__(0)
+
 
 class LinProg:
     """
@@ -2303,6 +2576,8 @@ class Scen:
         return ScenILoc(self)
 
     def suppset(self, *args):
+
+        args = flat(args)
 
         for arg in args:
             if arg.model is not self.ambset.model.sup_model:

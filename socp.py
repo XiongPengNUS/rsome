@@ -162,6 +162,7 @@ class Model(LPModel):
             qmat = []
             for qc in primal.qmat:
                 lbz_index = dual_lp.linear[qc[0], :].indices
+                ub[lbz_index] = - lb[lbz_index]
                 lb[lbz_index] = 0
                 linear[:, lbz_index] = - linear[:, lbz_index]
                 obj[lbz_index] = - obj[lbz_index]
