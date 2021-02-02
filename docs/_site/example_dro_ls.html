@@ -1,0 +1,330 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=64823e0556894d510f8ae490a2eb6e6d02c1e948">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="distributionally-robust-optimization-approaches-for-a-lot-sizing-problem">Distributionally robust optimization approaches for a lot-sizing problem</h3>
+
+<p>In this section, we are using RSOME to replicate numerical case studies presented in <a href="https://arxiv.org/pdf/1907.07142.pdf">Two-Stage Sample Robust Optimization</a>. A capacitated network with \(n\) locations is considered, where each location \(i\) has an unknown demand \(d_i\), and the demand can be satisfied by the existing local stock \(x_i\) or by transporting an amount \(y_{ij}\) of units from another location \(j\), which is determined after the demand is realized. Such a lot-sizing problem can be written as the following two-stage formulation,</p>
+
+\[\begin{align}
+\min~&amp; \sum\limits_{i=1}^Nc_ix_i + \mathbb{E}\left[Q(\pmb{x}, \tilde{\pmb{d}})\right], \\
+\text{s.t.}~ &amp;0 \leq x_i \leq K, &amp; i = 1, 2, ..., n
+\end{align}\]
+
+<p>where the recourse problem \(Q(\pmb{x}, \pmb{d})\) is written as</p>
+
+\[\begin{align}
+Q(\pmb{x}, \pmb{z}) = \min~&amp; \sum\limits_{i=1}^n\sum\limits_{j=1}^nc_{ij}y_{ij} &amp;\\
+\text{s.t.}~&amp;x_i - \sum\limits_{j=1}^Ny_{ji} + \sum\limits_{j=1}^Ny_{ij} \geq d_i &amp; i = 1, 2, ..., n \\
+&amp;\pmb{0} \leq \pmb{y} \leq \pmb{b}.
+\end{align}\]
+
+<p>Parameters of the case studies are given below:</p>
+<ul>
+  <li>The number of locations: \(n=10\)</li>
+  <li>Cost of local stock: \(a_i=1\), \(i=1, 2, …, n\)</li>
+  <li>Cost of shipping units: \(c_{ij}\) is the Euclidean distance between location \(i\) and \(j\).</li>
+  <li>Stock capacity: \(K=20\)</li>
+  <li>Transportation capacity: \(b_{ij}=K/(n-1)u_{ij}\), where each \(u_{ij}\) is a random variable generated from a standard uniform distribution.</li>
+  <li>Sample size of the training set: \(N=20\)</li>
+  <li>Robustness parameter: \(\epsilon=10N^{-1/10}\)</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">K</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">K</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+<span class="n">xy</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="p">((</span><span class="n">xy</span><span class="p">[[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[[</span><span class="mi">0</span><span class="p">]].</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+     <span class="o">+</span> <span class="p">(</span><span class="n">xy</span><span class="p">[[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[[</span><span class="mi">1</span><span class="p">]].</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+</code></pre></div></div>
+
+<p>Here we generate a training dataset <code class="language-plaintext highlighter-rouge">ds</code> assuming the demand at each location follows a uniform distribution. The average sample demand at each location is shown by the following figure. The lot-sizing problem is then solved by approaches described in <a href="https://arxiv.org/pdf/1907.07142.pdf">Two-Stage Sample Robust Optimization</a>: sample average approximation (SAA), single-policy affine approximation (SP affine), multi-policy affine approximation (MP affine), and the Wasserstein scenario-wise adaptation (Wass SW).</p>
+
+<p><img src="/lot-sizing_sample.png" alt="" /></p>
+
+<h4 id="saa">SAA</h4>
+
+<p>A direct means of implementing the SAA model is to define the recourse decision \(\pmb{y}\) as a three-dimensional array, where the first dimension represents the sample size, and the remaining two dimensions indicate the from and to locations.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome.grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>             <span class="c1"># Define a model
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>               <span class="c1"># Here-and-now location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>       <span class="c1"># Wait-and-see transportation decisions
+</span>
+<span class="c1"># Define model objective and constraints
+</span><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">((</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)).</span><span class="nb">sum</span><span class="p">())</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">ds</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0119s
+</code></pre></div></div>
+
+<p>Alternatively, the SAA method could be implemented by defining a scenario-wise ambiguity set \(\mathbb{F}\) with singleton supports for each scenario,</p>
+
+\[\begin{align}
+\mathbb{F} = \left\{
+\mathbb{P} \in \mathcal{P}(\mathbb{R}^n\times [N])\left|
+\begin{array}
+
+~(\tilde{\pmb{d}}, s) \sim \mathbb{P} &amp; \\
+\mathbb{P}[\tilde{\pmb{d}} = \hat{\pmb{d}}_s|\tilde{s}=1]=1,  &amp;\forall s\in [N] \\
+\mathbb{P}[\tilde{s}=s] = 1, &amp;\forall s \in [N] \\
+\text{for some }\pmb{p} \in \mathcal{P} &amp;
+\end{array}
+\right.
+\right\}
+\end{align}\]
+
+<p>with \(\hat{\pmb{d}}_s\) being each sample record of demands. Model with such an ambiguity set can be implemented by the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># Define a model with N scenarios
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Here-and-now location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>  <span class="c1"># Wait-and-see transportation decisions
+</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Define random variables as the demand
+</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>          <span class="c1"># The decision rule y adapts to all scenarios
+</span>
+<span class="c1"># Define the ambiguity set
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="n">ds</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c1"># Define model objective and constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">((</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">((</span><span class="n">c</span><span class="o">*</span><span class="n">y</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0193s
+</code></pre></div></div>
+
+<p>The optimal stock decision provided by the SAA model is shown by the following figure.</p>
+
+<p><img src="/ls_saa.png" alt="" /></p>
+
+<h4 id="sp-affine">SP affine</h4>
+<p>The second data-driven approach is referred to as sample robust optimizaiton, where an uncertainty set around each data sample is considered. Here the recourse decisions are approximated by a single-policy linear decision rule, thus the name SP affine. The ambiguity set of the sample robust model is presented below.</p>
+
+\[\begin{align}
+\mathbb{F} = \left\{
+\mathbb{P} \in \mathcal{P}(\mathbb{R}^n\times [N])\left|
+\begin{array}
+
+~(\tilde{\pmb{d}}, s) \sim \mathbb{P} &amp; \\
+\mathbb{P}[\|\tilde{\pmb{d}} - \hat{\pmb{d}}_s\|\leq \epsilon|\tilde{s}=1]=1,  &amp;\forall s\in [N] \\
+\mathbb{P}[\tilde{s}=s] = 1, &amp;\forall s \in [N] \\
+\text{for some }\pmb{p} \in \mathcal{P} &amp;
+\end{array}
+\right.
+\right\}
+\end{align}\]
+
+<p>The code for implementing such an ambiguity set is given below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># Define a model with N scenarios
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Here-and-now location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>  <span class="c1"># Wait-and-see transportation decisions
+</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Define random variables as the demand
+</span>
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>              <span class="c1"># The decision rule y affinely depends on d
+</span>
+<span class="c1"># Define the ambiguity set
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">ds</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c1"># Define model objective and constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">((</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">((</span><span class="n">c</span><span class="o">*</span><span class="n">y</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 38.8390s
+</code></pre></div></div>
+
+<p>The optimal lot-sizing decisions of the SP affine sample robust optimization method would be more conservative compared with the SAA method, as shown by the following figure.</p>
+
+<p><img src="/ls_sp_affine.png" alt="" /></p>
+
+<h4 id="mp-affine">MP affine</h4>
+<p>The sample robust optimization model above could be extended to the MP affine version, where the recourse decision \(\pmb{y}\) not only affinely depends on \(\pmb{d}\), but also adapts to various scenarios. The code together with the optimal allocation of stocks are presented below. It can be seen that the solution is less conservative compared with the SP affine case, because the recourse decision has a higher level of flexibility in approximating the actual recourse decisions.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># Define a model with N scenarios
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Here-and-now location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>  <span class="c1"># Wait-and-see transportation decisions
+</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Define random variables as the demand
+</span>
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>              <span class="c1"># The decision rule y affinely depends on d
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>          <span class="c1"># The decision rule y also adapts to each scenario s
+</span>
+<span class="c1"># Define the ambiguity set
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">ds</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c1"># Define model objective and constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">((</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">((</span><span class="n">c</span><span class="o">*</span><span class="n">y</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 19.4076s
+</code></pre></div></div>
+
+<p><img src="/ls_mp_affine.png" alt="" /></p>
+
+<h4 id="wass-sw">Wass SW</h4>
+
+<p>As pointed out by the paper <a href="https://arxiv.org/pdf/1907.07142.pdf">Two-Stage Sample Robust Optimization</a>, the distributionally robust optimization model considering the Wasserstein ambiguity set proposed in <a href="http://www.optimization-online.org/DB_FILE/2017/06/6055.pdf">Robust stochastic optimization made easy with RSOME</a> only yield one feasible first-stage decision \(\pmb{x}=(K, K, …, K)\) because this is the only solution that guarantees the feasibility of the second-stage problem over the entire support of \(\pmb{d}\). In order to make the numerical implementation more meaningful, we introduced an emergency order \(w_i\) to fill up the shortage at each location \(i\). The cost of the emergency order is assumed to be five times of stock cost \(a_i\). The code for implementing this distributionally robust optimization model is given below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># Define a model
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Define location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>  <span class="c1"># Define decision rule as the shifted quantities
+</span><span class="n">w</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Define decision rule as the emergency cost
+</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># Define random variables as the demand
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>        <span class="c1"># Define an auxiliary random variable
+</span>
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>              
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="n">w</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="n">w</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">w</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="c1"># Define the uncertainty set
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">ds</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c1"># Define model objective and constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">((</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">((</span><span class="n">c</span><span class="o">*</span><span class="n">y</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">w</span><span class="p">).</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">w</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">K</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 19.1652s
+</code></pre></div></div>
+
+<p>The optimal lot-sizing decision is illustrated by the following figure.</p>
+
+<p><img src="/ls_wass_sw.png" alt="" /></p>
+
+
+      </section>
+      <footer>
+        
+        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

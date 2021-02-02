@@ -8,7 +8,7 @@ $$
 \begin{align}
 \max~&\sum\limits_{i=1}^np_ix_i - \phi \sum\limits_{i=1}^n \sigma_i^2x_i^2 \\
 \text{s.t.}~&\sum\limits_{i=1}^nx_i = 1 \\
-& x_i \geq 1, ~\forall i = 1, 2, ..., n,
+& x_i \geq 0, ~\forall i = 1, 2, ..., n,
 \end{align}
 $$
 

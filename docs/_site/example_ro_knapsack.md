@@ -20,7 +20,7 @@ $$
 \end{align}
 $$
 
-The parameter $r$ is the budget of uncertainty. The robustness optimization model can be formulated by introducing auxiliary random variables \\(\pmb{u}\\), such that
+The parameter \\(r\\) is the budget of uncertainty. The robustness optimization model can be formulated by introducing auxiliary random variables \\(\pmb{u}\\), such that
 
 $$
 \begin{align}

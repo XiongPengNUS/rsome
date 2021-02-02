@@ -360,8 +360,9 @@ class Model:
         num_var = self.vt_model.vars[-1].last
 
         ro_constr = []
-        for event in constr.event_adapt:
-            drule = drule_list[event[0]]
+        # for event in constr.event_adapt:
+        for s in range(self.num_scen):
+            drule = drule_list[s]
             if isinstance(constr, DecRoConstr):
                 is_equal = (all(constr.sense) if
                             isinstance(constr.sense, Iterable) else
@@ -470,11 +471,11 @@ class Model:
                                               'undefined.')
                         else:
                             ambset = self.obj_ambiguity
-                            support = ambset.sup_constr[event[0]]
+                            support = ambset.sup_constr[s]
                     else:
                         ambset = constr.ambset
                         if isinstance(ambset, Ambiguity):
-                            support = constr.ambset.sup_constr[event[0]]
+                            support = constr.ambset.sup_constr[s]
                         elif isinstance(ambset, Iterable):
                             support = ambset
                     ew_constr = ew_constr.forall(support)
@@ -546,7 +547,7 @@ class Model:
                     new_raffine = raffine.linear[row_ind] @ temp
                     new_raffine = new_raffine.reshape((1, new_raffine.size))
                     new_raffine += raffine.const[i, :num_rand] + extra
-                    left = RoAffine(new_raffine, left, constr.rand_model) #####
+                    left = RoAffine(new_raffine, left, constr.rand_model)  # ##
 
                 event_indices = [k for k in range(num_event)
                                  if s in ambset.exp_constr_indices[k]]

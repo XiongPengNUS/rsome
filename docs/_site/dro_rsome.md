@@ -539,3 +539,4 @@ In the code segment above, the set \\(\mathcal{C}\\) is specified as \\(\\{\\{\t
 ## Application examples <a name="section3.5"></a>
 ### [Distributionally robust optimization for medical appointment scheduling](example_dro_mas)
 ### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)
+### [Distributionally robust optimization approaches for a lot-size problem ](example_dro_ls)

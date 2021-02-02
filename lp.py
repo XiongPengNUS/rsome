@@ -1734,19 +1734,25 @@ class DecVarSub(VarSub):
 
     def __le__(self, other):
 
+        """
         if isinstance(other, (Real, np.ndarray)):
             bounds = super().__le__(other)
             return DecBounds(bounds, self.event_adapt)
         else:
             return self.to_affine().__le__(other)
+        """
+        return self.to_affine().__le__(other)
 
     def __ge__(self, other):
 
+        """
         if isinstance(other, (Real, np.ndarray)):
             bounds = super().__ge__(other)
             return DecBounds(bounds, self.event_adapt)
         else:
             return self.to_affine().__ge__(other)
+        """
+        return self.to_affine().__ge__(other)
 
     @property
     def E(self):
