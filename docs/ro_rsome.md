@@ -202,6 +202,9 @@ y[:3, :].adapt(z[0])        # y[:3, :] depends on z[0]
 
 would give an error message because the affine dependency of decision rules `y[2, 3:]` on the random variable `z[0]` is defined twice.
 
+Finally, after the model is solved, coefficients of a decision rule `y` could be accessed by the `get()` method. More specifically:
+- `y.get()` returns the constant coefficients of the decision rule `y`. The returned array has the same shape as the decision rule array `y`.
+- `y.get(z)` returns the linear coefficients of `y` with respect to the random variable `z`. The shape of the returned array is `z.shape + y.shape`, i.e., the combination of dimensions of `z` and `y`. For example, if `c = y.get(z)` where `z.dim=2`, and `y.dim=2`, the returned coefficients are presented as a four-dimensional array `c` and `c[i, j]` gives the linear coefficients of `y` with respect to the random variable `z[i, j]`.
 
 ## Application examples <a name="section2.4"></a>
 

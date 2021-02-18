@@ -193,13 +193,6 @@ class Model:
                 start += size * len(dvar.event_adapt)
                 total_size += size
                 total_col += size * len(dvar.event_adapt)
-            """
-            tr_mat = csr_matrix(([1.0] * total_size, index,
-                                 range(total_size + 1)),
-                                shape=(total_size, total_col))
-
-            self.var_ev_list.append(tr_mat @ var_const)
-            """
 
             self.var_ev_list.append(var_const[index].to_affine())
 
@@ -368,10 +361,12 @@ class Model:
                             isinstance(constr.sense, Iterable) else
                             constr.sense == 1)
                 if is_equal:
-                    left = DecRoConstr(constr.roaffine, 0,
+                    roaffine = RoAffine(constr.raffine, constr.affine,
+                                        constr.rand_model)
+                    left = DecRoConstr(roaffine, 0,
                                        constr.event_adapt, constr.ctype)
                     left.ambset = constr.ambset
-                    right = DecRoConstr(-constr.roaffine, 0,
+                    right = DecRoConstr(-roaffine, 0,
                                         constr.event_adapt, constr.ctype)
                     right.ambset = constr.ambset
 
@@ -565,7 +560,7 @@ class Model:
 
         return ro_constr
 
-    def solve(self, solver=None, display=True, export=False):
+    def solve(self, solver=None, display=True, export=False, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -579,12 +574,15 @@ class Model:
             export : bool
                 Export option of the solver interface. A standard model file
                 is generated if the option is True.
+            params : dict
+                A dictionary that specifies parameters of the selected solver.
+                So far the argument only applies to Gurobi and MOSEK.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(), display, export)
+            solution = def_sol(self.do_math(), display, export, params)
         else:
-            solution = solver.solve(self.do_math(), display, export)
+            solution = solver.solve(self.do_math(), display, export, params)
 
         if isinstance(solution, Solution):
             self.ro_model.solution = solution

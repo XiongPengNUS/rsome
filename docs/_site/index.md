@@ -4,8 +4,6 @@
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
 
-The current version of RSOME supports models that fit the state-of-the-art robust stochastic optimization framework, proposed in the paper [robust stochastic optimization (RSO) framework](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R). The default solver of RSOME is the linear programming (LP) solver `linprog()` imported from the `scipy.optimize` package. We also provide interfaces with commercial solvers like [Gurobi](https://www.gurobi.com/) and [MOSEK](https://www.mosek.com/) so that we can solve problems with integer variables and second-order cone constraints.  
-
 
 ## Installing RSOME and solvers
 
@@ -17,7 +15,14 @@ The RSOME package can be installed with the <code>pip</code> command:
 
 ***
 
-For the current version, the `scipy.optimize.linprog() ` function is used as a default solver for LP problems. Interfaces with other solvers like Gurobi and MOSEK are also integrated in RSOME, and you may follow [Installing the Anaconda Python distribution](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) or [Installation - MOSEK optimizer API for Python](https://docs.mosek.com/9.2/pythonapi/install-interface.html) to complete the solver installation.
+The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
+
+| Solver | License | RSOME interface |Integer variables| Second-order cone constraints|
+|:-------|:--------|:----------------|:------------------------|:-----------------------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open source | `lpg_solver` | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open source | `clp_solver` | Yes | No |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | `grb_solver` | Yes | Yes |
+|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | `msk_solver` | Yes | Yes |
 
 
 ## A linear programming example

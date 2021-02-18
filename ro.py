@@ -261,7 +261,7 @@ class Model:
 
         return formula
 
-    def solve(self, solver=None, display=True, export=False):
+    def solve(self, solver=None, display=True, export=False, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -275,12 +275,15 @@ class Model:
             export : bool
                 Export option of the solver interface. A standard model file
                 is generated if the option is True.
+            params : dict
+                A dictionary that specifies parameters of the selected solver.
+                So far the argument only applies to Gurobi and MOSEK.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(), display, export)
+            solution = def_sol(self.do_math(), display, export, params)
         else:
-            solution = solver.solve(self.do_math(), display, export)
+            solution = solver.solve(self.do_math(), display, export, params)
 
         if isinstance(solution, Solution):
             self.rc_model.solution = solution
@@ -292,7 +295,6 @@ class Model:
                 self.rc_model.solution = Solution(x[0], x, solution.status)
 
         self.solution = self.rc_model.solution
-
 
     def get(self):
 

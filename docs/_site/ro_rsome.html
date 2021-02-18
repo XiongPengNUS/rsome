@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=64823e0556894d510f8ae490a2eb6e6d02c1e948">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=5f51ce5babad15e439465122887949a1b0807b5b">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -244,6 +244,12 @@
 </span></code></pre></div></div>
 
 <p>would give an error message because the affine dependency of decision rules <code class="language-plaintext highlighter-rouge">y[2, 3:]</code> on the random variable <code class="language-plaintext highlighter-rouge">z[0]</code> is defined twice.</p>
+
+<p>Finally, after the model is solved, coefficients of a decision rule <code class="language-plaintext highlighter-rouge">y</code> could be accessed by the <code class="language-plaintext highlighter-rouge">get()</code> method. More specifically:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">y.get()</code> returns the constant coefficients of the decision rule <code class="language-plaintext highlighter-rouge">y</code>. The returned array has the same shape as the decision rule array <code class="language-plaintext highlighter-rouge">y</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">y.get(z)</code> returns the linear coefficients of <code class="language-plaintext highlighter-rouge">y</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>. The shape of the returned array is <code class="language-plaintext highlighter-rouge">z.shape + y.shape</code>, i.e., the combination of dimensions of <code class="language-plaintext highlighter-rouge">z</code> and <code class="language-plaintext highlighter-rouge">y</code>. For example, if <code class="language-plaintext highlighter-rouge">c = y.get(z)</code> where <code class="language-plaintext highlighter-rouge">z.dim=2</code>, and <code class="language-plaintext highlighter-rouge">y.dim=2</code>, the returned coefficients are presented as a four-dimensional array <code class="language-plaintext highlighter-rouge">c</code> and <code class="language-plaintext highlighter-rouge">c[i, j]</code> gives the linear coefficients of <code class="language-plaintext highlighter-rouge">y</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z[i, j]</code>.</li>
+</ul>
 
 <h2 id="application-examples-">Application examples <a name="section2.4"></a></h2>
 

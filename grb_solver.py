@@ -1,11 +1,12 @@
 import gurobipy as gp
 import numpy as np
 import warnings
+import time
 from .socp import SOCProg
 from .lp import Solution
 
 
-def solve(formula, display=True, export=False):
+def solve(formula, display=True, export=False, params={}):
 
     nv = formula.linear.shape[1]
     vtype = list(formula.vtype)
@@ -35,8 +36,14 @@ def solve(formula, display=True, export=False):
     grb.setObjective(formula.obj @ x)
 
     grb.setParam('LogToConsole', 0)
+    try:
+        for param, value in params.items():
+            grb.setParam(param, value)
+    except (TypeError, ValueError):
+        raise ValueError('Incorrect parameters or values.')
     if display:
-        print('Being solved by Gurobi...')
+        print('Being solved by Gurobi...', flush=True)
+        time.sleep(0.2)
     grb.optimize()
     if display:
         print('Solution status: {0}'.format(grb.Status))
@@ -47,7 +54,7 @@ def solve(formula, display=True, export=False):
 
     try:
         solution = Solution(grb.ObjVal, grb.getAttr('X'), grb.Status)
-    except:
+    except AttributeError:
         warnings.warn('No feasible solution can be found.')
         solution = None
 

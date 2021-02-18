@@ -5,6 +5,7 @@ import scipy.sparse as sp
 import warnings
 from numbers import Real
 from scipy.sparse import csr_matrix
+from scipy.sparse import coo_matrix
 from collections import Iterable, Sized
 from .lpg_solver import solve as def_sol
 
@@ -268,13 +269,14 @@ class Model:
 
             return formula
 
-    def solve(self, solver=None, display=True, export=False):
+    def solve(self, solver=None, display=True, export=False, params={}):
         """
         Solve the model with the selected solver interface.
 
         Parameters
         ----------
-            solver : {None, lpg_solver, grb_solver, msk_solver}
+            solver : {None, lpg_solver, mip_solver,
+                      clp_solver, grb_solver, msk_solver}
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
@@ -282,12 +284,16 @@ class Model:
             export : bool
                 Export option of the solver interface. A standard model file
                 is generated if the option is True.
+            params : dict
+                A dictionary that specifies parameters of the selected solver.
+                So far the argument only applies to Gurobi and MOSEK.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(obj=True), display, export)
+            solution = def_sol(self.do_math(obj=True), display, export, params)
         else:
-            solution = solver.solve(self.do_math(obj=True), display, export)
+            solution = solver.solve(self.do_math(obj=True),
+                                    display, export, params)
 
         if instance(solution, Solution):
             self.solution = solution
@@ -462,10 +468,6 @@ class Vars:
         indices = item_array[item]
         if not isinstance(indices, np.ndarray):
             indices = np.array([indices]).reshape((1, ) * self.ndim)
-
-        # if self.sparray is None:
-        #     self.sparray = sparse_array(self.shape)
-        #     self.sparray = self.sv_array()
 
         return VarSub(self, indices)
 
@@ -1663,9 +1665,9 @@ class DecVar(Vars):
 
         dro_model = self.dro_model
         var_sol = dro_model.ro_model.rc_model.vars[1].get()
+        num_scen = dro_model.num_scen
+        edict = event_dict(self.event_adapt)
         if rvar is None:
-            num_scen = dro_model.num_scen
-            edict = event_dict(self.event_adapt)
             outputs = []
             for eindex in range(len(self.event_adapt)):
                 indices = (self.ro_first + eindex*self.size
@@ -1674,9 +1676,41 @@ class DecVar(Vars):
 
             if len(outputs) > 1:
                 ind_label = self.dro_model.series_scen.index
-                return pd.Series(outputs, index=ind_label)
+                return pd.Series([outputs[edict[key]] for key in edict],
+                                 index=ind_label)
             else:
                 return outputs[0]
+        else:
+            outputs = []
+            drule_list = dro_model.rule_var()
+            if isinstance(drule_list[0], Affine):
+                raise ValueError('Decision not affinely adaptive!')
+            for eindex in self.event_adapt:
+                s = eindex[0]
+                drule = drule_list[s]
+
+                sp = drule.raffine[self.get_ind(), :][:, rvar.get_ind()].linear
+                sp = coo_matrix(sp)
+
+                sol_vec = np.array(dro_model.solution.x)[sp.col]
+                sol_indices = sp.row
+
+                coeff = np.ones(sp.shape[0]) * np.NaN
+                coeff[sol_indices] = sol_vec
+
+                if rvar.to_affine().size == 1:
+                    outputs.append(coeff.reshape(self.shape))
+                else:
+                    rv_shape = rvar.to_affine().shape
+                    outputs.append(coeff.reshape(rv_shape + self.shape))
+
+            if len(outputs) > 1:
+                ind_label = self.dro_model.series_scen.index
+                return pd.Series([outputs[edict[key]] for key in edict],
+                                 index=ind_label)
+            else:
+                return outputs[0]
+
 
     @property
     def E(self):
@@ -2179,6 +2213,12 @@ class DecRoAffine(RoAffine):
 
         return DecRoConstr(left, 0, left.event_adapt, left.ctype)
 
+    def __eq__(self, other):
+
+        left = self - other
+
+        return DecRoConstr(left, 1, left.event_adapt, left.ctype)
+
     @property
     def E(self):
 
@@ -2390,14 +2430,17 @@ class DecRule:
         else:
             if rvar.model.mtype != 'S':
                 ValueError('The input is not a random variable.')
-            ldr_coeff = np.zeros((self.size,
-                                  self.model.rc_model.vars[-1].last))
+            ldr_coeff = np.ones((self.size,
+                                 self.model.rc_model.vars[-1].last)) * np.NAN
             rand_ind = rvar.get_ind()
             row_ind, col_ind = np.where(self.depend == 1)
             ldr_coeff[row_ind, col_ind] = self.var_coeff.get()
 
-            size = rvar.to_affine().size
-            return ldr_coeff[:, rand_ind].reshape((size, ) + self.shape)
+            if rvar.to_affine().size == 1:
+                return ldr_coeff[:, rand_ind].reshape(self.shape)
+            else:
+                rv_shape = rvar.to_affine().shape
+                return ldr_coeff[:, rand_ind].reshape(rv_shape + self.shape)
 
 
 class DecRuleSub:

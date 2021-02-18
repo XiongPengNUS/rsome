@@ -2,11 +2,20 @@
 
 # RSOME: Robust Stochastic Optimization Made Easy
 - Website: [RSOME for Python](https://xiongpengnus.github.io/rsome/)
-- PyPI: [RSOME 0.0.9](https://pypi.org/project/rsome/)
+- PyPI: [RSOME 0.1.0](https://pypi.org/project/rsome/)
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
 
-The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Interfaces with Gurobi and MOSEK solvers are also provided for solving problems with second-order cone constraints and integer variables.
+The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
+
+| Solver | License | RSOME interface |Integer variables| Second-order cone constraints|
+|:-------|:--------|:----------------|:------------------------|:-----------------------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open source | `lpg_solver` | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open source | `clp_solver` | Yes | No |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | `grb_solver` | Yes | Yes |
+|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | `msk_solver` | Yes | Yes |
+
+
 
 ## Introduction
 
@@ -16,8 +25,6 @@ The RSOME package can be installed by using the <code>pip</code> command:
 ***
 **`pip install rsome`**
 ***
-
-The current version of RSOME requires the Gurobi or MOSEK solver for solving the formatted models. You may follow [these steps](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html) to complete Gurobi installation. The MOSEK solver can be installed via steps in [this link](https://docs.mosek.com/9.2/pythonapi/install-interface.html).
 
 
 ### Getting started

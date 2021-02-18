@@ -536,6 +536,10 @@ x[:1].adapt(z[:2])      # x[:1] is affinely adaptive to z[:2]
 
 In the code segment above, the set \\(\mathcal{C}\\) is specified as \\(\\{\\{\text{cloudy}, \text{snowy}\\}, \\{\text{sunny}\\}, \\{\text{rainy}, \text{windy}\\}\\}\\), and the decision variable `x[0]` is affinely adaptive to random variables `z[:2]`.
 
+Similar to the linear decision rule defined in the `ro` modeling environment, coefficients of an event-wise recourse adaptation could be accessed by the `get()` method, where
+- `y.get()` returns the constant coefficients of the recourse adaptation. In cases of multiple scenarios, the returned object is a `pandas.Series` with the length to be the same as the number of scenarios. Each element of the series is an array that has the same shape as `y`.
+- `y.get(z)` returns the linear coefficients of the recourse adaptation. In cases of multiple scenarios, the returned object is a `pandas.Series` with the length to be the same as the number of scenarios. Each element of the series is an array, and the shape of the array is `z.shape + y.shape`, i.e., the combination of dimensions of `z` and `y`.
+
 ## Application examples <a name="section3.5"></a>
 ### [Distributionally robust optimization for medical appointment scheduling](example_dro_mas)
 ### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)

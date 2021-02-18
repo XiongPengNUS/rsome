@@ -4,16 +4,16 @@ import warnings
 import time
 
 
-def solve(formula, display=True, export=False):
+def solve(formula, display=True, export=False, params={}):
 
     if export:
         warnings.warn('Cannot export model by the linprog() function. ')
     try:
         if formula.qmat:
             warnings.warn('SOC constriants are ignored in the LP solver. ')
-    except:
+    except AttributeError:
         pass
-    if any(np.array(formula.vtype)!='C'):
+    if any(np.array(formula.vtype) != 'C'):
         warnings.warn('Integrality constraints are ignored in the LP solver. ')
 
     nv = formula.linear.shape[1]
@@ -39,16 +39,16 @@ def solve(formula, display=True, export=False):
                'sparse': True}
 
     if display:
-        print('Being solved by the default LP solver...')
-    t0 = time.process_time()
+        print('Being solved by the default LP solver...', flush=True)
+        time.sleep(0.2)
+    t0 = time.time()
     res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
                       A_eq=linear_eq, b_eq=const_eq,
                       bounds=bounds, options=default)
-    stime = time.process_time() - t0
+    stime = time.time() - t0
     if display:
         print('Solution status: {0}'.format(res.status))
         print('Running time: {0:0.4f}s'.format(stime))
-
 
     if res.status == 1:
         warnings.warn('Iteration limit reached. ')

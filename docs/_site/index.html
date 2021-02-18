@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=64823e0556894d510f8ae490a2eb6e6d02c1e948">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=5f51ce5babad15e439465122887949a1b0807b5b">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -67,8 +67,6 @@
 
 <p>RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.</p>
 
-<p>The current version of RSOME supports models that fit the state-of-the-art robust stochastic optimization framework, proposed in the paper <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603?af=R">robust stochastic optimization (RSO) framework</a>. The default solver of RSOME is the linear programming (LP) solver <code class="language-plaintext highlighter-rouge">linprog()</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package. We also provide interfaces with commercial solvers like <a href="https://www.gurobi.com/">Gurobi</a> and <a href="https://www.mosek.com/">MOSEK</a> so that we can solve problems with integer variables and second-order cone constraints.</p>
-
 <h2 id="installing-rsome-and-solvers">Installing RSOME and solvers</h2>
 
 <p>The RSOME package can be installed with the <code>pip</code> command:</p>
@@ -79,7 +77,49 @@
 
 <hr />
 
-<p>For the current version, the <code class="language-plaintext highlighter-rouge">scipy.optimize.linprog() </code> function is used as a default solver for LP problems. Interfaces with other solvers like Gurobi and MOSEK are also integrated in RSOME, and you may follow <a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Installing the Anaconda Python distribution</a> or <a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">Installation - MOSEK optimizer API for Python</a> to complete the solver installation.</p>
+<p>The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver <code class="language-plaintext highlighter-rouge">linprog()</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Solver</th>
+      <th style="text-align: left">License</th>
+      <th style="text-align: left">RSOME interface</th>
+      <th style="text-align: left">Integer variables</th>
+      <th style="text-align: left">Second-order cone constraints</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
+      <td style="text-align: left">Open source</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
+      <td style="text-align: left">No</td>
+      <td style="text-align: left">No</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
+      <td style="text-align: left">Open source</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Gurobi</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+  </tbody>
+</table>
 
 <h2 id="a-linear-programming-example">A linear programming example</h2>
 

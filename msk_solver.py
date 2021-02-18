@@ -7,7 +7,7 @@ import time
 from .lp import Solution
 
 
-def solve(form, display=True, export=False):
+def solve(form, display=True, export=False, params={}):
 
     numlc, numvar = form.linear.shape
     if isinstance(form, SOCProg):
@@ -86,11 +86,23 @@ def solve(form, display=True, export=False):
                                 0.0, cone)
 
             if display:
-                print('Being solved by Mosek...')
+                print('Being solved by Mosek...', flush=True)
+                time.sleep(0.2)
 
-            t0 = time.process_time()
+            try:
+                for param, value in params.items():
+                    if isinstance(value, float):
+                        task.putdouparam(getattr(mosek.dparam, param), value)
+                    if isinstance(value, int):
+                        task.putintparam(getattr(mosek.iparam, param), value)
+                    if isinstance(value, str):
+                        task.putstrparam(getattr(mosek.sparam, param), value)
+            except (TypeError, ValueError):
+                raise ValueError('Incorrect parameters or values.')
+
+            t0 = time.time()
             task.optimize()
-            stime = time.process_time() - t0
+            stime = time.time() - t0
 
             soltype = mosek.soltype
             solsta = None

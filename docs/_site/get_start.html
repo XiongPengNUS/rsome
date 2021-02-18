@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=64823e0556894d510f8ae490a2eb6e6d02c1e948">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=5f51ce5babad15e439465122887949a1b0807b5b">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -568,7 +568,7 @@ Number of SOC constraints:    1
 
 <p>The standard form of the model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, export=False) method of rsome.ro.Model instance
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, export=False, params={}) method of rsome.ro.Model instance
 Solve the model with the selected solver interface.
 
     Parameters
@@ -581,15 +581,62 @@ Solve the model with the selected solver interface.
         export : bool
             Export option of the solver interface. A standard model file
             is generated if the option is True.
+        params : dict
+            A dictionary that specifies parameters of the selected solver.
+            So far the argument only applies to Gurobi and MOSEK.
 </code></pre></div></div>
 
-<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version RSOME uses the default LP solver if  <code class="language-plaintext highlighter-rouge">solver=None</code> or <code class="language-plaintext highlighter-rouge">solver=lpg_solver</code>. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please specify <code class="language-plaintext highlighter-rouge">solver=grb_solver</code> or <code class="language-plaintext highlighter-rouge">solver=msk_solver</code> respectively for activating Gurobi or MOSEK solvers.</p>
+<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version RSOME uses the default LP solver if  <code class="language-plaintext highlighter-rouge">solver=None</code> or <code class="language-plaintext highlighter-rouge">solver=lpg_solver</code>. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please activate other solvers by specifying the <code class="language-plaintext highlighter-rouge">solver</code> parameter to be the values in the table below.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Solver</th>
+      <th style="text-align: left">License</th>
+      <th style="text-align: left">RSOME interface</th>
+      <th style="text-align: left">Integer variables</th>
+      <th style="text-align: left">Second-order cone constraints</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
+      <td style="text-align: left">Open source</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
+      <td style="text-align: left">No</td>
+      <td style="text-align: left">No</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
+      <td style="text-align: left">Open source</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Gurobi</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The model above involves second-order cone constraints, so we could use either Gurobi or Mosek to solve it. The interfaces for these solvers are imported by the following commands.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
 </code></pre></div></div>
 
-<p>The interfaces can be used to attain the solution.</p>
+<p>The interfaces can be then used to attain the solution.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
 </code></pre></div></div>
@@ -608,6 +655,14 @@ Running time: 0.0210s
 </code></pre></div></div>
 
 <p>The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.</p>
+
+<p>Finally, parameters of the Gurobi and MOSEK solvers can be specified by the <code class="language-plaintext highlighter-rouge">dict</code> type argument <code class="language-plaintext highlighter-rouge">params</code> in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;..., }</code>. For example, the following code solves the problem using Gurobi while displaying the log information.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span>                                <span class="c1"># Use Gurobi as the solver
+</span>            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'LogToConsole'</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>      <span class="c1"># Set LogToConsole to be True
+</span></code></pre></div></div>
+
+<p>For Gurobi, you may find the parameter names and their values from <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">Parameters</a>. Parameter information on MOSEK is given by <a href="https://docs.mosek.com/9.2/pythonfusion/parameters.html">Parameters (alphabetical list sorted by type)</a>. Please make sure that you are specifying parameters with the correct data type, otherwise an error message might be raised.</p>
 
 <h2 id="application-examples-">Application examples <a name="section1.4"></a></h2>
 
