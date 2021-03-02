@@ -1,5 +1,5 @@
 from .socp import Model as SOCModel
-from .lp import LinConstr, Bounds, CvxConstr
+from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import DecRule, DecRuleSub
 from .lp import RoAffine, RoConstr
@@ -191,7 +191,7 @@ class Model:
                 for item in constr:
                     self.st(item)
 
-            elif isinstance(constr, (LinConstr, Bounds, CvxConstr)):
+            elif isinstance(constr, (LinConstr, Bounds, CvxConstr, ConeConstr)):
                 if (constr.model is not self.rc_model) or \
                         (constr.model.mtype != 'R'):
                     raise ValueError('Models mismatch.')

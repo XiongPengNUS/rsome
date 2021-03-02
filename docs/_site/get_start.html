@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5f51ce5babad15e439465122887949a1b0807b5b">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=07f26f0183bdb159c5dc70cc411a42099c6c83aa">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -592,7 +592,7 @@ Solve the model with the selected solver interface.
   <thead>
     <tr>
       <th style="text-align: left">Solver</th>
-      <th style="text-align: left">License</th>
+      <th style="text-align: left">License  type</th>
       <th style="text-align: left">RSOME interface</th>
       <th style="text-align: left">Integer variables</th>
       <th style="text-align: left">Second-order cone constraints</th>
@@ -601,15 +601,22 @@ Solve the model with the selected solver interface.
   <tbody>
     <tr>
       <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
-      <td style="text-align: left">Open source</td>
+      <td style="text-align: left">Open-source</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
-      <td style="text-align: left">Open source</td>
+      <td style="text-align: left">Open-source</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://developers.google.com/optimization/install">OR-Tools</a></td>
+      <td style="text-align: left">Open-source</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -624,6 +631,13 @@ Solve the model with the selected solver interface.
       <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
       <td style="text-align: left">Commercial</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html">CPLEX</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
     </tr>
@@ -656,24 +670,25 @@ Running time: 0.0210s
 
 <p>The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.</p>
 
-<p>Finally, parameters of the Gurobi and MOSEK solvers can be specified by the <code class="language-plaintext highlighter-rouge">dict</code> type argument <code class="language-plaintext highlighter-rouge">params</code> in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;..., }</code>. For example, the following code solves the problem using Gurobi while displaying the log information.</p>
+<p>Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the <code class="language-plaintext highlighter-rouge">dict</code> type argument <code class="language-plaintext highlighter-rouge">params</code> in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;..., }</code>. For example, the following code solves the problem using Gurobi while displaying the log information.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span>                                <span class="c1"># Use Gurobi as the solver
 </span>            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'LogToConsole'</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>      <span class="c1"># Set LogToConsole to be True
 </span></code></pre></div></div>
 
-<p>For Gurobi, you may find the parameter names and their values from <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">Parameters</a>. Parameter information on MOSEK is given by <a href="https://docs.mosek.com/9.2/pythonfusion/parameters.html">Parameters (alphabetical list sorted by type)</a>. Please make sure that you are specifying parameters with the correct data type, otherwise an error message might be raised.</p>
+<p>For Gurobi, you may find the parameter names and their values from <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">Parameters</a>. Parameter information on MOSEK is given by <a href="https://docs.mosek.com/9.2/pythonfusion/parameters.html">Parameters (alphabetical list sorted by type)</a>. CPLEX solver parameters can be found from <a href="https://www.ibm.com/support/knowledgecenter/SSSA5P_12.7.1/ilog.odms.cplex.help/CPLEX/Parameters/topics/introListAlpha.html">List of CPLEX parameters</a>. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
 
 <h2 id="application-examples-">Application examples <a name="section1.4"></a></h2>
 
 <h3 id="mean-variance-portfolio-optimization"><a href="example_mv_portfolio">Mean-variance portfolio optimization</a></h3>
 <h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer programming for Sudoku</a></h3>
+<h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC power flow</a></h3>
 
 
       </section>
       <footer>
         
-        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
         
       </footer>
     </div>

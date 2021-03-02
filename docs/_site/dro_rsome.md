@@ -541,6 +541,7 @@ Similar to the linear decision rule defined in the `ro` modeling environment, co
 - `y.get(z)` returns the linear coefficients of the recourse adaptation. In cases of multiple scenarios, the returned object is a `pandas.Series` with the length to be the same as the number of scenarios. Each element of the series is an array, and the shape of the array is `z.shape + y.shape`, i.e., the combination of dimensions of `z` and `y`.
 
 ## Application examples <a name="section3.5"></a>
+### [Multi-stage stochastic financial planning](example_dro_finpl)
 ### [Distributionally robust optimization for medical appointment scheduling](example_dro_mas)
 ### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)
 ### [Distributionally robust optimization approaches for a lot-size problem ](example_dro_ls)

@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5f51ce5babad15e439465122887949a1b0807b5b">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=07f26f0183bdb159c5dc70cc411a42099c6c83aa">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -83,7 +83,7 @@
   <thead>
     <tr>
       <th style="text-align: left">Solver</th>
-      <th style="text-align: left">License</th>
+      <th style="text-align: left">License  type</th>
       <th style="text-align: left">RSOME interface</th>
       <th style="text-align: left">Integer variables</th>
       <th style="text-align: left">Second-order cone constraints</th>
@@ -92,15 +92,22 @@
   <tbody>
     <tr>
       <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
-      <td style="text-align: left">Open source</td>
+      <td style="text-align: left">Open-source</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
-      <td style="text-align: left">Open source</td>
+      <td style="text-align: left">Open-source</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://developers.google.com/optimization/install">OR-Tools</a></td>
+      <td style="text-align: left">Open-source</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -115,6 +122,13 @@
       <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
       <td style="text-align: left">Commercial</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html">CPLEX</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
     </tr>
@@ -191,7 +205,7 @@ Number of SOC constraints:    0
       </section>
       <footer>
         
-        <p>This project is maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
         
       </footer>
     </div>

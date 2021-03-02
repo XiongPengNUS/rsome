@@ -1,0 +1,349 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=07f26f0183bdb159c5dc70cc411a42099c6c83aa">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="conditional-value-at-risk-with-application-to-robust-portfolio-management">Conditional value-at-risk with application to robust portfolio management</h3>
+
+<p>This robust portfolio management model is proposed by <a href="http://www-optima.amp.i.kyoto-u.ac.jp/~fuku/papers/2005-006.pdf">Worst-Case Conditional Value-at-Risk with Application to Robust Portfolio Management</a>. The portfolio decision is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as</p>
+
+\[\begin{align}
+\min~&amp;\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^T\pmb{u} &amp;\\
+\text{s.t.}~&amp; u_k \geq \pmb{y}_k^T\pmb{x} - \alpha, &amp;\forall k = 1, 2, ..., s \\
+&amp;u_k \geq 0, &amp;\forall k=1, 2, ..., s \\
+&amp;\sum\limits_{k=1}^s\pi_k\pmb{y}_k^T\pmb{x} \geq \mu, &amp;\forall \pmb{\pi} \in \Pi  \\
+&amp;\underline{\pmb{x}} \leq \pmb{x} \leq \overline{\pmb{x}} \\
+&amp;\pmb{1}^T\pmb{x} = w_0
+\end{align}\]
+
+<p>with investment decisions\(\pmb{x}\in\mathbb{R}^n\) and auxiliary variables \(\pmb{u}\in\mathbb{R}^s\) and \(\alpha\in\mathbb{R}\), where \(n\) is the number of stocks, and \(s\) is the number of samples. The array \(\pmb{\pi}\) denotes the probabilities of samples, and \(\Pi\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \(\pmb{y}_k\in\mathbb{R}^n\) indicates the \(k\)th sample of stock return rates, and \(\bar{x}\) and \(\underline{x}\) are the lower and upper bounds of \(x\). The worst-case minimum expected overall return rate is set to be \(\mu=0.001\), the confidence level is \(\beta=0.95\), and the budget of investment is set to be \(w_0=1\). In this case study, we consider the sample data of five stocks “JPM”, “AMZN”, “TSLA”, “AAPL”, and	“GOOG” in the year of 2020, and the other parameters are specified by the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">pandas_datareader.data</span> <span class="k">as</span> <span class="n">web</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">stocks</span> <span class="o">=</span> <span class="p">[</span><span class="s">'JPM'</span><span class="p">,</span> <span class="s">'AMZN'</span><span class="p">,</span> <span class="s">'TSLA'</span><span class="p">,</span> <span class="s">'AAPL'</span><span class="p">,</span> <span class="s">'GOOG'</span><span class="p">]</span>
+<span class="n">start</span> <span class="o">=</span> <span class="s">'1/1/2020'</span>              <span class="c1"># Starting date of historical data
+</span><span class="n">end</span><span class="o">=</span><span class="s">'12/31/2020'</span>                <span class="c1"># End date of historical data
+</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">([])</span>
+<span class="k">for</span> <span class="n">stock</span> <span class="ow">in</span> <span class="n">stocks</span><span class="p">:</span>
+    <span class="n">each</span> <span class="o">=</span> <span class="n">web</span><span class="p">.</span><span class="n">DataReader</span><span class="p">(</span><span class="n">stock</span><span class="p">,</span> <span class="s">'yahoo'</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+    <span class="n">close</span> <span class="o">=</span> <span class="n">each</span><span class="p">[</span><span class="s">'Adj Close'</span><span class="p">].</span><span class="n">values</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">stock</span><span class="p">]</span> <span class="o">=</span> <span class="n">returns</span>
+
+<span class="n">data</span>
+</code></pre></div></div>
+
+<div>
+<table border="1" class="dataframe mystyle">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>JPM</th>
+      <th>AMZN</th>
+      <th>TSLA</th>
+      <th>AAPL</th>
+      <th>GOOG</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.012124</td>
+      <td>0.027151</td>
+      <td>0.028518</td>
+      <td>0.022816</td>
+      <td>0.022700</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.013197</td>
+      <td>-0.012139</td>
+      <td>0.029633</td>
+      <td>-0.009722</td>
+      <td>-0.004907</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-0.000795</td>
+      <td>0.014886</td>
+      <td>0.019255</td>
+      <td>0.007968</td>
+      <td>0.024657</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.017001</td>
+      <td>0.002092</td>
+      <td>0.038801</td>
+      <td>-0.004703</td>
+      <td>-0.000624</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.007801</td>
+      <td>-0.007809</td>
+      <td>0.049205</td>
+      <td>0.016086</td>
+      <td>0.007880</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>248</th>
+      <td>-0.004398</td>
+      <td>-0.003949</td>
+      <td>0.024444</td>
+      <td>0.007712</td>
+      <td>0.003735</td>
+    </tr>
+    <tr>
+      <th>249</th>
+      <td>0.006585</td>
+      <td>0.035071</td>
+      <td>0.002901</td>
+      <td>0.035766</td>
+      <td>0.021416</td>
+    </tr>
+    <tr>
+      <th>250</th>
+      <td>-0.002633</td>
+      <td>0.011584</td>
+      <td>0.003465</td>
+      <td>-0.013315</td>
+      <td>-0.009780</td>
+    </tr>
+    <tr>
+      <th>251</th>
+      <td>0.002800</td>
+      <td>-0.010882</td>
+      <td>0.043229</td>
+      <td>-0.008527</td>
+      <td>-0.010917</td>
+    </tr>
+    <tr>
+      <th>252</th>
+      <td>0.013641</td>
+      <td>-0.008801</td>
+      <td>0.015674</td>
+      <td>-0.007703</td>
+      <td>0.007105</td>
+    </tr>
+  </tbody>
+</table>
+<p>253 rows × 5 columns</p>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">values</span>     <span class="c1"># Stock data as an array
+</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">shape</span>      <span class="c1"># s: sample size; n: number of stocks
+</span>
+<span class="n">x_lb</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># Lower bounds of investment decisions
+</span><span class="n">x_ub</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>   <span class="c1"># Upper bounds of investment decisions
+</span>
+<span class="n">beta</span> <span class="o">=</span><span class="mf">0.95</span>          <span class="c1"># Confidence interval
+</span><span class="n">w0</span> <span class="o">=</span> <span class="mi">1</span>              <span class="c1"># Investment budget
+</span><span class="n">mu</span> <span class="o">=</span> <span class="mf">0.001</span>          <span class="c1"># Target minimum expected return rate
+</span></code></pre></div></div>
+
+<h4 id="nominal-cvar-model">Nominal CVaR model</h4>
+
+<p>In the nominal model, the CVaR and expected returns are evaluated assuming the exact distribution of stock returns is accurately represented by the historical samples without any distributional ambiguity. In other words, \(\Pi\) is written as a singleton uncertainty \(\Pi = \{\pmb{\pi}^0 \}\), where \(\pi_k^0=1/s\), with \(k=1, 2, …, s\). The Python code for implementing the nominal model is given below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>         <span class="c1"># No ambiguity in probability distribution
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">u</span><span class="p">))</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_lb</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_ub</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">w0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0073s
+</code></pre></div></div>
+
+<p>The portfolio decision for the nominal model is retrieved by the following code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># Portfolio decision with 4 d.p.
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.3135, 0.5331, 0.0455, 0.    , 0.1079])
+</code></pre></div></div>
+
+<h4 id="worst-case-cvar-model-with-box-uncertainty">Worst-case CVaR model with box uncertainty</h4>
+<p>Now we consider a box uncertainty set</p>
+
+\[\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \pmb{\eta}, \pmb{1}^T\pmb{\eta}=0, \underline{\pmb{\eta}}\leq \pmb{\eta} \leq \bar{\pmb{\eta}} \right\}.\]
+
+<p>In this case study, we assume that \(-\underline{\pmb{\eta}}=\bar{\pmb{\eta}}=0.0001\), and the Python code for implementation is provided below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">eta_ub</span> <span class="o">=</span> <span class="mf">0.0001</span>                 <span class="c1"># Upper bound of eta
+</span><span class="n">eta_lb</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0001</span>                <span class="c1"># Lower bound of eta
+</span>
+<span class="n">eta</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>             <span class="c1"># eta as random variables
+</span><span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">eta</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">eta</span> <span class="o">&gt;=</span> <span class="n">eta_lb</span><span class="p">,</span>
+        <span class="n">eta</span> <span class="o">&lt;=</span> <span class="n">eta_ub</span><span class="p">)</span>
+<span class="n">pi</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">s</span> <span class="o">+</span> <span class="n">eta</span>                  <span class="c1"># pi as inexact probabilities
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">u</span><span class="p">),</span> <span class="n">uset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_lb</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_ub</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">w0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0268s
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># Portfolio decision with 4 d.p.
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.2605, 0.5601, 0.0651, 0.    , 0.1143])
+</code></pre></div></div>
+
+<h4 id="worst-case-cvar-model-with-ellipsoidal-uncertainty">Worst-case CVaR model with ellipsoidal uncertainty</h4>
+
+<p>In cases that \(\Pi\) is an ellipsoidal uncertainty set</p>
+
+\[\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \rho\pmb{\eta}, \pmb{1}^T\pmb{\eta}=0, \pmb{\pi}^0 + \rho\pmb{\eta} \geq \pmb{0}, \|\pmb{\eta}\| \leq 1 \right\},\]
+
+<p>where the nominal probability \(\pmb{\pi}^0\) is the center of the ellipsoid, and the constant \(\rho=0.001\), then the model can be implemented by the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">rho</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+<span class="n">eta</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">eta</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">s</span> <span class="o">+</span> <span class="n">rho</span><span class="o">*</span><span class="n">eta</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">pi</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">s</span> <span class="o">+</span> <span class="n">rho</span><span class="o">*</span><span class="n">eta</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">u</span><span class="p">),</span> <span class="n">uset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_lb</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_ub</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">w0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0285s
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># Portfolio decision with 4 d.p.
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

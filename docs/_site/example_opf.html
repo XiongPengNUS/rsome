@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=07f26f0183bdb159c5dc70cc411a42099c6c83aa">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="optimal-dc-power-flow">Optimal DC power flow</h3>
+
+<p>The optimal power flow problem minimizes the overall operating cost in a electricity network while subject to a number of generation and transmission constraints. The DC model is a widely used linearized approximation of the actual nonlinear power flow model, and it can be written as</p>
+
+\[\begin{align}
+\min~&amp;\sum\limits_{i=1}^m (a_ig_i^2 + b_ig_i + c_i) \\
+\text{s.t.}~&amp;\pmb{B}_{\text{bus}} \pmb{v} + \pmb{I}_{\text{bg}} \pmb{g} = \pmb{L} \\
+&amp;|\pmb{B}_{\text{f}} \pmb{v}| \leq \pmb{R} \\
+&amp;P_i^{\min} \leq g_i \leq P_i^{\max} &amp;\forall i = 1, 2, ..., m \\
+&amp;v_{ref} = 0,
+\end{align}\]
+
+<p>where \(n\) is the number of buses, and $m$ is the number of generators. The decision variables:</p>
+
+<ul>
+  <li>\(v_j\): the voltage angle of bus \(j\), with \(j=1, 2, …, n\)</li>
+  <li>\(g_i\): the output of the \(i\)th generator, with \(i=1, 2, …, m\)</li>
+</ul>
+
+<p>and parameters:</p>
+
+<ul>
+  <li>\(\pmb{B}_{\text{bus}}\): the matrix of reciprocals of reactance between buses</li>
+  <li>\(\pmb{I}_{\text{bg}}\): the matrix that places generations to their corresponding buses</li>
+  <li>\(\pmb{L}\): the array of electricity load at each bus</li>
+  <li>\(\pmb{B}_{\text{f}}\): the matrix for calculating the transmitted power</li>
+  <li>\(P_i^{\min}\) and \(P_i^{\max}\): the minimum and maximum output of the \(i\)th generator</li>
+  <li>\(\pmb{R}\): the array of transmission line capacity ratings</li>
+</ul>
+
+<p>In this case study, we consider the <a href="https://ieeexplore.ieee.org/document/780914">IEEE-RTS 1996</a>, and the dataset is generated according to the one used in <a href="https://matpower.org/">MATPOWER</a>. You may find the dataset as an Excel file from <a href="/ieee_rts.xlsx">here</a>. The following code is used to import system parameters from the file.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Load data from the Excel file
+</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="n">Bbus_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'ieee_rts.xlsx'</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s">'Bbus'</span><span class="p">)</span>
+<span class="n">Bf_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'ieee_rts.xlsx'</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s">'Bf'</span><span class="p">)</span>
+<span class="n">Gen_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'ieee_rts.xlsx'</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s">'Gen'</span><span class="p">)</span>
+<span class="n">Rates_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'ieee_rts.xlsx'</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s">'Rates'</span><span class="p">)</span>
+<span class="n">Load_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'ieee_rts.xlsx'</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s">'Load'</span><span class="p">)</span>
+
+<span class="n">Bbus</span> <span class="o">=</span> <span class="n">Bbus_df</span><span class="p">.</span><span class="n">values</span>                           <span class="c1"># Bbus array
+</span><span class="n">Bf</span> <span class="o">=</span> <span class="n">Bf_df</span><span class="p">.</span><span class="n">values</span>                               <span class="c1"># Bf array
+</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">Rates_df</span><span class="p">[</span><span class="s">'Rate_A'</span><span class="p">].</span><span class="n">values</span>                   <span class="c1"># Line capacity ratings
+</span><span class="n">GBus</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'GBus'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># Generator buses
+</span><span class="n">Pmin</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'Pmin'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># Minimum outputs of generators
+</span><span class="n">Pmax</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'Pmax'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># Maximum outputs of generators
+</span><span class="n">Coeff</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'Cost_a'</span><span class="p">:</span><span class="s">'Cost_c'</span><span class="p">].</span><span class="n">values</span> <span class="c1"># Cost coefficients of generators
+</span><span class="n">L</span> <span class="o">=</span> <span class="n">Load_df</span><span class="p">[</span><span class="s">'Load'</span><span class="p">].</span><span class="n">values</span>                      <span class="c1"># Electricity loads
+</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">Bf</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                                 <span class="c1"># n: Number of buses
+</span><span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">GBus</span><span class="p">)</span>                                   <span class="c1"># m: Number of generators
+</span></code></pre></div></div>
+
+<p>The DC optimal power flow problem can be solved by the following Python code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                   <span class="c1"># Decision variable as the voltage angle
+</span><span class="n">g</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>                   <span class="c1"># Decision variable as the generation output
+</span>
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">g</span><span class="p">)</span> <span class="o">+</span>
+          <span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">@</span><span class="n">g</span> <span class="o">+</span>
+          <span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">].</span><span class="nb">sum</span><span class="p">())</span>        <span class="c1"># Quadratic objective function
+</span>
+<span class="n">I_bg</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+<span class="n">I_bg</span><span class="p">[</span><span class="n">GBus</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>          <span class="c1"># Array that places generators to their buses
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">Bbus</span><span class="o">@</span><span class="n">v</span> <span class="o">+</span> <span class="n">I_bg</span><span class="o">@</span><span class="n">g</span> <span class="o">==</span> <span class="n">L</span><span class="p">)</span>      <span class="c1"># Power balance equation
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Bf</span><span class="o">@</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">R</span><span class="p">)</span>            <span class="c1"># Transmission line capacities
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">g</span> <span class="o">&gt;=</span> <span class="n">Pmin</span><span class="p">,</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="n">Pmax</span><span class="p">)</span>      <span class="c1"># Output capacities of generators
+</span><span class="n">Ref</span> <span class="o">=</span> <span class="mi">12</span>                            <span class="c1"># Index of the reference bus
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">Ref</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>               <span class="c1"># Set the reference bus
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">Optimal generation cost: {0:0.2f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()))</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0045s
+
+Optimal generation cost: 61000.92
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

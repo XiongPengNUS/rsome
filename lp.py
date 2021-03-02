@@ -1533,6 +1533,7 @@ class RoConstr:
         num_constr, num_rand = self.raffine.shape
         support = self.support if not support else support
         size_support = support.linear.shape[1]
+        num_rand = min(num_rand, support.linear.shape[0])
 
         dual_var = self.dec_model.dvar((num_constr, size_support))
 
@@ -1540,7 +1541,7 @@ class RoConstr:
                    self.affine.reshape(num_constr) <= 0)
 
         left = dual_var @ support.linear[:num_rand].T
-        left = left + self.raffine * support.const[:num_rand]
+        left = left + self.raffine[:, :num_rand] * support.const[:num_rand]
         sense2 = np.tile(support.sense[:num_rand], num_constr)
         num_rc_constr = left.const.size
         constr2 = LinConstr(left.model, left.linear,

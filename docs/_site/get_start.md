@@ -560,12 +560,14 @@ The standard form of the model can be solved via calling the `solve()` method of
 
 It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version RSOME uses the default LP solver if  `solver=None` or `solver=lpg_solver`. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please activate other solvers by specifying the `solver` parameter to be the values in the table below.
 
-| Solver | License | RSOME interface |Integer variables| Second-order cone constraints|
-|:-------|:--------|:----------------|:------------------------|:-----------------------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open source | `lpg_solver` | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open source | `clp_solver` | Yes | No |
+| Solver | License  type | RSOME interface |Integer variables| Second-order cone constraints|
+|:-------|:--------------|:----------------|:------------------------|:---------------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | `lpg_solver` | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | `clp_solver` | Yes | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | `ort_solver` | Yes | No |
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | `grb_solver` | Yes | Yes |
 |[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | `msk_solver` | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | `cpx_solver` | Yes | Yes |
 
 
 The model above involves second-order cone constraints, so we could use either Gurobi or Mosek to solve it. The interfaces for these solvers are imported by the following commands.
@@ -599,16 +601,17 @@ model.solve(msk)
 
 The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.  
 
-Finally, parameters of the Gurobi and MOSEK solvers can be specified by the `dict` type argument `params` in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>..., }`. For example, the following code solves the problem using Gurobi while displaying the log information.
+Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the `dict` type argument `params` in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>..., }`. For example, the following code solves the problem using Gurobi while displaying the log information.
 
 ```python
 model.solve(grb,                                # Use Gurobi as the solver
             params={'LogToConsole': True})      # Set LogToConsole to be True
 ```
 
-For Gurobi, you may find the parameter names and their values from [Parameters](https://www.gurobi.com/documentation/9.1/refman/parameters.html). Parameter information on MOSEK is given by [Parameters (alphabetical list sorted by type)](https://docs.mosek.com/9.2/pythonfusion/parameters.html). Please make sure that you are specifying parameters with the correct data type, otherwise an error message might be raised.
+For Gurobi, you may find the parameter names and their values from [Parameters](https://www.gurobi.com/documentation/9.1/refman/parameters.html). Parameter information on MOSEK is given by [Parameters (alphabetical list sorted by type)](https://docs.mosek.com/9.2/pythonfusion/parameters.html). CPLEX solver parameters can be found from [List of CPLEX parameters](https://www.ibm.com/support/knowledgecenter/SSSA5P_12.7.1/ilog.odms.cplex.help/CPLEX/Parameters/topics/introListAlpha.html). Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
 
 ## Application examples <a name="section1.4"></a>
 
 ### [Mean-variance portfolio optimization](example_mv_portfolio)
 ### [Integer programming for Sudoku](example_sudoku)
+### [Optimal DC power flow](example_opf)

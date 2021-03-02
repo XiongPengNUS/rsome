@@ -209,5 +209,7 @@ Finally, after the model is solved, coefficients of a decision rule `y` could be
 ## Application examples <a name="section2.4"></a>
 
 ### [Robust portfolio optimization](example_ro_portfolio)
+### [Conditional value-at-risk with application to robust portfolio management](example_ro_cvar_portfolio)
 ### [The robust and robustness knapsack problems](example_ro_knapsack)
 ### [Adaptive robust optimization for a lot-sizing problem](example_ls)
+### [The robust production-inventory model](example_ro_inv)

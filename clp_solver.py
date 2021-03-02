@@ -7,7 +7,7 @@ import time
 from .lp import Solution
 
 
-def solve(formula, display=True, export=False):
+def solve(formula, display=True, export=False, params={}):
 
     try:
         if formula.qmat:
@@ -88,9 +88,6 @@ def solve(formula, display=True, export=False):
     if display:
         print('Solution status: {0}'.format(status))
         print('Running time: {0:0.4f}s'.format(stime))
-
-    if export:
-        m.write("out.lp")
 
     try:
         x_sol = np.zeros(linear.shape[1])

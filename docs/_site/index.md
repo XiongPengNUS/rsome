@@ -17,12 +17,14 @@ The RSOME package can be installed with the <code>pip</code> command:
 
 The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
 
-| Solver | License | RSOME interface |Integer variables| Second-order cone constraints|
-|:-------|:--------|:----------------|:------------------------|:-----------------------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open source | `lpg_solver` | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open source | `clp_solver` | Yes | No |
+| Solver | License  type | RSOME interface |Integer variables| Second-order cone constraints|
+|:-------|:--------------|:----------------|:------------------------|:---------------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | `lpg_solver` | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | `clp_solver` | Yes | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | `ort_solver` | Yes | No |
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | `grb_solver` | Yes | Yes |
 |[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | `msk_solver` | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | `cpx_solver` | Yes | Yes |
 
 
 ## A linear programming example

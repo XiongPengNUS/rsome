@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='rsome',
-     version='0.1.0',
+     version='0.1.1',
      author="Peng Xiong, Zhi Chen, and Melvyn Sim",
      author_email="xiongpengnus@gmail.com",
      description="Robust Stochastic Optimization Made Easy",

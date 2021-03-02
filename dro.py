@@ -497,6 +497,7 @@ class Model:
             raise ValueError('The ambiguity set is undefined.')
         mixed_support = ambset.mix_support(primal=False)
         p = ambset.mix_model.vars[0][:num_scen]
+        # p = ambset.mix_model.vars[0]
         var_exp_list = ambset.mix_model.vars[1:]
         num_event = len(ambset.exp_constr)
 
@@ -519,6 +520,7 @@ class Model:
             else:
                 beta = 0
 
+            # left = alpha @ p[:num_scen]
             left = alpha @ p
             for j in range(num_event):
                 left += var_exp_list[j][:num_rand] @ beta[:, j]
