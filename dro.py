@@ -159,6 +159,10 @@ class Model:
 
         return wks_set
 
+    def adro(self, *args):
+
+        return self.wks(*args)
+
     def rule_var(self):
 
         if self.var_ev_list is not None:

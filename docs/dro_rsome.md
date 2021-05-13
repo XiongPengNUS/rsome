@@ -454,7 +454,7 @@ fset = model.bou(abs(z) <= 1,
                  norm(z, 1) <= 1.5)     # Define an uncertainty set
 ```
 
-Another special case is the generalized-moment ambiguity set introduced in the paper [Distributionally robust convex optimization](http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf), or the WKS ambiguity, as named after the authors. This is again a one-scenario ambiguity set. It can be defined by the `wks()` method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.
+Another special case is the simplified version of the WKS ambiguity set (see [Distributionally robust convex optimization](http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf)) introduced in [Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf). This is again a one-scenario ambiguity set. It can be defined by the `wks()` method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.
 
 ```python
 from rsome import dro

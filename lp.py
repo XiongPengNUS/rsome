@@ -1090,9 +1090,12 @@ class Affine:
     def __eq__(self, other):
 
         left = self - other
-        return LinConstr(left.model, left.linear,
-                         -left.const.reshape((left.const.size,)),
-                         np.ones(left.const.size))
+        if isinstance(left, Affine) and not isinstance(left, DecAffine):
+            return LinConstr(left.model, left.linear,
+                             -left.const.reshape((left.const.size,)),
+                             np.ones(left.const.size))
+        else:
+            return left.__eq__(0)
         ##########
 
 
@@ -2375,6 +2378,10 @@ class DecRule:
     def __add__(self, other):
 
         return self.to_affine().__add__(other)
+
+    def __radd__(self, other):
+
+        return self.__add__(other)
 
     def __sub__(self, other):
 
