@@ -53,21 +53,21 @@ data = pd.read_csv('taxi_rain.csv')
 
 Y, X = data.iloc[:, :10], data.iloc[:, 10:]         # Y as demand, X as side info
 
-regr = DecisionTreeRegressor(max_leaf_nodes=4,      # max leaf nodes
-                             min_samples_leaf=3)    # min sample size of each leaf
+regr = DecisionTreeRegressor(max_leaf_nodes=4,      # Max leaf nodes
+                             min_samples_leaf=3)    # Min sample size of each leaf
 regr.fit(X, Y)
 
 mu, index, counts = np.unique(regr.predict(X), axis=0,
                               return_inverse=True,
                               return_counts=True)   # mu as the conditional mean
 
-p = counts/X.shape[0]                               # scenario weights         
+w = counts/X.shape[0]                               # Scenario weights         
 phi = np.array([(Y.values[index==i] - mu[i]).std(axis=0)
-                for i in range(len(counts))])       # conditional variance
+                for i in range(len(counts))])       # Conditional variance
 d_ub = np.array([Y.values[index==i].max(axis=0)
-                for i in range(len(counts))])       # upper bound of each scenario
+                 for i in range(len(counts))])      # Upper bound of each scenario
 d_lb = np.array([Y.values[index==i].min(axis=0)
-                for i in range(len(counts))])       # lower bound of each scenario
+                 for i in range(len(counts))])      # Lower bound of each scenario
 ```
 
 The structure of the tree is displayed by the following diagram, as an example of four leaf nodes where the minimum sample size for each node is three.
@@ -91,18 +91,18 @@ r = 0.1*rhat + b
 c = np.zeros((I, J)) + b
 q = 400 * np.ones(I)
 
-S = mu.shape[0]                             # the number of leaf nodes (scenarios)
-model = dro.Model(S)                        # create a model with S scenarios
+S = mu.shape[0]                             # The number of leaf nodes (scenarios)
+model = dro.Model(S)                        # Create a model with S scenarios
 
 d = model.rvar(J)
 u = model.rvar(J)
 fset = model.ambiguity()
 for s in range(S):
     fset[s].exptset(E(d) == mu[s],
-                    E(u) <= phi[s])         # expectation of each scenario
+                    E(u) <= phi[s])         # Conditional expectation
     fset[s].suppset(d >= d_lb[s], d <= d_ub[s],
-                    square(d - mu[s]) <= u) # support of each scenario
-pr = model.p                                # scenario weights
+                    square(d - mu[s]) <= u) # Support of each scenario
+pr = model.p                                # Scenario weights
 fset.probset(pr == w)                       # w as scenario weights
 
 x = model.dvar((I, J))
