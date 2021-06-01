@@ -46,26 +46,30 @@ The scenarios and parameters of the ambiguity sets are identified based on the d
 Covariates](https://poseidon01.ssrn.com/delivery.php?ID=844094086070064024091072104002099075001041021035000006069012011004096071088071083104032055127026009096001070088117011094080028025052090016076024094098009013002125127004055032029018120108100080117122104121068099127103101024005102012074098069027085096068&EXT=pdf&INDEX=TRUE) as some small random noises are added to the demand data. We use a multivariate regression tree to generate \\(S\\) scenarios (leaf nodes of the tree) and the conditional means and variances for each scenario are calculated respectively. The code is provided as follows.
 
 ```python
+import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
 
-y, X = data.iloc[:, :10], data.iloc[:, 10:]         # y as demand, X as side info
+data = pd.read_csv('taxi_rain.csv')
+
+Y, X = data.iloc[:, :10], data.iloc[:, 10:]         # Y as demand, X as side info
 
 regr = DecisionTreeRegressor(max_leaf_nodes=4,      # max leaf nodes
                              min_samples_leaf=3)    # min sample size of each leaf
-regr.fit(X, y)
+regr.fit(X, Y)
 
 mu, index, counts = np.unique(regr.predict(X), axis=0,
                               return_inverse=True,
                               return_counts=True)   # mu as the conditional mean
 
 p = counts/X.shape[0]                               # scenario weights         
-phi = np.array([(y.values[index==i] - mu[i]).std(axis=0)
+phi = np.array([(Y.values[index==i] - mu[i]).std(axis=0)
                 for i in range(len(counts))])       # conditional variance
-d_ub = np.array([y.values[index==i].max(axis=0)
+d_ub = np.array([Y.values[index==i].max(axis=0)
                 for i in range(len(counts))])       # upper bound of each scenario
-d_lb = np.array([y.values[index==i].min(axis=0)
+d_lb = np.array([Y.values[index==i].min(axis=0)
                 for i in range(len(counts))])       # lower bound of each scenario
 ```
+
 The structure of the tree is displayed by the following diagram, as an example of four leaf nodes where the minimum sample size for each node is three.
 
 ![](taxi_demand_tree.png)
@@ -77,6 +81,15 @@ from rsome import dro
 from rsome import square
 from rsome import E
 from rsome import grb_solver as grb
+import numpy as np
+
+J = 10
+I = 1
+rhat = np.array([15.0, 14.1, 6.1, 14.9, 13.8, 15.8, 15.3, 16.4, 15.8, 13.2])
+b = 3 * np.ones(J)
+r = 0.1*rhat + b
+c = np.zeros((I, J)) + b
+q = 400 * np.ones(I)
 
 S = mu.shape[0]                             # the number of leaf nodes (scenarios)
 model = dro.Model(S)                        # create a model with S scenarios
