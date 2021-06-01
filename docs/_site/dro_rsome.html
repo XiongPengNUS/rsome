@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=07f26f0183bdb159c5dc70cc411a42099c6c83aa">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b4e15976bc54adc718f7bf95c96d5984bf276912">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -483,7 +483,7 @@ dtype: int64
                  <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>     <span class="c1"># Define an uncertainty set
 </span></code></pre></div></div>
 
-<p>Another special case is the generalized-moment ambiguity set introduced in the paper <a href="http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf">Distributionally robust convex optimization</a>, or the WKS ambiguity, as named after the authors. This is again a one-scenario ambiguity set. It can be defined by the <code class="language-plaintext highlighter-rouge">wks()</code> method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.</p>
+<p>Another special case is the simplified version of the WKS ambiguity set (see <a href="http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf">Distributionally robust convex optimization</a>) introduced in <a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>. This is again a one-scenario ambiguity set. It can be defined by the <code class="language-plaintext highlighter-rouge">wks()</code> method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
@@ -570,7 +570,8 @@ dtype: int64
 <h3 id="multi-stage-stochastic-financial-planning"><a href="example_dro_finpl">Multi-stage stochastic financial planning</a></h3>
 <h3 id="distributionally-robust-optimization-for-medical-appointment-scheduling"><a href="example_dro_mas">Distributionally robust optimization for medical appointment scheduling</a></h3>
 <h3 id="a-multi-item-newsvendor-problem-considering-the-wasserstein-ambiguity-set"><a href="example_dro_nv">A multi-item newsvendor problem considering the Wasserstein ambiguity set</a></h3>
-<h3 id="distributionally-robust-optimization-approaches-for-a-lot-size-problem-"><a href="example_dro_ls">Distributionally robust optimization approaches for a lot-size problem </a></h3>
+<h3 id="distributionally-robust-optimization-approaches-for-a-lot-size-problem"><a href="example_dro_ls">Distributionally robust optimization approaches for a lot-size problem</a></h3>
+<h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates"><a href="example_dro_vehicle">Robust vehicle pre-allocation with uncertain covariates</a></h3>
 
 
       </section>

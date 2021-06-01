@@ -30,6 +30,7 @@
   <li> <a href="example_dro_mas">Distributionally robust optimization for medical appointment scheduling </a></li>
   <li> <a href="example_dro_nv">A multi-item newsvendor problem considering the Wasserstein ambiguity set </a></li>
   <li> <a href="example_dro_ls">Distributionally robust optimization approaches for a lot-size problem </a></li>
+  <li> <a href="example_dro_vehicle">Robust vehicle pre-allocation with uncertain covariates</a></li>
 </ul>
 </toc></th></tr>
 </table>

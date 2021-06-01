@@ -83,7 +83,7 @@ T = mu.sum() + 0.5*((sigma**2).sum())**0.5
 mul = np.diag(np.ones(N))*(1-alpha) + np.ones((N, N))*alpha
 Sigma = (sigma.T @ sigma) * mul
 
-# Modeling with RSOMEb
+# Modeling with RSOME
 model = dro.Model()                                  # Define a DRO model
 z = model.rvar(N)                                    # Random variable z
 u = model.rvar(N+1)                                  # Auxiliary variable u

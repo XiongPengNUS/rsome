@@ -544,4 +544,5 @@ Similar to the linear decision rule defined in the `ro` modeling environment, co
 ### [Multi-stage stochastic financial planning](example_dro_finpl)
 ### [Distributionally robust optimization for medical appointment scheduling](example_dro_mas)
 ### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)
-### [Distributionally robust optimization approaches for a lot-size problem ](example_dro_ls)
+### [Distributionally robust optimization approaches for a lot-size problem](example_dro_ls)
+### [Robust vehicle pre-allocation with uncertain covariates](example_dro_vehicle)

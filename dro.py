@@ -419,10 +419,12 @@ class Model:
                     if is_equal == 1:
 
                         left = DecLinConstr(constr.model,
-                                            constr.linear, constr.const, 0,
+                                            constr.linear, constr.const,
+                                            np.zeros(constr.linear.shape[0]),
                                             constr.event_adapt, constr.ctype)
                         right = DecLinConstr(constr.model,
-                                             -constr.linear, -constr.const, 0,
+                                             -constr.linear, -constr.const,
+                                             np.zeros(constr.linear.shape[0]),
                                              constr.event_adapt, constr.ctype)
                         return self.ro_to_roc(left) + self.ro_to_roc(right)
 

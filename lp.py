@@ -1706,7 +1706,7 @@ class DecVar(Vars):
                     outputs.append(coeff.reshape(self.shape))
                 else:
                     rv_shape = rvar.to_affine().shape
-                    outputs.append(coeff.reshape(rv_shape + self.shape))
+                    outputs.append(coeff.reshape(self.shape + rv_shape))
 
             if len(outputs) > 1:
                 ind_label = self.dro_model.series_scen.index
@@ -2448,7 +2448,7 @@ class DecRule:
                 return ldr_coeff[:, rand_ind].reshape(self.shape)
             else:
                 rv_shape = rvar.to_affine().shape
-                return ldr_coeff[:, rand_ind].reshape(rv_shape + self.shape)
+                return ldr_coeff[:, rand_ind].reshape(self.shape + rv_shape)
 
 
 class DecRuleSub:

@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME for Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b4e15976bc54adc718f7bf95c96d5984bf276912">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME for Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates">Robust vehicle pre-allocation with uncertain covariates</h3>
+
+<p>In this example,  we consider the vehicle pre-allocation problem introduced in <a href="https://poseidon01.ssrn.com/delivery.php?ID=844094086070064024091072104002099075001041021035000006069012011004096071088071083104032055127026009096001070088117011094080028025052090016076024094098009013002125127004055032029018120108100080117122104121068099127103101024005102012074098069027085096068&amp;EXT=pdf&amp;INDEX=TRUE">Robust Vehicle Pre-Allocation with Uncertain
+Covariates</a>. Suppose that there are \(I\) supply nodes and \(J\) demand nodes in an urban area.  The operator,  before the random demand \(\tilde{d}_j = (\tilde{d})_{j\in[J]}\) realizes, allocates \(x_{ij}\) vehicles from supply node \(i\in[I]\) (which has a numbers \(i\) of idle vehicles) to demand node \(j\in[J]\) at a unit cost \(c_{ij}\), and the revenue is calculated as \(\sum_{j \in [J]} r_j \min\left\{\sum_{i \in [I]} x_{ij}, d_j\right\}\), as the uncertain demand is realized. Consider the demand randomness, the distributionally robust vehicle pre-allocation problem can be formulated as the following problem:</p>
+
+\[\begin{align}
+\min~&amp;\sum\limits_{i\in[I]}\sum\limits_{j\in[J]}(c_{ij} - r_j)x_{ij} + \sup\limits_{\mathbb{P}\in\mathcal{F}}\mathbb{E}_{\mathbb{P}}\left[\sum\limits_{j\in[J]}r_jy_j(\tilde{s}, \tilde{\pmb{d}}, \tilde{\pmb{u}})\right] \hspace{-1.5in}&amp;&amp; \\
+\text{s.t.}~&amp;y_j(s, \pmb{d}, \pmb{u}) \geq \sum\limits_{i\in[I]}x_{ij} - d_j &amp;&amp; \forall (\pmb{d}, \pmb{u}) \in \mathcal{Z}_s, \forall s \in [S], \forall j \in [J] \\
+&amp;y_j(s, \pmb{d}, \pmb{u}) \geq 0 &amp;&amp; \forall (\pmb{d}, \pmb{u}) \in \mathcal{Z}_s, \forall s \in [S], \forall j \in [J] \\
+&amp;\sum\limits_{j\in[J]}x_{ij} \leq q_i &amp;&amp; \forall i \in [I] \\
+&amp;x_{ij} \geq 0 &amp;&amp;\forall i \in[I], \forall j \in [J], \\
+\end{align}\]
+
+<p>where \(y_j(s, \pmb{d}, \pmb{u})\) is the adaptive decision representing the demand surplus and it adapts to each scenario and affinely depends on random variables \(\pmb{d}\) and \(\pmb{u}\), as a tractable approximation of the non-anticipative decisions. Following the paper <a href="https://poseidon01.ssrn.com/delivery.php?ID=844094086070064024091072104002099075001041021035000006069012011004096071088071083104032055127026009096001070088117011094080028025052090016076024094098009013002125127004055032029018120108100080117122104121068099127103101024005102012074098069027085096068&amp;EXT=pdf&amp;INDEX=TRUE">Robust Vehicle Pre-Allocation with Uncertain
+Covariates</a>, model parameters are summarized as follows:</p>
+<ul>
+  <li>Number of supply nodes \(I=1\);</li>
+  <li>Number of demand nodes \(J=10\);</li>
+  <li>Coefficients \(\hat{\pmb{r}} = (15.0,14.1,6.1,14.9,13.8,15.8,15.3,16.4,15.8,13.2)\);</li>
+  <li>Revenue coefficients \(r_j = 0.1\hat{r}_j + 3\), where \(j=1, 2, …, J\);</li>
+  <li>Cost coefficients \(c_j = 3\), where \(j=1, 2, …, J\);</li>
+  <li>Maximum supply of vehicles \(q_i=400\), where \(i=1, 2, …, I\).</li>
+</ul>
+
+<p>The ambiguity set \(\mathcal{F}\) presented below considers the conditional means and variances of \(S\) scenario,</p>
+
+\[\begin{align}
+\mathcal{F} = \left\{
+\mathbb{P}\in\mathcal{P}_0(\mathbb{R}^J\times\mathbb{R}^J\times [S]) \left|
+\begin{array}{ll}
+(\tilde{\pmb{d}}, \tilde{\pmb{u}}, \tilde{s}) \in \mathbb{P} &amp; \\
+\mathbb{E}_{\mathbb{P}}[\tilde{\pmb{d}}|\tilde{s}=s] = \pmb{\mu}_s &amp; \forall s \in [S] \\
+\mathbb{E}_{\mathbb{P}}[\tilde{\pmb{u}}|\tilde{s}=s] = \pmb{\phi}_s &amp; \forall s \in [S] \\
+\mathbb{P}[(\tilde{\pmb{d}}, \tilde{\pmb{u}}) \in \mathcal{Z}_s | \tilde{s}=s] = 1 &amp; \forall s \in [S] \\
+\mathbb{P}[\tilde{s}=s] = w_s &amp; \forall s \in [S] \\
+\end{array}
+\right.
+\right\}.
+\end{align}\]
+
+<p>The scenarios and parameters of the ambiguity sets are identified based on the dataset dataset <a href="taxi_rain.csv">taxi_rain.csv</a> where the first ten columns are the taxi demand data for ten regions, and the remaining columns are corresponding side information in terms of rainfall records. Please note that the dataset is slightsly different from the data used in <a href="https://poseidon01.ssrn.com/delivery.php?ID=844094086070064024091072104002099075001041021035000006069012011004096071088071083104032055127026009096001070088117011094080028025052090016076024094098009013002125127004055032029018120108100080117122104121068099127103101024005102012074098069027085096068&amp;EXT=pdf&amp;INDEX=TRUE">Robust Vehicle Pre-Allocation with Uncertain
+Covariates</a> as some small random noises are added to the demand data. We use a multivariate regression tree to generate \(S\) scenarios (leaf nodes of the tree) and the conditional means and variances for each scenario are calculated respectively. The code is provided as follows.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
+
+<span class="n">y</span><span class="p">,</span> <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">10</span><span class="p">],</span> <span class="n">data</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">10</span><span class="p">:]</span>         <span class="c1"># y as demand, X as side info
+</span>
+<span class="n">regr</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_leaf_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>      <span class="c1"># max leaf nodes
+</span>                             <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>    <span class="c1"># min sample size of each leaf
+</span><span class="n">regr</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="n">mu</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">unique</span><span class="p">(</span><span class="n">regr</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">return_inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>   <span class="c1"># mu as the conditional mean
+</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">counts</span><span class="o">/</span><span class="n">X</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                               <span class="c1"># scenario weights         
+</span><span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([(</span><span class="n">y</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="o">==</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))])</span>       <span class="c1"># conditional variance
+</span><span class="n">d_ub</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">y</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="o">==</span><span class="n">i</span><span class="p">].</span><span class="nb">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))])</span>       <span class="c1"># upper bound of each scenario
+</span><span class="n">d_lb</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">y</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="o">==</span><span class="n">i</span><span class="p">].</span><span class="nb">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))])</span>       <span class="c1"># lower bound of each scenario
+</span></code></pre></div></div>
+<p>The structure of the tree is displayed by the following diagram, as an example of four leaf nodes where the minimum sample size for each node is three.</p>
+
+<p><img src="taxi_demand_tree.png" alt="" /></p>
+
+<p>By exploiting the moment information of each leaf node, we can formulate the model by the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+
+<span class="n">S</span> <span class="o">=</span> <span class="n">mu</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                             <span class="c1"># the number of leaf nodes (scenarios)
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                        <span class="c1"># create a model with S scenarios
+</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                    <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>         <span class="c1"># expectation of each scenario
+</span>    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                    <span class="n">square</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span> <span class="c1"># support of each scenario
+</span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                <span class="c1"># scenario weights
+</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="n">w</span><span class="p">)</span>                       <span class="c1"># w as scenario weights
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                              <span class="c1"># y adapts to each scenario s
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(((</span><span class="n">c</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">r</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">q</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0591s
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

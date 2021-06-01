@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=07f26f0183bdb159c5dc70cc411a42099c6c83aa">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b4e15976bc54adc718f7bf95c96d5984bf276912">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -141,7 +141,7 @@
 <span class="n">mul</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="n">alpha</span>
 <span class="n">Sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma</span><span class="p">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">mul</span>
 
-<span class="c1"># Modeling with RSOMEb
+<span class="c1"># Modeling with RSOME
 </span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                                  <span class="c1"># Define a DRO model
 </span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># Random variable z
 </span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># Auxiliary variable u
