@@ -29,7 +29,7 @@ The RSOME package can be installed by using the <code>pip</code> command:
 
 ### Getting started
 
-In RSOME, models can be specified by using highly readable algebraic expressions that are consistent with NumPy syntax. Below we provide a simple linear program as an example to illustrate the steps of modeling and solving an optimization problem.
+In RSOME, models can be specified by using highly readable algebraic expressions that are consistent with NumPy-syntax. Below we provide a simple linear program as an example to illustrate the steps of modeling and solving an optimization problem in RSOME.
 
 
 ![](https://latex.codecogs.com/gif.latex?%5Cdpi%7B120%7D%20%5Cbg_white%20%5Cbegin%7Balign%7D%20%5Cmax%20%7E%263x%20&plus;%204y%20%5Cnonumber%20%5C%5C%20%5Ctext%7Bs.t.%7D%7E%262.5x%20&plus;%20y%20%5Cleq%2020%20%5Cnonumber%20%5C%5C%20%265x%20&plus;%203y%20%5Cleq%2030%20%5Cnonumber%20%5C%5C%20%26x%20&plus;%202y%20%5Cleq%2016%20%5Cnonumber%20%5C%5C%20%26%7Cy%7C%20%5Cleq%202%2C%20%5Cnonumber%20%5Cend%7Balign%7D)
