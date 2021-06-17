@@ -194,4 +194,4 @@ x_under_sol.apply(lambda x: x.round(3)) # scenario-wise solution of x_under (3 d
 
 <a id="ref1"></a>
 
-Birge, John R., and Francois Louveaux. [<i>Introduction to stochastic programming</i>](https://www.springer.com/gp/book/9781461402367). Springer Science & Business Media, 2011.
+Birge, John R, Francois Louveaux. 2011. [<i>Introduction to stochastic programming</i>](https://www.springer.com/gp/book/9781461402367). Springer.

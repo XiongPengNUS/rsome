@@ -454,7 +454,7 @@ fset = model.bou(abs(z) <= 1,
                  norm(z, 1) <= 1.5)     # Define an uncertainty set
 ```
 
-Another special case is the simplified version of the WKS ambiguity set (see [Distributionally robust convex optimization](http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf)) introduced in [Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf). This is again a one-scenario ambiguity set. It can be defined by the `wks()` method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.
+Another special case is the simplified version of the WKS ambiguity set (see [Wiesemann et al. (2014)](#ref1)) introduced in [Bertsimas et al. (2019)](#ref2). This is again a one-scenario ambiguity set. It can be defined by the `wks()` method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.
 
 ```python
 from rsome import dro
@@ -546,3 +546,14 @@ Similar to the linear decision rule defined in the `ro` modeling environment, co
 ### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)
 ### [Distributionally robust optimization approaches for a lot-size problem](example_dro_ls)
 ### [Robust vehicle pre-allocation with uncertain covariates](example_dro_vehicle)
+
+
+## Reference
+
+<a id="ref1"></a>
+
+Wiesemann, Wolfram, Daniel Kuhn, Melvyn Sim. 2014. [Distributionally robust convex optimization](https://pubsonline.informs.org/doi/abs/10.1287/opre.2014.1314). <i>Operations Research</i> <b>62</b>(6) 1358–1376.
+
+<a id="ref2"></a>
+
+Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. [Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf). <i>Management Science</i> <b>65</b>(2) 604-618.

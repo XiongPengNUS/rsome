@@ -273,8 +273,8 @@ The optimal lot-sizing decision is illustrated by the following figure.
 
 <a id="ref1"></a>
 
-Bertsimas, Dimitris, Shimrit Shtern, and Bradley Sturt. "[Two-stage sample robust optimization](https://pubsonline.informs.org/doi/abs/10.1287/opre.2020.2096)." Operations Research (2021).
+Bertsimas, Dimitris, Shimrit Shtern, and Bradley Sturt. 2021. [Two-stage sample robust optimization](https://pubsonline.informs.org/doi/abs/10.1287/opre.2020.2096). <i>Operations Research</i>.
 
 <a id="ref2"></a>
 
-Chen, Zhi, Melvyn Sim, and Peng Xiong. "[Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603)." <i>Management Science</i> 66.8 (2020): 3329-3339.
+Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329–3339.

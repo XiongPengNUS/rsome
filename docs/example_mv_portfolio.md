@@ -80,4 +80,4 @@ print('Objective value: {0:0.4f}'.format(obj_val))
 
 <a id="ref1"></a>
 
-Ben-Tal, A., & Nemirovski, A. (1999). "[Robust solutions of uncertain linear programs](https://www.sciencedirect.com/science/article/abs/pii/S0167637799000164)." <i>Operations research letters</i>, 25(1), 1-13.
+Ben-Tal, Aharon, and Arkadi Nemirovski. 1999. [Robust solutions of uncertain linear programs](https://www.sciencedirect.com/science/article/abs/pii/S0167637799000164). <i>Operations Research Letters</i> <b>25</b>(1) 1-13.

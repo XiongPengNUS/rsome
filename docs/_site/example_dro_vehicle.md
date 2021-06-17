@@ -127,4 +127,4 @@ Running time: 0.0591s
 
 <a id="ref1"></a>
 
-Hao, Zhaowei, Long He, Zhenyu Hu, and Jun Jiang. "[Robust vehicle pre‐allocation with uncertain covariates]((https://onlinelibrary.wiley.com/doi/abs/10.1111/poms.13143))." <i>Production and Operations Management</i> 29.4 (2020): 955-972.
+Hao, Zhaowei, Long He, Zhenyu Hu, and Jun Jiang. 2020. [Robust vehicle pre‐allocation with uncertain covariates]((https://onlinelibrary.wiley.com/doi/abs/10.1111/poms.13143)). <i>Production and Operations Management</i> <b>29</b>(4) 955-972.

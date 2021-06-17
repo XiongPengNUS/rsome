@@ -118,4 +118,4 @@ Running time: 0.0516s
 
 <a id="ref1"></a>
 
-Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. "[Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf)." <i>Management Science</i> 65.2 (2019): 604-618.
+Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. [Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf). <i>Management Science</i> <b>65</b>(2) 604-618.

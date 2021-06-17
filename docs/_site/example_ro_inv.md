@@ -135,7 +135,7 @@ Please refer to Table 1 of [de Ruiter et al. (2016)](#ref2) to verify the worst-
 
 <a id="ref1"></a>
 
-Ben-Tal, Aharon, Alexander Goryashko, Elana Guslitzer, and Arkadi Nemirovski. "[Adjustable robust solutions of uncertain linear programs](https://www2.isye.gatech.edu/~nemirovs/MP_Elana_2004.pdf)." <i>Mathematical programming</i> 99.2 (2004): 351-376.
+Ben-Tal, Aharon, Alexander Goryashko, Elana Guslitzer, and Arkadi Nemirovski. 2004. [Adjustable robust solutions of uncertain linear programs](https://www2.isye.gatech.edu/~nemirovs/MP_Elana_2004.pdf). <i>Mathematical Programming</i> <b>99</b>(2) 351-376.
 
 <a id="ref2"></a>
-de Ruiter, Frans JCT, Ruud CM Brekelmans, and Dick den Hertog. "[The impact of the existence of multiple adjustable robust solutions](https://link.springer.com/article/10.1007/s10107-016-0978-6)." <i>Mathematical Programming</i> 160.1 (2016): 531-545.
+de Ruiter, Frans JCT, Ruud CM Brekelmans, and Dick den Hertog. 2016. [The impact of the existence of multiple adjustable robust solutions](https://link.springer.com/article/10.1007/s10107-016-0978-6). <i>Mathematical Programming</i> <b>160</b>(1) 531-545.

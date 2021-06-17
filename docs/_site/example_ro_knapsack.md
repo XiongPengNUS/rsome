@@ -186,8 +186,8 @@ plt.show()
 #### Reference
 
 <a id="ref1"></a>
-Bertsimas, Dimitris, and Melvyn Sim. "[The price of robustness](https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065)." <i>Operations research</i> 52.1 (2004): 35-53.
+Bertsimas, Dimitris, and Melvyn Sim. 2004. [The price of robustness](https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065). <i>Operations Research</i> <b>52</b>(1) 35-53.
 
 
 <a id="ref2"></a>
-Long, Daniel Zhuoyu, Melvyn Sim, and Minglong Zhou. "[The dao of robustness](https://www.researchgate.net/publication/337185661_The_Dao_of_Robustness)." (2019).
+Long, Daniel Zhuoyu, Melvyn Sim, and Minglong Zhou. 2019. [The dao of robustness](https://www.researchgate.net/publication/337185661_The_Dao_of_Robustness).

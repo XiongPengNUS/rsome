@@ -483,7 +483,7 @@ dtype: int64
                  <span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.5</span><span class="p">)</span>     <span class="c1"># Define an uncertainty set
 </span></code></pre></div></div>
 
-<p>Another special case is the simplified version of the WKS ambiguity set (see <a href="http://www.optimization-online.org/DB_FILE/2013/02/3757.pdf">Distributionally robust convex optimization</a>) introduced in <a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>. This is again a one-scenario ambiguity set. It can be defined by the <code class="language-plaintext highlighter-rouge">wks()</code> method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.</p>
+<p>Another special case is the simplified version of the WKS ambiguity set (see <a href="#ref1">Wiesemann et al. (2014)</a>) introduced in <a href="#ref2">Bertsimas et al. (2019)</a>. This is again a one-scenario ambiguity set. It can be defined by the <code class="language-plaintext highlighter-rouge">wks()</code> method of the model object, where constraints of both the random variables and their expectations can be specified altogether, as demonstrated by the following sample code.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
@@ -572,6 +572,16 @@ dtype: int64
 <h3 id="a-multi-item-newsvendor-problem-considering-the-wasserstein-ambiguity-set"><a href="example_dro_nv">A multi-item newsvendor problem considering the Wasserstein ambiguity set</a></h3>
 <h3 id="distributionally-robust-optimization-approaches-for-a-lot-size-problem"><a href="example_dro_ls">Distributionally robust optimization approaches for a lot-size problem</a></h3>
 <h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates"><a href="example_dro_vehicle">Robust vehicle pre-allocation with uncertain covariates</a></h3>
+
+<h2 id="reference">Reference</h2>
+
+<p><a id="ref1"></a></p>
+
+<p>Wiesemann, Wolfram, Daniel Kuhn, Melvyn Sim. 2014. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.2014.1314">Distributionally robust convex optimization</a>. <i>Operations Research</i> <b>62</b>(6) 1358–1376.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. <a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>. <i>Management Science</i> <b>65</b>(2) 604-618.</p>
 
 
       </section>

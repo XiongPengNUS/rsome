@@ -295,4 +295,4 @@ array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
 
 <a id="ref1"></a>
 
-Zhu, Shushang, and Masao Fukushima. "[Worst-case conditional value-at-risk with application to robust portfolio management](https://pubsonline.informs.org/doi/abs/10.1287/opre.1080.0684)." <i>Operations research</i> 57.5 (2009): 1155-1168.
+Zhu, Shushang, and Masao Fukushima. 2009. [Worst-case conditional value-at-risk with application to robust portfolio management](https://pubsonline.informs.org/doi/abs/10.1287/opre.1080.0684). <i>Operations Research</i> <b>57</b>(5) 1155-1168.

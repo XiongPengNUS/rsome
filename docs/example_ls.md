@@ -2,7 +2,7 @@
 
 ### Adaptive robust optimization for a lot-sizing problem
 
-In this example, we consider a lot-sizing problem described in [Bertsimas et al. (2016)](#ref1). In a network with \\(N\\) stores, the stock allocation \\(x_i\\) for each store \\(i\\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \\(d\\),  is uncertain and assumed to be in a budget uncertainty set
+In this example, we consider a lot-sizing problem described in [Bertsimas and de Ruiter (2016)](#ref1). In a network with \\(N\\) stores, the stock allocation \\(x_i\\) for each store \\(i\\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \\(d\\),  is uncertain and assumed to be in a budget uncertainty set
 
 $$
 \mathcal{U}=\left\{\pmb{d}: \pmb{0}\leq \pmb{d} \leq d_{\text{max}}\pmb{e}, \pmb{e}^T\pmb{d} \leq \Gamma\right\}.
@@ -89,4 +89,4 @@ plt.show()
 
 <a id="ref1"></a>
 
-Bertsimas, Dimitris, and Frans JCT de Ruiter. "[Duality in two-stage adaptive linear optimization: Faster computation and stronger bounds](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2016.0689)." <i>INFORMS Journal on Computing</i> 28.3 (2016): 500-511.
+Bertsimas, Dimitris, and Frans JCT de Ruiter. 2016. [Duality in two-stage adaptive linear optimization: Faster computation and stronger bounds](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2016.0689). <i>INFORMS Journal on Computing</i> <b>28</b>(3) 500-511.

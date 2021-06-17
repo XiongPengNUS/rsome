@@ -5,9 +5,9 @@
 - [Peng Xiong](https://bizfaculty.nus.edu.sg/faculty-details/?profId=543)
 
 ### Citation
-Chen Z, Xiong P. [RSOME in Python: an open-source package for robust stochastic optimization made easy](http://www.optimization-online.org/DB_HTML/2021/06/8443.html). <i>Optimization Online</i>. 2021 June.
+Chen, Zhi, and Peng Xiong. 2021. [RSOME in Python: an open-source package for robust stochastic optimization made easy](http://www.optimization-online.org/DB_HTML/2021/06/8443.html). <i>Optimization Online</i>.
 
-Chen Z, Sim M, Xiong P. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i>. 2020 May 13.
+Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329–3339.
 
 Bibtex entry:
 
@@ -25,6 +25,9 @@ Bibtex entry:
   title={Robust stochastic optimization made easy with RSOME},
   author={Chen, Zhi and Sim, Melvyn and Xiong, Peng},
   journal={Management Science},
+  volume={66},
+  number={8},
+  pages={3329--3339},
   year={2020},
   publisher={INFORMS}
 }

@@ -623,4 +623,4 @@ For Gurobi, you may find the parameter names and their values from [Parameters](
 
 <a id="ref1"></a>
 
-Chen, Zhi, Melvyn Sim, and Peng Xiong. "[Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603)." <i>Management Science</i> 66.8 (2020): 3329-3339.
+Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329–3339.
