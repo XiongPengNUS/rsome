@@ -2,7 +2,7 @@
 
 ### Robust portfolio optimization
 
-In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper [The Price of Robustness](https://www.researchgate.net/publication/220244391_The_Price_of_Robustness). The robust model is presented below.
+In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper [Bertsimas and Sim (2004)](#ref1). The robust model is presented below.
 
 $$
 \begin{align}
@@ -40,23 +40,23 @@ import rsome as rso
 import numpy as np
 
 
-n = 150                                 # Number of stocks
-i = np.arange(1, n+1)                   # Indices of stocks
-p = 1.15 + i*0.05/150                   # Mean returns
-delta = 0.05/450 * (2*i*n*(n+1))**0.5   # Deviations of returns
-Gamma = 5                               # Budget of uncertainty
+n = 150                                 # number of stocks
+i = np.arange(1, n+1)                   # indices of stocks
+p = 1.15 + i*0.05/150                   # mean returns
+delta = 0.05/450 * (2*i*n*(n+1))**0.5   # deviations of returns
+Gamma = 5                               # budget of uncertainty
 
 model = ro.Model()              
-x = model.dvar(n)                       # Fractions of investment
-z = model.rvar(n)                       # Random variables
+x = model.dvar(n)                       # fractions of investment
+z = model.rvar(n)                       # random variables
 
-model.maxmin((p + delta*z) @ x,         # The max-min objective
-             rso.norm(z, np.infty) <=1, # Uncertainty set constraints
-             rso.norm(z, 1) <= Gamma)   # Uncertainty set constraints
-model.st(sum(x) == 1)                   # Summation of x is one
+model.maxmin((p + delta*z) @ x,         # the max-min objective
+             rso.norm(z, np.infty) <=1, # uncertainty set constraints
+             rso.norm(z, 1) <= Gamma)   # uncertainty set constraints
+model.st(sum(x) == 1)                   # summation of x is one
 model.st(x >= 0)                        # x is non-negative
 
-model.solve(grb)                        # Solve the model by Gurobi
+model.solve(grb)                        # solve the model by Gurobi
 ```
 
     Being solved by Gurobi...
@@ -70,8 +70,8 @@ The optimal investment decision can be visualized by the diagram below.
 ```python
 import matplotlib.pyplot as plt
 
-obj_val = model.get()               # The optimal objective value
-x_sol = x.get()                     # The optimal investment decision
+obj_val = model.get()                   # the optimal objective value
+x_sol = x.get()                         # the optimal investment decision
 
 plt.plot(range(1, n+1), x_sol,
          linewidth=2, color='b')
@@ -86,3 +86,9 @@ print('Objective value: {0:0.4f}'.format(obj_val))
 
 
     Objective value: 1.1709
+
+<br>
+#### Reference
+
+<a id="ref1"></a>
+Bertsimas, Dimitris, and Melvyn Sim. "[The price of robustness](https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065)." <i>Operations research</i> 52.1 (2004): 35-53.

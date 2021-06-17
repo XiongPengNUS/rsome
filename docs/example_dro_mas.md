@@ -2,7 +2,7 @@
 
 ### Distributionally robust optimization for medical appointment scheduling
 
-In this example,  we consider a medical appointment scheduling problem described in [Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf), where \\(N\\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.
+In this example,  we consider a medical appointment scheduling problem described in [Bertsimas et al. (2019)](#ref1), where \\(N\\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.
 
 A distributionally robust optimization model presented below is used to minimize the worst-case expected total cost of patients waiting and physician overtime over a partial cross moment ambiguity set.
 
@@ -72,7 +72,7 @@ import numpy as np
 import numpy.random as rd
 
 
-# Model and ambiguity set parameters
+# model and ambiguity set parameters
 N = 8
 gamma = 2
 alpha = 0.25
@@ -83,28 +83,28 @@ T = mu.sum() + 0.5*((sigma**2).sum())**0.5
 mul = np.diag(np.ones(N))*(1-alpha) + np.ones((N, N))*alpha
 Sigma = (sigma.T @ sigma) * mul
 
-# Modeling with RSOME
-model = dro.Model()                                  # Define a DRO model
-z = model.rvar(N)                                    # Random variable z
-u = model.rvar(N+1)                                  # Auxiliary variable u
+# modeling with RSOME
+model = dro.Model()                                  # define a DRO model
+z = model.rvar(N)                                    # random variable z
+u = model.rvar(N+1)                                  # auxiliary variable u
 
 fset = model.wks(z >= 0, square(z - mu) <= u[:-1],
-                 square((z-mu).sum()) <= u[-1],      # Support of random variables
+                 square((z-mu).sum()) <= u[-1],      # support of random variables
                  E(z) == mu, E(u[:-1]) <= sigma**2,
-                 E(u[-1]) <= Sigma.sum())            # Support of expectations
+                 E(u[-1]) <= Sigma.sum())            # support of expectations
 
-x = model.dvar(N)                                    # The first-stage decision
-y = model.dvar(N+1)                                  # The decision rule
-y.adapt(z)                                           # Define affine adaptation
-y.adapt(u)                                           # Define affine adaptation
+x = model.dvar(N)                                    # the first-stage decision
+y = model.dvar(N+1)                                  # the decision rule
+y.adapt(z)                                           # define affine adaptation
+y.adapt(u)                                           # define affine adaptation
 
-model.minsup(E(y[:-1].sum() + gamma*y[-1]), fset)    # Worst-case expected cost
-model.st(y[1:] - y[:-1] + x >= z)                    # Constraints
-model.st(y >= 0)                                     # Constraints
-model.st(x >= 0)                                     # Constraints
-model.st(x.sum() <= T)                               # Constraints
+model.minsup(E(y[:-1].sum() + gamma*y[-1]), fset)    # worst-case expected cost
+model.st(y[1:] - y[:-1] + x >= z)                    # constraints
+model.st(y >= 0)                                     # constraints
+model.st(x >= 0)                                     # constraints
+model.st(x.sum() <= T)                               # constraints
 
-model.solve(grb)                                     # Solve the model by Gurobi
+model.solve(grb)                                     # solve the model by Gurobi
 ```
 
 ```
@@ -112,3 +112,10 @@ Being solved by Gurobi...
 Solution status: 2
 Running time: 0.0516s
 ```
+
+<br>
+#### Reference
+
+<a id="ref1"></a>
+
+Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. "[Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf)." <i>Management Science</i> 65.2 (2019): 604-618.

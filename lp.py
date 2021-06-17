@@ -286,7 +286,7 @@ class Model:
                 is generated if the option is True.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi and MOSEK.
+                So far the argument only applies to Gurobi, CPLEX,and MOSEK.
         """
 
         if solver is None:

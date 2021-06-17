@@ -2,7 +2,7 @@
 
 ### Integer programming for Sudoku
 
-In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in \[1,9\] on a nine-by-nine grid, with some of the digits already filled in. Your solution must satisfy the following four rules:
+In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) game to illustrate how to use integer and multi-dimensional arrays in RSOME. Sudoku is a popular number puzzle. The goal is to place the digits in \[1,9\] on a nine-by-nine grid, with some of the digits already filled in. The solution must satisfy the following four rules:
 
 1. Each cell contains an integer in \[1,9\].
 2. Each row must contain each of the integers in \[1,9\].
@@ -13,7 +13,7 @@ In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) gam
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg/1280px-Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg.png" width=200>
 </p>
 
-The Sudoku game can be considered as a optimization with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \\(x_{ijk}\in \{0, 1\}\\), where \\(\forall i \in [0, 8]\\), \\(j \in [0, 8]\\), \\(k \in [0, 8]\\). It equals to one if an integer \\(k+1\\) is placed in a cell at the \\(i\\)th row and \\(j\\)th column. Let \\(a_{ij}\\) be the known number at the \\(i\\)th row and \\(j\\)th column, where \\(i\in\mathcal{I}\\) and \\(j\in\mathcal{J}\\), the Sudoku game can be written as the following integer programming problem
+The Sudoku game can be considered as a feasibility optimization problem with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \\(x_{ijk}\in \\{0, 1\\}\\), with\\(i \in [0, 8]\\), \\(j \in [0, 8]\\), and \\(k \in [0, 8]\\). It equals to one if an integer \\(k+1\\) is placed in a cell at the \\(i\\)th row and \\(j\\)th column. Let \\(a_{ij}\\) be the known number at the \\(i\\)th row and \\(j\\)th column, with \\((i, j)\in\mathcal{I}\times\mathcal{J}\\) as \\(\mathcal{I}\\) and \\(\mathcal{J}\\) are the row and column indices of numbers with known values, the Sudoku game can be thus written as the following integer program:
 
 $$
 \begin{align}
@@ -35,8 +35,8 @@ import numpy as np
 from rsome import ro
 from rsome import grb_solver as grb
 
-# A Sudoku puzzle
-# Zeros represent unknown numbers
+# Sudoku puzzle
+# zeros represent unknown numbers
 puzzle = np.array([[5, 3, 0, 0, 7, 0, 0, 0, 2],
                    [6, 0, 0, 1, 9, 5, 0, 0, 0],
                    [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -47,28 +47,28 @@ puzzle = np.array([[5, 3, 0, 0, 7, 0, 0, 0, 2],
                    [0, 0, 0, 4, 1, 9, 0, 0, 5],
                    [0, 0, 0, 0, 8, 0, 0, 7, 9]])
 
-# Create model and binary decision variables
+# create model and binary decision variables
 model = ro.Model()
 x = model.dvar((9, 9, 9), vtype='B')
 
-# Objective is set to be zero
+# objective is set to be zero
 model.min(0 * x.sum())
 
-# Constraints 1 to 3
+# constraints 1 to 3
 model.st(x.sum(axis=0) == 1,
          x.sum(axis=1) == 1,
          x.sum(axis=2) == 1)
 
-# Constraints 4
+# constraints 4
 i, j = np.where(puzzle)
 model.st(x[i, j, puzzle[i, j]-1] == 1)
 
-# Constraints 5
+# constraints 5
 for i in range(0, 9, 3):
     for j in range(0, 9, 3):
         model.st(x[i: i+3, j: j+3, :].sum(axis=(0, 1)) == 1)
 
-# Solve the integer programming problem
+# solve the integer programming problem
 model.solve(grb)
 ```
 
@@ -77,13 +77,13 @@ model.solve(grb)
     Running time: 0.0017s
 
 
-The binary variable \\(x_{ijk}\\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Please note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.
+The binary variable \\(x_{ijk}\\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.
 
 The Sudoku problem and the its solution are presented below.
 
 
 ```python
-print(puzzle)                   # Display the Sudoku puzzle
+print(puzzle)                   # display the Sudoku puzzle
 ```
 
     [[5 3 0 0 7 0 0 0 2]
@@ -99,7 +99,7 @@ print(puzzle)                   # Display the Sudoku puzzle
 
 
 ```python
-x_sol = x.get().astype('int')   # Retrieve the solution as integers
+x_sol = x.get().astype('int')   # retrieve the solution as integers
 
 print((x_sol * np.arange(1, 10).reshape((1, 1, 9))).sum(axis=2))
 ```
@@ -114,10 +114,10 @@ print((x_sol * np.arange(1, 10).reshape((1, 1, 9))).sum(axis=2))
      [2 8 7 4 1 9 6 3 5]
      [3 4 5 2 8 6 1 7 9]]
 
-Please note that in defining "Constraints 4", variables `i` and `j` represent the row and column indices of the fixed elements, which can be retrieved by the `np.where()` function. An alternative approach is to use the boolean indexing of arrays, as the code below.
+Note that in defining "constraints 4", variables `i` and `j` represent the row and column indices of the fixed elements, which can be retrieved by the `np.where()` function. An alternative approach is to use the boolean indexing of arrays, as the code below.
 
 ```python
-# An alternative approach for Constraints 4
+# an alternative approach for constraints 4
 is_fixed = puzzle > 0
 model.st(x[is_fixed, puzzle[is_fixed]-1] == 1)
 ```

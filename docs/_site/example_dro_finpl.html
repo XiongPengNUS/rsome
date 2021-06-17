@@ -65,7 +65,7 @@
 
 <h3 id="multi-stage-stochastic-financial-planning">Multi-stage stochastic financial planning</h3>
 
-<p>In this example we consider the multi-stage financial planning problem discussed in the textbook <a href="https://www.springer.com/gp/book/9781461402367">Introduction to Stochastic Programming (page 23)</a>. As a multi-stage model problem, the here-and-now decision allocates the total wealth $d$ between two investment types: stocks (S) and bonds (B). Each investment type may have a high return and a low return as two possible outcomes. It is assumed that the high returns for stocks and bonds are 1.25 and 1.14, and the low returns are 1.06 and 1.12, respectively. These outcomes are independent and with equal likelihood, so throughout the subsequent stages, we would have eight scenarios with equal probabilities. The random return outcomes of stocks and bonds are represented by a scenario tree shown below.</p>
+<p>In this example we consider the multi-stage financial planning problem discussed in page 23 of <a href="#ref1">Birge and Francois (2011)</a>. As a multi-stage model problem, the here-and-now decision allocates the total wealth \(d\) between two investment types: stocks (S) and bonds (B). Each investment type may have a high return and a low return as two possible outcomes. It is assumed that the high returns for stocks and bonds are 1.25 and 1.14, and the low returns are 1.06 and 1.12, respectively. These outcomes are independent and with equal likelihood, so throughout the subsequent stages, we would have eight scenarios with equal probabilities. The random return outcomes of stocks and bonds are represented by a scenario tree shown below.</p>
 
 <p><img src="https://www.researchgate.net/profile/Zhi-Chen-21/publication/339817145/figure/fig4/AS:867492100591619@1583837642911/Scenario-tree-of-the-financial-planning-problem_W640.jpg" width="400" /></p>
 
@@ -75,7 +75,7 @@
 \mathbb{P}\in\mathcal{P}_0(\mathbb{R}^{3\times2}\times[S]) \left|
 \begin{array}
 ~&amp;(\tilde{\pmb{z}}, \tilde{s}) \in \mathbb{P} &amp;&amp;\\
-&amp;\mathbb{P}[\tilde{\pmb{z}}) \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1, &amp;&amp;\forall s\in[S]\\
+&amp;\mathbb{P}[\tilde{\pmb{z}} \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1, &amp;&amp;\forall s\in[S]\\
 &amp;\mathbb{P}[\tilde{s}=s] = 1/S
 \end{array}
 \right.
@@ -97,7 +97,7 @@
 \[\begin{align}
 &amp;\pmb{x}_1(s) \in \mathcal{A}(\{1, 2, 3, 4\}, \{5, 6, 7, 8\}) \\
 &amp;\pmb{x}_2(s) \in \mathcal{A}(\{1, 2\}, \{3, 4\}, \{5, 6\}, \{7, 8\}) \\
-&amp;\overline{x}(s), \underline{x}(s) \in \mathcal{A}(\{1\}, \{2\}, \{3\}, \{4\}, \{5,\} \{6\}, \{7\}, \{8\})
+&amp;\overline{x}(s), \underline{x}(s) \in \mathcal{A}(\{1\}, \{2\}, \{3\}, \{4\}, \{5\}, \{6\}, \{7\}, \{8\})
 \end{align}\]
 
 <p>In this example, the target parameter \(\tau=80\), and the initial budget is given as \(d=55\). These parameters and the scenario tree are defined by the following code cell.</p>
@@ -125,14 +125,14 @@
 
 
 <span class="n">S</span> <span class="o">=</span> <span class="mi">8</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                    <span class="c1"># A model with S scenarios
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                    <span class="c1"># a model with S scenarios
 </span>
-<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>                  <span class="c1"># Random variables as a 3x2 array
-</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                <span class="c1"># Create an ambiguity set
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>                  <span class="c1"># random variables as a 3x2 array
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                <span class="c1"># create an ambiguity set
 </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
-    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">z_hat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>  <span class="c1"># Scenario-wise support of z
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">z_hat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>  <span class="c1"># scenario-wise support of z
 </span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
-<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>                 <span class="c1"># Probability of each scenario
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>                 <span class="c1"># probability of each scenario
 </span>
 <span class="n">w</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>                       <span class="c1"># 1st-stage decision w
 </span><span class="n">x1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>                      <span class="c1"># 2nd-stage decision x1
@@ -142,14 +142,14 @@
 </span>
 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">s</span><span class="o">%</span><span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">x1</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>         <span class="c1"># Recourse adaptation of x1
+        <span class="n">x1</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>         <span class="c1"># recourse adaptation of x1
 </span>    <span class="k">if</span> <span class="n">s</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">x2</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">))</span>         <span class="c1"># Recourse adaptation of x2
+        <span class="n">x2</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">))</span>         <span class="c1"># recourse adaptation of x2
 </span>
-    <span class="n">x_over</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                     <span class="c1"># Recourse adaptation of \overline{x}
-</span>    <span class="n">x_under</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="c1"># Recourse adaptation of \underline{x}
+    <span class="n">x_over</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                     <span class="c1"># recourse adaptation of \overline{x}
+</span>    <span class="n">x_under</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="c1"># recourse adaptation of \underline{x}
 </span>
-<span class="c1"># The objective and constraints
+<span class="c1"># the objective and constraints
 </span><span class="n">model</span><span class="p">.</span><span class="n">maxinf</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">x_over</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">x_under</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">d</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x1</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">@</span><span class="n">w</span><span class="p">)</span>
@@ -158,7 +158,7 @@
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x2</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
          <span class="n">x_over</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_under</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                        <span class="c1"># Solve the model by Gurobi
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                        <span class="c1"># solve the model by Gurobi
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
@@ -174,7 +174,7 @@ Running time: 0.0020s
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([41.479, 13.521])
 </code></pre></div></div>
 
-<p>In the following code segment, <code class="language-plaintext highlighter-rouge">x1.get()</code> returns the scenario-wise solution of \(\pmb{x}_1\) as a <code class="language-plaintext highlighter-rouge">pandas.Series</code> type object. Index labels of the Series are the same as the scenario indices, so solutions for selected scenarios could be accessed by the <code class="language-plaintext highlighter-rouge">loc</code> or <code class="language-plaintext highlighter-rouge">iloc</code> indexers.</p>
+<p>In the following code segment, <code class="language-plaintext highlighter-rouge">x1.get()</code> returns the scenario-wise solution of \(\pmb{x}_1\) as a <code class="language-plaintext highlighter-rouge">pandas.Series</code> type object. Index labels of the series are the same as the scenario indices, and the solution as an array for each scenario is an element of the series, which could be accessed by the <code class="language-plaintext highlighter-rouge">loc</code> or <code class="language-plaintext highlighter-rouge">iloc</code> indexers.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x1_sol</span> <span class="o">=</span> <span class="n">x1</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
 <span class="n">x1_sol</span><span class="p">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="nb">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>      <span class="c1"># scenario-wise solution of x1 (3 d.p.)
@@ -237,6 +237,13 @@ dtype: object
 7    [12.16]
 dtype: object
 </code></pre></div></div>
+
+<p><br /></p>
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Birge, John R., and Francois Louveaux. <a href="https://www.springer.com/gp/book/9781461402367"><i>Introduction to stochastic programming</i></a>. Springer Science &amp; Business Media, 2011.</p>
 
 
       </section>

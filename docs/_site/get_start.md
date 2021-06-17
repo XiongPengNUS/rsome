@@ -2,17 +2,20 @@
 
 # Getting Started
 
-RSOME is an open-source algebraic library for generic optimization modeling. It is aimed at providing a fast and highly readable modeling environment for the state-of-the-art robust stochastic optimization framework.
+RSOME is an open-source algebraic library for modeling generic optimization problems under uncertainty. It provides highly readable and mathematically intuitive modeling environment based on the state-of-the-art robust stochastic optimization framework.
 
-This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. As for the package and solver installation, please refer to our [home page](index) for more information.
+This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our [home page](index) for more information.
 
 ## Modeling environments <a name="section1.1"></a>
 
-The current version of RSOME provides several layers of modeling environments, as illustrated by the structure diagram below.
+The current version of RSOME provides four layers of modeling environments, as illustrated by the structure diagram below.
 
 <img src="rsome_modules.png" width=600/>
 
-The structure diagram also shows that `lp` for linear programs is a bottom layer modeling environment. Problems can be solved by the `lp` layer are a subset of the `socp` layer. Similarly, problems can be solved by the `socp` layer are a subset of the higher level `ro` environment. The top layer `dro` for distributionally robust optimization is the most general modeling environment, with all lower layers to be special cases of this general framework.
+
+The lower two layers of RSOME modules provide modeling tools for deterministic linear and second-order cone (SOC) programs, which are the cornerstone for building the upper-level robust and distributionally robust optimization modules. In RSOME, all robust counterparts of upper-level robust and distributionally robust models are formulated into the lower-level deterministic problems before being sent to solvers.
+
+A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer `dro` module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in [Chen  et  al.  (2020)](#ref1), is the most general framework among all. For example, robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The `ro` module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.
 
 The syntax rules of `lp`, `socp`, and `ro` are very similar, so we would focus on `ro` as a more general modeling environment for all robust and deterministic optimization problems. The `dro` is specially designed for distributionally robust optimization problems, with the worst-case expectations to be considered in the objective function or constraints. It will be introduced separately.
 
@@ -24,9 +27,9 @@ In RSOME, all optimization models are specified based on a <code>Model</code> ty
 
 
 ```python
-from rsome import ro            # Import the ro modeling tool
+from rsome import ro            # import the ro modeling tool
 
-model = ro.Model('My model')    # Create a Model object
+model = ro.Model('My model')    # create a Model object
 ```
 
 The code above defines a new <code>Model</code> object <code>model</code>, with the name specified to be <code>'My model'</code>. You could also leave the name unspecified and the default name is <code>None</code>.
@@ -78,9 +81,9 @@ A few examples of decision variables are presented below.
 
 
 ```python
-x = model.dvar(3, vtype='I')    # Integer variables as a 1D array
-y = model.dvar((3, 5), 'B')     # Binary variables as a 2D array
-z = model.dvar((2, 3, 4, 5))    # Continuous variables as a 4D array
+x = model.dvar(3, vtype='I')    # integer variables as a 1D array
+y = model.dvar((3, 5), 'B')     # binary variables as a 2D array
+z = model.dvar((2, 3, 4, 5))    # continuous variables as a 4D array
 ```
 
 ### Affine operations and linear constraints
@@ -95,7 +98,7 @@ x = model.dvar(3)
 y = model.dvar((3, 5))
 z = model.dvar((2, 3, 4))
 
-type(3*x + 1)               # Display the Affine type
+type(3*x + 1)               # display the affine type
 ```
 
 
@@ -111,21 +114,21 @@ The <code>Affine</code> objects are also compatible with the standard NumPy arra
 import numpy as np
 
 a = np.ones(3)
-expr1 = a @ x                       # Matrix multiplication
+expr1 = a @ x                       # matrix multiplication
 print(expr1)
 
 b = np.arange(15).reshape((3, 5))
-expr2 = b + y                       # Element-wise operation
+expr2 = b + y                       # element-wise operation
 print(expr2)
 
 c = np.arange(12).reshape((3, 4))
-expr3 = c * z                       # Broadcasting
+expr3 = c * z                       # broadcasting
 print(expr3)
 
-expr4 = x.reshape((3, 1)) + y       # Reshape and broadcasting
+expr4 = x.reshape((3, 1)) + y       # reshape and broadcasting
 print(expr4)
 
-expr5 = x + y[:, 2].T               # Slicing and transpose
+expr5 = x + y[:, 2].T               # slicing and transpose
 print(expr5)
 ```
 
@@ -169,7 +172,7 @@ The RSOME package also supports several convex functions for specifying convex c
 
 - **<code>sumsqr()</code> for sum of squares**: the function <code>sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code>size</code> to be the same as maximum <code>shape</code> value.
 
-- **<code>norm()</code> for norms of vectors**: the function <code>sumsqr()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code>degree</code> to specify the degree of the norm function. The default value of the <code>degree</code> argument is 2. Examples of specifying convex constraints are provided below.
+- **<code>norm()</code> for norms of vectors**: the function <code>norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code>degree</code> to specify the degree of the norm function. The default value of the <code>degree</code> argument is 2. Examples of specifying convex constraints are provided below.
 
 
 ```python
@@ -184,7 +187,7 @@ model.st(rso.norm(x, 1) <= y[0, 0]) # A Constraint with 1-norm terms
 model.st(rso.norm(x, inf) <= x[0])  # A Constraint with infinity norm
 ```
 
-Please note that all functions above can only be used in convex functions, so convex function cannot be applied in equality constraints, and these functions cannot be used for concave inequalities, such as <code>abs(x) >= 2</code> is invalid and gives an error message.
+Note that all functions above can only be used in convex functions, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities. For example, <code>abs(x) >= 2</code> is invalid and gives an error message.
 
 ## Standard forms and solutions <a name="section1.3"></a>
 
@@ -197,7 +200,7 @@ Model.do_math(primal=True)
     the returned formula is for the primal or the dual problem.
 ```
 
-You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, i.e., the objective function, linear and second-order cone constraints, bounds and variable types.
+You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.
 
 
 ```python
@@ -214,8 +217,8 @@ x = model.dvar(n)
 model.max(c @ x)
 model.st(rso.norm(x) <= 1)
 
-primal = model.do_math()            # Standard form of the primal problem
-dual = model.do_math(primal=False)  # Standard form of the dual problem
+primal = model.do_math()            # standard form of the primal problem
+dual = model.do_math(primal=False)  # standard form of the dual problem
 ```
 
 The variables `primal` and `dual` represent the standard forms of the primal and dual problems, respectively.
@@ -537,7 +540,7 @@ dual.show()
 </table>
 </div>
 
-The standard form of the model can be solved via calling the `solve()` method of the model object. Arguments of the `solve()` method are listed below.
+The standard form of a model can be solved via calling the `solve()` method of the model object. Arguments of the `solve()` method are listed below.
 
     solve(solver=None, display=True, export=False, params={}) method of rsome.ro.Model instance
     Solve the model with the selected solver interface.
@@ -554,11 +557,11 @@ The standard form of the model can be solved via calling the `solve()` method of
                 is generated if the option is True.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi and MOSEK.
+                So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 
 
 
-It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version RSOME uses the default LP solver if  `solver=None` or `solver=lpg_solver`. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please activate other solvers by specifying the `solver` parameter to be the values in the table below.
+It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version RSOME uses the default LP solver if  `solver=None` or `solver=lpg_solver`. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please use other solvers by specifying the `solver` parameter to be the values in the table below.
 
 | Solver | License  type | RSOME interface |Integer variables| Second-order cone constraints|
 |:-------|:--------------|:----------------|:------------------------|:---------------------|
@@ -601,7 +604,7 @@ model.solve(msk)
 
 The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.  
 
-Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the `dict` type argument `params` in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>..., }`. For example, the following code solves the problem using Gurobi while displaying the log information.
+Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the `dict` type argument `params` in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>..., }`. For example, the following code solves the problem using Gurobi while configuring the parameter `LogToConsole` to be `True` so that the log information is displayed in the coding Console.
 
 ```python
 model.solve(grb,                                # Use Gurobi as the solver
@@ -615,3 +618,9 @@ For Gurobi, you may find the parameter names and their values from [Parameters](
 ### [Mean-variance portfolio optimization](example_mv_portfolio)
 ### [Integer programming for Sudoku](example_sudoku)
 ### [Optimal DC power flow](example_opf)
+
+## Reference
+
+<a id="ref1"></a>
+
+Chen, Zhi, Melvyn Sim, and Peng Xiong. "[Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603)." <i>Management Science</i> 66.8 (2020): 3329-3339.

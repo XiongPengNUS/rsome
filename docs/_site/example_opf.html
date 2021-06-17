@@ -75,7 +75,7 @@
 &amp;v_{ref} = 0,
 \end{align}\]
 
-<p>where \(n\) is the number of buses, and $m$ is the number of generators. The decision variables:</p>
+<p>where \(n\) is the number of buses, and \(m\) is the number of generators. The decision variables:</p>
 
 <ul>
   <li>\(v_j\): the voltage angle of bus \(j\), with \(j=1, 2, …, n\)</li>
@@ -107,12 +107,12 @@
 <span class="n">Bbus</span> <span class="o">=</span> <span class="n">Bbus_df</span><span class="p">.</span><span class="n">values</span>                           <span class="c1"># Bbus array
 </span><span class="n">Bf</span> <span class="o">=</span> <span class="n">Bf_df</span><span class="p">.</span><span class="n">values</span>                               <span class="c1"># Bf array
 </span>
-<span class="n">R</span> <span class="o">=</span> <span class="n">Rates_df</span><span class="p">[</span><span class="s">'Rate_A'</span><span class="p">].</span><span class="n">values</span>                   <span class="c1"># Line capacity ratings
-</span><span class="n">GBus</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'GBus'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># Generator buses
-</span><span class="n">Pmin</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'Pmin'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># Minimum outputs of generators
-</span><span class="n">Pmax</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'Pmax'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># Maximum outputs of generators
-</span><span class="n">Coeff</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'Cost_a'</span><span class="p">:</span><span class="s">'Cost_c'</span><span class="p">].</span><span class="n">values</span> <span class="c1"># Cost coefficients of generators
-</span><span class="n">L</span> <span class="o">=</span> <span class="n">Load_df</span><span class="p">[</span><span class="s">'Load'</span><span class="p">].</span><span class="n">values</span>                      <span class="c1"># Electricity loads
+<span class="n">R</span> <span class="o">=</span> <span class="n">Rates_df</span><span class="p">[</span><span class="s">'Rate_A'</span><span class="p">].</span><span class="n">values</span>                   <span class="c1"># line capacity ratings
+</span><span class="n">GBus</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'GBus'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># generator buses
+</span><span class="n">Pmin</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'Pmin'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># minimum outputs of generators
+</span><span class="n">Pmax</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">[</span><span class="s">'Pmax'</span><span class="p">].</span><span class="n">values</span>                    <span class="c1"># maximum outputs of generators
+</span><span class="n">Coeff</span> <span class="o">=</span> <span class="n">Gen_df</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'Cost_a'</span><span class="p">:</span><span class="s">'Cost_c'</span><span class="p">].</span><span class="n">values</span> <span class="c1"># cost coefficients of generators
+</span><span class="n">L</span> <span class="o">=</span> <span class="n">Load_df</span><span class="p">[</span><span class="s">'Load'</span><span class="p">].</span><span class="n">values</span>                      <span class="c1"># electricity loads
 </span>
 <span class="n">n</span> <span class="o">=</span> <span class="n">Bf</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                                 <span class="c1"># n: Number of buses
 </span><span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">GBus</span><span class="p">)</span>                                   <span class="c1"># m: Number of generators
@@ -127,20 +127,20 @@
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 
-<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                   <span class="c1"># Decision variable as the voltage angle
-</span><span class="n">g</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>                   <span class="c1"># Decision variable as the generation output
+<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                   <span class="c1"># decision variable as the voltage angle
+</span><span class="n">g</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>                   <span class="c1"># decision variable as the generation output
 </span>
 <span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">g</span><span class="p">)</span> <span class="o">+</span>
           <span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">@</span><span class="n">g</span> <span class="o">+</span>
-          <span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">].</span><span class="nb">sum</span><span class="p">())</span>        <span class="c1"># Quadratic objective function
+          <span class="n">Coeff</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">].</span><span class="nb">sum</span><span class="p">())</span>        <span class="c1"># quadratic objective function
 </span>
 <span class="n">I_bg</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
-<span class="n">I_bg</span><span class="p">[</span><span class="n">GBus</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>          <span class="c1"># Array that places generators to their buses
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">Bbus</span><span class="o">@</span><span class="n">v</span> <span class="o">+</span> <span class="n">I_bg</span><span class="o">@</span><span class="n">g</span> <span class="o">==</span> <span class="n">L</span><span class="p">)</span>      <span class="c1"># Power balance equation
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Bf</span><span class="o">@</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">R</span><span class="p">)</span>            <span class="c1"># Transmission line capacities
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">g</span> <span class="o">&gt;=</span> <span class="n">Pmin</span><span class="p">,</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="n">Pmax</span><span class="p">)</span>      <span class="c1"># Output capacities of generators
-</span><span class="n">Ref</span> <span class="o">=</span> <span class="mi">12</span>                            <span class="c1"># Index of the reference bus
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">Ref</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>               <span class="c1"># Set the reference bus
+<span class="n">I_bg</span><span class="p">[</span><span class="n">GBus</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>          <span class="c1"># array that places generators to their buses
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">Bbus</span><span class="o">@</span><span class="n">v</span> <span class="o">+</span> <span class="n">I_bg</span><span class="o">@</span><span class="n">g</span> <span class="o">==</span> <span class="n">L</span><span class="p">)</span>      <span class="c1"># power balance equation
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Bf</span><span class="o">@</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">R</span><span class="p">)</span>            <span class="c1"># transmission line capacities
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">g</span> <span class="o">&gt;=</span> <span class="n">Pmin</span><span class="p">,</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="n">Pmax</span><span class="p">)</span>      <span class="c1"># output capacities of generators
+</span><span class="n">Ref</span> <span class="o">=</span> <span class="mi">12</span>                            <span class="c1"># index of the reference bus
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">Ref</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>               <span class="c1"># set the reference bus
 </span>
 <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
 

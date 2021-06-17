@@ -2,7 +2,7 @@
 
 ### Adaptive robust optimization for a lot-sizing problem
 
-In this example, we consider a lot-sizing problem described in [Duality in Two-Stage Adaptive Linear Optimization: Faster Computation and Stronger Bounds](https://www.fransderuiter.com/papers/BertsimasdeRuiter2016.pdf). In a network with \\(N\\) stores, the stock allocation \\(x_i\\) for each store \\(i\\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \\(d\\),  is uncertain and assumed to be in a budget uncertainty set
+In this example, we consider a lot-sizing problem described in [Bertsimas et al. (2016)](#ref1). In a network with \\(N\\) stores, the stock allocation \\(x_i\\) for each store \\(i\\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \\(d\\),  is uncertain and assumed to be in a budget uncertainty set
 
 $$
 \mathcal{U}=\left\{\pmb{d}: \pmb{0}\leq \pmb{d} \leq d_{\text{max}}\pmb{e}, \pmb{e}^T\pmb{d} \leq \Gamma\right\}.
@@ -42,17 +42,18 @@ xy = 10*rd.rand(2, N)
 t = ((xy[[0]] - xy[[0]].T) ** 2
      + (xy[[1]] - xy[[1]].T) ** 2) ** 0.5
 
-model = ro.Model()      # Define a model
-x = model.dvar(N)       # Define location decisions
-y = model.ldr((N, N))   # Define decision rule as the shifted quantities
-d = model.rvar(N)       # Define random variables as the demand
+model = ro.Model()          # define a model
+x = model.dvar(N)           # define location decisions
+y = model.ldr((N, N))       # define decision rule as the shifted quantities
+d = model.rvar(N)           # define random variables as the demand
 
-y.adapt(d)              # The decision rule y affinely depends on d
+y.adapt(d)                  # the decision rule y affinely depends on d
 
-# Define the uncertainty set
-uset = (d >= 0, d <= dmax, sum(d) <= Gamma)
+uset = (d >= 0,
+        d <= dmax,
+        sum(d) <= Gamma)    # define the uncertainty set
 
-# Define model objective and constraints
+# define model objective and constraints
 model.minmax((c*x).sum() + (t*y).sum(), uset)
 model.st(d <= y.sum(axis=0) - y.sum(axis=1) + x)
 model.st(y >= 0)
@@ -81,3 +82,11 @@ plt.grid()
 plt.show()
 ```
 ![](lot-sizing_results.png)
+
+<br>
+
+#### Reference
+
+<a id="ref1"></a>
+
+Bertsimas, Dimitris, and Frans JCT de Ruiter. "[Duality in two-stage adaptive linear optimization: Faster computation and stronger bounds](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2016.0689)." <i>INFORMS Journal on Computing</i> 28.3 (2016): 500-511.

@@ -65,7 +65,7 @@
 
 <h3 id="the-robust-and-robustness-knapsack-problems">The robust and robustness knapsack problems</h3>
 
-<p>In this example, we will use the RSOME package to implement the robust knapsack model introduced in the paper <a href="https://www.researchgate.net/publication/220244391_The_Price_of_Robustness">The Price of Robustness</a>, and the robustness model described in the paper <a href="http://www.optimization-online.org/DB_FILE/2019/11/7456.pdf">The Dao of Robustness</a>. In the knapsack problem, the weight coefficient \(\tilde{w}_i\) is assumed to be randomly distributed in the range \([w_i - \delta_i, ~ w_i + \delta_i]\). Suppose that each good has a value of \(c_i\), then the objective is to maximize the total value of goods. The robust model can be thus written as</p>
+<p>In this example, we will use the RSOME package to implement the robust knapsack model introduced in the paper <a href="#ref1">Bertsimas and Sim (2004)</a>, and the robustness model described in the paper <a href="#ref2">Long et al. (2019)</a>. In the knapsack problem, the weight coefficient \(\tilde{w}_i\) is assumed to be randomly distributed in the range \([w_i - \delta_i, ~ w_i + \delta_i]\). Suppose that each good has a value of \(c_i\), then the objective is to maximize the total value of goods. The robust model can be thus written as</p>
 
 \[\begin{align}
 \max~&amp;\sum\limits_{i=1}^nc_i x_i \\
@@ -105,9 +105,9 @@
 <span class="n">N</span> <span class="o">=</span> <span class="mi">50</span>
 <span class="n">b</span> <span class="o">=</span> <span class="mi">2000</span>
 
-<span class="n">c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># Profit coefficients
-</span><span class="n">w</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">41</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>   <span class="c1"># Nominal weights
-</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">w</span>                               <span class="c1"># Maximum deviations
+<span class="n">c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># profit coefficients
+</span><span class="n">w</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">41</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>   <span class="c1"># nominal weights
+</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">w</span>                               <span class="c1"># maximum deviations
 </span></code></pre></div></div>
 
 <p>The robust optimization model for a given budget of uncertainty \(r\) is written as a function named <code>robust()</code>.</p>
@@ -126,9 +126,9 @@
     <span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">c</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(((</span><span class="n">w</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">z_set</span><span class="p">))</span>
 
-    <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="c1"># Disable solution message
+    <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="c1"># disable solution message
 </span>
-    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>     <span class="c1"># Optimal objective and solution
+    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>     <span class="c1"># the optimal objective and solution
 </span></code></pre></div></div>
 
 <p>Similarly, the robustness optimization model for a given target of profit \(\tau\) can also be written as a function <code>robustness()</code>.</p>
@@ -152,9 +152,9 @@
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(((</span><span class="n">w</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span> <span class="o">-</span> <span class="n">b</span> <span class="o">&lt;=</span> <span class="n">k</span><span class="o">*</span><span class="n">u</span><span class="p">.</span><span class="nb">sum</span><span class="p">()).</span><span class="n">forall</span><span class="p">(</span><span class="n">z_set</span><span class="p">))</span>
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="c1"># Disable solution message
+    <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="c1"># disable solution message
 </span>
-    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>     <span class="c1"># Optimal objective and solution
+    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>     <span class="c1"># the optimal objective and solution
 </span></code></pre></div></div>
 
 <p>Given a decision \(\pmb{x}\) and a sample of the random variable \(\pmb{z}\), we write a function <code>sim()</code> to calculate the probability of constraint violation, as an indicator of the performance of solutions.</p>
@@ -167,31 +167,31 @@
         zs: random sample of the random variable z
     """</span>
 
-    <span class="n">ws</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">zs</span><span class="o">*</span><span class="n">delta</span>   <span class="c1"># Random samples of uncertain weights
+    <span class="n">ws</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">zs</span><span class="o">*</span><span class="n">delta</span>   <span class="c1"># random samples of uncertain weights
 </span>
     <span class="k">return</span> <span class="p">(</span><span class="n">ws</span> <span class="o">@</span> <span class="n">x_sol</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
 
 </code></pre></div></div>
 
-<p>According to the paper <a href="http://www.optimization-online.org/DB_FILE/2019/11/7456.pdf">The Dao of Robustness</a>, the robust models are solved first under different budgets of uncertainty. The corresponding objective values are then used as total value targets in the robustness optimization models. Solutions of the robust and robustness models are assessed via simulation to find out the probabilities of violations.</p>
+<p>According to <a href="#ref2">Long et al. (2019)</a>, the robust models are solved first under different budgets of uncertainty. The corresponding objective values are then used as total value targets in the robustness optimization models. Solutions of the robust and robustness models are assessed via simulation to find out the probabilities of violations.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">step</span> <span class="o">=</span> <span class="mf">0.1</span>
-<span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>         <span class="c1"># All budgets of uncertainty
+<span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>         <span class="c1"># all budgets of uncertainty
 </span><span class="n">num_samp</span> <span class="o">=</span> <span class="mi">20000</span>
-<span class="n">zs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_samp</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>           <span class="c1"># Random samples for z
+<span class="n">zs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_samp</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>           <span class="c1"># random samples for z
 </span>
 <span class="s">"""Robust optimization"""</span>
 <span class="n">outputs_rb</span> <span class="o">=</span> <span class="p">[</span><span class="n">robust</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">]</span>
 <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-           <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rb</span><span class="p">]</span>    <span class="c1"># RO Objective as targets
+           <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rb</span><span class="p">]</span>    <span class="c1"># RO objective as targets
 </span><span class="n">pv_rb</span> <span class="o">=</span> <span class="p">[</span><span class="n">sim</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zs</span><span class="p">)</span>
-         <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rb</span><span class="p">]</span>      <span class="c1"># Prob. of violations
+         <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rb</span><span class="p">]</span>      <span class="c1"># probability of violations
 </span>
 <span class="s">"""Robustness optimization"""</span>
 <span class="n">outputs_rbn</span> <span class="o">=</span> <span class="p">[</span><span class="n">robustness</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
                <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">]</span>   
 <span class="n">pv_rbn</span> <span class="o">=</span> <span class="p">[</span><span class="n">sim</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zs</span><span class="p">)</span>
-          <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rbn</span><span class="p">]</span>    <span class="c1"># Prob. of violations
+          <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs_rbn</span><span class="p">]</span>    <span class="c1"># probability of violations
 </span></code></pre></div></div>
 
 <p>Finally, the probabilities of violations for both methods are visualized by the following diagrams.</p>
@@ -220,6 +220,15 @@
 <p><img src="/output_27_0.png" alt="png" /></p>
 
 <p><img src="/output_27_1.png" alt="png" /></p>
+
+<p><br /></p>
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a>
+Bertsimas, Dimitris, and Melvyn Sim. “<a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065">The price of robustness</a>.” <i>Operations research</i> 52.1 (2004): 35-53.</p>
+
+<p><a id="ref2"></a>
+Long, Daniel Zhuoyu, Melvyn Sim, and Minglong Zhou. “<a href="https://www.researchgate.net/publication/337185661_The_Dao_of_Robustness">The dao of robustness</a>.” (2019).</p>
 
 
       </section>

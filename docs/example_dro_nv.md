@@ -2,7 +2,7 @@
 
 ### A multi-item newsvendor problem considering the Wasserstein ambiguity set
 
-In this example, we consider the multi-item newsvendor problem discussed in the paper [Robust stochastic optimization made easy with RSOME](http://www.optimization-online.org/DB_FILE/2017/06/6055.pdf). This newsvendor problem determines the order quantity \\(w_i\\) of each of the \\(I\\) products under a total budget \\(d\\). The unit selling price and ordering cost for each product item are denoted by \\(p_i\\) and \\(c_i\\), respectively. The uncertain demand of each product item is denoted by the random variable \\(\tilde{z}_i\\). Once the demand realizes, the selling quantity \\(y_i\\) is expressed as \\(\min\{x_i, z_i\}\\), and the newsvendor problem can be written as the following distributionally robust optimization model,
+In this example, we consider the multi-item newsvendor problem discussed in the paper [Chen et al. (2020)](#ref1). This newsvendor problem determines the order quantity \\(w_i\\) of each of the \\(I\\) products under a total budget \\(d\\). The unit selling price and ordering cost for each product item are denoted by \\(p_i\\) and \\(c_i\\), respectively. The uncertain demand of each product item is denoted by the random variable \\(\tilde{z}_i\\). Once the demand realizes, the selling quantity \\(y_i\\) is expressed as \\(\min\{x_i, z_i\}\\), and the newsvendor problem can be written as the following distributionally robust optimization model,
 
 $$
 \begin{align}
@@ -51,7 +51,7 @@ from rsome import grb_solver as grb
 import numpy as np
 import numpy.random as rd
 
-# Model and ambiguity set parameters
+# model and ambiguity set parameters
 I = 2
 S = 50
 c = np.ones(I)
@@ -61,33 +61,33 @@ zbar = 100 * rd.rand(I)
 zhat = zbar * rd.rand(S, I)
 theta = 0.01 * zbar.min()
 
-# Modeling with RSOME
-model = dro.Model(S)                        # Create a DRO model with S scenarios
-z = model.rvar(I)                           # Random demand z
-u = model.rvar()                            # Auxiliary random variable
+# modeling with RSOME
+model = dro.Model(S)                        # create a DRO model with S scenarios
+z = model.rvar(I)                           # random demand z
+u = model.rvar()                            # auxiliary random variable
 
-fset = model.ambiguity()                    #
+fset = model.ambiguity()                    # create an ambiguity set
 for s in range(S):
     fset[s].suppset(0 <= z, z <= zbar,
-                    norm(z - zhat[s]) <= u) # Define the support for each scenario
-fset.exptset(E(u) <= theta)                 # The Wasserstein metric constraint
-pr = model.p                                # An array of scenario probabilities
-fset.probset(pr == 1/S)                     # Support of scenario probabilities
+                    norm(z - zhat[s]) <= u) # define the support for each scenario
+fset.exptset(E(u) <= theta)                 # the Wasserstein metric constraint
+pr = model.p                                # an array of scenario probabilities
+fset.probset(pr == 1/S)                     # support of scenario probabilities
 
-x = model.dvar(I)                           # Define first-stage decisions
-y = model.dvar(I)                           # Define decision rule variables
+x = model.dvar(I)                           # define first-stage decisions
+y = model.dvar(I)                           # define decision rule variables
 y.adapt(z)                                  # y affinely adapts to z
 y.adapt(u)                                  # y affinely adapts to u
 for s in range(S):
     y.adapt(s)                              # y adapts to each scenario s
 
-model.minsup(-p@x + E(p@y), fset)           # Worst-case expectation over fset
-model.st(y >= 0)                            # Constraints
-model.st(y >= x - z)                        # Constraints
-model.st(x >= 0)                            # Constraints
-model.st(c@x == d)                          # Constraints
+model.minsup(-p@x + E(p@y), fset)           # worst-case expectation over fset
+model.st(y >= 0)                            # constraints
+model.st(y >= x - z)                        # constraints
+model.st(x >= 0)                            # constraints
+model.st(c@x == d)                          # constraints
 
-model.solve(grb)                            # Solve the model by Gurobi
+model.solve(grb)                            # solve the model by Gurobi
 ```
 
 ```
@@ -95,3 +95,11 @@ Being solved by Gurobi...
 Solution status: 2
 Running time: 0.0271s
 ```
+
+<br>
+
+#### Reference
+
+<a id="ref1"></a>
+
+Chen, Zhi, Melvyn Sim, and Peng Xiong. "[Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603)." <i>Management Science</i> 66.8 (2020): 3329-3339.

@@ -14,7 +14,7 @@ $$
 \end{align}
 $$
 
-where \\(n\\) is the number of buses, and $m$ is the number of generators. The decision variables:
+where \\(n\\) is the number of buses, and \\(m\\) is the number of generators. The decision variables:
 
 - \\(v_j\\): the voltage angle of bus \\(j\\), with \\(j=1, 2, ..., n\\)
 - \\(g_i\\): the output of the \\(i\\)th generator, with \\(i=1, 2, ..., m\\)
@@ -43,12 +43,12 @@ Load_df = pd.read_excel('ieee_rts.xlsx', sheet_name='Load')
 Bbus = Bbus_df.values                           # Bbus array
 Bf = Bf_df.values                               # Bf array
 
-R = Rates_df['Rate_A'].values                   # Line capacity ratings
-GBus = Gen_df['GBus'].values                    # Generator buses
-Pmin = Gen_df['Pmin'].values                    # Minimum outputs of generators
-Pmax = Gen_df['Pmax'].values                    # Maximum outputs of generators
-Coeff = Gen_df.loc[:, 'Cost_a':'Cost_c'].values # Cost coefficients of generators
-L = Load_df['Load'].values                      # Electricity loads
+R = Rates_df['Rate_A'].values                   # line capacity ratings
+GBus = Gen_df['GBus'].values                    # generator buses
+Pmin = Gen_df['Pmin'].values                    # minimum outputs of generators
+Pmax = Gen_df['Pmax'].values                    # maximum outputs of generators
+Coeff = Gen_df.loc[:, 'Cost_a':'Cost_c'].values # cost coefficients of generators
+L = Load_df['Load'].values                      # electricity loads
 
 n = Bf.shape[1]                                 # n: Number of buses
 m = len(GBus)                                   # m: Number of generators
@@ -64,20 +64,20 @@ import numpy as np
 
 model = ro.Model()
 
-v = model.dvar(n)                   # Decision variable as the voltage angle
-g = model.dvar(m)                   # Decision variable as the generation output
+v = model.dvar(n)                   # decision variable as the voltage angle
+g = model.dvar(m)                   # decision variable as the generation output
 
 model.min(rso.sumsqr(Coeff[:, 0]**0.5 * g) +
           Coeff[:, 1]@g +
-          Coeff[:, 2].sum())        # Quadratic objective function
+          Coeff[:, 2].sum())        # quadratic objective function
 
 I_bg = np.zeros((n, m))
-I_bg[GBus-1, range(m)] = 1          # Array that places generators to their buses
-model.st(Bbus@v + I_bg@g == L)      # Power balance equation
-model.st(abs(Bf@v) <= R)            # Transmission line capacities
-model.st(g >= Pmin, g <= Pmax)      # Output capacities of generators
-Ref = 12                            # Index of the reference bus
-model.st(v[Ref] == 0)               # Set the reference bus
+I_bg[GBus-1, range(m)] = 1          # array that places generators to their buses
+model.st(Bbus@v + I_bg@g == L)      # power balance equation
+model.st(abs(Bf@v) <= R)            # transmission line capacities
+model.st(g >= Pmin, g <= Pmax)      # output capacities of generators
+Ref = 12                            # index of the reference bus
+model.st(v[Ref] == 0)               # set the reference bus
 
 model.solve(grb)
 

@@ -2,7 +2,7 @@
 
 ### Multi-stage stochastic financial planning
 
-In this example we consider the multi-stage financial planning problem discussed in the textbook [Introduction to Stochastic Programming (page 23)](https://www.springer.com/gp/book/9781461402367). As a multi-stage model problem, the here-and-now decision allocates the total wealth $d$ between two investment types: stocks (S) and bonds (B). Each investment type may have a high return and a low return as two possible outcomes. It is assumed that the high returns for stocks and bonds are 1.25 and 1.14, and the low returns are 1.06 and 1.12, respectively. These outcomes are independent and with equal likelihood, so throughout the subsequent stages, we would have eight scenarios with equal probabilities. The random return outcomes of stocks and bonds are represented by a scenario tree shown below.
+In this example we consider the multi-stage financial planning problem discussed in page 23 of [Birge and Francois (2011)](#ref1). As a multi-stage model problem, the here-and-now decision allocates the total wealth \\(d\\) between two investment types: stocks (S) and bonds (B). Each investment type may have a high return and a low return as two possible outcomes. It is assumed that the high returns for stocks and bonds are 1.25 and 1.14, and the low returns are 1.06 and 1.12, respectively. These outcomes are independent and with equal likelihood, so throughout the subsequent stages, we would have eight scenarios with equal probabilities. The random return outcomes of stocks and bonds are represented by a scenario tree shown below.
 
 <img src="https://www.researchgate.net/profile/Zhi-Chen-21/publication/339817145/figure/fig4/AS:867492100591619@1583837642911/Scenario-tree-of-the-financial-planning-problem_W640.jpg" width=400>
 
@@ -13,7 +13,7 @@ $$
 \mathbb{P}\in\mathcal{P}_0(\mathbb{R}^{3\times2}\times[S]) \left|
 \begin{array}
 ~&(\tilde{\pmb{z}}, \tilde{s}) \in \mathbb{P} &&\\
-&\mathbb{P}[\tilde{\pmb{z}}) \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1, &&\forall s\in[S]\\
+&\mathbb{P}[\tilde{\pmb{z}} \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1, &&\forall s\in[S]\\
 &\mathbb{P}[\tilde{s}=s] = 1/S
 \end{array}
 \right.
@@ -39,7 +39,7 @@ $$
 \begin{align}
 &\pmb{x}_1(s) \in \mathcal{A}(\{1, 2, 3, 4\}, \{5, 6, 7, 8\}) \\
 &\pmb{x}_2(s) \in \mathcal{A}(\{1, 2\}, \{3, 4\}, \{5, 6\}, \{7, 8\}) \\
-&\overline{x}(s), \underline{x}(s) \in \mathcal{A}(\{1\}, \{2\}, \{3\}, \{4\}, \{5,\} \{6\}, \{7\}, \{8\})
+&\overline{x}(s), \underline{x}(s) \in \mathcal{A}(\{1\}, \{2\}, \{3\}, \{4\}, \{5\}, \{6\}, \{7\}, \{8\})
 \end{align}
 $$
 
@@ -70,14 +70,14 @@ from rsome import grb_solver as grb
 
 
 S = 8
-model = dro.Model(S)                    # A model with S scenarios
+model = dro.Model(S)                    # a model with S scenarios
 
-z = model.rvar((3, 2))                  # Random variables as a 3x2 array
-fset = model.ambiguity()                # Create an ambiguity set
+z = model.rvar((3, 2))                  # random variables as a 3x2 array
+fset = model.ambiguity()                # create an ambiguity set
 for s in range(S):
-    fset[s].suppset(z == 1 + z_hat[s])  # Scenario-wise support of z
+    fset[s].suppset(z == 1 + z_hat[s])  # scenario-wise support of z
 pr = model.p
-fset.probset(pr == 1/S)                 # Probability of each scenario
+fset.probset(pr == 1/S)                 # probability of each scenario
 
 w = model.dvar(2)                       # 1st-stage decision w
 x1 = model.dvar(2)                      # 2nd-stage decision x1
@@ -87,14 +87,14 @@ x_under = model.dvar()                  # 4th-stage decision \underline{x}
 
 for s in range(S):
     if s%4 == 0:
-        x1.adapt(range(s, s+4))         # Recourse adaptation of x1
+        x1.adapt(range(s, s+4))         # recourse adaptation of x1
     if s%2 == 0:
-        x2.adapt(range(s, s+2))         # Recourse adaptation of x2
+        x2.adapt(range(s, s+2))         # recourse adaptation of x2
 
-    x_over.adapt(s)                     # Recourse adaptation of \overline{x}
-    x_under.adapt(s)                    # Recourse adaptation of \underline{x}
+    x_over.adapt(s)                     # recourse adaptation of \overline{x}
+    x_under.adapt(s)                    # recourse adaptation of \underline{x}
 
-# The objective and constraints
+# the objective and constraints
 model.maxinf(E(x_over - 4*x_under), fset)
 model.st(w >= 0, w.sum() == d)
 model.st(x1.sum() == z[0]@w)
@@ -103,7 +103,7 @@ model.st(z[2]@x2 - x_over + x_under == tau)
 model.st(x1 >= 0, x2 >= 0,
          x_over >= 0, x_under >= 0)
 
-model.solve(grb)                        # Solve the model by Gurobi
+model.solve(grb)                        # solve the model by Gurobi
 ```
 
     Being solved by Gurobi...
@@ -121,7 +121,7 @@ w.get().round(3)                        # solution of w (3 d.p.)
     array([41.479, 13.521])
 
 
-In the following code segment, `x1.get()` returns the scenario-wise solution of \\(\pmb{x}_1\\) as a `pandas.Series` type object. Index labels of the Series are the same as the scenario indices, so solutions for selected scenarios could be accessed by the `loc` or `iloc` indexers.
+In the following code segment, `x1.get()` returns the scenario-wise solution of \\(\pmb{x}_1\\) as a `pandas.Series` type object. Index labels of the series are the same as the scenario indices, and the solution as an array for each scenario is an element of the series, which could be accessed by the `loc` or `iloc` indexers.
 
 ```python
 x1_sol = x1.get()
@@ -188,3 +188,10 @@ x_under_sol.apply(lambda x: x.round(3)) # scenario-wise solution of x_under (3 d
     6      [0.0]
     7    [12.16]
     dtype: object
+
+<br>
+#### Reference
+
+<a id="ref1"></a>
+
+Birge, John R., and Francois Louveaux. [<i>Introduction to stochastic programming</i>](https://www.springer.com/gp/book/9781461402367). Springer Science & Business Media, 2011.

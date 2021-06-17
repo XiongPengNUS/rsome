@@ -2,14 +2,14 @@
 
 ### Th robust production-inventory model
 
-In this example, we considered the robust production-inventory problem introduced in [Adjustable robust solutions of uncertain linear programs](https://www2.isye.gatech.edu/~nemirovs/MP_Elana_2004.pdf). The formulation of the robust model is given below.
+In this example, we considered the robust production-inventory problem introduced in [Ben-Tal et al. (2004)](#ref1). The formulation of the robust model is given below,
 
 $$
 \begin{align}
 \min~&\max\limits_{\pmb{d}\in \mathcal{Z}}\sum\limits_{t=1}^{24}\sum\limits_{i=1}^3c_{it}p_{it}(\pmb{d}) &&\\
 \text{s.t.}~&0 \leq p_{it}(\pmb{d}) \leq P_{it}, && i= 1, 2, 3; t = 1, 2, ..., 24 \\
 &\sum\limits_{i=1}^Tp_{it}(\pmb{d}) \leq Q_i, && i = 1, 2, 3 \\
-& v_{\min} \leq v_0 + \sum\limits_{\tau=1}^{t-1}\sum\limits_{i=1}^3p_{i\tau} - \sum\limits_{\tau=1}^{t-1}d_{\tau} \leq v_{\max}, && t = 1, 2, ..., 24
+& v_{\min} \leq v_0 + \sum\limits_{\tau=1}^{t-1}\sum\limits_{i=1}^3p_{i\tau} - \sum\limits_{\tau=1}^{t-1}d_{\tau} \leq v_{\max}, && t = 1, 2, ..., 24,
 \end{align}
 $$
 
@@ -54,11 +54,11 @@ model = ro.Model()
 d = model.rvar(T)
 uset = (d >= (1-theta)*d0, d <= (1+theta)*d0)
 
-p = model.ldr((3, T))              # Define p as affine decision rule
+p = model.ldr((3, T))              # define p as affine decision rule
 for t in range(1, T):
-    p[:, t].adapt(d[:t])           # Adaptation of the decision rule
+    p[:, t].adapt(d[:t])           # adaptation of the decision rule
 
-model.minmax((c*p).sum(), uset)    # Worst-case objective
+model.minmax((c*p).sum(), uset)    # worst-case objective
 model.st(0 <= p, p <= P)
 model.st(p.sum(axis=1) <= Q)
 for t in range(T):
@@ -85,24 +85,23 @@ wc_cost
 44272.82749311939
 ```
 
-It is demonstrated in [The impact of the existence of multiple adjustable robust solutions](https://www.researchgate.net/publication/292386336_The_impact_of_the_existence_of_multiple_adjustable_robust_solutions) that there could be multiple optimal solutions for this robust production-inventory problem. All of these optimal robust solutions have the same worst-case objective value, but the affine decision rule \\(\pmb{p}(\pmb{d})\\) could be greatly vary, leading to very different performance under non worst-case realizations. For example, if different solvers are used to solve the robust model above, solutions for \\(\pmb{p}(\pmb{d})\\) could be quite different.
+It is demonstrated in [de Ruiter et al. (2016)](#ref2) that there could be multiple optimal solutions for this robust production-inventory problem. All of these optimal robust solutions have the same worst-case objective value, but the affine decision rule \\(\pmb{p}(\pmb{d})\\) could be greatly vary, leading to very different performance under non worst-case realizations. For example, if different solvers are used to solve the robust model above, solutions for \\(\pmb{p}(\pmb{d})\\) could be quite different.
 
-Here we follow the steps introduced in [The impact of the existence of multiple adjustable robust solutions](https://www.researchgate.net/publication/292386336_The_impact_of_the_existence_of_multiple_adjustable_robust_solutions) to find a  Pareto robustly optimal solution: change the objective into minimizing the cost for the nominal demand trajectory.
-Furthermore, add a constraint that ensures that the worst-case costs do not exceed the worst-case cost found in the robust model above. Please note that the nominal objective can be equivalently written as the worst-case cost over an uncertainty set \\(\mathcal{Z}_0=\\left\\{\pmb{d}^0\\right\\}\\), i.e., enforcing \\(\pmb{d}\\) to be the same as the nominal trajectory. The code is given below to find the Pareto robustly optimal solution.
+Here we follow the steps introduced in [de Ruiter et al. (2016)](#ref2) to find a Pareto robustly optimal solution: change the objective into minimizing the cost for the nominal demand trajectory. Furthermore, add a constraint that ensures that the worst-case costs do not exceed the worst-case cost found in the robust model above. Please note that the nominal objective can be equivalently written as the worst-case cost over an uncertainty set \\(\mathcal{Z}_0=\\left\\{\pmb{d}^0\\right\\}\\), i.e., enforcing \\(\pmb{d}\\) to be the same as the nominal trajectory. The code is given below to find the Pareto robustly optimal solution.
 
 ```python
 model = ro.Model()
 
 d = model.rvar(T)
-uset = (d >= (1-theta)*d0, d <= (1+theta)*d0)
-uset0 = (d == d0,)                                 # Nominal case uncertainty set
+uset = (d >= (1-theta)*d0, d <= (1+theta)*d0)      # budget of uncertainty
+uset0 = (d == d0,)                                 # nominal case uncertainty set
 
 p = model.ldr((3, T))
 for t in range(1, T):
     p[:, t].adapt(d[:t])
 
-model.minmax((c*p).sum(), uset0)                   # Nominal objective
-model.st(((c*p).sum() <= wc_cost).forall(uset))    # Worst-case objective
+model.minmax((c*p).sum(), uset0)                   # the nominal objective
+model.st(((c*p).sum() <= wc_cost).forall(uset))    # the worst-case objective
 model.st((0 <= p).forall(uset))
 model.st((p <= P).forall(uset))
 model.st((p.sum(axis=1) <= Q).forall(uset))
@@ -129,4 +128,14 @@ nom_cost
 35076.73675839575
 ```
 
-Please refer to Table 1 of [The impact of the existence of multiple adjustable robust solutions](https://www.researchgate.net/publication/292386336_The_impact_of_the_existence_of_multiple_adjustable_robust_solutions) to verify the worst-case and nominal production costs.
+Please refer to Table 1 of [de Ruiter et al. (2016)](#ref2) to verify the worst-case and nominal production costs.
+
+<br>
+#### Reference
+
+<a id="ref1"></a>
+
+Ben-Tal, Aharon, Alexander Goryashko, Elana Guslitzer, and Arkadi Nemirovski. "[Adjustable robust solutions of uncertain linear programs](https://www2.isye.gatech.edu/~nemirovs/MP_Elana_2004.pdf)." <i>Mathematical programming</i> 99.2 (2004): 351-376.
+
+<a id="ref2"></a>
+de Ruiter, Frans JCT, Ruud CM Brekelmans, and Dick den Hertog. "[The impact of the existence of multiple adjustable robust solutions](https://link.springer.com/article/10.1007/s10107-016-0978-6)." <i>Mathematical Programming</i> 160.1 (2016): 531-545.

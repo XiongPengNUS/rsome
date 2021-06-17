@@ -65,7 +65,7 @@
 
 <h3 id="conditional-value-at-risk-with-application-to-robust-portfolio-management">Conditional value-at-risk with application to robust portfolio management</h3>
 
-<p>This robust portfolio management model is proposed by <a href="http://www-optima.amp.i.kyoto-u.ac.jp/~fuku/papers/2005-006.pdf">Worst-Case Conditional Value-at-Risk with Application to Robust Portfolio Management</a>. The portfolio decision is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as</p>
+<p>This robust portfolio management model is proposed by <a href="#ref1">Zhu and Fukushima (2009)</a>. The portfolio allocation is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as</p>
 
 \[\begin{align}
 \min~&amp;\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^T\pmb{u} &amp;\\
@@ -83,8 +83,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 
 <span class="n">stocks</span> <span class="o">=</span> <span class="p">[</span><span class="s">'JPM'</span><span class="p">,</span> <span class="s">'AMZN'</span><span class="p">,</span> <span class="s">'TSLA'</span><span class="p">,</span> <span class="s">'AAPL'</span><span class="p">,</span> <span class="s">'GOOG'</span><span class="p">]</span>
-<span class="n">start</span> <span class="o">=</span> <span class="s">'1/1/2020'</span>              <span class="c1"># Starting date of historical data
-</span><span class="n">end</span><span class="o">=</span><span class="s">'12/31/2020'</span>                <span class="c1"># End date of historical data
+<span class="n">start</span> <span class="o">=</span> <span class="s">'1/1/2020'</span>              <span class="c1"># starting date of historical data
+</span><span class="n">end</span><span class="o">=</span><span class="s">'12/31/2020'</span>                <span class="c1"># end date of historical data
 </span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">([])</span>
 <span class="k">for</span> <span class="n">stock</span> <span class="ow">in</span> <span class="n">stocks</span><span class="p">:</span>
@@ -202,15 +202,15 @@
 <p>253 rows × 5 columns</p>
 </div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">values</span>     <span class="c1"># Stock data as an array
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">values</span>     <span class="c1"># stock data as an array
 </span><span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">shape</span>      <span class="c1"># s: sample size; n: number of stocks
 </span>
-<span class="n">x_lb</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># Lower bounds of investment decisions
-</span><span class="n">x_ub</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>   <span class="c1"># Upper bounds of investment decisions
+<span class="n">x_lb</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># lower bounds of investment decisions
+</span><span class="n">x_ub</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>   <span class="c1"># upper bounds of investment decisions
 </span>
-<span class="n">beta</span> <span class="o">=</span><span class="mf">0.95</span>          <span class="c1"># Confidence interval
-</span><span class="n">w0</span> <span class="o">=</span> <span class="mi">1</span>              <span class="c1"># Investment budget
-</span><span class="n">mu</span> <span class="o">=</span> <span class="mf">0.001</span>          <span class="c1"># Target minimum expected return rate
+<span class="n">beta</span> <span class="o">=</span><span class="mf">0.95</span>          <span class="c1"># confidence interval
+</span><span class="n">w0</span> <span class="o">=</span> <span class="mi">1</span>              <span class="c1"># investment budget
+</span><span class="n">mu</span> <span class="o">=</span> <span class="mf">0.001</span>          <span class="c1"># target minimum expected return rate
 </span></code></pre></div></div>
 
 <h4 id="nominal-cvar-model">Nominal CVaR model</h4>
@@ -222,7 +222,7 @@
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 
-<span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>         <span class="c1"># No ambiguity in probability distribution
+<span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>         <span class="c1"># no ambiguity in probability distribution
 </span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -244,7 +244,7 @@ Running time: 0.0073s
 
 <p>The portfolio decision for the nominal model is retrieved by the following code.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># Portfolio decision with 4 d.p.
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># the optimal portfolio decision with 4 d.p.
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.3135, 0.5331, 0.0455, 0.    , 0.1079])
@@ -259,8 +259,8 @@ Running time: 0.0073s
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 
-<span class="n">eta_ub</span> <span class="o">=</span> <span class="mf">0.0001</span>                 <span class="c1"># Upper bound of eta
-</span><span class="n">eta_lb</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0001</span>                <span class="c1"># Lower bound of eta
+<span class="n">eta_ub</span> <span class="o">=</span> <span class="mf">0.0001</span>                 <span class="c1"># upper bound of eta
+</span><span class="n">eta_lb</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0001</span>                <span class="c1"># lower bound of eta
 </span>
 <span class="n">eta</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>             <span class="c1"># eta as random variables
 </span><span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">eta</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
@@ -286,7 +286,7 @@ Solution status: 2
 Running time: 0.0268s
 </code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># Portfolio decision with 4 d.p.
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># the optimal portfolio decision with 4 d.p.
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.2605, 0.5601, 0.0651, 0.    , 0.1143])
@@ -327,11 +327,18 @@ Solution status: 2
 Running time: 0.0285s
 </code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># Portfolio decision with 4 d.p.
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># the optimal portfolio decision with 4 d.p.
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
 </code></pre></div></div>
+
+<p><br /></p>
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Zhu, Shushang, and Masao Fukushima. “<a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.1080.0684">Worst-case conditional value-at-risk with application to robust portfolio management</a>.” <i>Operations research</i> 57.5 (2009): 1155-1168.</p>
 
 
       </section>

@@ -2,7 +2,7 @@
 
 ### Mean-variance portfolio optimization
 
-In this example, we consider a portfolio construction problem discussed in [Robust Solutions of Uncertain Linear Programs](https://www2.isye.gatech.edu/~nemirovs/stablpn.pdf). Suppose there are \\(n=150\\) stocks, and each stock \\(i\\) has the mean return to be \\(p_i\\) and the standard deviation to be \\(\sigma_i\\). Let \\(x_i\\) be the fraction of wealth invested in stock \\(i\\), a classic approach is to formulate the problem as a quadratic program, where a mean-variance objective function is maximized:
+In this example, we consider a portfolio optimization problem discussed in [Ben-Tal and Nemirovski 1999](#ref1). Suppose there are \\(n=150\\) stocks, and each stock \\(i\\) has the mean return to be \\(p_i\\) and the standard deviation to be \\(\sigma_i\\). Let \\(x_i\\) be the fraction of the total wealth invested in stock \\(i\\), a classic approach is to formulate the problem as a quadratic program, where a mean-variance objective function is maximized:
 
 $$
 \begin{align}
@@ -12,7 +12,7 @@ $$
 \end{align}
 $$
 
-with the constant \\(\phi=5\\), and the means and standard deviations are specified to be
+with the constant \\(\phi=5\\), and the means and standard deviations are specified as
 
 $$
 \begin{align}
@@ -30,18 +30,18 @@ import numpy as np
 from rsome import ro
 from rsome import grb_solver as grb
 
-n = 150                                     # Number of stocks
-i = np.arange(1, n+1)                       # Indices of stocks
-p = 1.15 + i*0.05/150                       # Mean returns
-sigma = 0.05/450 * (2*i*n*(n+1))**0.5       # Standard deviations of returns
-phi = 5                                     # Constant phi
+n = 150                                     # number of stocks
+i = np.arange(1, n+1)                       # indices of stocks
+p = 1.15 + i*0.05/150                       # mean returns
+sigma = 0.05/450 * (2*i*n*(n+1))**0.5       # standard deviations of returns
+phi = 5                                     # constant phi
 
 model = ro.Model('mv-portfolio')
 
-x = model.dvar(n)                           # Fractions of investment
+x = model.dvar(n)                           # fractions of investment
 
-model.max(p@x - phi*rso.sumsqr(sigma*x))    # Mean-variance objective
-model.st(x.sum() == 1)                      # Summation of x is one
+model.max(p@x - phi*rso.sumsqr(sigma*x))    # mean-variance objective
+model.st(x.sum() == 1)                      # summation of x is one
 model.st(x >= 0)                            # x is non-negative
 
 model.solve(grb)
@@ -52,14 +52,14 @@ model.solve(grb)
     Running time: 0.0028s
 
 
-The optimal investment decision and the mean-variance objective value are shown below.
+The optimal investment and the optimal objective value are shown below.
 
 
 ```python
 import matplotlib.pyplot as plt
 
-obj_val = model.get()               # The optimal objective value
-x_sol = x.get()                     # The optimal investment decision
+obj_val = model.get()               # the optimal objective value
+x_sol = x.get()                     # the optimal investment decision
 
 plt.plot(range(1, n+1), x_sol,
          linewidth=2, color='b')
@@ -74,3 +74,10 @@ print('Objective value: {0:0.4f}'.format(obj_val))
 
 
     Objective value: 1.1853
+
+<br>
+#### Reference
+
+<a id="ref1"></a>
+
+Ben-Tal, A., & Nemirovski, A. (1999). "[Robust solutions of uncertain linear programs](https://www.sciencedirect.com/science/article/abs/pii/S0167637799000164)." <i>Operations research letters</i>, 25(1), 1-13.

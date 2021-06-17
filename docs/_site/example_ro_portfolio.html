@@ -65,7 +65,7 @@
 
 <h3 id="robust-portfolio-optimization">Robust portfolio optimization</h3>
 
-<p>In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper <a href="https://www.researchgate.net/publication/220244391_The_Price_of_Robustness">The Price of Robustness</a>. The robust model is presented below.</p>
+<p>In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper <a href="#ref1">Bertsimas and Sim (2004)</a>. The robust model is presented below.</p>
 
 \[\begin{align}
 \max~&amp;\min\limits_{\pmb{z}\in\mathcal{Z}} \sum\limits_{i=1}^n\left(p_i + \delta_iz_i \right)x_i \\
@@ -95,23 +95,23 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 
 
-<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                 <span class="c1"># Number of stocks
-</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Indices of stocks
-</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                   <span class="c1"># Mean returns
-</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>   <span class="c1"># Deviations of returns
-</span><span class="n">Gamma</span> <span class="o">=</span> <span class="mi">5</span>                               <span class="c1"># Budget of uncertainty
+<span class="n">n</span> <span class="o">=</span> <span class="mi">150</span>                                 <span class="c1"># number of stocks
+</span><span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                   <span class="c1"># indices of stocks
+</span><span class="n">p</span> <span class="o">=</span> <span class="mf">1.15</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.05</span><span class="o">/</span><span class="mi">150</span>                   <span class="c1"># mean returns
+</span><span class="n">delta</span> <span class="o">=</span> <span class="mf">0.05</span><span class="o">/</span><span class="mi">450</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>   <span class="c1"># deviations of returns
+</span><span class="n">Gamma</span> <span class="o">=</span> <span class="mi">5</span>                               <span class="c1"># budget of uncertainty
 </span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>              
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Fractions of investment
-</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># Random variables
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># fractions of investment
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                       <span class="c1"># random variables
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">maxmin</span><span class="p">((</span><span class="n">p</span> <span class="o">+</span> <span class="n">delta</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span><span class="p">,</span>         <span class="c1"># The max-min objective
-</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">infty</span><span class="p">)</span> <span class="o">&lt;=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Uncertainty set constraints
-</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>   <span class="c1"># Uncertainty set constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                   <span class="c1"># Summation of x is one
+<span class="n">model</span><span class="p">.</span><span class="n">maxmin</span><span class="p">((</span><span class="n">p</span> <span class="o">+</span> <span class="n">delta</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span><span class="p">,</span>         <span class="c1"># the max-min objective
+</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">infty</span><span class="p">)</span> <span class="o">&lt;=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># uncertainty set constraints
+</span>             <span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>   <span class="c1"># uncertainty set constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                   <span class="c1"># summation of x is one
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                        <span class="c1"># x is non-negative
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                        <span class="c1"># Solve the model by Gurobi
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                        <span class="c1"># solve the model by Gurobi
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
@@ -123,8 +123,8 @@ Running time: 0.0038s
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
-<span class="n">obj_val</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>               <span class="c1"># The optimal objective value
-</span><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>                     <span class="c1"># The optimal investment decision
+<span class="n">obj_val</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>                   <span class="c1"># the optimal objective value
+</span><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>                         <span class="c1"># the optimal investment decision
 </span>
 <span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">x_sol</span><span class="p">,</span>
          <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">)</span>
@@ -138,6 +138,12 @@ Running time: 0.0038s
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Objective value: 1.1709
 </code></pre></div></div>
+
+<p><br /></p>
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a>
+Bertsimas, Dimitris, and Melvyn Sim. “<a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065">The price of robustness</a>.” <i>Operations research</i> 52.1 (2004): 35-53.</p>
 
 
       </section>

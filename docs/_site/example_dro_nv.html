@@ -65,7 +65,7 @@
 
 <h3 id="a-multi-item-newsvendor-problem-considering-the-wasserstein-ambiguity-set">A multi-item newsvendor problem considering the Wasserstein ambiguity set</h3>
 
-<p>In this example, we consider the multi-item newsvendor problem discussed in the paper <a href="http://www.optimization-online.org/DB_FILE/2017/06/6055.pdf">Robust stochastic optimization made easy with RSOME</a>. This newsvendor problem determines the order quantity \(w_i\) of each of the \(I\) products under a total budget \(d\). The unit selling price and ordering cost for each product item are denoted by \(p_i\) and \(c_i\), respectively. The uncertain demand of each product item is denoted by the random variable \(\tilde{z}_i\). Once the demand realizes, the selling quantity \(y_i\) is expressed as \(\min{x_i, z_i}\), and the newsvendor problem can be written as the following distributionally robust optimization model,</p>
+<p>In this example, we consider the multi-item newsvendor problem discussed in the paper <a href="#ref1">Chen et al. (2020)</a>. This newsvendor problem determines the order quantity \(w_i\) of each of the \(I\) products under a total budget \(d\). The unit selling price and ordering cost for each product item are denoted by \(p_i\) and \(c_i\), respectively. The uncertain demand of each product item is denoted by the random variable \(\tilde{z}_i\). Once the demand realizes, the selling quantity \(y_i\) is expressed as \(\min{x_i, z_i}\), and the newsvendor problem can be written as the following distributionally robust optimization model,</p>
 
 \[\begin{align}
 \min~&amp; -\pmb{p}^T\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] &amp;&amp; \\
@@ -111,7 +111,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
 
-<span class="c1"># Model and ambiguity set parameters
+<span class="c1"># model and ambiguity set parameters
 </span><span class="n">I</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">S</span> <span class="o">=</span> <span class="mi">50</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
@@ -121,39 +121,47 @@
 <span class="n">zhat</span> <span class="o">=</span> <span class="n">zbar</span> <span class="o">*</span> <span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
 <span class="n">theta</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">zbar</span><span class="p">.</span><span class="nb">min</span><span class="p">()</span>
 
-<span class="c1"># Modeling with RSOME
-</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                        <span class="c1"># Create a DRO model with S scenarios
-</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># Random demand z
-</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>                            <span class="c1"># Auxiliary random variable
+<span class="c1"># modeling with RSOME
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                        <span class="c1"># create a DRO model with S scenarios
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># random demand z
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>                            <span class="c1"># auxiliary random variable
 </span>
-<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                    <span class="c1">#
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                    <span class="c1"># create an ambiguity set
 </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
     <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">,</span> <span class="n">z</span> <span class="o">&lt;=</span> <span class="n">zbar</span><span class="p">,</span>
-                    <span class="n">norm</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">zhat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span> <span class="c1"># Define the support for each scenario
-</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">theta</span><span class="p">)</span>                 <span class="c1"># The Wasserstein metric constraint
-</span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                <span class="c1"># An array of scenario probabilities
-</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>                     <span class="c1"># Support of scenario probabilities
+                    <span class="n">norm</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">zhat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span> <span class="c1"># define the support for each scenario
+</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">theta</span><span class="p">)</span>                 <span class="c1"># the Wasserstein metric constraint
+</span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                <span class="c1"># an array of scenario probabilities
+</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>                     <span class="c1"># support of scenario probabilities
 </span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># Define first-stage decisions
-</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># Define decision rule variables
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># define first-stage decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                           <span class="c1"># define decision rule variables
 </span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>                                  <span class="c1"># y affinely adapts to z
 </span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                  <span class="c1"># y affinely adapts to u
 </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
     <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                              <span class="c1"># y adapts to each scenario s
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>           <span class="c1"># Worst-case expectation over fset
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># Constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>                        <span class="c1"># Constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># Constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">c</span><span class="o">@</span><span class="n">x</span> <span class="o">==</span> <span class="n">d</span><span class="p">)</span>                          <span class="c1"># Constraints
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>           <span class="c1"># worst-case expectation over fset
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>                        <span class="c1"># constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">c</span><span class="o">@</span><span class="n">x</span> <span class="o">==</span> <span class="n">d</span><span class="p">)</span>                          <span class="c1"># constraints
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                            <span class="c1"># Solve the model by Gurobi
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                            <span class="c1"># solve the model by Gurobi
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
 Solution status: 2
 Running time: 0.0271s
 </code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, and Peng Xiong. “<a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>.” <i>Management Science</i> 66.8 (2020): 3329-3339.</p>
 
 
       </section>

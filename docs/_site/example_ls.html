@@ -65,7 +65,7 @@
 
 <h3 id="adaptive-robust-optimization-for-a-lot-sizing-problem">Adaptive robust optimization for a lot-sizing problem</h3>
 
-<p>In this example, we consider a lot-sizing problem described in <a href="https://www.fransderuiter.com/papers/BertsimasdeRuiter2016.pdf">Duality in Two-Stage Adaptive Linear Optimization: Faster Computation and Stronger Bounds</a>. In a network with \(N\) stores, the stock allocation \(x_i\) for each store \(i\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \(d\),  is uncertain and assumed to be in a budget uncertainty set</p>
+<p>In this example, we consider a lot-sizing problem described in <a href="#ref1">Bertsimas et al. (2016)</a>. In a network with \(N\) stores, the stock allocation \(x_i\) for each store \(i\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \(d\),  is uncertain and assumed to be in a budget uncertainty set</p>
 
 \[\mathcal{U}=\left\{\pmb{d}: \pmb{0}\leq \pmb{d} \leq d_{\text{max}}\pmb{e}, \pmb{e}^T\pmb{d} \leq \Gamma\right\}.\]
 
@@ -98,17 +98,18 @@
 <span class="n">t</span> <span class="o">=</span> <span class="p">((</span><span class="n">xy</span><span class="p">[[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[[</span><span class="mi">0</span><span class="p">]].</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
      <span class="o">+</span> <span class="p">(</span><span class="n">xy</span><span class="p">[[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[[</span><span class="mi">1</span><span class="p">]].</span><span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>      <span class="c1"># Define a model
-</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>       <span class="c1"># Define location decisions
-</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ldr</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>   <span class="c1"># Define decision rule as the shifted quantities
-</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>       <span class="c1"># Define random variables as the demand
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>          <span class="c1"># define a model
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>           <span class="c1"># define location decisions
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ldr</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>       <span class="c1"># define decision rule as the shifted quantities
+</span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>           <span class="c1"># define random variables as the demand
 </span>
-<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>              <span class="c1"># The decision rule y affinely depends on d
+<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                  <span class="c1"># the decision rule y affinely depends on d
 </span>
-<span class="c1"># Define the uncertainty set
-</span><span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">dmax</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>
-
-<span class="c1"># Define model objective and constraints
+<span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">dmax</span><span class="p">,</span>
+        <span class="nb">sum</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">Gamma</span><span class="p">)</span>    <span class="c1"># define the uncertainty set
+</span>
+<span class="c1"># define model objective and constraints
 </span><span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">((</span><span class="n">c</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">t</span><span class="o">*</span><span class="n">y</span><span class="p">).</span><span class="nb">sum</span><span class="p">(),</span> <span class="n">uset</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
@@ -135,6 +136,14 @@ Running time: 2.8133s
 <span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div></div>
 <p><img src="/lot-sizing_results.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Bertsimas, Dimitris, and Frans JCT de Ruiter. “<a href="https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2016.0689">Duality in two-stage adaptive linear optimization: Faster computation and stronger bounds</a>.” <i>INFORMS Journal on Computing</i> 28.3 (2016): 500-511.</p>
 
 
       </section>

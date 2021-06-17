@@ -65,17 +65,19 @@
 
 <h1 id="getting-started">Getting Started</h1>
 
-<p>RSOME is an open-source algebraic library for generic optimization modeling. It is aimed at providing a fast and highly readable modeling environment for the state-of-the-art robust stochastic optimization framework.</p>
+<p>RSOME is an open-source algebraic library for modeling generic optimization problems under uncertainty. It provides highly readable and mathematically intuitive modeling environment based on the state-of-the-art robust stochastic optimization framework.</p>
 
-<p>This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. As for the package and solver installation, please refer to our <a href="index">home page</a> for more information.</p>
+<p>This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our <a href="index">home page</a> for more information.</p>
 
 <h2 id="modeling-environments-">Modeling environments <a name="section1.1"></a></h2>
 
-<p>The current version of RSOME provides several layers of modeling environments, as illustrated by the structure diagram below.</p>
+<p>The current version of RSOME provides four layers of modeling environments, as illustrated by the structure diagram below.</p>
 
 <p><img src="rsome_modules.png" width="600" /></p>
 
-<p>The structure diagram also shows that <code class="language-plaintext highlighter-rouge">lp</code> for linear programs is a bottom layer modeling environment. Problems can be solved by the <code class="language-plaintext highlighter-rouge">lp</code> layer are a subset of the <code class="language-plaintext highlighter-rouge">socp</code> layer. Similarly, problems can be solved by the <code class="language-plaintext highlighter-rouge">socp</code> layer are a subset of the higher level <code class="language-plaintext highlighter-rouge">ro</code> environment. The top layer <code class="language-plaintext highlighter-rouge">dro</code> for distributionally robust optimization is the most general modeling environment, with all lower layers to be special cases of this general framework.</p>
+<p>The lower two layers of RSOME modules provide modeling tools for deterministic linear and second-order cone (SOC) programs, which are the cornerstone for building the upper-level robust and distributionally robust optimization modules. In RSOME, all robust counterparts of upper-level robust and distributionally robust models are formulated into the lower-level deterministic problems before being sent to solvers.</p>
+
+<p>A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer <code class="language-plaintext highlighter-rouge">dro</code> module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in <a href="#ref1">Chen  et  al.  (2020)</a>, is the most general framework among all. For example, robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The <code class="language-plaintext highlighter-rouge">ro</code> module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.</p>
 
 <p>The syntax rules of <code class="language-plaintext highlighter-rouge">lp</code>, <code class="language-plaintext highlighter-rouge">socp</code>, and <code class="language-plaintext highlighter-rouge">ro</code> are very similar, so we would focus on <code class="language-plaintext highlighter-rouge">ro</code> as a more general modeling environment for all robust and deterministic optimization problems. The <code class="language-plaintext highlighter-rouge">dro</code> is specially designed for distributionally robust optimization problems, with the worst-case expectations to be considered in the objective function or constraints. It will be introduced separately.</p>
 
@@ -85,9 +87,9 @@
 
 <p>In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> modeling environment.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>            <span class="c1"># Import the ro modeling tool
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>            <span class="c1"># import the ro modeling tool
 </span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'My model'</span><span class="p">)</span>    <span class="c1"># Create a Model object
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'My model'</span><span class="p">)</span>    <span class="c1"># create a Model object
 </span></code></pre></div></div>
 
 <p>The code above defines a new <code>Model</code> object <code>model</code>, with the name specified to be <code>'My model'</code>. You could also leave the name unspecified and the default name is <code>None</code>.</p>
@@ -134,9 +136,9 @@ name : str
 
 <p>A few examples of decision variables are presented below.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'I'</span><span class="p">)</span>    <span class="c1"># Integer variables as a 1D array
-</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>     <span class="c1"># Binary variables as a 2D array
-</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    <span class="c1"># Continuous variables as a 4D array
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'I'</span><span class="p">)</span>    <span class="c1"># integer variables as a 1D array
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>     <span class="c1"># binary variables as a 2D array
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    <span class="c1"># continuous variables as a 4D array
 </span></code></pre></div></div>
 
 <h3 id="affine-operations-and-linear-constraints">Affine operations and linear constraints</h3>
@@ -149,7 +151,7 @@ name : str
 <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 
-<span class="nb">type</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>               <span class="c1"># Display the Affine type
+<span class="nb">type</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>               <span class="c1"># display the affine type
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rsome.lp.Affine
@@ -160,21 +162,21 @@ name : str
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">expr1</span> <span class="o">=</span> <span class="n">a</span> <span class="o">@</span> <span class="n">x</span>                       <span class="c1"># Matrix multiplication
+<span class="n">expr1</span> <span class="o">=</span> <span class="n">a</span> <span class="o">@</span> <span class="n">x</span>                       <span class="c1"># matrix multiplication
 </span><span class="k">print</span><span class="p">(</span><span class="n">expr1</span><span class="p">)</span>
 
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">15</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="n">expr2</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="n">y</span>                       <span class="c1"># Element-wise operation
+<span class="n">expr2</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="n">y</span>                       <span class="c1"># element-wise operation
 </span><span class="k">print</span><span class="p">(</span><span class="n">expr2</span><span class="p">)</span>
 
 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="n">expr3</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">z</span>                       <span class="c1"># Broadcasting
+<span class="n">expr3</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">z</span>                       <span class="c1"># broadcasting
 </span><span class="k">print</span><span class="p">(</span><span class="n">expr3</span><span class="p">)</span>
 
-<span class="n">expr4</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">y</span>       <span class="c1"># Reshape and broadcasting
+<span class="n">expr4</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">y</span>       <span class="c1"># reshape and broadcasting
 </span><span class="k">print</span><span class="p">(</span><span class="n">expr4</span><span class="p">)</span>
 
-<span class="n">expr5</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">].</span><span class="n">T</span>               <span class="c1"># Slicing and transpose
+<span class="n">expr5</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">].</span><span class="n">T</span>               <span class="c1"># slicing and transpose
 </span><span class="k">print</span><span class="p">(</span><span class="n">expr5</span><span class="p">)</span>
 </code></pre></div></div>
 
@@ -219,7 +221,7 @@ name : str
     <p><strong><code>sumsqr()</code> for sum of squares</strong>: the function <code>sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code>size</code> to be the same as maximum <code>shape</code> value.</p>
   </li>
   <li>
-    <p><strong><code>norm()</code> for norms of vectors</strong>: the function <code>sumsqr()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code>degree</code> to specify the degree of the norm function. The default value of the <code>degree</code> argument is 2. Examples of specifying convex constraints are provided below.</p>
+    <p><strong><code>norm()</code> for norms of vectors</strong>: the function <code>norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code>degree</code> to specify the degree of the norm function. The default value of the <code>degree</code> argument is 2. Examples of specifying convex constraints are provided below.</p>
   </li>
 </ul>
 
@@ -234,7 +236,7 @@ name : str
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># A Constraint with infinity norm
 </span></code></pre></div></div>
 
-<p>Please note that all functions above can only be used in convex functions, so convex function cannot be applied in equality constraints, and these functions cannot be used for concave inequalities, such as <code>abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
+<p>Note that all functions above can only be used in convex functions, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities. For example, <code>abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
 
 <h2 id="standard-forms-and-solutions-">Standard forms and solutions <a name="section1.3"></a></h2>
 
@@ -246,7 +248,7 @@ name : str
     the returned formula is for the primal or the dual problem.
 </code></pre></div></div>
 
-<p>You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, i.e., the objective function, linear and second-order cone constraints, bounds and variable types.</p>
+<p>You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
@@ -261,8 +263,8 @@ name : str
 <span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">c</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="n">primal</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">()</span>            <span class="c1"># Standard form of the primal problem
-</span><span class="n">dual</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">(</span><span class="n">primal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1"># Standard form of the dual problem
+<span class="n">primal</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">()</span>            <span class="c1"># standard form of the primal problem
+</span><span class="n">dual</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">(</span><span class="n">primal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1"># standard form of the dual problem
 </span></code></pre></div></div>
 
 <p>The variables <code class="language-plaintext highlighter-rouge">primal</code> and <code class="language-plaintext highlighter-rouge">dual</code> represent the standard forms of the primal and dual problems, respectively.</p>
@@ -566,7 +568,7 @@ Number of SOC constraints:    1
 </table>
 </div>
 
-<p>The standard form of the model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
+<p>The standard form of a model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, export=False, params={}) method of rsome.ro.Model instance
 Solve the model with the selected solver interface.
@@ -583,10 +585,10 @@ Solve the model with the selected solver interface.
             is generated if the option is True.
         params : dict
             A dictionary that specifies parameters of the selected solver.
-            So far the argument only applies to Gurobi and MOSEK.
+            So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 </code></pre></div></div>
 
-<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version RSOME uses the default LP solver if  <code class="language-plaintext highlighter-rouge">solver=None</code> or <code class="language-plaintext highlighter-rouge">solver=lpg_solver</code>. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please activate other solvers by specifying the <code class="language-plaintext highlighter-rouge">solver</code> parameter to be the values in the table below.</p>
+<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version RSOME uses the default LP solver if  <code class="language-plaintext highlighter-rouge">solver=None</code> or <code class="language-plaintext highlighter-rouge">solver=lpg_solver</code>. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please use other solvers by specifying the <code class="language-plaintext highlighter-rouge">solver</code> parameter to be the values in the table below.</p>
 
 <table>
   <thead>
@@ -670,7 +672,7 @@ Running time: 0.0210s
 
 <p>The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.</p>
 
-<p>Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the <code class="language-plaintext highlighter-rouge">dict</code> type argument <code class="language-plaintext highlighter-rouge">params</code> in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;..., }</code>. For example, the following code solves the problem using Gurobi while displaying the log information.</p>
+<p>Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the <code class="language-plaintext highlighter-rouge">dict</code> type argument <code class="language-plaintext highlighter-rouge">params</code> in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;..., }</code>. For example, the following code solves the problem using Gurobi while configuring the parameter <code class="language-plaintext highlighter-rouge">LogToConsole</code> to be <code class="language-plaintext highlighter-rouge">True</code> so that the log information is displayed in the coding Console.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span>                                <span class="c1"># Use Gurobi as the solver
 </span>            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'LogToConsole'</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>      <span class="c1"># Set LogToConsole to be True
@@ -683,6 +685,12 @@ Running time: 0.0210s
 <h3 id="mean-variance-portfolio-optimization"><a href="example_mv_portfolio">Mean-variance portfolio optimization</a></h3>
 <h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer programming for Sudoku</a></h3>
 <h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC power flow</a></h3>
+
+<h2 id="reference">Reference</h2>
+
+<p><a id="ref1"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, and Peng Xiong. “<a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>.” <i>Management Science</i> 66.8 (2020): 3329-3339.</p>
 
 
       </section>

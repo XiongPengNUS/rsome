@@ -2,7 +2,7 @@
 
 ### Conditional value-at-risk with application to robust portfolio management
 
-This robust portfolio management model is proposed by [Worst-Case Conditional Value-at-Risk with Application to Robust Portfolio Management](http://www-optima.amp.i.kyoto-u.ac.jp/~fuku/papers/2005-006.pdf). The portfolio decision is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as
+This robust portfolio management model is proposed by [Zhu and Fukushima (2009)](#ref1). The portfolio allocation is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as
 
 $$
 \begin{align}
@@ -23,8 +23,8 @@ import pandas_datareader.data as web
 import numpy as np
 
 stocks = ['JPM', 'AMZN', 'TSLA', 'AAPL', 'GOOG']
-start = '1/1/2020'              # Starting date of historical data
-end='12/31/2020'                # End date of historical data
+start = '1/1/2020'              # starting date of historical data
+end='12/31/2020'                # end date of historical data
 
 data = pd.DataFrame([])
 for stock in stocks:
@@ -143,15 +143,15 @@ data
 </div>
 
 ```python
-y = data.values     # Stock data as an array
+y = data.values     # stock data as an array
 s, n = y.shape      # s: sample size; n: number of stocks
 
-x_lb = np.zeros(n)  # Lower bounds of investment decisions
-x_ub = np.ones(n)   # Upper bounds of investment decisions
+x_lb = np.zeros(n)  # lower bounds of investment decisions
+x_ub = np.ones(n)   # upper bounds of investment decisions
 
-beta =0.95          # Confidence interval
-w0 = 1              # Investment budget
-mu = 0.001          # Target minimum expected return rate
+beta =0.95          # confidence interval
+w0 = 1              # investment budget
+mu = 0.001          # target minimum expected return rate
 ```
 
 #### Nominal CVaR model
@@ -164,7 +164,7 @@ from rsome import grb_solver as grb
 
 model = ro.Model()
 
-pi = np.ones(s) / s         # No ambiguity in probability distribution
+pi = np.ones(s) / s         # no ambiguity in probability distribution
 
 x = model.dvar(n)
 u = model.dvar(s)
@@ -188,7 +188,7 @@ Running time: 0.0073s
 The portfolio decision for the nominal model is retrieved by the following code.
 
 ```python
-x.get().round(4)    # Portfolio decision with 4 d.p.
+x.get().round(4)    # the optimal portfolio decision with 4 d.p.
 ```
 
 ```
@@ -207,8 +207,8 @@ In this case study, we assume that \\(-\underline{\pmb{\eta}}=\bar{\pmb{\eta}}=0
 ```python
 model = ro.Model()
 
-eta_ub = 0.0001                 # Upper bound of eta
-eta_lb = -0.0001                # Lower bound of eta
+eta_ub = 0.0001                 # upper bound of eta
+eta_lb = -0.0001                # lower bound of eta
 
 eta = model.rvar(s)             # eta as random variables
 uset = (eta.sum() == 0,
@@ -236,7 +236,7 @@ Running time: 0.0268s
 ```
 
 ```python
-x.get().round(4)    # Portfolio decision with 4 d.p.
+x.get().round(4)    # the optimal portfolio decision with 4 d.p.
 ```
 
 ```
@@ -283,9 +283,16 @@ Running time: 0.0285s
 ```
 
 ```python
-x.get().round(4)    # Portfolio decision with 4 d.p.
+x.get().round(4)    # the optimal portfolio decision with 4 d.p.
 ```
 
 ```
 array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
 ```
+
+<br>
+#### Reference
+
+<a id="ref1"></a>
+
+Zhu, Shushang, and Masao Fukushima. "[Worst-case conditional value-at-risk with application to robust portfolio management](https://pubsonline.informs.org/doi/abs/10.1287/opre.1080.0684)." <i>Operations research</i> 57.5 (2009): 1155-1168.

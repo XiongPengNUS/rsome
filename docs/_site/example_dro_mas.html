@@ -65,7 +65,7 @@
 
 <h3 id="distributionally-robust-optimization-for-medical-appointment-scheduling">Distributionally robust optimization for medical appointment scheduling</h3>
 
-<p>In this example,  we consider a medical appointment scheduling problem described in <a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>, where \(N\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.</p>
+<p>In this example,  we consider a medical appointment scheduling problem described in <a href="#ref1">Bertsimas et al. (2019)</a>, where \(N\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.</p>
 
 <p>A distributionally robust optimization model presented below is used to minimize the worst-case expected total cost of patients waiting and physician overtime over a partial cross moment ambiguity set.</p>
 
@@ -130,7 +130,7 @@
 <span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
 
 
-<span class="c1"># Model and ambiguity set parameters
+<span class="c1"># model and ambiguity set parameters
 </span><span class="n">N</span> <span class="o">=</span> <span class="mi">8</span>
 <span class="n">gamma</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.25</span>
@@ -141,34 +141,41 @@
 <span class="n">mul</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="n">alpha</span>
 <span class="n">Sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma</span><span class="p">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">mul</span>
 
-<span class="c1"># Modeling with RSOME
-</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                                  <span class="c1"># Define a DRO model
-</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># Random variable z
-</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># Auxiliary variable u
+<span class="c1"># modeling with RSOME
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                                  <span class="c1"># define a DRO model
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># random variable z
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># auxiliary variable u
 </span>
 <span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">wks</span><span class="p">(</span><span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">square</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-                 <span class="n">square</span><span class="p">((</span><span class="n">z</span><span class="o">-</span><span class="n">mu</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>      <span class="c1"># Support of random variables
+                 <span class="n">square</span><span class="p">((</span><span class="n">z</span><span class="o">-</span><span class="n">mu</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>      <span class="c1"># support of random variables
 </span>                 <span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">,</span> <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
-                 <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">Sigma</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>            <span class="c1"># Support of expectations
+                 <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">Sigma</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>            <span class="c1"># support of expectations
 </span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># The first-stage decision
-</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># The decision rule
-</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>                                           <span class="c1"># Define affine adaptation
-</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                           <span class="c1"># Define affine adaptation
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># the first-stage decision
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># the decision rule
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>                                           <span class="c1"># define affine adaptation
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                           <span class="c1"># define affine adaptation
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">gamma</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">fset</span><span class="p">)</span>    <span class="c1"># Worst-case expected cost
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">z</span><span class="p">)</span>                    <span class="c1"># Constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                     <span class="c1"># Constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                     <span class="c1"># Constraints
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">T</span><span class="p">)</span>                               <span class="c1"># Constraints
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">gamma</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">fset</span><span class="p">)</span>    <span class="c1"># worst-case expected cost
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">z</span><span class="p">)</span>                    <span class="c1"># constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                     <span class="c1"># constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                     <span class="c1"># constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">T</span><span class="p">)</span>                               <span class="c1"># constraints
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                                     <span class="c1"># Solve the model by Gurobi
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                                     <span class="c1"># solve the model by Gurobi
 </span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
 Solution status: 2
 Running time: 0.0516s
 </code></pre></div></div>
+
+<p><br /></p>
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. “<a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>.” <i>Management Science</i> 65.2 (2019): 604-618.</p>
 
 
       </section>
