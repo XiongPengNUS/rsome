@@ -2,12 +2,12 @@
 
 # Introduction
 
-RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
+RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for modeling generic optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
 
 
 ## Installing RSOME and solvers
 
-The RSOME package can be installed with the <code>pip</code> command:
+The RSOME package can be installed with the `pip` command:
 
 ***
 
@@ -27,7 +27,7 @@ The current version of RSOME supports deterministic, robust optimization and dis
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | `cpx_solver` | Yes | Yes |
 
 
-## A linear programming example 
+## A linear programming example
 
 The RSOME package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
 
@@ -45,19 +45,19 @@ and it is used to illustrate the steps of solving optimization models.
 
 
 ```python
-from rsome import ro                # Import the ro modeling tool
+from rsome import ro                # import the ro modeling tool
 
-model = ro.Model('LP model')        # Create a Model object
-x = model.dvar()                    # Define a decision variable x
-y = model.dvar()                    # Define a decision variable y
+model = ro.Model('LP model')        # create a Model object
+x = model.dvar()                    # define a decision variable x
+y = model.dvar()                    # define a decision variable y
 
-model.max(3*x + 4*y)                # Maximize the objective function
-model.st(2.5*x + y <= 20)           # Specify the 1st constraints
-model.st(5*x + 3*y <= 30)           # Specify the 2nd constraints
-model.st(x + 2*y <= 16)             # Specify the 3rd constraints
-model.st(abs(y) <= 2)               # Specify the 4th constraints
+model.max(3*x + 4*y)                # maximize the objective function
+model.st(2.5*x + y <= 20)           # specify the 1st constraints
+model.st(5*x + 3*y <= 30)           # specify the 2nd constraints
+model.st(x + 2*y <= 16)             # specify the 3rd constraints
+model.st(abs(y) <= 2)               # specify the 4th constraints
 
-model.solve()                       # Solve the model by the default solver
+model.solve()                       # solve the model by the default solver
 ```
 
     Being solved by the default LP solver...
@@ -65,9 +65,9 @@ model.solve()                       # Solve the model by the default solver
     Running time: 0.0426s
 
 
-In this sample code, a model object is created by calling the constructor <code>Model()</code> imported from the <code>rsome.ro</code> toolbox. Based on the model object, decision variables <code>x</code> and <code>y</code> are created by the method <code>dvar()</code>. These variables are then used in specifying the objective function and model constraints. The last step is calling the <code>solve()</code> method to solve the problem. Once the solution completes, a message showing the solution status and running time will be printed.
+In this sample code, a model object is created by calling the constructor `Model()` imported from the `rsome.ro` toolbox. Based on the model object, decision variables `x` and `y` are created by the method `dvar()`. These variables are then used in specifying the objective function and model constraints. The last step is calling the `solve()` method to solve the problem. Once the solution completes, a message showing the solution status and running time will be printed.
 
-You may find the interpretation of the solution status code of `linprog()` from the website [`scipy.optimize.linprog`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html). The status code <code>0</code> suggests that the problem was solved to optimality (subject to tolerances), and an optimal solution is available. The optimal solution and the corresponding objective value can be attained by the <code>get()</code> method.
+You may find the interpretation of the solution status code of `linprog()` from the website [`scipy.optimize.linprog`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html). The status code `0` suggests that the problem was solved to optimality (subject to tolerances), and an optimal solution is available. The optimal solution and the corresponding objective value can be attained by the `get()` method.
 
 
 ```python
@@ -81,7 +81,7 @@ print('Objective:', round(model.get(), 2))
     Objective: 22.4
 
 
-The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the integrated solver. The basic information of the standard form can be retrieved by calling the <code>do_math()</code> method of the RSOME model object.
+The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the integrated solver. The basic information of the standard form can be retrieved by calling the `do_math()` method of the RSOME model object.
 
 
 ```python

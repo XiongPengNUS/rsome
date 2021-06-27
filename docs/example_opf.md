@@ -79,7 +79,7 @@ model.st(g >= Pmin, g <= Pmax)      # output capacities of generators
 Ref = 12                            # index of the reference bus
 model.st(v[Ref] == 0)               # set the reference bus
 
-model.solve(grb)
+model.solve(grb)                    # solve the problem by Gurobi
 
 print('\nOptimal generation cost: {0:0.2f}'.format(model.get()))
 ```

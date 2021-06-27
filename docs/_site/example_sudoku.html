@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5ea8ec7fe4e902f5df47e914f6eca0ab04a7e87a">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -78,7 +78,7 @@
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg/1280px-Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg.png" width="200" />
 </p>
 
-<p>The Sudoku game can be considered as a feasibility optimization problem with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \(x_{ijk}\in \{0, 1\}\), with\(i \in [0, 8]\), \(j \in [0, 8]\), and \(k \in [0, 8]\). It equals to one if an integer \(k+1\) is placed in a cell at the \(i\)th row and \(j\)th column. Let \(a_{ij}\) be the known number at the \(i\)th row and \(j\)th column, with \((i, j)\in\mathcal{I}\times\mathcal{J}\) as \(\mathcal{I}\) and \(\mathcal{J}\) are the row and column indices of numbers with known values, the Sudoku game can be thus written as the following integer program:</p>
+<p>The Sudoku game can be considered as a feasibility optimization problem with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \(x_{ijk}\in \{0, 1\}\), with \(i \in [0, 8]\), \(j \in [0, 8]\), and \(k \in [0, 8]\). It equals to one if an integer \(k+1\) is placed in a cell at the \(i\)th row and \(j\)th column. Let \(a_{ij}\) be the known number at the \(i\)th row and \(j\)th column, with \((i, j)\in\mathcal{I}\times\mathcal{J}\) as \(\mathcal{I}\) and \(\mathcal{J}\) are the row and column indices of numbers with known values, the Sudoku game can be thus written as the following integer program:</p>
 
 \[\begin{align}
 \min~&amp;0 \\
@@ -156,7 +156,7 @@ Running time: 0.0017s
  [0 0 0 0 8 0 0 7 9]]
 </code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">astype</span><span class="p">(</span><span class="s">'int'</span><span class="p">)</span>   <span class="c1"># retrieve the solution as integers
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_sol</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">astype</span><span class="p">(</span><span class="s">'int'</span><span class="p">)</span>   <span class="c1"># retrieve the solution as an array of integers
 </span>
 <span class="k">print</span><span class="p">((</span><span class="n">x_sol</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">))).</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </code></pre></div></div>

@@ -1,35 +1,44 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-# Robust optimization
+# RSOME for robust optimization
 
 ## General formulation for robust optimization models <a name="section2.1"></a>
 
-The `rsome.ro` modeling environment is capable of formulating the robust optimization problems as
+The `rsome.ro` module in RSOME is designed for robust optimization problems, where tailored modeling tools are developed for specifying random variables, uncertainty sets, and objective functions or constraints under worst-case scenarios that may arise from the uncertainty set. Let \\(\pmb{z}\in\mathbb{R}^J\\) be a vector of random variables and \\(\pmb{x}\in\mathbb{R}^{I_x}\\)(resp., \\(\pmb{y}(\pmb{z})\in\mathbb{R}^{I_y}\\)) be the here-and-now  (resp., non-anticipative wait-and-see) decision made before (resp., after) the uncertainty realizes. Models supported in the `ro` module can be cast into the following general format:
 
 $$
 \begin{align}
-\min ~ &\max\limits_{\pmb{z}\in\mathcal{Z}_0} ~\pmb{a}_0^T(\pmb{z})\pmb{x} + \pmb{b}_0^T\pmb{y}(\pmb{z}) + c_0(\pmb{z}) &&\\
-\text{s.t.} ~ & \pmb{a}_1^T(\pmb{z})\pmb{x} + \pmb{b}_1^T\pmb{y}(\pmb{z}) + c_1(\pmb{z}) \leq 0, && \forall \pmb{z}\in\mathcal{Z}_1 \\
-& \pmb{a}_2^T(\pmb{z})\pmb{x} + \pmb{b}_2^T\pmb{y}(\pmb{z}) + c_2(\pmb{z}) \leq 0, && \forall \pmb{z}\in\mathcal{Z}_2 \\
-& \vdots \\
-& \pmb{a}_M^T(\pmb{z})\pmb{x} + \pmb{b}_M^T\pmb{y}(\pmb{z}) + c_M(\pmb{z}) \leq 0, && \forall \pmb{z}\in\mathcal{Z}_M \\
-& \pmb{x} \in \mathcal{X} &&
+\min ~ &\max\limits_{\pmb{z}\in\mathcal{Z}_0} ~\left\{\pmb{a}_0^T(\pmb{z})\pmb{x} + \pmb{b}_0^T\pmb{y}(\pmb{z}) + c_0(\pmb{z})\right\} &&\\
+\text{s.t.} ~ & \max\limits_{\pmb{z}\in\mathcal{Z}_M}\left\{\pmb{a}_m^T(\pmb{z})\pmb{x} + \pmb{b}_m^T\pmb{y}(\pmb{z}) + c_m(\pmb{z})\right\} \leq 0, && \forall m \in \mathcal{M}_1 \\
+& y_i \in \mathcal{L}(\mathcal{J}_i) &&\forall i \in [I_y] \\
+& \pmb{x} \in \mathcal{X}. &&
 \end{align}
 $$
 
-with \\(\pmb{x}\in\mathbb{R}^I\\) an array of decision variables, \\(\pmb{z}\in\mathbb{R}^J\\) an array of random variables, and \\(\pmb{y}(\pmb{z})\\) the linear decision rule that affinely adapts to \\(\pmb{z}\\), which is expressed as
+Here \\(\mathcal{X}\subseteq \mathbb{R}^{I_x}\\) is a feasible of \\(\pmb{x}\\) which is second-order cone representable, \\(\pmb{b}_m\in\mathbb{R}^{I_y}\\), \\(m \in \mathcal{M}_1\cup \\{0\\}\\) are fixed parameters of \\(\pmb{y}\\), and uncertain parameters \\(\pmb{a}_m(\pmb{z})\\) as well as \\(c_m(\pmb{z})\\) are expressed as affine mappings of random variable \\(\pmb{z}\\):
 
 $$
-y_n(\pmb{z}) = y_n^0 + \sum\limits_{j\in\mathcal{J}^n} y_{nj}^z z_j, ~~~~n=1, 2, ..., N.
+\begin{align}
+\pmb{a}_m(\pmb{z}) := \pmb{a}_m^0 + \sum\limits_{j\in[J]}\pmb{a}_m^jz_j ~~\text{and}~~ c_m(\pmb{z}) := c_m^0 + \sum\limits_{j\in[J]}c_m^jz_j.
+\end{align}
 $$
 
-where \\(\mathcal{J}^n\\) is a subset of all random variables that the decision rule \\(y_n(\pmb{z})\\) adapts to. The formulation above suggests that we are minimizing (or maximizing) the objective function under the worst-case realization of the uncertainty set \\(\mathcal{Z}_0\\), subject to constraints under the worst case over uncertainty sets \\(\mathcal{Z}_m\\), \\(m= 1, 2, ..., M\\).
+where \\(\pmb{a}_m^j\in\mathbb{R}^{I_x}\\) and \\(c_m^j\in\mathbb{R}\\), indexed by \\(j\in[J]\cup\\{0\\}\\) and \\(\mathcal{M}_1\cup \\{0\\}\\), are proper coefficients. The wait-and-see decision \\(\pmb{y}\\), which can potentially be an arbitrary functional of uncertainty realization \\(\pmb{z}\\), is infinite-dimensional, and thus is hard to optimize. A common robust optimization technique for tractability, called linear decision rule (or affine decision rule), is to restrict y to simpler and easy-to-optimize affine functions in the following form:
 
-The RSOME package provides rich algebraic tools for specifying random variables arrays, uncertainty sets, the worst-case objective and constraints of the robust model, which will be introduced in the subsequent sections.
+$$
+\begin{align}
+\mathcal{L}(\mathcal{J}) := \left\{y: \mathbb{R}^{[\mathcal{J}]} \mapsto \mathbb{R} \left|
+y(\pmb{z}) = y^0 + \sum\limits_{j\in\mathcal{J}}y^jz_j
+\right.
+\right\}.
+\end{align}
+$$
+
+The RSOME package provides rich algebraic tools for specifying random variables arrays, linear decision rules, uncertainty sets, the worst-case objective and constraints of a robust model, which will be introduced in the subsequent sections.
 
 ## Random variables and uncertainty sets <a name="section2.2"></a>
 
-Random variables of a robust optimization model can be defined by the method <code>rvar()</code> of the model object.
+Similar to decision variables, random variables are created as arrays in RSOME, and the shapes of random variable arrays are specified by the `rvar()` method of the `Model` object.
 
 ```
 rvar(shape=(1,), name=None) method of rsome.ro.Model instance
@@ -48,98 +57,136 @@ rvar(shape=(1,), name=None) method of rsome.ro.Model instance
         An array of new random variables
 ```
 
-Similar to decision variables, random variables are also formulated as arrays, and all array operations and functions aforementioned, including operations between decision and random variables, could be applied.
-
-
-```python
-from rsome import ro
-
-model = ro.Model()          # Create a model object
-x = model.dvar((1, 5))      # A 1x5 array of decision varaibles
-y = model.dvar((2, 1))      # A 2x1 array of decision variables
-z = model.rvar((2, 5))      # A 2x5 array of random variables
-
-model.st(x * z <= 2)        # Multiplication with broadcasting
-model.st(y.T@z - x <= 5)    # Matrix multiplication
-```
-
-The uncertainty set \\(\mathcal{Z}_0\\) for the objective function can be specified by the method <code>minmax()</code> and <code>maxmin()</code>. Take the following uncertainty set \\(\mathcal{Z}_0\\) for example,  
-
-$$
-\begin{align}
-\mathcal{Z}_0 = \left\{\pmb{z}:
-\|\pmb{z}\|_{\infty} \leq 1,
-\|\pmb{z}\|_1 \leq 1.5  
-\right\},
-\end{align}
-$$
-
-it is used to define the worst-case objective functions, which can be written as the following code.
+All array operations, convex functions, and NumPy-style syntax for decision variables can also be applied to random variables in defining uncertainty sets. For example, let \\(\pmb{z}\in\mathbb{R}^5\\) be the vector of random variables, an uncertainty set \\(\mathcal{Z}_0 = \left\\{\pmb{z} \left\| \\|\pmb{z}\\|\_{\infty} \leq 1, \\|\pmb{z}\\|\_1 \leq 1.5 \right\. \right\\}\\) can be defined as `z_set0` in the following code segment.
 
 ```python
 from rsome import ro
-import rsome as rso
+from rsome import norm
 import numpy as np
 
-model = ro.Model()          
-x = model.dvar((2, 5))      
-z = model.rvar((1, 5))    
+model = ro.Model()                 # create a model object
 
-# Define uncertainty set Z0 as a tuple
-z_set0 = (rso.norm(z, np.inf) <= 1,   
-          rso.norm(z, 1) <= 1.5)
+z = model.rvar(5)                  # 5 random variables as an 1D array
 
-# Minimize the worst-case objective over the uncertainty set Z0
-model.minmax((x*z).sum(), z_set0)    
-
-# Maximize the worst-case objective over an uncertainty defined by two constraints
-model.maxmin((x*z).sum(),
-             rso.norm(z, np.inf) <= 1,
-             rso.norm(z, 2) <= 1.25)
+z_set0 = (norm(z, np.inf) <= 1,    # the infinity-norm constraint
+          norm(z, 1) <= 1.5)       # the one-norm constraint
 ```
 
-In the functions <code>minmax()</code> and <code>maxmin()</code>, the first argument is the objective function, and all the remaining arguments are used to specify the constraints of the uncertainty set \\(\mathcal{Z}_0\\). Constraints of the uncertainty set can be provided in an iterable data object, such as a `tuple` or `list`. Alternatively, these constraints can be given as other arguments of the `minmax()` or `maxmin()` methods, as shown by the examples above.
+Note that an uncertainty set is a collection of constraints, written as an iterable Python object, such as `tuple` or `list`. These constraints are then used in specifying the worst-case objective function and constraints, which are introduced in the next section.
 
+## The worst-case objective and constraints <a name="section2.3"></a>
 
-For constraints of the robust model, uncertainty sets can be specified by the <code>forall()</code> method of constraints involving random variables, as shown by the following example.
+In the case of minimizing or maximizing the worst-case objective function in ROMSE, we may use the `minmax()` or the `maxmin()` method of the `Model` object to specify the objective function and the uncertainty set.
 
-
-```python
-# Define uncertainty set Z1 as a tuple
-z_set1 = (rso.norm(z, np.inf) <= 1.5,
-          rso.norm(z, 1) <= 2)
-
-# The constraints over the uncertainty set Z1
-model.st((x*z + z >= 0).forall(z_set1))
 ```
+minmax(obj, *args) method of rsome.ro.Model instance
+    Minimize the maximum objective value over the given uncertainty set.
 
-Please note that if the uncertainty set of a robust constraint is not defined, then by default, its uncertainty set is \\(\mathcal{Z}_0\\), defined by the `minmax()` or `maxmin()` methods for the objective. The code below demonstrates a case where one uncertainty set \\(\mathcal{Z}_0\\) applies to the objective function and all constraints.
+    Parameters
+    ----------
+    obj
+        Objective function involving random variables
+    *args
+        Constraints or collections of constraints of random variables
+        used for defining the uncertainty set
 
+    Notes
+    -----
+    The uncertainty set defined for the objective function is considered
+    the default uncertainty set for the robust model.
+
+```
+The documentation shows that the objective function of the robust model is specified by the first argument `obj`, while the remaining arguments could be constraints, or collection of constraints, used for defining the uncertainty set. The `minmax()` and `maxmin()` methods thus enable two approaches for specifying the worst-case objective, as shown by the sample code below.
 
 ```python
 from rsome import ro
-import rsome as rso
+from rsome import norm
+import numpy as np
 
-model = ro.Model()          
-x = model.dvar((2, 5))      
-z = model.rvar((1, 5))    
+model = ro.Model()   
 
-# Define uncertainty set Z0 as a tuple
-z_set0 = (rso.norm(z, np.inf) <= 1,   
-          rso.norm(z, 1) <= 1.5)
+x = model.dvar(5)                # 5 decision variables as a 1D array
+z = model.rvar(5)                # 5 random variables as a 1D array
 
-# Define objective function and the uncertainty set
-model.minmax((x*z).sum(), z_set0)  
+# define the uncertainty set z_set0 as a tuple
+z_set0 = (norm(z, np.inf) <= 1,   
+          norm(z, 1) <= 1.5)
 
-# The uncertainty set Z0 applies to all constraints below
-model.st(x*z + z >= 0)
-model.st(x*z + x >= 0)
-model.st(x >= z)
+# the worst-case objective over the uncertainty set z_set0
+model.minmax(x @ z, z_set0)    
+
+# the worst-case objective over an uncertainty set defined by two constraints
+model.minmax(x @ z, norm(z, np.inf) <= 1, norm(z, 2) <= 1.25)
 ```
 
-It can be seen that uncertainty sets of the robust model can be flexibly specified. More application examples are presented in the next section.
+Similar to deterministic constraints, the worst-case constraints can be defined using the NumPy-style array operations, and the associated uncertainty set is specified using the `forall()` method of the constraint.
 
-## Linear decision rules for adaptive decision-making <a name="section2.3"></a>
+```
+forall(*args) method of rsome.lp.RoConstr instance
+    Specify the uncertainty set of the constraints involving random
+    variables. The given arguments are constraints or collections of
+    constraints used for defining the uncertainty set.
+
+    Notes
+    -----
+    The uncertainty set defined by this method overrides the default
+    uncertainty set defined for the worst-case objective.
+```
+
+The `forall()` method enables users to flexibly define the worst-case constraints, as demonstrated by the sample code below.
+
+```python
+from rsome import ro
+from rsome import norm
+
+model = ro.Model()   
+
+x = model.dvar(5)
+z = model.rvar(5)
+
+# define an ellipsoidal uncertainty set z_set0
+z_set0 = norm(z, 2) <= 1.5
+
+# the worst-case objective over the uncertainty set z_set0
+model.minmax(x @ z, z_set0)    
+
+# worst-case constraints over the uncertainty set z_set0
+model.st((x * z <= 2).forall(z_set0))      
+model.st((x*z + x >= 0).forall(z_set0))        
+
+# worst-case constraints over different uncertainty sets defined by a loop
+model.st((x[:i] <= z[:i].sum()).forall(norm(z, 2) <= i*0.5) for i in range(1, 6))
+```
+
+Note that if the uncertainty set of a robust constraint is unspecified, then by default, its uncertainty set is \\(\mathcal{Z}_0\\), defined by the `minmax()` or `maxmin()` methods for the worst-case objective. The sample code above is hence equivalent to the following code segment.
+
+```python
+from rsome import ro
+from rsome import norm
+
+model = ro.Model()   
+
+x = model.dvar(5)
+z = model.rvar(5)
+
+# define an ellipsoidal uncertainty set z_set0
+z_set0 = norm(z, 2) <= 1.5
+
+# the worst-case objective over the default uncertainty set z_set0
+model.minmax(x @ z, z_set0)    
+
+# worst-case constraints over the default uncertainty set z_set0
+model.st(x * z <= 2)      
+model.st(x*z + x >= 0)        
+
+# worst-case constraints over uncertainty sets different from the default one
+model.st((x[:i] <= z[:i].sum()).forall(norm(z, 2) <= i*0.5) for i in range(1, 6))
+```
+
+The sample code above shows that the Python version of RSOME is able to specify defferent uncertainty sets \\(\mathcal{Z}_m\\), \\(m\in\mathcal{M}_1\cup\\{0\\}\\), for the objective function (with index 0) and each of the constraints (with index \\(m\in\mathcal{M}_1\\)).  Such a framework is more flexible than that in the MATLAB version introduced in [Chen et al.  (2020)](#ref2) and can be used to address a rich range of robust models, including the distributional interpretation of robust
+formulation in [Xu et al. (2012)](#ref4), the notion of Pareto robustly optimal solution discussed in [de Ruiter et al. (2016)](#ref3), as well as the sample robust optimization models proposed by [Bertsimas et al. (2021)](#ref1).
+
+## Linear decision rules for adaptive decision-making <a name="section2.4"></a>
 
 The `rsome.ro` modeling environment also supports linear decision rules for non-anticipative decision-making. A linear decision rule object can be created by the `ldr()` method of an `ro` model. Details of the method are provided below.
 
@@ -168,8 +215,8 @@ from rsome import ro
 
 model = ro.Model()
 
-x = model.ldr((2, 4))       # Decision rule variable array x
-y = model.ldr((3, 5))       # Decision rule variable array y
+x = model.ldr((2, 4))       # 2x4 decision rule variables as a 2D array
+y = model.ldr((3, 5, 4))    # 3x5x4 decision rule variables as a 3D array
 
 print(x)
 print(y)
@@ -177,39 +224,46 @@ print(y)
 
 ```
 2x4 decision rule variables
-3x5 decision rule variables
+3x5x4 decision rule variables
 ```
 
-As mentioned in previous sections, the decision rule \\(y_n(\pmb{z})\\) may affinely depend on a subset \\(\mathcal{J}^n\\) of random variables, and such a subset can be specified by the `adapt()`, as shown by the following code segment.
+As mentioned in previous sections, the decision rule \\(y_i\\) is restricted to being affinely depend on a subset \\(\mathcal{J}_i\\) of random variables, and such a subset can be specified by the `adapt()` method of the decision rule object, as shown by the following code segment.
 
 ```python
-z = model.rvar((2, 4))      # Random variable array z
-u = model.rvar(5)           # Random variable array u
+z = model.rvar((2, 4))      # 2x4 random variables as a 2D array
+u = model.rvar(5)           # 5 random variables as a 1D array
 
-x.adapt(z)                  # All elements of x depends on all z elements
-y[2, 3:].adapt(z[0, 1])     # y[2, 3:] depends on z[0, 1]
-y[1, 3:].adapt(u[3:])       # y[1, 3:] depends on u[3:]
+x.adapt(z)                  # all elements of x depends on all z elements
+y[2, 3:, :].adapt(z[0, 1])  # y[2, 3:, :] depends on z[0, 1]
+y[1, 3:, :].adapt(u[3:])    # y[1, 3:, :] depends on u[3:]
 ```
 
 Once the decision rules are created and the affine dependency on random variables is specified, the aforementioned array operations and syntax can be applied to decision rule arrays in constructing constraints involving adaptive decisions. The affine dependency must be specified before using decision rule variables in constraints, otherwise an error message will be given.
 
-Please also note that RSOME does not allow redefinition of the same affine dependency relation, such as the following code segment
-
-```python
-y[2, 3:].adapt(z[0, 1])     # y[2, 3:] depends on z[0, 1]
-y[:3, :].adapt(z[0])        # y[:3, :] depends on z[0]
-```
-
-would give an error message because the affine dependency of decision rules `y[2, 3:]` on the random variable `z[0]` is defined twice.
-
 Finally, after the model is solved, coefficients of a decision rule `y` could be accessed by the `get()` method. More specifically:
 - `y.get()` returns the constant coefficients of the decision rule `y`. The returned array has the same shape as the decision rule array `y`.
-- `y.get(z)` returns the linear coefficients of `y` with respect to the random variable `z`. The shape of the returned array is `y.shape + z.shape`, i.e., the combination of dimensions of `y` and `z`. For example, if `c = y.get(z)` where `y.dim=2`, and `z.dim=2`, the returned coefficients are presented as a four-dimensional array `c` and `c[i, j]` gives the linear coefficients of `y[i, j]` with respect to the random variable `z`.
+- `y.get(z)` returns the linear coefficients of `y` with respect to the random variable `z`. The shape of the returned array is `y.shape + z.shape`, <i>i.e.</i>, the combination of dimensions of `y` and `z`. For example, if `c = y.get(z)` where `y.dim=2`, and `z.dim=2`, the returned coefficients are presented as a four-dimensional array `c` and `c[i, j]` gives the linear coefficients of `y[i, j]` with respect to the random variable `z`.
 
-## Application examples <a name="section2.4"></a>
+## Application examples <a name="section2.5"></a>
 
 ### [Robust portfolio optimization](example_ro_portfolio)
 ### [Conditional value-at-risk with application to robust portfolio management](example_ro_cvar_portfolio)
 ### [The robust and robustness knapsack problems](example_ro_knapsack)
 ### [Adaptive robust optimization for a lot-sizing problem](example_ls)
 ### [The robust production-inventory model](example_ro_inv)
+
+## Reference
+
+<a id="ref1"></a>
+
+Bertsimas, Dimitris, Shimrit Shtern, and Bradley Sturt. 2021. [Two-stage sample robust optimization](https://pubsonline.informs.org/doi/abs/10.1287/opre.2020.2096). <i>Operations Research</i>.
+
+<a id="ref2"></a>
+
+Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329–3339.
+
+<a id="ref3"></a>
+de Ruiter, Frans JCT, Ruud CM Brekelmans, and Dick den Hertog. 2016. [The impact of the existence of multiple adjustable robust solutions](https://link.springer.com/article/10.1007/s10107-016-0978-6). <i>Mathematical Programming</i> <b>160</b>(1) 531-545.
+
+<a id="ref4"></a>
+Xu, Huan, Constantine Caramanis, and Shie Mannor. 2012. [A distributional interpretation of robust optimization](https://pubsonline.informs.org/doi/abs/10.1287/moor.1110.0531). <i>Mathematics of Operations Research</i> <b>37</b>(1) 95-110.

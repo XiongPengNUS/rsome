@@ -13,7 +13,7 @@
 </toc></th>
 
 <tr><th><toc>
-<li> Robust optimizaiton models </li>
+<li> RSOME for robust optimization models </li>
 <ul class="a">
   <li> <a href="example_ro_portfolio">Robust portfolio optimization </a></li>
   <li> <a href="example_ro_cvar_portfolio">Conditional value-at-risk with application to robust portfolio management </a></li>
@@ -24,7 +24,7 @@
 </toc></th></tr>
 
 <tr><th><toc>
-<li> Distributionally robust optimizaiton models </li>
+<li> RSOME for distributionally robust optimization models </li>
 <ul class="a">
   <li> <a href="example_dro_finpl">Multi-stage stochastic financial planning </a></li>
   <li> <a href="example_dro_mas">Distributionally robust optimization for medical appointment scheduling </a></li>

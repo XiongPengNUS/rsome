@@ -4,7 +4,7 @@
 
 RSOME is an open-source algebraic library for modeling generic optimization problems under uncertainty. It provides highly readable and mathematically intuitive modeling environment based on the state-of-the-art robust stochastic optimization framework.
 
-This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our [home page](index) for more information.
+This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our [Home Page](index) for more information.
 
 ## Modeling environments <a name="section1.1"></a>
 
@@ -15,15 +15,15 @@ The current version of RSOME provides four layers of modeling environments, as i
 
 The lower two layers of RSOME modules provide modeling tools for deterministic linear and second-order cone (SOC) programs, which are the cornerstone for building the upper-level robust and distributionally robust optimization modules. In RSOME, all robust counterparts of upper-level robust and distributionally robust models are formulated into the lower-level deterministic problems before being sent to solvers.
 
-A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer `dro` module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in [Chen  et  al.  (2020)](#ref1), is the most general framework among all. For example, robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The `ro` module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.
+A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer `dro` module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in [Chen et al.  (2020)](#ref1), is the most general framework among all. For example, classic robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The `ro` module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.
 
-The syntax rules of `lp`, `socp`, and `ro` are very similar, so we would focus on `ro` as a more general modeling environment for all robust and deterministic optimization problems. The `dro` is specially designed for distributionally robust optimization problems, with the worst-case expectations to be considered in the objective function or constraints. It will be introduced separately.
+Though each layer of RSOME modules are targeting different types of optimization problems, they follow consistent syntax in defining variables, objective functions, and constraints. In this section, we will use the `ro` module as a general modeling environment for deterministic problems, and cases of robust optimization problems will be discussed in [RSOME for robust optimization](ro_rsome). The `dro` module is specially designed for distributionally robust optimization problems, and it is different from `ro` in specifying recourse adaptations and uncertainty/ambiguity sets. It will be introduced separately in [RSOME for distributionall robust optimization](dro_rsome).
 
 ## Introduction to the `rsome.ro` environment <a name="section1.2"></a>
 
 ### Models
 
-In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> modeling environment.
+In RSOME, all optimization models are specified based on a `Model` type object. Such an object is created by the constructor `Model()` imported from the `rsome.ro` modeling environment.
 
 
 ```python
@@ -32,11 +32,11 @@ from rsome import ro            # import the ro modeling tool
 model = ro.Model('My model')    # create a Model object
 ```
 
-The code above defines a new <code>Model</code> object <code>model</code>, with the name specified to be <code>'My model'</code>. You could also leave the name unspecified and the default name is <code>None</code>.
+The code above defines a new `Model` object `model`, with the name specified to be `'My model'`. You could also leave the name unspecified and the default name is `None`.
 
-### Decision variables
+### Decision variables and linear constraints
 
-Decision variables of a model can be defined by the method <code>dvar()</code>.
+Decision variables of a model can be defined by the method `dvar()`.
 ```
 dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
     Returns an array of decision variables with the given shape
@@ -59,139 +59,92 @@ dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model insta
         An array of new decision variables
 ```
 
+Variables in RSOME can be formatted as N-dimensional arrays, which are consistent with the widely used NumPy arrays in the definition of dimensions, shapes, and sizes. Users could use the `dvar()` method of the `Model` object to specify the shape and type (`'C'` for continuous, `'B'` for binary, and `'I'` for general integer) of the decision variable array, as shown by the following examples.
 
-Similar to the <code>numpy.ndarray</code> data objects, variables in RSOME can be formatted as N-dimensional arrays, and the dimensional number is determined by the length of the tuple type attribute <code>shape</code>. Some important attributes of RSOME variables are provided below. It can be seen that they are consistent with the <code>numpy.ndarray</code> class.
-
-```
-Affine
-    An Affine type object as the transpose of the variable array
-ndim : int
-    Number of variable array dimensions
-shape : int or tuple
-    The shape of the variable array
-size : int
-    Number of variables in the array
-vtype : {'C', 'B', 'I'}
-    Type of variables
-name : str
-    Name of the variable array
+```python
+x = model.dvar(3, vtype='I')    # 3 integer variables as a 1D array
+y = model.dvar((3, 5), 'B')     # 3x5 binary variables as a 2D array
+z = model.dvar((2, 3, 4, 5))    # 2x3x4x5 continuous variables as a 4D array
 ```
 
-A few examples of decision variables are presented below.
+RSOME variables are also compatible with the standard NumPy array operations, such as element-wise computation, matrix calculation rules, broadcasting, indexing and slicing, etc. It thus enables users to define blocks of constraints with the array system. For example, the constraint system
+
+$$
+\begin{align}
+&\sum\limits_{i\in[I]}b_ix_i = 1 && \\
+&\sum\limits_{i\in[I]}A_{ji}x_i \leq c_j && j\in[J] \\
+&\sum\limits_{j\in[J]}\sum\limits_{i\in I}y_{ji} \geq 1 &&\\
+&\sum\limits_{i\in[I]}y_{ji} \geq 0 && j\in [J] \\
+&A_{ji}x_i \geq 1 &&\forall j\in[J], i\in[I] \\
+&A_{ji}y_{ji} + x_i \geq 0 && \forall j\in [J], i\in[I]
+\end{align}
+$$
+
+with decision variable \\(\pmb{x}\in\mathbb{R}^I\\) and \\(\pmb{y}\in\mathbb{R}^{J\times I}\\), as well as parameters \\(\pmb{A}\in\mathbb{R}^{J\times I}\\), \\(\pmb{b}\in\mathbb{R}^I\\), and \\(\pmb{c}\in\mathbb{R}^J\\), can be conveniently specified by the code segment below.
+
+```python
+x = model.dvar(I)               # define x as a 1D array of I variables
+y = model.dvar((J, I))          # define y as a 2D array of JxI variables
+
+b @ x == 1                      
+A @ x <= c
+y.sum() >= 1
+y.sum(axis=1) >= 0
+A * x >= 1
+A*y + x >= 0
+```
+
+RSOME arrays can also be used in specifying the objective function of the optimization model. Note that the objective function must be one affine expression. In other words, the `size` attribute of the expression must be one, otherwise an error message would be generated.
 
 
 ```python
-x = model.dvar(3, vtype='I')    # integer variables as a 1D array
-y = model.dvar((3, 5), 'B')     # binary variables as a 2D array
-z = model.dvar((2, 3, 4, 5))    # continuous variables as a 4D array
+model.min(b @ x)        # minimize the objective function b @ x
+model.max(b @ x)        # maximize the objective function b @ x
 ```
 
-### Affine operations and linear constraints
-
-Any affine operations of a variable array would create an <code>Affine</code> type object, as shown by the sample code below.
+Model constraints can be specified by the method `st()`, which means "subject to". This method allows users to define their constraints in different ways.
 
 
 ```python
-model = ro.Model()
+model.st(A @ x <= c)                    # define one constraint
 
-x = model.dvar(3)
-y = model.dvar((3, 5))
-z = model.dvar((2, 3, 4))
+model.st(y.sum() >= 1,
+         y.sum(axis=1) >= 0,
+         A*y + x >= 0)                  # define multiple constraints
 
-type(3*x + 1)               # display the affine type
-```
-
-
-
-    rsome.lp.Affine
-
-
-
-The <code>Affine</code> objects are also compatible with the standard NumPy array syntax, like reshaping, element-wise operations, matrix calculation rules, broadcasting, indexing and slicing. A few examples are provided below.
-
-
-```python
-import numpy as np
-
-a = np.ones(3)
-expr1 = a @ x                       # matrix multiplication
-print(expr1)
-
-b = np.arange(15).reshape((3, 5))
-expr2 = b + y                       # element-wise operation
-print(expr2)
-
-c = np.arange(12).reshape((3, 4))
-expr3 = c * z                       # broadcasting
-print(expr3)
-
-expr4 = x.reshape((3, 1)) + y       # reshape and broadcasting
-print(expr4)
-
-expr5 = x + y[:, 2].T               # slicing and transpose
-print(expr5)
-```
-
-    1 affine expressions
-    3x5 affine expressions
-    2x3x4 affine expressions
-    3x5 affine expressions
-    3 affine expressions
-
-
-These affine expressions can be then used in specifying the objective function of the optimization model. Please note that the objective function must be one affine expression. In other words, the <code>size</code> attribute of the expression must be one, otherwise an error message would be generated.
-
-
-```python
-model.min(a @ x)        # Minimize the objective function a @ x
-model.max(a @ x)        # Maximize the objective function a @ x
-```
-
-Model constraints can be specified by the method <code>st()</code>, which means "subject to". This method allows users to define their constraints in different ways.
-
-
-```python
-model.st(c * z <= 0)        # Define one constraint
-
-model.st(x >= 0,
-         x <= 10,
-         y >= 0,
-         y <= 20)           # Define multiple constraints as a tuple
-
-model.st(x[i] <= i
-         for i in range(3)) # Define constraints via comprehension
+model.st(x[i] <= i for i in range(3))   # define constraints by a loop
 ```
 
 ### Convex functions and convex constraints
 
 The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.
 
-- **<code>abs()</code> for absolute values**: the function <code>abs()</code> returns the element-wise absolute value of an array of variables or affine expressions.
+- `abs()` for absolute values: the function `abs()` returns the element-wise absolute value of an array of variables or affine expressions.
 
-- **<code>square()</code> for squared values**: the function <code>square</code> returns the element-wise squared values of an array of variables or affine expressions.
+- `square()` for squared values: the function `square()` returns the element-wise squared values of an array of variables or affine expressions.
 
-- **<code>sumsqr()</code> for sum of squares**: the function <code>sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code>size</code> to be the same as maximum <code>shape</code> value.
+- `sumsqr()` for sum of squares**: the function `sumsqr()` returns the sum of squares of a vector, which is a one-dimensional array, or an array with its `size` to be the same as maximum `shape` value.
 
-- **<code>norm()</code> for norms of vectors**: the function <code>norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code>degree</code> to specify the degree of the norm function. The default value of the <code>degree</code> argument is 2. Examples of specifying convex constraints are provided below.
+- `norm()` for norms of vectors: the function `norm()` returns the first, second, or infinity norm of a vector. Users may use the second argument `degree` to specify the degree of the norm function. The default value of the `degree` argument is 2. Examples of specifying convex constraints are provided below.
 
 
 ```python
 import rsome as rso
 from numpy import inf
 
-model.st(abs(z) <= 2)               # Constraints with absolute terms
-model.st(rso.sumsqr(x) <= 10)       # A Constraint with sum of squares
-model.st(rso.square(y) <= 5)        # Constraints with squared terms
-model.st(rso.norm(z[:, 2, 0]) <= 1) # A Constraint with 2-norm terms
-model.st(rso.norm(x, 1) <= y[0, 0]) # A Constraint with 1-norm terms
-model.st(rso.norm(x, inf) <= x[0])  # A Constraint with infinity norm
+model.st(abs(x) <= 2)               # constraints with absolute terms
+model.st(rso.sumsqr(x) <= 10)       # a constraint with sum of squares
+model.st(rso.square(y) <= 5)        # constraints with squared terms
+model.st(rso.norm(y[:, 0]) <= 1)    # a constraint with 2-norm terms
+model.st(rso.norm(x, 1) <= y[0, 0]) # a constraint with 1-norm terms
+model.st(rso.norm(x, inf) <= x[0])  # a constraint with infinity norm
 ```
 
-Note that all functions above can only be used in convex functions, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities. For example, <code>abs(x) >= 2</code> is invalid and gives an error message.
+Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as `abs(x) >= 2` is invalid and gives an error message.
 
 ## Standard forms and solutions <a name="section1.3"></a>
 
-All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code>do_math()</code> method of the model object.
+All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the `do_math()` method of the model object.
 
 ```
 Model.do_math(primal=True)
@@ -200,7 +153,7 @@ Model.do_math(primal=True)
     the returned formula is for the primal or the dual problem.
 ```
 
-You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.
+You may use the `do_math()` method together with the `show()` method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.
 
 
 ```python

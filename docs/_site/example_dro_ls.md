@@ -51,8 +51,9 @@ Here we generate a training dataset `ds` assuming the demand at each location fo
 A direct means of implementing the SAA model is to define the recourse decision \\(\pmb{y}\\) as a three-dimensional array, where the first dimension represents the sample size, and the remaining two dimensions indicate the from and to locations.
 
 ```python
-from rsome import ro
+from rsome import dro
 import rsome.grb_solver as grb
+import rsome as rso
 
 model = dro.Model()             # define a model
 x = model.dvar(n)               # here-and-now location decisions

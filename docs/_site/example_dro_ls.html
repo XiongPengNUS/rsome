@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5ea8ec7fe4e902f5df47e914f6eca0ab04a7e87a">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -110,8 +110,9 @@ Q(\pmb{x}, \pmb{z}) = \min~&amp; \sum\limits_{i=1}^n\sum\limits_{j=1}^nc_{ij}y_{
 
 <p>A direct means of implementing the SAA model is to define the recourse decision \(\pmb{y}\) as a three-dimensional array, where the first dimension represents the sample size, and the remaining two dimensions indicate the from and to locations.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
 <span class="kn">import</span> <span class="nn">rsome.grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>             <span class="c1"># define a model
 </span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>               <span class="c1"># here-and-now location decisions

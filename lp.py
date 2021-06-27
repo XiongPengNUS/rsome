@@ -432,10 +432,6 @@ class Vars:
                             shape=(dim, self.model.last))
         const = np.zeros(self.shape)
 
-        # if self.sparray is None:
-        #     self.sparray = sparse_array(self.shape)
-        #     self.sparray = self.sv_array()
-
         return Affine(self.model, linear, const, self.sparray)
 
     def get_ind(self):
@@ -630,18 +626,6 @@ class VarSub(Vars):
 
     def __le__(self, other):
 
-        """
-        if not isinstance(other, (Real, np.ndarray)):
-            return self.to_affine().__le__(other)
-
-        upper = super().__le__(other)
-        indices = self.indices.reshape((self.indices.size, ))
-        bound_indices = upper.indices.reshape((upper.indices.size, ))[indices]
-        bound_values = upper.values.reshape(upper.values.size)[indices]
-
-        return Bounds(upper.model, bound_indices, bound_values, 'U')
-        """
-
         upper = super().__le__(other)
         if isinstance(upper, Bounds):
             indices = self.indices.reshape((self.indices.size, ))
@@ -652,21 +636,7 @@ class VarSub(Vars):
         else:
             return self.to_affine().__le__(other)
 
-
     def __ge__(self, other):
-
-
-        """
-        if not isinstance(other, (Real, np.ndarray)):
-            return self.to_affine().__ge__(other)
-
-        lower = super().__ge__(other)
-        indices = self.indices.reshape((self.indices.size, ))
-        bound_indices = lower.indices.reshape((lower.indices.size, ))[indices]
-        bound_values = lower.values.reshape((lower.indices.size, ))[indices]
-
-        return Bounds(lower.model, bound_indices, bound_values, 'L')
-        """
 
         lower = super().__ge__(other)
         if isinstance(lower, Bounds):
@@ -1280,15 +1250,6 @@ class RoAffine:
                 right_term = right.rand_to_roaffine(left.dec_model)
                 return left.__add__(right_term)
             elif other.model == self.dec_model:
-                # raffine = self.raffine + np.zeros((other.size,
-                #                                    self.raffine.shape[1]))
-                # affine = self.affine + other
-
-                # sparray = self.sv_array()
-                # zero = self.sv_zeros(other.size)
-                # sparse = sv_to_csr(sparray + zero)
-                # raffine = sparse @ self.raffine
-
                 if other.shape != self.shape:
                     left = self * np.ones(other.shape)
                     right = other + np.zeros(self.shape)
@@ -1317,13 +1278,6 @@ class RoAffine:
                                     shape=[size, self.size])
                 raffine = sparse @ self.raffine
 
-            """
-            sparray = self.sv_array()
-            zero = self.sv_zeros(other.size)
-            sparse = sv_to_csr(sparray + zero)
-            raffine = sparse @ self.raffine
-            """
-
             affine = self.affine + other
             return RoAffine(raffine, affine, self.rand_model)
         else:
@@ -1347,14 +1301,6 @@ class RoAffine:
         if isinstance(other, Real):
             other = np.array([other])
 
-        """
-        svarray = self.affine.sv_array()
-        new_svarray = svarray * other
-        if not isinstance(new_svarray, np.ndarray):
-            new_svarray = np.array([new_svarray])
-
-        new_raffine = sv_to_csr(new_svarray) @ self.raffine
-        """
         new_raffine = sparse_mul(other, self) @ self.raffine
 
         return RoAffine(new_raffine, new_affine, self.rand_model)
@@ -1364,15 +1310,6 @@ class RoAffine:
         new_affine = other * self.affine
         if isinstance(other, Real):
             other = np.array([other])
-
-        """
-        svarray = self.affine.sv_array()
-        new_svarray = other * svarray
-        if not isinstance(new_svarray, np.ndarray):
-            new_svarray = np.array([new_svarray])
-
-        new_raffine = sv_to_csr(new_svarray) @ self.raffine
-        """
 
         new_raffine = sparse_mul(other, self) @ self.raffine
 
@@ -1384,15 +1321,6 @@ class RoAffine:
 
         new_affine = self.affine @ other
 
-        """
-        svarray = self.affine.sv_array()
-        new_svarray = svarray @ other
-        if not isinstance(new_svarray, np.ndarray):
-            new_svarray = np.array([new_svarray])
-
-        new_raffine = sv_to_csr(new_svarray) @ self.raffine
-        """
-
         new_raffine = sp_lmatmul(other, self, new_affine.shape) @ self.raffine
 
         return RoAffine(new_raffine, new_affine, self.rand_model)
@@ -1402,15 +1330,6 @@ class RoAffine:
         other = check_numeric(other)
 
         new_affine = other @ self.affine
-
-        """
-        svarray = self.affine.sv_array()
-        new_svarray = other @ svarray
-        if not isinstance(new_svarray, np.ndarray):
-            new_svarray = np.array([new_svarray])
-
-        new_raffine = sv_to_csr(new_svarray) @ self.raffine
-        """
 
         new_raffine = sp_matmul(other, self, new_affine.shape) @ self.raffine
 
@@ -1512,6 +1431,16 @@ class RoConstr:
         self.support = None
 
     def forall(self, *args):
+        """
+        Specify the uncertainty set of the constraints involving random
+        variables. The given arguments are constraints or collections of
+        constraints used for defining the uncertainty set.
+
+        Notes
+        -----
+        The uncertainty set defined by this method overrides the default
+        uncertainty set defined for the worst-case objective.
+        """
 
         constraints = []
         for items in args:

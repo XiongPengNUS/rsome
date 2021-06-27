@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5ea8ec7fe4e902f5df47e914f6eca0ab04a7e87a">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -142,8 +142,8 @@
 </span><span class="n">Ref</span> <span class="o">=</span> <span class="mi">12</span>                            <span class="c1"># index of the reference bus
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">Ref</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>               <span class="c1"># set the reference bus
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
-
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># solve the problem by Gurobi
+</span>
 <span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">Optimal generation cost: {0:0.2f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()))</span>
 </code></pre></div></div>
 

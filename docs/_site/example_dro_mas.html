@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5ea8ec7fe4e902f5df47e914f6eca0ab04a7e87a">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -91,8 +91,8 @@
 (z_j - \mu_j)^2 \leq u_j, &amp; \forall j \in [N] \\
 (\pmb{1}^T(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
 \mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} &amp; \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j, &amp; \forall j \in [N] \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_N) \leq \pmb{1}^T\pmb{\Sigma}\pmb{1}
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j^2, &amp; \forall j \in [N] \\
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^T\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.
 \right\}.
@@ -146,13 +146,14 @@
 </span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># random variable z
 </span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># auxiliary variable u
 </span>
-<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">wks</span><span class="p">(</span><span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">square</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-                 <span class="n">square</span><span class="p">((</span><span class="n">z</span><span class="o">-</span><span class="n">mu</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>      <span class="c1"># support of random variables
-</span>                 <span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">,</span> <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
-                 <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">Sigma</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>            <span class="c1"># support of expectations
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">suppset</span><span class="p">(</span><span class="n">z</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">square</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+             <span class="n">square</span><span class="p">((</span><span class="n">z</span><span class="o">-</span><span class="n">mu</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>          <span class="c1"># support of random variables
+</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">,</span> <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+             <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">Sigma</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>                <span class="c1"># support of expectations
 </span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># the first-stage decision
-</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># the decision rule
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>                                    <span class="c1"># the here-and-now decision
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># the wait-and-see decision
 </span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>                                           <span class="c1"># define affine adaptation
 </span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                           <span class="c1"># define affine adaptation
 </span>

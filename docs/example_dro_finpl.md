@@ -6,7 +6,7 @@ In this example we consider the multi-stage financial planning problem discussed
 
 <img src="https://www.researchgate.net/profile/Zhi-Chen-21/publication/339817145/figure/fig4/AS:867492100591619@1583837642911/Scenario-tree-of-the-financial-planning-problem_W640.jpg" width=400>
 
-Besides the deterministic equivalent of the stochastic model, the financial planning problem can also be formulated as a distributionally robust optimization problem where the decision tree is represented by the following ambiguity set.
+Besides the deterministic equivalent of the stochastic model, the financial planning problem can also be formulated as a distributionally robust optimization problem where the decision tree is represented by the following ambiguity set,
 
 $$
 \mathcal{F} = \left\{
@@ -17,7 +17,7 @@ $$
 &\mathbb{P}[\tilde{s}=s] = 1/S
 \end{array}
 \right.
-\right\}
+\right\},
 $$
 
 with the scenario number \\(S=8\\) and the support \\(\mathcal{Z}_s=\\left\\{\hat{\pmb{z}}_s \\right\\} \\). The financial planning problem is thus written as
@@ -29,17 +29,17 @@ $$
 &x_{11}(s) + x_{12}(s) - \pmb{z}_1^T\pmb{w} = 0 && \forall \pmb{z} \in \mathcal{Z}_s, s\in [S]\\
 &x_{21}(s) + x_{22}(s) - \pmb{z}_2^T\pmb{x}_1(s) = 0 && \forall \pmb{z} \in \mathcal{Z}_s, s\in [S]\\
 &\pmb{z}_3^T\pmb{x}_2(s) + \overline{x}(s) - \underline{x}(s) = \tau \\
-&\pmb{x}_1(s), \pmb{x}_2(s) \geq \pmb{0}, ~ \overline{x}(s), \underline{x} \geq 0
+&\pmb{x}_1(s), \pmb{x}_2(s) \geq \pmb{0}, ~ \overline{x}(s), \underline{x}(s) \geq 0.
 \end{align}
 $$
 
-According to the scenario tree, the adaptive decisions are governed by the event-wise adaptivity rules below.
+According to the scenario tree, the adaptive decisions are governed by the event-wise static adaptation rules below,
 
 $$
 \begin{align}
 &\pmb{x}_1(s) \in \mathcal{A}(\{1, 2, 3, 4\}, \{5, 6, 7, 8\}) \\
 &\pmb{x}_2(s) \in \mathcal{A}(\{1, 2\}, \{3, 4\}, \{5, 6\}, \{7, 8\}) \\
-&\overline{x}(s), \underline{x}(s) \in \mathcal{A}(\{1\}, \{2\}, \{3\}, \{4\}, \{5\}, \{6\}, \{7\}, \{8\})
+&\overline{x}(s), \underline{x}(s) \in \mathcal{A}(\{1\}, \{2\}, \{3\}, \{4\}, \{5\}, \{6\}, \{7\}, \{8\}).
 \end{align}
 $$
 
@@ -114,7 +114,7 @@ model.solve(grb)                        # solve the model by Gurobi
 The objective value is \\(-1.514\\), as retrieved by the `model.get()` command. The solution to the here-and-now decision \\(\pmb{w}\\) is given below.
 
 ```python
-w.get().round(3)                        # solution of w (3 d.p.)
+w.get().round(3)                        # solution of w
 ```
 
 
@@ -125,7 +125,7 @@ In the following code segment, `x1.get()` returns the scenario-wise solution of 
 
 ```python
 x1_sol = x1.get()
-x1_sol.apply(lambda x: x.round(3))      # scenario-wise solution of x1 (3 d.p.)
+x1_sol.apply(lambda x: x.round(3))      # scenario-wise solution of x1
 ```
 
     0     [65.095, 2.168]
@@ -143,7 +143,7 @@ Similarly, scenario-wise solutions of \\(\pmb{x}_2\\), \\(\overline{x}\\), and \
 
 ```python
 x2_sol = x2.get()
-x2_sol.apply(lambda x: x.round(3))      # scenario-wise solution of x2 (3 d.p.)
+x2_sol.apply(lambda x: x.round(3))      # scenario-wise solution of x2
 ```
 
 
@@ -160,7 +160,7 @@ x2_sol.apply(lambda x: x.round(3))      # scenario-wise solution of x2 (3 d.p.)
 
 ```python
 x_over_sol = x_over.get()
-x_over_sol.apply(lambda x: x.round(3))  # scenario-wise solution of x_over (3 d.p.)
+x_over_sol.apply(lambda x: x.round(3))  # scenario-wise solution of x_over
 ```
 
     0     [24.8]
@@ -176,7 +176,7 @@ x_over_sol.apply(lambda x: x.round(3))  # scenario-wise solution of x_over (3 d.
 
 ```python
 x_under_sol = x_under.get()
-x_under_sol.apply(lambda x: x.round(3)) # scenario-wise solution of x_under (3 d.p.)
+x_under_sol.apply(lambda x: x.round(3)) # scenario-wise solution of x_under
 ```
 
     0      [0.0]

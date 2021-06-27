@@ -13,7 +13,7 @@ In this section we will use a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) gam
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg/1280px-Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg.png" width=200>
 </p>
 
-The Sudoku game can be considered as a feasibility optimization problem with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \\(x_{ijk}\in \\{0, 1\\}\\), with\\(i \in [0, 8]\\), \\(j \in [0, 8]\\), and \\(k \in [0, 8]\\). It equals to one if an integer \\(k+1\\) is placed in a cell at the \\(i\\)th row and \\(j\\)th column. Let \\(a_{ij}\\) be the known number at the \\(i\\)th row and \\(j\\)th column, with \\((i, j)\in\mathcal{I}\times\mathcal{J}\\) as \\(\mathcal{I}\\) and \\(\mathcal{J}\\) are the row and column indices of numbers with known values, the Sudoku game can be thus written as the following integer program:
+The Sudoku game can be considered as a feasibility optimization problem with the objective to be zero and constraints used to fulfill above rules. Consider a binary variable \\(x_{ijk}\in \\{0, 1\\}\\), with \\(i \in [0, 8]\\), \\(j \in [0, 8]\\), and \\(k \in [0, 8]\\). It equals to one if an integer \\(k+1\\) is placed in a cell at the \\(i\\)th row and \\(j\\)th column. Let \\(a_{ij}\\) be the known number at the \\(i\\)th row and \\(j\\)th column, with \\((i, j)\in\mathcal{I}\times\mathcal{J}\\) as \\(\mathcal{I}\\) and \\(\mathcal{J}\\) are the row and column indices of numbers with known values, the Sudoku game can be thus written as the following integer program:
 
 $$
 \begin{align}
@@ -99,7 +99,7 @@ print(puzzle)                   # display the Sudoku puzzle
 
 
 ```python
-x_sol = x.get().astype('int')   # retrieve the solution as integers
+x_sol = x.get().astype('int')   # retrieve the solution as an array of integers
 
 print((x_sol * np.arange(1, 10).reshape((1, 1, 9))).sum(axis=2))
 ```

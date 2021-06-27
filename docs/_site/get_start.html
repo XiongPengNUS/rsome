@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME for Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5ea8ec7fe4e902f5df47e914f6eca0ab04a7e87a">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -67,7 +67,7 @@
 
 <p>RSOME is an open-source algebraic library for modeling generic optimization problems under uncertainty. It provides highly readable and mathematically intuitive modeling environment based on the state-of-the-art robust stochastic optimization framework.</p>
 
-<p>This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our <a href="index">home page</a> for more information.</p>
+<p>This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our <a href="index">Home Page</a> for more information.</p>
 
 <h2 id="modeling-environments-">Modeling environments <a name="section1.1"></a></h2>
 
@@ -77,26 +77,26 @@
 
 <p>The lower two layers of RSOME modules provide modeling tools for deterministic linear and second-order cone (SOC) programs, which are the cornerstone for building the upper-level robust and distributionally robust optimization modules. In RSOME, all robust counterparts of upper-level robust and distributionally robust models are formulated into the lower-level deterministic problems before being sent to solvers.</p>
 
-<p>A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer <code class="language-plaintext highlighter-rouge">dro</code> module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in <a href="#ref1">Chen  et  al.  (2020)</a>, is the most general framework among all. For example, robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The <code class="language-plaintext highlighter-rouge">ro</code> module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.</p>
+<p>A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer <code class="language-plaintext highlighter-rouge">dro</code> module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in <a href="#ref1">Chen et al.  (2020)</a>, is the most general framework among all. For example, classic robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The <code class="language-plaintext highlighter-rouge">ro</code> module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.</p>
 
-<p>The syntax rules of <code class="language-plaintext highlighter-rouge">lp</code>, <code class="language-plaintext highlighter-rouge">socp</code>, and <code class="language-plaintext highlighter-rouge">ro</code> are very similar, so we would focus on <code class="language-plaintext highlighter-rouge">ro</code> as a more general modeling environment for all robust and deterministic optimization problems. The <code class="language-plaintext highlighter-rouge">dro</code> is specially designed for distributionally robust optimization problems, with the worst-case expectations to be considered in the objective function or constraints. It will be introduced separately.</p>
+<p>Though each layer of RSOME modules are targeting different types of optimization problems, they follow consistent syntax in defining variables, objective functions, and constraints. In this section, we will use the <code class="language-plaintext highlighter-rouge">ro</code> module as a general modeling environment for deterministic problems, and cases of robust optimization problems will be discussed in <a href="ro_rsome">RSOME for robust optimization</a>. The <code class="language-plaintext highlighter-rouge">dro</code> module is specially designed for distributionally robust optimization problems, and it is different from <code class="language-plaintext highlighter-rouge">ro</code> in specifying recourse adaptations and uncertainty/ambiguity sets. It will be introduced separately in <a href="dro_rsome">RSOME for distributionall robust optimization</a>.</p>
 
 <h2 id="introduction-to-the-rsomero-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> environment <a name="section1.2"></a></h2>
 
 <h3 id="models">Models</h3>
 
-<p>In RSOME, all optimization models are specified based on a <code>Model</code> type object. Such an object is created by the constructor <code>Model()</code> imported from the <code>rsome.ro</code> modeling environment.</p>
+<p>In RSOME, all optimization models are specified based on a <code class="language-plaintext highlighter-rouge">Model</code> type object. Such an object is created by the constructor <code class="language-plaintext highlighter-rouge">Model()</code> imported from the <code class="language-plaintext highlighter-rouge">rsome.ro</code> modeling environment.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>            <span class="c1"># import the ro modeling tool
 </span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'My model'</span><span class="p">)</span>    <span class="c1"># create a Model object
 </span></code></pre></div></div>
 
-<p>The code above defines a new <code>Model</code> object <code>model</code>, with the name specified to be <code>'My model'</code>. You could also leave the name unspecified and the default name is <code>None</code>.</p>
+<p>The code above defines a new <code class="language-plaintext highlighter-rouge">Model</code> object <code class="language-plaintext highlighter-rouge">model</code>, with the name specified to be <code class="language-plaintext highlighter-rouge">'My model'</code>. You could also leave the name unspecified and the default name is <code class="language-plaintext highlighter-rouge">None</code>.</p>
 
-<h3 id="decision-variables">Decision variables</h3>
+<h3 id="decision-variables-and-linear-constraints">Decision variables and linear constraints</h3>
 
-<p>Decision variables of a model can be defined by the method <code>dvar()</code>.</p>
+<p>Decision variables of a model can be defined by the method <code class="language-plaintext highlighter-rouge">dvar()</code>.</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
     Returns an array of decision variables with the given shape
     and variable type.
@@ -118,92 +118,52 @@
         An array of new decision variables
 </code></pre></div></div>
 
-<p>Similar to the <code>numpy.ndarray</code> data objects, variables in RSOME can be formatted as N-dimensional arrays, and the dimensional number is determined by the length of the tuple type attribute <code>shape</code>. Some important attributes of RSOME variables are provided below. It can be seen that they are consistent with the <code>numpy.ndarray</code> class.</p>
+<p>Variables in RSOME can be formatted as N-dimensional arrays, which are consistent with the widely used NumPy arrays in the definition of dimensions, shapes, and sizes. Users could use the <code class="language-plaintext highlighter-rouge">dvar()</code> method of the <code class="language-plaintext highlighter-rouge">Model</code> object to specify the shape and type (<code class="language-plaintext highlighter-rouge">'C'</code> for continuous, <code class="language-plaintext highlighter-rouge">'B'</code> for binary, and <code class="language-plaintext highlighter-rouge">'I'</code> for general integer) of the decision variable array, as shown by the following examples.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Affine
-    An Affine type object as the transpose of the variable array
-ndim : int
-    Number of variable array dimensions
-shape : int or tuple
-    The shape of the variable array
-size : int
-    Number of variables in the array
-vtype : {'C', 'B', 'I'}
-    Type of variables
-name : str
-    Name of the variable array
-</code></pre></div></div>
-
-<p>A few examples of decision variables are presented below.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'I'</span><span class="p">)</span>    <span class="c1"># integer variables as a 1D array
-</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>     <span class="c1"># binary variables as a 2D array
-</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    <span class="c1"># continuous variables as a 4D array
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'I'</span><span class="p">)</span>    <span class="c1"># 3 integer variables as a 1D array
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>     <span class="c1"># 3x5 binary variables as a 2D array
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    <span class="c1"># 2x3x4x5 continuous variables as a 4D array
 </span></code></pre></div></div>
 
-<h3 id="affine-operations-and-linear-constraints">Affine operations and linear constraints</h3>
+<p>RSOME variables are also compatible with the standard NumPy array operations, such as element-wise computation, matrix calculation rules, broadcasting, indexing and slicing, etc. It thus enables users to define blocks of constraints with the array system. For example, the constraint system</p>
 
-<p>Any affine operations of a variable array would create an <code>Affine</code> type object, as shown by the sample code below.</p>
+\[\begin{align}
+&amp;\sum\limits_{i\in[I]}b_ix_i = 1 &amp;&amp; \\
+&amp;\sum\limits_{i\in[I]}A_{ji}x_i \leq c_j &amp;&amp; j\in[J] \\
+&amp;\sum\limits_{j\in[J]}\sum\limits_{i\in I}y_{ji} \geq 1 &amp;&amp;\\
+&amp;\sum\limits_{i\in[I]}y_{ji} \geq 0 &amp;&amp; j\in [J] \\
+&amp;A_{ji}x_i \geq 1 &amp;&amp;\forall j\in[J], i\in[I] \\
+&amp;A_{ji}y_{ji} + x_i \geq 0 &amp;&amp; \forall j\in [J], i\in[I]
+\end{align}\]
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+<p>with decision variable \(\pmb{x}\in\mathbb{R}^I\) and \(\pmb{y}\in\mathbb{R}^{J\times I}\), as well as parameters \(\pmb{A}\in\mathbb{R}^{J\times I}\), \(\pmb{b}\in\mathbb{R}^I\), and \(\pmb{c}\in\mathbb{R}^J\), can be conveniently specified by the code segment below.</p>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-
-<span class="nb">type</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>               <span class="c1"># display the affine type
-</span></code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rsome.lp.Affine
-</code></pre></div></div>
-
-<p>The <code>Affine</code> objects are also compatible with the standard NumPy array syntax, like reshaping, element-wise operations, matrix calculation rules, broadcasting, indexing and slicing. A few examples are provided below.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
-
-<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">expr1</span> <span class="o">=</span> <span class="n">a</span> <span class="o">@</span> <span class="n">x</span>                       <span class="c1"># matrix multiplication
-</span><span class="k">print</span><span class="p">(</span><span class="n">expr1</span><span class="p">)</span>
-
-<span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">15</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="n">expr2</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="n">y</span>                       <span class="c1"># element-wise operation
-</span><span class="k">print</span><span class="p">(</span><span class="n">expr2</span><span class="p">)</span>
-
-<span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="n">expr3</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">z</span>                       <span class="c1"># broadcasting
-</span><span class="k">print</span><span class="p">(</span><span class="n">expr3</span><span class="p">)</span>
-
-<span class="n">expr4</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">y</span>       <span class="c1"># reshape and broadcasting
-</span><span class="k">print</span><span class="p">(</span><span class="n">expr4</span><span class="p">)</span>
-
-<span class="n">expr5</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">].</span><span class="n">T</span>               <span class="c1"># slicing and transpose
-</span><span class="k">print</span><span class="p">(</span><span class="n">expr5</span><span class="p">)</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1 affine expressions
-3x5 affine expressions
-2x3x4 affine expressions
-3x5 affine expressions
-3 affine expressions
-</code></pre></div></div>
-
-<p>These affine expressions can be then used in specifying the objective function of the optimization model. Please note that the objective function must be one affine expression. In other words, the <code>size</code> attribute of the expression must be one, otherwise an error message would be generated.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>        <span class="c1"># Minimize the objective function a @ x
-</span><span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>        <span class="c1"># Maximize the objective function a @ x
-</span></code></pre></div></div>
-
-<p>Model constraints can be specified by the method <code>st()</code>, which means “subject to”. This method allows users to define their constraints in different ways.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">z</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>        <span class="c1"># Define one constraint
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>               <span class="c1"># define x as a 1D array of I variables
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">J</span><span class="p">,</span> <span class="n">I</span><span class="p">))</span>          <span class="c1"># define y as a 2D array of JxI variables
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
-         <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">,</span>
-         <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
-         <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">)</span>           <span class="c1"># Define multiple constraints as a tuple
+<span class="n">b</span> <span class="o">@</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span>                      
+<span class="n">A</span> <span class="o">@</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">c</span>
+<span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+<span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+<span class="n">A</span> <span class="o">*</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+<span class="n">A</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<p>RSOME arrays can also be used in specifying the objective function of the optimization model. Note that the objective function must be one affine expression. In other words, the <code class="language-plaintext highlighter-rouge">size</code> attribute of the expression must be one, otherwise an error message would be generated.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">b</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>        <span class="c1"># minimize the objective function b @ x
+</span><span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">b</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>        <span class="c1"># maximize the objective function b @ x
+</span></code></pre></div></div>
+
+<p>Model constraints can be specified by the method <code class="language-plaintext highlighter-rouge">st()</code>, which means “subject to”. This method allows users to define their constraints in different ways.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">A</span> <span class="o">@</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="p">)</span>                    <span class="c1"># define one constraint
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">i</span>
-         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="c1"># Define constraints via comprehension
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span>
+         <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
+         <span class="n">A</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                  <span class="c1"># define multiple constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># define constraints by a loop
 </span></code></pre></div></div>
 
 <h3 id="convex-functions-and-convex-constraints">Convex functions and convex constraints</h3>
@@ -212,35 +172,35 @@ name : str
 
 <ul>
   <li>
-    <p><strong><code>abs()</code> for absolute values</strong>: the function <code>abs()</code> returns the element-wise absolute value of an array of variables or affine expressions.</p>
+    <p><code class="language-plaintext highlighter-rouge">abs()</code> for absolute values: the function <code class="language-plaintext highlighter-rouge">abs()</code> returns the element-wise absolute value of an array of variables or affine expressions.</p>
   </li>
   <li>
-    <p><strong><code>square()</code> for squared values</strong>: the function <code>square</code> returns the element-wise squared values of an array of variables or affine expressions.</p>
+    <p><code class="language-plaintext highlighter-rouge">square()</code> for squared values: the function <code class="language-plaintext highlighter-rouge">square()</code> returns the element-wise squared values of an array of variables or affine expressions.</p>
   </li>
   <li>
-    <p><strong><code>sumsqr()</code> for sum of squares</strong>: the function <code>sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code>size</code> to be the same as maximum <code>shape</code> value.</p>
+    <p><code class="language-plaintext highlighter-rouge">sumsqr()</code> for sum of squares**: the function <code class="language-plaintext highlighter-rouge">sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code class="language-plaintext highlighter-rouge">size</code> to be the same as maximum <code class="language-plaintext highlighter-rouge">shape</code> value.</p>
   </li>
   <li>
-    <p><strong><code>norm()</code> for norms of vectors</strong>: the function <code>norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code>degree</code> to specify the degree of the norm function. The default value of the <code>degree</code> argument is 2. Examples of specifying convex constraints are provided below.</p>
+    <p><code class="language-plaintext highlighter-rouge">norm()</code> for norms of vectors: the function <code class="language-plaintext highlighter-rouge">norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code class="language-plaintext highlighter-rouge">degree</code> to specify the degree of the norm function. The default value of the <code class="language-plaintext highlighter-rouge">degree</code> argument is 2. Examples of specifying convex constraints are provided below.</p>
   </li>
 </ul>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># Constraints with absolute terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>       <span class="c1"># A Constraint with sum of squares
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>        <span class="c1"># Constraints with squared terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># A Constraint with 2-norm terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># A Constraint with 1-norm terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># A Constraint with infinity norm
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># constraints with absolute terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>       <span class="c1"># a constraint with sum of squares
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>        <span class="c1"># constraints with squared terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>    <span class="c1"># a constraint with 2-norm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># a constraint with 1-norm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># a constraint with infinity norm
 </span></code></pre></div></div>
 
-<p>Note that all functions above can only be used in convex functions, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities. For example, <code>abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
+<p>Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as <code class="language-plaintext highlighter-rouge">abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
 
 <h2 id="standard-forms-and-solutions-">Standard forms and solutions <a name="section1.3"></a></h2>
 
-<p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code>do_math()</code> method of the model object.</p>
+<p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code class="language-plaintext highlighter-rouge">do_math()</code> method of the model object.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.do_math(primal=True)
     Returns a SOCProg type object representing the standard form
@@ -248,7 +208,7 @@ name : str
     the returned formula is for the primal or the dual problem.
 </code></pre></div></div>
 
-<p>You may use the <code>do_math()</code> method together with the <code>show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.</p>
+<p>You may use the <code class="language-plaintext highlighter-rouge">do_math()</code> method together with the <code class="language-plaintext highlighter-rouge">show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>

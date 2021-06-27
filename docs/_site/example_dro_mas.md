@@ -31,8 +31,8 @@ $$
 (z_j - \mu_j)^2 \leq u_j, & \forall j \in [N] \\
 (\pmb{1}^T(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
 \mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} & \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j, & \forall j \in [N] \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_N) \leq \pmb{1}^T\pmb{\Sigma}\pmb{1}
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j^2, & \forall j \in [N] \\
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^T\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.
 \right\}.
@@ -88,13 +88,14 @@ model = dro.Model()                                  # define a DRO model
 z = model.rvar(N)                                    # random variable z
 u = model.rvar(N+1)                                  # auxiliary variable u
 
-fset = model.wks(z >= 0, square(z - mu) <= u[:-1],
-                 square((z-mu).sum()) <= u[-1],      # support of random variables
-                 E(z) == mu, E(u[:-1]) <= sigma**2,
-                 E(u[-1]) <= Sigma.sum())            # support of expectations
+fset = model.ambiguity()
+fset.suppset(z >= 0, square(z - mu) <= u[:-1],
+             square((z-mu).sum()) <= u[-1])          # support of random variables
+fset.exptset(E(z) == mu, E(u[:-1]) <= sigma**2,
+             E(u[-1]) <= Sigma.sum())                # support of expectations
 
-x = model.dvar(N)                                    # the first-stage decision
-y = model.dvar(N+1)                                  # the decision rule
+x = model.dvar(N)                                    # the here-and-now decision
+y = model.dvar(N+1)                                  # the wait-and-see decision
 y.adapt(z)                                           # define affine adaptation
 y.adapt(u)                                           # define affine adaptation
 

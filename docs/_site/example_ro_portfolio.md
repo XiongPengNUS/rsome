@@ -92,4 +92,4 @@ print('Objective value: {0:0.4f}'.format(obj_val))
 
 <a id="ref1"></a>
 
-Bertsimas, Dimitris, Melvyn Sim. 2004. [The price of robustness](https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065) <i>Operations research</i> <b>52</b>(1) 35–53.
+Bertsimas, Dimitris, Melvyn Sim. 2004. [The price of robustness](https://pubsonline.informs.org/doi/abs/10.1287/opre.1030.0065) <i>Operations Research</i> <b>52</b>(1) 35–53.

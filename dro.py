@@ -113,6 +113,10 @@ class Model:
         return dec_var
 
     def ambiguity(self):
+        """
+        Returns an event-wise ambiguity set with the given number of scenarios
+        decalred in creating the DRO model.
+        """
 
         if self.all_constr:
             raise SyntaxError('Ambiguity set must be specified ' +
@@ -269,6 +273,22 @@ class Model:
         self.dupdate = True
 
     def minsup(self, obj, ambset):
+        """
+        Minimize the worst-case expected objective value over the given
+        ambiguity set.
+
+        Parameters
+        ----------
+        obj
+            Objective function involving random variables
+        ambset : Ambiguity
+            The ambiguity set defined for the worst-case expectation
+
+        Notes
+        -----
+        The ambiguity set defined for the objective function is considered
+        the default ambiguity set for the distritionally robust model.
+        """
 
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
@@ -280,6 +300,23 @@ class Model:
         self.dupdate = True
 
     def maxinf(self, obj, ambset):
+
+        """
+        Maximize the worst-case expected objective value over the given
+        ambiguity set.
+
+        Parameters
+        ----------
+        obj
+            Objective function involving random variables
+        ambset : Ambiguity
+            The ambiguity set defined for the worst-case expectation
+
+        Notes
+        -----
+        The ambiguity set defined for the objective function is considered
+        the default ambiguity set for the distritionally robust model.
+        """
 
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')

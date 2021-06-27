@@ -36,7 +36,7 @@ p = 1.15 + i*0.05/150                       # mean returns
 sigma = 0.05/450 * (2*i*n*(n+1))**0.5       # standard deviations of returns
 phi = 5                                     # constant phi
 
-model = ro.Model('mv-portfolio')
+model = ro.Model('mv-portfolio')            # create an RSOME model
 
 x = model.dvar(n)                           # fractions of investment
 

@@ -136,6 +136,23 @@ class Model:
 
     def minmax(self, obj, *args):
 
+        """
+        Minimize the maximum objective value over the given uncertainty set.
+
+        Parameters
+        ----------
+        obj
+            Objective function involving random variables
+        *args
+            Constraints or collections of constraints of random variables
+            used for defining the uncertainty set
+
+        Notes
+        -----
+        The uncertainty set defined for the objective function is considered
+        the default uncertainty set for the robust model.
+        """
+
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
 
@@ -160,6 +177,23 @@ class Model:
         self.dupdate = True
 
     def maxmin(self, obj, *args):
+
+        """
+        Maximize the minimum objective value over the given uncertainty set.
+
+        Parameters
+        ----------
+        obj
+            Objective function involving random variables
+        *args
+            Constraints or collections of constraints of random variables
+            used for defining the uncertainty set
+
+        Notes
+        -----
+        The uncertainty set defined for the objective function is considered
+        the default uncertainty set for the robust model.
+        """
 
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
