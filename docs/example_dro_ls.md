@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Distributionally robust optimization approaches for a lot-sizing problem
+### Adaptive Distributionally Robust Lot-Sizing
 
 In this section, we are using RSOME to replicate numerical case studies presented in [Bertsimas et al. (2021)](#ref1). A capacitated network with \\(n\\) locations is considered, where each location \\(i\\) has an unknown demand \\(d_i\\), and the demand can be satisfied by the existing local stock \\(x_i\\) or by transporting an amount \\(y_{ij}\\) of units from another location \\(j\\), which is determined after the demand is realized. Such a lot-sizing problem can be written as the following two-stage formulation,
 

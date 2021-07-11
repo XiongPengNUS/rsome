@@ -1,3 +1,8 @@
+"""
+This module is used as an interface to call the Gurobi solver for solving
+(mixed-integer) linear or second-order cone programs.
+"""
+
 import gurobipy as gp
 import numpy as np
 import warnings

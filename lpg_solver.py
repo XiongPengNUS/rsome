@@ -1,8 +1,12 @@
+"""
+This module is used as an interface to call the scipy.optimize.linprog
+solver (default solver) for solving linear programming problems.
+"""
+
 import scipy.optimize as opt
 import numpy as np
 import warnings
 import time
-
 
 def solve(formula, display=True, export=False, params={}):
 

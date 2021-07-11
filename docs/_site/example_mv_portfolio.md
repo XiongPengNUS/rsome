@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Mean-variance portfolio optimization
+### Mean-Variance Portfolio
 
 In this example, we consider a portfolio optimization problem discussed in [Ben-Tal and Nemirovski 1999](#ref1). Suppose there are \\(n=150\\) stocks, and each stock \\(i\\) has the mean return to be \\(p_i\\) and the standard deviation to be \\(\sigma_i\\). Let \\(x_i\\) be the fraction of the total wealth invested in stock \\(i\\), a classic approach is to formulate the problem as a quadratic program, where a mean-variance objective function is maximized:
 

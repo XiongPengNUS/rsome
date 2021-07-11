@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### The robust and robustness knapsack problems
+### Robust/Robustness Knapsack
 
 In this example, we will use the RSOME package to implement the robust knapsack model introduced in the paper [Bertsimas and Sim (2004)](#ref1), and the robustness model described in the paper [Long et al. (2019)](#ref2). In the knapsack problem, the weight coefficient \\(\tilde{w}_i\\) is assumed to be randomly distributed in the range \\([w_i - \delta_i, ~ w_i + \delta_i]\\). Suppose that each good has a value of \\(c_i\\), then the objective is to maximize the total value of goods. The robust model can be thus written as
 

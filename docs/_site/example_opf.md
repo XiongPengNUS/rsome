@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Optimal DC power flow
+### Optimal DC Power Flow
 
 The optimal power flow problem minimizes the overall operating cost in a electricity network while subject to a number of generation and transmission constraints. The DC model is a widely used linearized approximation of the actual nonlinear power flow model, and it can be written as
 

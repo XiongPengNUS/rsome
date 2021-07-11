@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>RSOME for Python by XiongPengNUS</title>
+    <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -20,7 +20,7 @@
           <img src="/rso_left.png" alt="Logo" width=180/>
         
 
-        <h1>RSOME for Python</h1>
+        <h1>RSOME in Python</h1>
 
         <table>
           <tr>
@@ -63,15 +63,15 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h1 id="rsome-for-robust-optimization">RSOME for robust optimization</h1>
+<h1 id="rsome-for-robust-optimization">RSOME for Robust Optimization</h1>
 
-<h2 id="general-formulation-for-robust-optimization-models-">General formulation for robust optimization models <a name="section2.1"></a></h2>
+<h2 id="general-formulation-for-robust-optimization-models-">General Formulation for Robust Optimization Models <a name="section2.1"></a></h2>
 
 <p>The <code class="language-plaintext highlighter-rouge">rsome.ro</code> module in RSOME is designed for robust optimization problems, where tailored modeling tools are developed for specifying random variables, uncertainty sets, and objective functions or constraints under worst-case scenarios that may arise from the uncertainty set. Let \(\pmb{z}\in\mathbb{R}^J\) be a vector of random variables and \(\pmb{x}\in\mathbb{R}^{I_x}\)(resp., \(\pmb{y}(\pmb{z})\in\mathbb{R}^{I_y}\)) be the here-and-now  (resp., non-anticipative wait-and-see) decision made before (resp., after) the uncertainty realizes. Models supported in the <code class="language-plaintext highlighter-rouge">ro</code> module can be cast into the following general format:</p>
 
 \[\begin{align}
-\min ~ &amp;\max\limits_{\pmb{z}\in\mathcal{Z}_0} ~\left\{\pmb{a}_0^T(\pmb{z})\pmb{x} + \pmb{b}_0^T\pmb{y}(\pmb{z}) + c_0(\pmb{z})\right\} &amp;&amp;\\
-\text{s.t.} ~ &amp; \max\limits_{\pmb{z}\in\mathcal{Z}_M}\left\{\pmb{a}_m^T(\pmb{z})\pmb{x} + \pmb{b}_m^T\pmb{y}(\pmb{z}) + c_m(\pmb{z})\right\} \leq 0, &amp;&amp; \forall m \in \mathcal{M}_1 \\
+\min ~ &amp;\max\limits_{\pmb{z}\in\mathcal{Z}_0} ~\left\{\pmb{a}_0^{\top}(\pmb{z})\pmb{x} + \pmb{b}_0^{\top}\pmb{y}(\pmb{z}) + c_0(\pmb{z})\right\} &amp;&amp;\\
+\text{s.t.} ~ &amp; \max\limits_{\pmb{z}\in\mathcal{Z}_M}\left\{\pmb{a}_m^{\top}(\pmb{z})\pmb{x} + \pmb{b}_m^{\top}\pmb{y}(\pmb{z}) + c_m(\pmb{z})\right\} \leq 0, &amp;&amp; \forall m \in \mathcal{M}_1 \\
 &amp; y_i \in \mathcal{L}(\mathcal{J}_i) &amp;&amp;\forall i \in [I_y] \\
 &amp; \pmb{x} \in \mathcal{X}. &amp;&amp;
 \end{align}\]
@@ -93,7 +93,7 @@ y(\pmb{z}) = y^0 + \sum\limits_{j\in\mathcal{J}}y^jz_j
 
 <p>The RSOME package provides rich algebraic tools for specifying random variables arrays, linear decision rules, uncertainty sets, the worst-case objective and constraints of a robust model, which will be introduced in the subsequent sections.</p>
 
-<h2 id="random-variables-and-uncertainty-sets-">Random variables and uncertainty sets <a name="section2.2"></a></h2>
+<h2 id="random-variables-and-uncertainty-sets-">Random Variables and Uncertainty Sets <a name="section2.2"></a></h2>
 
 <p>Similar to decision variables, random variables are created as arrays in RSOME, and the shapes of random variable arrays are specified by the <code class="language-plaintext highlighter-rouge">rvar()</code> method of the <code class="language-plaintext highlighter-rouge">Model</code> object.</p>
 
@@ -129,7 +129,7 @@ y(\pmb{z}) = y^0 + \sum\limits_{j\in\mathcal{J}}y^jz_j
 
 <p>Note that an uncertainty set is a collection of constraints, written as an iterable Python object, such as <code class="language-plaintext highlighter-rouge">tuple</code> or <code class="language-plaintext highlighter-rouge">list</code>. These constraints are then used in specifying the worst-case objective function and constraints, which are introduced in the next section.</p>
 
-<h2 id="the-worst-case-objective-and-constraints-">The worst-case objective and constraints <a name="section2.3"></a></h2>
+<h2 id="the-worst-case-objective-and-constraints-">The Worst-Case Objective and Constraints <a name="section2.3"></a></h2>
 
 <p>In the case of minimizing or maximizing the worst-case objective function in ROMSE, we may use the <code class="language-plaintext highlighter-rouge">minmax()</code> or the <code class="language-plaintext highlighter-rouge">maxmin()</code> method of the <code class="language-plaintext highlighter-rouge">Model</code> object to specify the objective function and the uncertainty set.</p>
 
@@ -236,7 +236,7 @@ y(\pmb{z}) = y^0 + \sum\limits_{j\in\mathcal{J}}y^jz_j
 <p>The sample code above shows that the Python version of RSOME is able to specify defferent uncertainty sets \(\mathcal{Z}_m\), \(m\in\mathcal{M}_1\cup\{0\}\), for the objective function (with index 0) and each of the constraints (with index \(m\in\mathcal{M}_1\)).  Such a framework is more flexible than that in the MATLAB version introduced in <a href="#ref2">Chen et al.  (2020)</a> and can be used to address a rich range of robust models, including the distributional interpretation of robust
 formulation in <a href="#ref4">Xu et al. (2012)</a>, the notion of Pareto robustly optimal solution discussed in <a href="#ref3">de Ruiter et al. (2016)</a>, as well as the sample robust optimization models proposed by <a href="#ref1">Bertsimas et al. (2021)</a>.</p>
 
-<h2 id="linear-decision-rules-for-adaptive-decision-making-">Linear decision rules for adaptive decision-making <a name="section2.4"></a></h2>
+<h2 id="linear-decision-rules-for-adaptive-decision-making-">Linear Decision Rules for Adaptive Decision-Making <a name="section2.4"></a></h2>
 
 <p>The <code class="language-plaintext highlighter-rouge">rsome.ro</code> modeling environment also supports linear decision rules for non-anticipative decision-making. A linear decision rule object can be created by the <code class="language-plaintext highlighter-rouge">ldr()</code> method of an <code class="language-plaintext highlighter-rouge">ro</code> model. Details of the method are provided below.</p>
 
@@ -292,13 +292,13 @@ formulation in <a href="#ref4">Xu et al. (2012)</a>, the notion of Pareto robust
   <li><code class="language-plaintext highlighter-rouge">y.get(z)</code> returns the linear coefficients of <code class="language-plaintext highlighter-rouge">y</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>. The shape of the returned array is <code class="language-plaintext highlighter-rouge">y.shape + z.shape</code>, <i>i.e.</i>, the combination of dimensions of <code class="language-plaintext highlighter-rouge">y</code> and <code class="language-plaintext highlighter-rouge">z</code>. For example, if <code class="language-plaintext highlighter-rouge">c = y.get(z)</code> where <code class="language-plaintext highlighter-rouge">y.dim=2</code>, and <code class="language-plaintext highlighter-rouge">z.dim=2</code>, the returned coefficients are presented as a four-dimensional array <code class="language-plaintext highlighter-rouge">c</code> and <code class="language-plaintext highlighter-rouge">c[i, j]</code> gives the linear coefficients of <code class="language-plaintext highlighter-rouge">y[i, j]</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>.</li>
 </ul>
 
-<h2 id="application-examples-">Application examples <a name="section2.5"></a></h2>
+<h2 id="application-examples-">Application Examples <a name="section2.5"></a></h2>
 
-<h3 id="robust-portfolio-optimization"><a href="example_ro_portfolio">Robust portfolio optimization</a></h3>
-<h3 id="conditional-value-at-risk-with-application-to-robust-portfolio-management"><a href="example_ro_cvar_portfolio">Conditional value-at-risk with application to robust portfolio management</a></h3>
-<h3 id="the-robust-and-robustness-knapsack-problems"><a href="example_ro_knapsack">The robust and robustness knapsack problems</a></h3>
-<h3 id="adaptive-robust-optimization-for-a-lot-sizing-problem"><a href="example_ls">Adaptive robust optimization for a lot-sizing problem</a></h3>
-<h3 id="the-robust-production-inventory-model"><a href="example_ro_inv">The robust production-inventory model</a></h3>
+<h3 id="robust-portfolio"><a href="example_ro_portfolio">Robust Portfolio</a></h3>
+<h3 id="conditional-value-at-risk-in-robust-portfolio-management"><a href="example_ro_cvar_portfolio">Conditional Value-at-Risk in Robust Portfolio Management</a></h3>
+<h3 id="robustrobustness-knapsack"><a href="example_ro_knapsack">Robust/Robustness Knapsack</a></h3>
+<h3 id="robust-lot-sizing"><a href="example_ls">Robust Lot-Sizing</a></h3>
+<h3 id="joint-production-inventory"><a href="example_ro_inv">Joint Production-Inventory</a></h3>
 
 <h2 id="reference">Reference</h2>
 

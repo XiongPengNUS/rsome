@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>RSOME for Python by XiongPengNUS</title>
+    <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -20,7 +20,7 @@
           <img src="/rso_left.png" alt="Logo" width=180/>
         
 
-        <h1>RSOME for Python</h1>
+        <h1>RSOME in Python</h1>
 
         <table>
           <tr>
@@ -69,7 +69,7 @@
 
 <p>This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our <a href="index">Home Page</a> for more information.</p>
 
-<h2 id="modeling-environments-">Modeling environments <a name="section1.1"></a></h2>
+<h2 id="modeling-environments-">Modeling Environments <a name="section1.1"></a></h2>
 
 <p>The current version of RSOME provides four layers of modeling environments, as illustrated by the structure diagram below.</p>
 
@@ -81,7 +81,7 @@
 
 <p>Though each layer of RSOME modules are targeting different types of optimization problems, they follow consistent syntax in defining variables, objective functions, and constraints. In this section, we will use the <code class="language-plaintext highlighter-rouge">ro</code> module as a general modeling environment for deterministic problems, and cases of robust optimization problems will be discussed in <a href="ro_rsome">RSOME for robust optimization</a>. The <code class="language-plaintext highlighter-rouge">dro</code> module is specially designed for distributionally robust optimization problems, and it is different from <code class="language-plaintext highlighter-rouge">ro</code> in specifying recourse adaptations and uncertainty/ambiguity sets. It will be introduced separately in <a href="dro_rsome">RSOME for distributionall robust optimization</a>.</p>
 
-<h2 id="introduction-to-the-rsomero-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> environment <a name="section1.2"></a></h2>
+<h2 id="introduction-to-the-rsomero-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> Environment <a name="section1.2"></a></h2>
 
 <h3 id="models">Models</h3>
 
@@ -94,7 +94,7 @@
 
 <p>The code above defines a new <code class="language-plaintext highlighter-rouge">Model</code> object <code class="language-plaintext highlighter-rouge">model</code>, with the name specified to be <code class="language-plaintext highlighter-rouge">'My model'</code>. You could also leave the name unspecified and the default name is <code class="language-plaintext highlighter-rouge">None</code>.</p>
 
-<h3 id="decision-variables-and-linear-constraints">Decision variables and linear constraints</h3>
+<h3 id="decision-variables-and-linear-constraints">Decision Variables and Linear Constraints</h3>
 
 <p>Decision variables of a model can be defined by the method <code class="language-plaintext highlighter-rouge">dvar()</code>.</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
@@ -166,7 +166,7 @@
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># define constraints by a loop
 </span></code></pre></div></div>
 
-<h3 id="convex-functions-and-convex-constraints">Convex functions and convex constraints</h3>
+<h3 id="convex-functions-and-convex-constraints">Convex Functions and Convex Constraints</h3>
 
 <p>The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.</p>
 
@@ -198,7 +198,7 @@
 
 <p>Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as <code class="language-plaintext highlighter-rouge">abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
 
-<h2 id="standard-forms-and-solutions-">Standard forms and solutions <a name="section1.3"></a></h2>
+<h2 id="standard-forms-and-solutions-">Standard Forms and Solutions <a name="section1.3"></a></h2>
 
 <p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code class="language-plaintext highlighter-rouge">do_math()</code> method of the model object.</p>
 
@@ -640,11 +640,11 @@ Running time: 0.0210s
 
 <p>For Gurobi, you may find the parameter names and their values from <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">Parameters</a>. Parameter information on MOSEK is given by <a href="https://docs.mosek.com/9.2/pythonfusion/parameters.html">Parameters (alphabetical list sorted by type)</a>. CPLEX solver parameters can be found from <a href="https://www.ibm.com/support/knowledgecenter/SSSA5P_12.7.1/ilog.odms.cplex.help/CPLEX/Parameters/topics/introListAlpha.html">List of CPLEX parameters</a>. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
 
-<h2 id="application-examples-">Application examples <a name="section1.4"></a></h2>
+<h2 id="application-examples-">Application Examples <a name="section1.4"></a></h2>
 
-<h3 id="mean-variance-portfolio-optimization"><a href="example_mv_portfolio">Mean-variance portfolio optimization</a></h3>
-<h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer programming for Sudoku</a></h3>
-<h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC power flow</a></h3>
+<h3 id="mean-variance-portfolio"><a href="example_mv_portfolio">Mean-Variance Portfolio</a></h3>
+<h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer Programming for Sudoku</a></h3>
+<h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC Power Flow</a></h3>
 
 <h2 id="reference">Reference</h2>
 

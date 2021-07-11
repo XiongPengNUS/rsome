@@ -1,3 +1,8 @@
+"""
+This module is used as an interface to call the OR-Tools solver for
+solving (mixed-integer) linear programming problems.
+"""
+
 from ortools.linear_solver import pywraplp
 
 import numpy as np

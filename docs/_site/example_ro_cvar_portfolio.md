@@ -1,17 +1,17 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Conditional value-at-risk with application to robust portfolio management
+### Conditional Value-at-Risk in Robust Portfolio
 
 This robust portfolio management model is proposed by [Zhu and Fukushima (2009)](#ref1). The portfolio allocation is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as
 
 $$
 \begin{align}
-\min~&\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^T\pmb{u} &\\
-\text{s.t.}~& u_k \geq \pmb{y}_k^T\pmb{x} - \alpha, &\forall k = 1, 2, ..., s \\
+\min~&\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^{\top}\pmb{u} &\\
+\text{s.t.}~& u_k \geq \pmb{y}_k^{\top}\pmb{x} - \alpha, &\forall k = 1, 2, ..., s \\
 &u_k \geq 0, &\forall k=1, 2, ..., s \\
-&\sum\limits_{k=1}^s\pi_k\pmb{y}_k^T\pmb{x} \geq \mu, &\forall \pmb{\pi} \in \Pi  \\
+&\sum\limits_{k=1}^s\pi_k\pmb{y}_k^{\top}\pmb{x} \geq \mu, &\forall \pmb{\pi} \in \Pi  \\
 &\underline{\pmb{x}} \leq \pmb{x} \leq \overline{\pmb{x}} \\
-&\pmb{1}^T\pmb{x} = w_0
+&\pmb{1}^{\top}\pmb{x} = w_0
 \end{align}
 $$
 
@@ -199,7 +199,7 @@ array([0.3135, 0.5331, 0.0455, 0.    , 0.1079])
 Now we consider a box uncertainty set
 
 $$
-\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \pmb{\eta}, \pmb{1}^T\pmb{\eta}=0, \underline{\pmb{\eta}}\leq \pmb{\eta} \leq \bar{\pmb{\eta}} \right\}.
+\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \pmb{\eta}, \pmb{1}^{\top}\pmb{\eta}=0, \underline{\pmb{\eta}}\leq \pmb{\eta} \leq \bar{\pmb{\eta}} \right\}.
 $$
 
 In this case study, we assume that \\(-\underline{\pmb{\eta}}=\bar{\pmb{\eta}}=0.0001\\), and the Python code for implementation is provided below.
@@ -248,7 +248,7 @@ array([0.2605, 0.5601, 0.0651, 0.    , 0.1143])
 In cases that \\(\Pi\\) is an ellipsoidal uncertainty set
 
 $$
-\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \rho\pmb{\eta}, \pmb{1}^T\pmb{\eta}=0, \pmb{\pi}^0 + \rho\pmb{\eta} \geq \pmb{0}, \|\pmb{\eta}\| \leq 1 \right\},
+\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \rho\pmb{\eta}, \pmb{1}^{\top}\pmb{\eta}=0, \pmb{\pi}^0 + \rho\pmb{\eta} \geq \pmb{0}, \|\pmb{\eta}\| \leq 1 \right\},
 $$
 
 where the nominal probability \\(\pmb{\pi}^0\\) is the center of the ellipsoid, and the constant \\(\rho=0.001\\), then the model can be implemented by the code below.
@@ -289,6 +289,8 @@ x.get().round(4)    # the optimal portfolio decision with 4 d.p.
 ```
 array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
 ```
+
+In this example, we show that data acquisition tools provided in the Python ecosystem (<i>e.g.</i>, `pandas-datareader`) can be readily used to collect and feed real data into RSOME models.  Apart from acquiring data, rich machine learning tools in the Python ecosystem can also be used to develop data-driven optimization models. More such examples will be provided in introducing the `dro` module for modeling distributionally robust optimization problems.  
 
 <br>
 #### Reference

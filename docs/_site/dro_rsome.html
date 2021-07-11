@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>RSOME for Python by XiongPengNUS</title>
+    <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -20,7 +20,7 @@
           <img src="/rso_left.png" alt="Logo" width=180/>
         
 
-        <h1>RSOME for Python</h1>
+        <h1>RSOME in Python</h1>
 
         <table>
           <tr>
@@ -63,16 +63,16 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h1 id="rsome-for-distributionally-robust-optimization">RSOME for distributionally robust optimization</h1>
+<h1 id="rsome-for-distributionally-robust-optimization">RSOME for Distributionally Robust Optimization</h1>
 
-<h2 id="the-general-formulation-for-distributionally-robust-optimization-models-">The general formulation for distributionally robust optimization models <a name="section3.1"></a></h2>
+<h2 id="the-general-formulation-for-distributionally-robust-optimization-models-">The General Formulation for Distributionally Robust Optimization Models <a name="section3.1"></a></h2>
 
 <p>The RSOME package supports optimization models that fit the general formulation below</p>
 
 \[\begin{align}
-\min ~~ &amp;\sup\limits_{\mathbb{P}\in\mathcal{F}_0} \mathbb{E}_{\mathbb{P}} \left\{\pmb{a}_0^T(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_0^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_0(\tilde{s}, \tilde{\pmb{z}})\right\} &amp;&amp;\\
-\text{s.t.} ~~ &amp;\max\limits_{s\in[S], \pmb{z}\in\mathcal{Z}_{ms}}\left\{\pmb{a}_m^T(s, \pmb{z})\pmb{x}(s) + \pmb{b}_m^T\pmb{y}(s, \pmb{z}) + c_m(s, \pmb{z})\right\} \leq 0, &amp;&amp; \forall m\in \mathcal{M}_1 \\
-&amp; \sup\limits_{\mathbb{P}\in\mathcal{F}_m}\mathbb{E}_{\mathbb{P}}\left\{\pmb{a}_m^T(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_m^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_m(\tilde{s}, \tilde{\pmb{z}})\right\} \leq 0, &amp;&amp; \forall m\in \mathcal{M}_2 \\
+\min ~~ &amp;\sup\limits_{\mathbb{P}\in\mathcal{F}_0} \mathbb{E}_{\mathbb{P}} \left\{\pmb{a}_0^{\top}(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_0^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_0(\tilde{s}, \tilde{\pmb{z}})\right\} &amp;&amp;\\
+\text{s.t.} ~~ &amp;\max\limits_{s\in[S], \pmb{z}\in\mathcal{Z}_{ms}}\left\{\pmb{a}_m^{\top}(s, \pmb{z})\pmb{x}(s) + \pmb{b}_m^{\top}\pmb{y}(s, \pmb{z}) + c_m(s, \pmb{z})\right\} \leq 0, &amp;&amp; \forall m\in \mathcal{M}_1 \\
+&amp; \sup\limits_{\mathbb{P}\in\mathcal{F}_m}\mathbb{E}_{\mathbb{P}}\left\{\pmb{a}_m^{\top}(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_m^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_m(\tilde{s}, \tilde{\pmb{z}})\right\} \leq 0, &amp;&amp; \forall m\in \mathcal{M}_2 \\
 &amp; x_i \in \mathcal{A}\left(\mathcal{C}_x^i\right) &amp;&amp; \forall i \in [I_x] \\
 &amp; y_n \in \overline{\mathcal{A}}\left(\mathcal{C}_y^n, \mathcal{J}_y^n\right) &amp;&amp; \forall n \in [I_y] \\
 &amp; \pmb{x}(s) \in \mathcal{X}_s &amp;&amp; s \in [S]. \\
@@ -109,7 +109,7 @@
 <ol>
   <li>The conditional expectation of \(\tilde{\pmb{z}}\) over events (defined as subsets of scenarios and denoted by \(\mathcal{E}_{km}\) are known to reside in an SOC representable set \(\mathcal{Q}_{km}\);</li>
   <li>The support of \(\tilde{\pmb{z}}\) in each scenario \(s\in[S]\) is specified to be another SOC representable set \(\mathcal{Z}_{sm}\);</li>
-  <li>Probabilities of scenarios, collectively denoted by a vector \(\pmb{p}\), are constrained by a third SOC representable subset \(\mathcal{P}_m\subseteq\left\{\pmb{p}\in \mathbb{R}_{++}^S \left| \pmb{e}^T\pmb{p}=1 \right. \right\}\) in the probability simplex.</li>
+  <li>Probabilities of scenarios, collectively denoted by a vector \(\pmb{p}\), are constrained by a third SOC representable subset \(\mathcal{P}_m\subseteq\left\{\pmb{p}\in \mathbb{R}_{++}^S \left| \pmb{e}^{\top}\pmb{p}=1 \right. \right\}\) in the probability simplex.</li>
 </ol>
 
 <p>Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types—-the <i>event-wise static adaptation</i> denoted by \(\mathcal{A}(C)\) as well as the <i>event-wise affine adaptation</i> denoted by \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\). In particular, given a fixed number of \(S\) scenarios and a
@@ -138,9 +138,9 @@ y: [S]\times\mathbb{R}^{J} \mapsto \mathbb{R}
 
 <p>Here, \(\mathcal{H}_{\mathcal{C}}: [S] \mapsto \mathcal{C}\) is a function such that \(\mathcal{H}_{\mathcal{C}}= \mathcal{E}\) maps the scenario \(s\) to the only event \(\mathcal{E}\) in \(\mathcal{C}\) that contains \(s\), and \(\mathcal{J} \subseteq [J]\) is an index subset of random components \(\tilde{z}_1\),…, \(\tilde{z}_J\) that the affine adaptation depends on. In the remaining part of the guide, we will introduce the RSOME code for specifying the event-wise ambiguity set and recourse adaptation rules.</p>
 
-<h2 id="introduction-to-the-rsomedro-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.dro</code> environment <a name="section3.2"></a></h2>
+<h2 id="introduction-to-the-rsomedro-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.dro</code> Environment <a name="section3.2"></a></h2>
 
-<p>In general, the <code class="language-plaintext highlighter-rouge">rsome.dro</code> modeling environment is very similar to <code class="language-plaintext highlighter-rouge">rsome.ro</code> discussed in the section <a href="get_start#section1.2">Introduction to the <code>rsome.ro</code> environment</a>, so almost all array operations, indexing and slicing syntax could be applied to <code class="language-plaintext highlighter-rouge">dro</code> models. The unique features of the <code class="language-plaintext highlighter-rouge">dro</code> model mainly come from the scenario-representation of uncertainties and a different way of specifying the event-wise adaptation of decision variables.</p>
+<p>In general, the <code class="language-plaintext highlighter-rouge">rsome.dro</code> modeling environment is very similar to <code class="language-plaintext highlighter-rouge">rsome.ro</code> discussed in the section <a href="get_start#section1.2">Introduction to the <code>rsome.ro</code> Environment</a>, so almost all array operations, indexing and slicing syntax could be applied to <code class="language-plaintext highlighter-rouge">dro</code> models. The unique features of the <code class="language-plaintext highlighter-rouge">dro</code> model mainly come from the scenario-representation of uncertainties and a different way of specifying the event-wise adaptation of decision variables.</p>
 
 <h3 id="models">Models</h3>
 <p>Similar to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> modeling environment, the <code class="language-plaintext highlighter-rouge">dro</code> models are all defined upon <code class="language-plaintext highlighter-rouge">Model</code> type objects, which are created by the constructor <code class="language-plaintext highlighter-rouge">Model()</code> imported from the sub-package <code class="language-plaintext highlighter-rouge">rsome.dro</code>.</p>
@@ -174,7 +174,7 @@ y: [S]\times\mathbb{R}^{J} \mapsto \mathbb{R}
 <span class="n">model2</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>  <span class="c1"># a DRO model with 5 scenarios given by a list.
 </span></code></pre></div></div>
 
-<h3 id="decision-variables">Decision variables</h3>
+<h3 id="decision-variables">Decision Variables</h3>
 
 <p>In the general formulation, decision variables \(\pmb{x}(s)\) are event-wise static and \(\pmb{y}(s, \pmb{z})\) are event-wise affinely adaptive. The <code class="language-plaintext highlighter-rouge">dro</code> modeling environment does not differentiate the two in creating these variables. Both types of decision variables are created by the <code class="language-plaintext highlighter-rouge">dvar()</code> method of the model object, with the same syntax as the <code class="language-plaintext highlighter-rouge">rsome.ro</code> models.</p>
 
@@ -200,7 +200,7 @@ y: [S]\times\mathbb{R}^{J} \mapsto \mathbb{R}
 
 <p>All decision variables are created to be non-adaptive at first. The event-wise and affine adaptation can be then specified by the method <code class="language-plaintext highlighter-rouge">adapt()</code> of the variable object. Details of specifying the adaptive decisions are provided in the section <a href="#section3.3">Event-wise recourse adaptations</a></p>
 
-<h3 id="random-variables">Random variables</h3>
+<h3 id="random-variables">Random Variables</h3>
 <p>The syntax of creating random variables for a <code class="language-plaintext highlighter-rouge">dro</code> model is exactly the same as the <code class="language-plaintext highlighter-rouge">ro</code> models. You may refer to the section <a href="ro_rsome#section2.2">Random variables and uncertainty sets</a> for more details.</p>
 
 <p>The <code class="language-plaintext highlighter-rouge">dro</code> model supports the expectation of random variables, so that we could define the expectation sets \(\mathcal{Q}_{km}\) in the ambiguity set \(\mathcal{F}_m\). This is different from <code class="language-plaintext highlighter-rouge">ro</code> models. The expectation is indicated by the <code class="language-plaintext highlighter-rouge">E()</code> function imported from <code class="language-plaintext highlighter-rouge">rsome</code>, as demonstrated by the sample code below.</p>
@@ -216,9 +216,9 @@ y: [S]\times\mathbb{R}^{J} \mapsto \mathbb{R}
 </span><span class="n">E</span><span class="p">(</span><span class="n">z</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>         <span class="c1"># sum of E(z) is zero
 </span></code></pre></div></div>
 
-<h2 id="event-wise-ambiguity-set-">Event-wise ambiguity set <a name="section3.3"></a></h2>
+<h2 id="event-wise-ambiguity-set-">Event-wise Ambiguity Set <a name="section3.3"></a></h2>
 
-<h3 id="create-an-ambiguity-set">Create an ambiguity set</h3>
+<h3 id="create-an-ambiguity-set">Create an Ambiguity Set</h3>
 
 <p>Ambiguity sets \(\mathcal{F}_m\) of a <code class="language-plaintext highlighter-rouge">dro</code> model can be created by the <code class="language-plaintext highlighter-rouge">ambiguity()</code> method. The associated scenario indices of the ambiguity set can be accessed by the <code class="language-plaintext highlighter-rouge">s</code> attribute of the ambiguity set object, as shown by the following sample code.</p>
 
@@ -299,7 +299,7 @@ dtype: int64
 
 <p>The indices of the scenarios are crucial in defining components of the ambiguity set, such as sets \(\mathcal{Q}_{km}\), and \(\mathcal{Z}_{sm}\), which will be discussed next.</p>
 
-<h3 id="mathcalq_km-as-the-support-of-conditional-expectations">\(\mathcal{Q}_{km}\) as the support of conditional expectations</h3>
+<h3 id="mathcalq_km-as-the-support-of-conditional-expectations">\(\mathcal{Q}_{km}\) as the Support of Conditional Expectations</h3>
 
 <p>According to the formulation of the ambiguity set \(\mathcal{F}_m\) presented in the section <a href="#section3.1">The general formulation for distributionally robust optimization models</a>, the SOC representable set \(\mathcal{Q}_{km}\) is defined as the support of the conditional expectation of random variables under the event \(\mathcal{E}_k\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \(\mathcal{Q}_{km}\) are defined by the <code class="language-plaintext highlighter-rouge">exptset()</code> method of the ambiguity set object. Take the supports of conditional expectations below, for example,</p>
 
@@ -337,7 +337,7 @@ dtype: int64
 
 <p>The ambiguity set <code class="language-plaintext highlighter-rouge">fset</code> itself represents the event \(\mathcal{E}_1\) of all scenarios, and the <code class="language-plaintext highlighter-rouge">loc</code> indexer is used to form the event \(\mathcal{E}_2\) with three scenarios included. Besides <code class="language-plaintext highlighter-rouge">loc</code>, other indexing and slicing expressions described in the previous section can also be used to construct the events for the support sets of the expectations.</p>
 
-<h3 id="mathcalz_sm-as-the-support-of-random-variables">\(\mathcal{Z}_{sm}\) as the support of random variables</h3>
+<h3 id="mathcalz_sm-as-the-support-of-random-variables">\(\mathcal{Z}_{sm}\) as the Support of Random Variables</h3>
 
 <p>The support \(\mathcal{Z}_{sm}\) of random variables can be specified by the method <code class="language-plaintext highlighter-rouge">suppset()</code> method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. Take the following supports of random variables \(\tilde{\pmb{z}}\in\mathbb{R}^3\) for example,</p>
 
@@ -449,7 +449,7 @@ dtype: int64
 
 <p>As the example above shows, supports for all scenarios have been defined, and there are two supports defined for the conditional expectations.</p>
 
-<h3 id="mathcalp_m-as-the-support-of-scenario-probabilities">\(\mathcal{P}_m\) as the support of scenario probabilities</h3>
+<h3 id="mathcalp_m-as-the-support-of-scenario-probabilities">\(\mathcal{P}_m\) as the Support of Scenario Probabilities</h3>
 
 <p>In the event-wise ambiguity set, the support of scenario probabilities can also be specified via the calling the method <code class="language-plaintext highlighter-rouge">probset()</code>, as demonstrated by the following sample code.</p>
 
@@ -465,9 +465,9 @@ dtype: int64
 </span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="mf">0.2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">)</span>   <span class="c1"># define the support of the array p
 </span></code></pre></div></div>
 
-<p>The scenario probabilities are formatted as a one-dimensional array, which can be accessed via the attribute <code class="language-plaintext highlighter-rouge">p</code> of the model object. Notice that two underlying constraints for probabilities: \(\pmb{p}\geq \pmb{0}\) and \(\pmb{e}^T\pmb{p}=1\), are already integrated in the ambiguity set, so there is no need to specify them in defining the support of scenario probabilities.</p>
+<p>The scenario probabilities are formatted as a one-dimensional array, which can be accessed via the attribute <code class="language-plaintext highlighter-rouge">p</code> of the model object. Notice that two underlying constraints for probabilities: \(\pmb{p}\geq \pmb{0}\) and \(\pmb{e}^{\top}\pmb{p}=1\), are already integrated in the ambiguity set, so there is no need to specify them in defining the support of scenario probabilities.</p>
 
-<h2 id="event-wise-recourse-adaptations-">Event-wise recourse adaptations <a name="section3.4"></a></h2>
+<h2 id="event-wise-recourse-adaptations-">Event-wise Recourse Adaptations <a name="section3.4"></a></h2>
 
 <p>Here we introduce how the event-wise static adaptation \(\mathcal{A}(\mathcal{C})\) and the event-wise affine adaptation \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\) are specified in RSOME. Note that decision variables created in the <code class="language-plaintext highlighter-rouge">rsome.dro</code> modeling environment are initially non-adaptive, in the sense that the event set \(\mathcal{C} = \{[S]\}\) and the dependent set \(\mathcal{J}=\varnothing\). These two sets can be modified by the <code class="language-plaintext highlighter-rouge">adapt()</code> method of the decision variable object for specifying the decision adaptation, as demonstrated by the following sample code.</p>
 
@@ -492,7 +492,7 @@ dtype: int64
   <li><code class="language-plaintext highlighter-rouge">y.get(z)</code> returns the linear coefficients of the recourse adaptation. In cases of multiple scenarios, the returned object is a <code class="language-plaintext highlighter-rouge">pandas.Series</code> with the length to be the same as the number of scenarios. Each element of the series is an array, and the shape of the array is <code class="language-plaintext highlighter-rouge">y.shape + z.shape</code>, <i>i.e.</i>, the combination of dimensions of <code class="language-plaintext highlighter-rouge">y</code> and <code class="language-plaintext highlighter-rouge">z</code>.</li>
 </ul>
 
-<h2 id="the-worst-case-expectations-">The worst-case expectations <a name="section3.5"></a></h2>
+<h2 id="the-worst-case-expectations-">The Worst-Case Expectations <a name="section3.5"></a></h2>
 
 <p>Once the ambiguity sets \(\mathcal{F}_m\) and the recourse adaptation of decision variables are defined, the worst-case expectations in the objective function or constraints can be then specified. The ambiguity set of the objective function can be specified by the <code class="language-plaintext highlighter-rouge">minsup()</code> method, for minimizing, or the <code class="language-plaintext highlighter-rouge">maxinf()</code> method, for maximizing, the objective function involving the worst-case expectations. The documentation of the <code class="language-plaintext highlighter-rouge">minsup()</code> method is given below.</p>
 
@@ -535,12 +535,14 @@ dtype: int64
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mi">2</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">z</span><span class="p">)</span>               <span class="c1"># worst-case over the support of fset
 </span></code></pre></div></div>
 
-<h2 id="application-examples-">Application examples <a name="section3.6"></a></h2>
-<h3 id="multi-stage-stochastic-financial-planning"><a href="example_dro_finpl">Multi-stage stochastic financial planning</a></h3>
-<h3 id="distributionally-robust-optimization-for-medical-appointment-scheduling"><a href="example_dro_mas">Distributionally robust optimization for medical appointment scheduling</a></h3>
-<h3 id="a-multi-item-newsvendor-problem-considering-the-wasserstein-ambiguity-set"><a href="example_dro_nv">A multi-item newsvendor problem considering the Wasserstein ambiguity set</a></h3>
-<h3 id="distributionally-robust-optimization-approaches-for-a-lot-size-problem"><a href="example_dro_ls">Distributionally robust optimization approaches for a lot-size problem</a></h3>
-<h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates"><a href="example_dro_vehicle">Robust vehicle pre-allocation with uncertain covariates</a></h3>
+<h2 id="application-examples-">Application Examples <a name="section3.6"></a></h2>
+<h3 id="distributionally-robust-portfolio"><a href="example_dro_portfolio">Distributionally Robust Portfolio</a></h3>
+<h3 id="distributionally-robust-medical-appointment"><a href="example_dro_mas">Distributionally Robust Medical Appointment</a></h3>
+<h3 id="multi-item-newsvendor-problem-with-wasserstein-ambiguity-sets"><a href="example_dro_nv">Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets</a></h3>
+<h3 id="adaptive-distributionally-robust-lot-sizing"><a href="example_dro_ls">Adaptive Distributionally Robust Lot-Sizing</a></h3>
+<h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates"><a href="example_dro_vehicle">Robust Vehicle Pre-Allocation with Uncertain Covariates</a></h3>
+<h3 id="multi-stage-inventory-control"><a href="example_dro_inv">Multi-Stage Inventory Control</a></h3>
+<h3 id="multi-stage-stochastic-financial-planning"><a href="example_dro_finpl">Multi-Stage Stochastic Financial Planning</a></h3>
 
 <h2 id="reference">Reference</h2>
 

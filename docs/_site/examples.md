@@ -4,33 +4,35 @@
 
 <table>
 <th><toc>
-<li> Deterministic linear and second-order cone programs</li>
+<li> Deterministic Linear and Second-Order Cone Programs</li>
 <ul class="a">
-  <li> <a href="example_mv_portfolio">Mean-variance portfolio optimization</a> </li>
-  <li> <a href="example_sudoku">Integer programming for Sudoku</a> </li>
-  <li> <a href="example_opf">Optimal DC power flow</a> </li>
+  <li> <a href="example_mv_portfolio">Mean-Variance Portfolio</a> </li>
+  <li> <a href="example_sudoku">Integer Programming for Sudoku</a> </li>
+  <li> <a href="example_opf">Optimal DC Power Flow</a> </li>
 </ul>
 </toc></th>
 
 <tr><th><toc>
-<li> RSOME for robust optimization models </li>
+<li> RSOME for Robust Optimization Models </li>
 <ul class="a">
-  <li> <a href="example_ro_portfolio">Robust portfolio optimization </a></li>
-  <li> <a href="example_ro_cvar_portfolio">Conditional value-at-risk with application to robust portfolio management </a></li>
-  <li> <a href="example_ro_knapsack">The robust and robustness knapsack problems </a></li>
-  <li> <a href="example_ls">Adaptive robust optimization for a lot-sizing problem </a></li>
-  <li> <a href="example_ro_inv">The robust production-inventory model </a></li>
+  <li> <a href="example_ro_portfolio">Robust Portfolio</a></li>
+  <li> <a href="example_ro_cvar_portfolio">Conditional Value-at-Risk in Robust Portfolio</a></li>
+  <li> <a href="example_ro_knapsack">Robust/Robustness Knapsack</a></li>
+  <li> <a href="example_ls">Robust Lot-Sizing</a></li>
+  <li> <a href="example_ro_inv">Joint Production-Inventory</a></li>
 </ul>
 </toc></th></tr>
 
 <tr><th><toc>
-<li> RSOME for distributionally robust optimization models </li>
+<li> RSOME for Distributionally Robust Optimization Models </li>
 <ul class="a">
-  <li> <a href="example_dro_finpl">Multi-stage stochastic financial planning </a></li>
-  <li> <a href="example_dro_mas">Distributionally robust optimization for medical appointment scheduling </a></li>
-  <li> <a href="example_dro_nv">A multi-item newsvendor problem considering the Wasserstein ambiguity set </a></li>
-  <li> <a href="example_dro_ls">Distributionally robust optimization approaches for a lot-size problem </a></li>
-  <li> <a href="example_dro_vehicle">Robust vehicle pre-allocation with uncertain covariates</a></li>
+  <li> <a href="example_dro_portfolio">Distributionally Robust Portfolio </a></li>
+  <li> <a href="example_dro_mas">Distributionally Robust Medical Appointment </a></li>
+  <li> <a href="example_dro_nv">Multi-Item Newsvendor Problem with the Wasserstein Ambiguity Sets </a></li>
+  <li> <a href="example_dro_ls">Adaptive Distributionally Robust Lot-Sizing </a></li>
+  <li> <a href="example_dro_vehicle">Robust Vehicle Pre-Allocation with Uncertain Covariates</a></li>
+  <li> <a href="example_dro_inv">Multi-Stage Inventory Control </a></li>
+  <li> <a href="example_dro_finpl">Multi-Stage Stochastic Financial Planning </a></li>
 </ul>
 </toc></th></tr>
 </table>

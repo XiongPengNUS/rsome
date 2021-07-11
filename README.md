@@ -2,11 +2,11 @@
 
 # RSOME: Robust Stochastic Optimization Made Easy
 - Website: [RSOME for Python](https://xiongpengnus.github.io/rsome/)
-- PyPI: [RSOME 0.1.3](https://pypi.org/project/rsome/)
+- PyPI: [RSOME 0.1.4](https://pypi.org/project/rsome/)
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling of optimization problems (subject to uncertainty). Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
 
-The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programs are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
+The current version of RSOME supports deterministic as well as robust and distributionally robust optimization problems. In the default configuration, linear programs are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
 
 | Solver | License  type | RSOME interface |Integer variables| Second-order cone constraints|
 |:-------|:--------------|:----------------|:------------------------|:---------------------|

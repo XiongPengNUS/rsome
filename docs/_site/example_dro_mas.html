@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>RSOME for Python by XiongPengNUS</title>
+    <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -20,7 +20,7 @@
           <img src="/rso_left.png" alt="Logo" width=180/>
         
 
-        <h1>RSOME for Python</h1>
+        <h1>RSOME in Python</h1>
 
         <table>
           <tr>
@@ -63,7 +63,7 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h3 id="distributionally-robust-optimization-for-medical-appointment-scheduling">Distributionally robust optimization for medical appointment scheduling</h3>
+<h3 id="distributionally-robust-medical-appointment">Distributionally Robust Medical Appointment</h3>
 
 <p>In this example,  we consider a medical appointment scheduling problem described in <a href="#ref1">Bertsimas et al. (2019)</a>, where \(N\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.</p>
 
@@ -89,10 +89,10 @@
 ~(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
 \pmb{z} \geq \pmb{0} &amp; \\
 (z_j - \mu_j)^2 \leq u_j, &amp; \forall j \in [N] \\
-(\pmb{1}^T(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
+(\pmb{1}^{\top}(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
 \mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} &amp; \\
 \mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j^2, &amp; \forall j \in [N] \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^T\pmb{\Sigma}\pmb{e}
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.
 \right\}.
@@ -176,7 +176,7 @@ Running time: 0.0516s
 
 <p><a id="ref1"></a></p>
 
-<p>Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. <a href="http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf">Adaptive distributionally robust optimization</a>. <i>Management Science</i> <b>65</b>(2) 604-618.</p>
+<p>Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2017.2952">Adaptive distributionally robust optimization</a>. <i>Management Science</i> <b>65</b>(2) 604-618.</p>
 
 
       </section>

@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Robust portfolio optimization
+### Robust Portfolio
 
 In this example, the portfolio construction problem discussed in the previous sections is solved by a robust optimization approach introduced in the paper [Bertsimas and Sim (2004)](#ref1). The robust model is presented below.
 

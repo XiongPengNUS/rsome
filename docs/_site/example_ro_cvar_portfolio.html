@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
-    <title>RSOME for Python by XiongPengNUS</title>
+    <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=b8b515a69738110519c6d084c695051647277a8d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -20,7 +20,7 @@
           <img src="/rso_left.png" alt="Logo" width=180/>
         
 
-        <h1>RSOME for Python</h1>
+        <h1>RSOME in Python</h1>
 
         <table>
           <tr>
@@ -63,17 +63,17 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h3 id="conditional-value-at-risk-with-application-to-robust-portfolio-management">Conditional value-at-risk with application to robust portfolio management</h3>
+<h3 id="conditional-value-at-risk-in-robust-portfolio">Conditional Value-at-Risk in Robust Portfolio</h3>
 
 <p>This robust portfolio management model is proposed by <a href="#ref1">Zhu and Fukushima (2009)</a>. The portfolio allocation is determined via minimizing the worst-case conditional value-at-risk (CVaR) under ambiguous distribution information. The generic formulation is given as</p>
 
 \[\begin{align}
-\min~&amp;\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^T\pmb{u} &amp;\\
-\text{s.t.}~&amp; u_k \geq \pmb{y}_k^T\pmb{x} - \alpha, &amp;\forall k = 1, 2, ..., s \\
+\min~&amp;\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^{\top}\pmb{u} &amp;\\
+\text{s.t.}~&amp; u_k \geq \pmb{y}_k^{\top}\pmb{x} - \alpha, &amp;\forall k = 1, 2, ..., s \\
 &amp;u_k \geq 0, &amp;\forall k=1, 2, ..., s \\
-&amp;\sum\limits_{k=1}^s\pi_k\pmb{y}_k^T\pmb{x} \geq \mu, &amp;\forall \pmb{\pi} \in \Pi  \\
+&amp;\sum\limits_{k=1}^s\pi_k\pmb{y}_k^{\top}\pmb{x} \geq \mu, &amp;\forall \pmb{\pi} \in \Pi  \\
 &amp;\underline{\pmb{x}} \leq \pmb{x} \leq \overline{\pmb{x}} \\
-&amp;\pmb{1}^T\pmb{x} = w_0
+&amp;\pmb{1}^{\top}\pmb{x} = w_0
 \end{align}\]
 
 <p>with investment decisions\(\pmb{x}\in\mathbb{R}^n\) and auxiliary variables \(\pmb{u}\in\mathbb{R}^s\) and \(\alpha\in\mathbb{R}\), where \(n\) is the number of stocks, and \(s\) is the number of samples. The array \(\pmb{\pi}\) denotes the probabilities of samples, and \(\Pi\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \(\pmb{y}_k\in\mathbb{R}^n\) indicates the \(k\)th sample of stock return rates, and \(\bar{x}\) and \(\underline{x}\) are the lower and upper bounds of \(x\). The worst-case minimum expected overall return rate is set to be \(\mu=0.001\), the confidence level is \(\beta=0.95\), and the budget of investment is set to be \(w_0=1\). In this case study, we consider the sample data of five stocks “JPM”, “AMZN”, “TSLA”, “AAPL”, and	“GOOG” in the year of 2020, and the other parameters are specified by the following code segment.</p>
@@ -253,7 +253,7 @@ Running time: 0.0073s
 <h4 id="worst-case-cvar-model-with-box-uncertainty">Worst-case CVaR model with box uncertainty</h4>
 <p>Now we consider a box uncertainty set</p>
 
-\[\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \pmb{\eta}, \pmb{1}^T\pmb{\eta}=0, \underline{\pmb{\eta}}\leq \pmb{\eta} \leq \bar{\pmb{\eta}} \right\}.\]
+\[\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \pmb{\eta}, \pmb{1}^{\top}\pmb{\eta}=0, \underline{\pmb{\eta}}\leq \pmb{\eta} \leq \bar{\pmb{\eta}} \right\}.\]
 
 <p>In this case study, we assume that \(-\underline{\pmb{\eta}}=\bar{\pmb{\eta}}=0.0001\), and the Python code for implementation is provided below.</p>
 
@@ -296,7 +296,7 @@ Running time: 0.0268s
 
 <p>In cases that \(\Pi\) is an ellipsoidal uncertainty set</p>
 
-\[\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \rho\pmb{\eta}, \pmb{1}^T\pmb{\eta}=0, \pmb{\pi}^0 + \rho\pmb{\eta} \geq \pmb{0}, \|\pmb{\eta}\| \leq 1 \right\},\]
+\[\Pi = \left\{\pmb{\pi}: \pmb{\pi} = \pmb{\pi}^0 + \rho\pmb{\eta}, \pmb{1}^{\top}\pmb{\eta}=0, \pmb{\pi}^0 + \rho\pmb{\eta} \geq \pmb{0}, \|\pmb{\eta}\| \leq 1 \right\},\]
 
 <p>where the nominal probability \(\pmb{\pi}^0\) is the center of the ellipsoid, and the constant \(\rho=0.001\), then the model can be implemented by the code below.</p>
 
@@ -332,6 +332,8 @@ Running time: 0.0285s
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
 </code></pre></div></div>
+
+<p>In this example, we show that data acquisition tools provided in the Python ecosystem (<i>e.g.</i>, <code class="language-plaintext highlighter-rouge">pandas-datareader</code>) can be readily used to collect and feed real data into RSOME models.  Apart from acquiring data, rich machine learning tools in the Python ecosystem can also be used to develop data-driven optimization models. More such examples will be provided in introducing the <code class="language-plaintext highlighter-rouge">dro</code> module for modeling distributionally robust optimization problems.</p>
 
 <p><br /></p>
 <h4 id="reference">Reference</h4>

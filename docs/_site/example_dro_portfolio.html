@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="distributionally-robust-portfolio">Distributionally Robust Portfolio</h3>
+
+<p>Given \(J\) investment options whose random returns are collectively denoted by a random vector \(\tilde{\pmb{z}}\), we choose a portfolio that maximizes the worst-case (<i>i.e.</i>, least) expected utility:</p>
+
+\[\begin{align}
+\max_{\pmb{x}}~&amp; \inf_{\mathbb{P} \in \mathcal{F}}\mathbb{E}_\mathbb{P}\left[U\left(\tilde{\pmb{d}}^{\top}\pmb{x}\right)\right] \\
+\text{s.t.} ~&amp; \pmb{e}^{\top}\pmb{x} = 1 \\
+&amp; \pmb{x} \in \mathbb{R}^J_+.
+\end{align}\]
+
+<p>Here we assume that a commonly used utility function is piecewise affine and concave such that \(U(y) = \min_{k \in [K]} \left\{\alpha_k y + \beta_k\right\}\) with \(\alpha_k \geq 0\). We also assume the mean returns, the variance of each option, as well as the variance of sum of these options are known, captured by the widely used partial cross-moment ambiguity set (<a href="#ref1">Bertsimas et al. (2019)</a>, <a href="#ref3">Delgage and Ye (2010)</a>,  <a href="#ref4">Wiesemann et al. (2014)</a>):</p>
+
+\[\mathcal{G} =
+	\left\{
+	\mathbb{P} \in \mathcal{P}_0 (\mathbb{R}^J)
+	~\left|~
+	\begin{array}{l@{\quad}l}
+		\tilde{\pmb{d}} \sim \mathbb{R} \\
+		\mathbb{E}_\mathbb{P}[\tilde{\pmb{d}}] = \pmb{\mu} \\
+		\mathbb{E}_\mathbb{P}[(\tilde{d}_j - \mu_j)^2] \leq \sigma^2_j &amp; \forall j \in [J] \\
+		\mathbb{E}_\mathbb{P}[(\pmb{e}^\top(\tilde{\pmb{d}}-\pmb{\mu}))^2] \leq \pmb{e}^\top\pmb{\Sigma}\pmb{e} \\
+		\mathbb{P}[\tilde{\pmb{d}} \in [\underline{\pmb{d}}, \bar{\pmb{d}}]] = 1
+	\end{array}
+	\right.
+	\right\},\]
+
+<p>where \(\pmb{\mu} = (\mu_j)_{j \in [J]}\) is the vector of mean values, \(\pmb{\sigma} = (\sigma_j)_{j \in [J]}\) is the vector of standard deviations, and \(\pmb{\Sigma}\) is the covariance matrix of random returns. Introducing an auxiliary random vector \(\tilde{\pmb{u}}\) and auxiliary random scenario \(\tilde{s}\), the above ambiguity set can be reformulated into the format of event-wise ambiguity set with only one scenario (<i>i.e.</i>, \(S = 1\)):
+\(\mathcal{F} =
+\left\{
+	\mathbb{P} \in \mathcal{P}_0 (\mathbb{R}^J \times \mathbb{R}^{J+1} \times \{1\}) ~\left|~
+	\begin{array}{ll}
+		(\tilde{\pmb{d}}, \tilde{\pmb{u}}, \tilde{s}) \sim \mathbb{P} \\
+		\mathbb{E}_\mathbb{P}[\tilde{\pmb{d}} \mid \tilde{s} = 1] = \pmb{\mu} \\
+		\mathbb{E}_\mathbb{P}[\tilde{u}_j \mid \tilde{s} = 1] \leq \sigma^2_j &amp;~\forall j \in [J] \\
+		\mathbb{E}\_\mathbb{P}[\tilde{u}_{J+1} \mid \tilde{s} = 1] \leq \pmb{e}^\top\pmb{\Sigma}\pmb{e} \\
+		\mathbb{P}[(\tilde{\pmb{d}}, \tilde{\pmb{u}}) \in \mathcal{Z}_1 \mid \tilde{s} = 1] = 1 \\
+		\mathbb{P}[\tilde{s} = 1] = 1
+	\end{array}
+	\right.
+	\right\},\)</p>
+
+<p>where the support set is given by</p>
+
+\[\mathcal{Z}_1 = \left\{(\pmb{d}, \pmb{u}) \in \mathbb{R}^J \times \mathbb{R}^{J+1}: \; \pmb{d} \in [\underline{\pmb{d}}, \bar{\pmb{d}}], \; (\pmb{e}^\top(\pmb{d}-\pmb{\mu}))^2 \leq u_{J+1}, \; (d_j -\mu_j)^2 \leq u_j ~\forall j \in [J]\right\}.\]
+
+<p>These two ambiguity sets are equivalent in the sense that \(\mathcal{G} = \cup_{\mathbb{P} \in \mathcal{F}}{\Pi_{\tilde{\pmb{d}}}\mathbb{P}}\), where \(\Pi_{\tilde{\pmb{d}}}\mathbb{P}\) denotes the marginal distribution of \(\tilde{\pmb{d}}\) under a joint distribution \(\mathbb{P}\) of \((\tilde{\pmb{d}}, \tilde{\pmb{u}}, \tilde{s})\). With this equivalence and the fact that its objective function is independent of the auxiliary uncertainty \((\tilde{\pmb{u}}, \tilde{s})\), the distributionally robust optimization problem above is equivalent to</p>
+
+\[\begin{align}
+\max_{\pmb{x}} ~&amp; \inf_{\mathbb{P} \in \mathcal{F}}\mathbb{E}_\mathbb{P}\left[U\left(\tilde{\pmb{d}}^{\top}\pmb{x}\right)\right] \\
+\text{s.t.} ~&amp; \pmb{e}^\top\pmb{x} = 1 \\
+&amp; \pmb{x} \in \mathbb{R}^J_+.
+\end{align}\]
+
+<p>By applying <b>Theorem 1</b> in <a href="#ref2">Chen et al. (2020)</a>, we obtain the following equivalent adaptive problem in our distributionally robust optimization framework:</p>
+
+\[\begin{align}
+\max_{\pmb{x}} ~ &amp; \inf_{\mathbb{P} \in \mathcal{F}}\mathbb{E}_\mathbb{P}\left[y\left(1, \tilde{\pmb{d}}, \tilde{\pmb{u}}\right)\right] \\
+\text{s.t.} ~  &amp; y(1, \pmb{d}, \pmb{u}) \geq \alpha_k\cdot (\pmb{d}^\top\pmb{x}) + \beta_k &amp; \forall (\pmb{d}, \pmb{u}) \in \mathcal{Z}_1, \; k \in [K] \\
+&amp; y \in \overline{\mathcal{A}}(\{\{1\}\}, [J]) \\
+&amp; \pmb{e}^\top\pmb{x} = 1 \\
+&amp; \pmb{x} \in \mathbb{R}^J_+,
+\end{align}\]
+
+<p>where we would like to highlight the introduction of an auxiliary one-dimensional wait-and-see decision \(y\), which obeys the event-wise affine adaptation \(\overline{\mathcal{A}}({{1}}, [2J+1])\) that affinely depends on all random components \(\tilde{d}_1,\dots,\tilde{d}_J\) as well as \(\tilde{u}_1,\dots,\tilde{u}_{J+1}\).</p>
+
+<p>As a concrete example, we consider $J=6$ stocks (TSLA, AAPL, AMZN, GOOG, ZM, and FB) in the year of 2020 and collect daily returns using the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">pandas_datareader.data</span> <span class="k">as</span> <span class="n">web</span>
+
+<span class="n">stocks</span> <span class="o">=</span> <span class="p">[</span><span class="s">'TSLA'</span><span class="p">,</span> <span class="s">'AAPL'</span><span class="p">,</span> <span class="s">'AMZN'</span><span class="p">,</span> <span class="s">'GOOG'</span><span class="p">,</span> <span class="s">'ZM'</span><span class="p">,</span> <span class="s">'FB'</span><span class="p">]</span>
+<span class="n">start</span> <span class="o">=</span> <span class="s">'1/1/2020'</span>              <span class="c1"># starting date of historical data
+</span><span class="n">end</span><span class="o">=</span><span class="s">'1/1/2021'</span>                  <span class="c1"># end date of historical data
+</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">([])</span>
+<span class="k">for</span> <span class="n">stock</span> <span class="ow">in</span> <span class="n">stocks</span><span class="p">:</span>
+    <span class="n">each</span> <span class="o">=</span> <span class="n">web</span><span class="p">.</span><span class="n">DataReader</span><span class="p">(</span><span class="n">stock</span><span class="p">,</span> <span class="s">'yahoo'</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+    <span class="n">close</span> <span class="o">=</span> <span class="n">each</span><span class="p">[</span><span class="s">'Adj Close'</span><span class="p">].</span><span class="n">values</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">stock</span><span class="p">]</span> <span class="o">=</span> <span class="n">returns</span>
+</code></pre></div></div>
+
+<p>Paramters of the utility function are given below</p>
+<ul>
+  <li>Number of pieces of the utility function \(U(y)\): \(K=3\).</li>
+  <li>Linear terms of the piecewise utility function \(U(y)\): \(\alpha=(6, 3, 1)\).</li>
+  <li>Constant terms of the piecewise utility function \(U(y)\): \(\beta=(0.02, 0, 0)\).
+<br /></li>
+</ul>
+
+<p>Parameters of the utility function and the ambiguity set are defined by the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>               <span class="c1"># linear terms of the piecewise utility function
+</span><span class="n">beta</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.02</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>             <span class="c1"># constant terms of the piecewise utility function
+</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">mean</span><span class="p">().</span><span class="n">values</span>         <span class="c1"># the expected values of stock returns
+</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">sigma</span><span class="p">().</span><span class="n">values</span>     <span class="c1"># variance of stock returns
+</span><span class="n">Sigma</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">cov</span><span class="p">().</span><span class="n">values</span>       <span class="c1"># covariance matrix of stock returns
+</span><span class="n">z_ub</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nb">max</span><span class="p">().</span><span class="n">values</span>        <span class="c1"># upper bounds of stock returns
+</span><span class="n">z_lb</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nb">min</span><span class="p">().</span><span class="n">values</span>        <span class="c1"># lower bounds of stock returns
+</span>
+<span class="n">J</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>                     <span class="c1"># number of stocks
+</span><span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>                  <span class="c1"># number of pieces of the utility function
+</span></code></pre></div></div>
+<p>The portfolio optimization problem is then formulated and solved by the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>                        <span class="c1"># import the dro module
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>                          <span class="c1"># import the notion of expectation
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>                     <span class="c1"># import the square function
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>          <span class="c1"># import the interface for Gurobi
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                          <span class="c1"># create an RSOME DRO model
+</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                            <span class="c1"># J random variables as an array d
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>                          <span class="c1"># J+1 random variables as an array u
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                     <span class="c1"># create an ambiguity set
+</span><span class="n">fset</span><span class="p">.</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">,</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">,</span>
+             <span class="n">square</span><span class="p">(</span><span class="n">d</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+             <span class="n">square</span><span class="p">((</span><span class="n">d</span><span class="o">-</span><span class="n">mu</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># support of random variables
+</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">,</span>
+             <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+             <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">Sigma</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>        <span class="c1"># uncertainty set of expectations
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                            <span class="c1"># J decision variables as an array x
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                             <span class="c1"># 1 decision variable as y
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                                   <span class="c1"># y affinely adapts to d
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                   <span class="c1"># y affinely adapts to u
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">maxinf</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>                     <span class="c1"># worst-case expectation over fset
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">d</span><span class="o">@</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+         <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>       <span class="c1"># piecewise linear constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>               <span class="c1"># constraints of x
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                             <span class="c1"># solve the model by Gurobi
+</span></code></pre></div></div>
+
+<p>Different from the <code class="language-plaintext highlighter-rouge">ro</code> module, the <code class="language-plaintext highlighter-rouge">dro</code> module enables users to define an ambiguity set for capturing the ambiguous distribution. The ambiguity set is created by calling the <code class="language-plaintext highlighter-rouge">ambiguity()</code> method and then the support of random variables <code class="language-plaintext highlighter-rouge">d</code> and <code class="language-plaintext highlighter-rouge">u</code> and the uncertainty set of their expectations are specified by the <code class="language-plaintext highlighter-rouge">suppset()</code> and <code class="language-plaintext highlighter-rouge">exptset()</code>, respectively. Similar  to the <code class="language-plaintext highlighter-rouge">ro</code> module, the affine adaptation of decision <code class="language-plaintext highlighter-rouge">y</code> upon random variables is defined using the <code class="language-plaintext highlighter-rouge">adapt()</code> method. The objective as the worst-case expectation over the ambiguity set <code class="language-plaintext highlighter-rouge">fset</code> is then defined by the <code class="language-plaintext highlighter-rouge">maxinf()</code> method, which means maximizing the infimum of the expected term.</p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2017.2952">Adaptive distributionally robust optimization</a>. <i>Management Science</i> <b>65</b>(2) 604-618.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>. <i>Management Science</i> <b>66</b>(8) 3329–3339.</p>
+
+<p><a id="ref3"></a></p>
+
+<p>Delage, Erick, and Yinyu Ye. 2010. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.1090.0741">Distributionally robust optimization under moment uncertainty with application to data-driven problems</a>. <i>Operations Research</i> <b>58</b>(3) 595-612.</p>
+
+<p><a id="ref4"></a></p>
+
+<p>Wiesemann, Wolfram, Daniel Kuhn, and Melvyn Sim. 2014. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.2014.1314">Distributionally robust convex optimization</a>. <i>Operations Research</i> <b>62</b>(6) 1358-1376.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

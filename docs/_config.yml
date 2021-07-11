@@ -1,6 +1,6 @@
 math: ture
 markdown: kramdown
-title: RSOME for Python
+title: RSOME in Python
 show_downloads: "true"
 logo: rso_left.png
 theme: jekyll-theme-minimal

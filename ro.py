@@ -115,6 +115,19 @@ class Model:
         return new_ldr
 
     def min(self, obj):
+        """
+        Minimize the given objective function.
+
+        Parameters
+        ----------
+        obj
+            An objective function
+
+        Notes
+        -----
+        The objective function given as an array must have the size
+        to be one.
+        """
 
         if obj.size > 1:
             raise ValueError('Incorrect function dimension.')
@@ -125,6 +138,19 @@ class Model:
         self.dupdate = True
 
     def max(self, obj):
+        """
+        Maximize the given objective function.
+
+        Parameters
+        ----------
+        obj
+            An objective function
+
+        Notes
+        -----
+        The objective function given as an array must have the size
+        to be one.
+        """
 
         if obj.size > 1:
             raise ValueError('Incorrect function dimension.')

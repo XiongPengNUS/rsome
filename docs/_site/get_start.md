@@ -6,7 +6,7 @@ RSOME is an open-source algebraic library for modeling generic optimization prob
 
 This guide introduces the main components, basic data structures, and syntax rules of the RSOME package. For installations, please refer to our [Home Page](index) for more information.
 
-## Modeling environments <a name="section1.1"></a>
+## Modeling Environments <a name="section1.1"></a>
 
 The current version of RSOME provides four layers of modeling environments, as illustrated by the structure diagram below.
 
@@ -19,7 +19,7 @@ A higher layer of RSOME module could address a more general class of problems co
 
 Though each layer of RSOME modules are targeting different types of optimization problems, they follow consistent syntax in defining variables, objective functions, and constraints. In this section, we will use the `ro` module as a general modeling environment for deterministic problems, and cases of robust optimization problems will be discussed in [RSOME for robust optimization](ro_rsome). The `dro` module is specially designed for distributionally robust optimization problems, and it is different from `ro` in specifying recourse adaptations and uncertainty/ambiguity sets. It will be introduced separately in [RSOME for distributionall robust optimization](dro_rsome).
 
-## Introduction to the `rsome.ro` environment <a name="section1.2"></a>
+## Introduction to the `rsome.ro` Environment <a name="section1.2"></a>
 
 ### Models
 
@@ -34,7 +34,7 @@ model = ro.Model('My model')    # create a Model object
 
 The code above defines a new `Model` object `model`, with the name specified to be `'My model'`. You could also leave the name unspecified and the default name is `None`.
 
-### Decision variables and linear constraints
+### Decision Variables and Linear Constraints
 
 Decision variables of a model can be defined by the method `dvar()`.
 ```
@@ -115,7 +115,7 @@ model.st(y.sum() >= 1,
 model.st(x[i] <= i for i in range(3))   # define constraints by a loop
 ```
 
-### Convex functions and convex constraints
+### Convex Functions and Convex Constraints
 
 The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.
 
@@ -142,7 +142,7 @@ model.st(rso.norm(x, inf) <= x[0])  # a constraint with infinity norm
 
 Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as `abs(x) >= 2` is invalid and gives an error message.
 
-## Standard forms and solutions <a name="section1.3"></a>
+## Standard Forms and Solutions <a name="section1.3"></a>
 
 All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the `do_math()` method of the model object.
 
@@ -566,11 +566,11 @@ model.solve(grb,                                # Use Gurobi as the solver
 
 For Gurobi, you may find the parameter names and their values from [Parameters](https://www.gurobi.com/documentation/9.1/refman/parameters.html). Parameter information on MOSEK is given by [Parameters (alphabetical list sorted by type)](https://docs.mosek.com/9.2/pythonfusion/parameters.html). CPLEX solver parameters can be found from [List of CPLEX parameters](https://www.ibm.com/support/knowledgecenter/SSSA5P_12.7.1/ilog.odms.cplex.help/CPLEX/Parameters/topics/introListAlpha.html). Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
 
-## Application examples <a name="section1.4"></a>
+## Application Examples <a name="section1.4"></a>
 
-### [Mean-variance portfolio optimization](example_mv_portfolio)
-### [Integer programming for Sudoku](example_sudoku)
-### [Optimal DC power flow](example_opf)
+### [Mean-Variance Portfolio](example_mv_portfolio)
+### [Integer Programming for Sudoku](example_sudoku)
+### [Optimal DC Power Flow](example_opf)
 
 ## Reference
 

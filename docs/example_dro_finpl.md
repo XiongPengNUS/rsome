@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Multi-stage stochastic financial planning
+### Multi-Stage Stochastic Financial Planning
 
 In this example we consider the multi-stage financial planning problem discussed in page 23 of [Birge and Francois (2011)](#ref1). As a multi-stage model problem, the here-and-now decision allocates the total wealth \\(d\\) between two investment types: stocks (S) and bonds (B). Each investment type may have a high return and a low return as two possible outcomes. It is assumed that the high returns for stocks and bonds are 1.25 and 1.14, and the low returns are 1.06 and 1.12, respectively. These outcomes are independent and with equal likelihood, so throughout the subsequent stages, we would have eight scenarios with equal probabilities. The random return outcomes of stocks and bonds are represented by a scenario tree shown below.
 
@@ -26,9 +26,9 @@ $$
 \begin{align}
 \max~&\inf \mathbb{E}\left[\overline{x}(\tilde{s}) - 4\underline{x}(\tilde{s})\right] \\
 \text{s.t.}~&w_1, w_2 \geq 0, ~w_1 + w_2 = d  &&\\
-&x_{11}(s) + x_{12}(s) - \pmb{z}_1^T\pmb{w} = 0 && \forall \pmb{z} \in \mathcal{Z}_s, s\in [S]\\
-&x_{21}(s) + x_{22}(s) - \pmb{z}_2^T\pmb{x}_1(s) = 0 && \forall \pmb{z} \in \mathcal{Z}_s, s\in [S]\\
-&\pmb{z}_3^T\pmb{x}_2(s) + \overline{x}(s) - \underline{x}(s) = \tau \\
+&x_{11}(s) + x_{12}(s) - \pmb{z}_1^{\top}\pmb{w} = 0 && \forall \pmb{z} \in \mathcal{Z}_s, s\in [S]\\
+&x_{21}(s) + x_{22}(s) - \pmb{z}_2^{\top}\pmb{x}_1(s) = 0 && \forall \pmb{z} \in \mathcal{Z}_s, s\in [S]\\
+&\pmb{z}_3^{\top}\pmb{x}_2(s) + \overline{x}(s) - \underline{x}(s) = \tau \\
 &\pmb{x}_1(s), \pmb{x}_2(s) \geq \pmb{0}, ~ \overline{x}(s), \underline{x}(s) \geq 0.
 \end{align}
 $$

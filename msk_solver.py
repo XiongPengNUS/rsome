@@ -1,3 +1,8 @@
+"""
+This module is used as an interface to call the MOSEK solver for solving 
+(mixed-integer) linear or second-order cone programs.
+"""
+
 import mosek
 import numpy as np
 from scipy.sparse import coo_matrix

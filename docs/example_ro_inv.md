@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Th robust production-inventory model
+### Joint Production-Inventory
 
 In this example, we considered the robust production-inventory problem introduced in [Ben-Tal et al. (2004)](#ref1). The formulation of the robust model is given below,
 
@@ -8,7 +8,7 @@ $$
 \begin{align}
 \min~&\max\limits_{\pmb{d}\in \mathcal{Z}}\sum\limits_{t=1}^{24}\sum\limits_{i=1}^3c_{it}p_{it}(\pmb{d}) &&\\
 \text{s.t.}~&0 \leq p_{it}(\pmb{d}) \leq P_{it}, && i= 1, 2, 3; t = 1, 2, ..., 24 \\
-&\sum\limits_{i=1}^Tp_{it}(\pmb{d}) \leq Q_i, && i = 1, 2, 3 \\
+&\sum\limits_{i=1}^{\top}p_{it}(\pmb{d}) \leq Q_i, && i = 1, 2, 3 \\
 & v_{\min} \leq v_0 + \sum\limits_{\tau=1}^{t-1}\sum\limits_{i=1}^3p_{i\tau} - \sum\limits_{\tau=1}^{t-1}d_{\tau} \leq v_{\max}, && t = 1, 2, ..., 24,
 \end{align}
 $$

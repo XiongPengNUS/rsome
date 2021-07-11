@@ -1,3 +1,8 @@
+"""
+This module is used as an interface to call the CyLP solver for solving
+(mixed-integer) linear programming problems.
+"""
+
 from cylp.cy import CyClpSimplex
 from cylp.py.modeling.CyLPModel import CyLPArray
 

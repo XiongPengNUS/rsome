@@ -211,20 +211,75 @@ def comb_set(s1, s2):
 
 
 def norm(affine, degree=2):
+    """
+    Return the first, second, or infinity norm of an array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be a vector, i.e., the size of the
+        array must be the same as the largest dimension.
+    degree : {1, 2, numpy.inf}, optional
+        Order of the norm function. It can only be 1, 2, or infinity.
+
+    Returns
+    -------
+    n : Convex
+        The norm of the given array
+    """
 
     return affine.norm(degree)
 
 
 def square(affine):
+    """
+    Return the element-wise square of an array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array.
+
+    Returns
+    -------
+    n : Convex
+        The element-wise squares of the given array
+    """
 
     return affine.to_affine().square()
 
 
 def sumsqr(affine):
+    """
+    Return the sum of squares of an array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be a vector, i.e., the size of the
+        array must be the same as the largest dimension.
+
+    Returns
+    -------
+    n : Convex
+        The sum of squares of the given array
+    """
 
     return affine.to_affine().sumsqr()
 
 
 def E(expr):
+    """
+    The notion of the expectation of random variables and the worst-case
+    expected values
+
+    Notes
+    -----
+    This function is used to denote
+    1. the expected value of an random variable when specifying the
+    uncertainty set of expectations.
+    2. the worst-case expected value of an affine function involving random
+    variables.
+    """
 
     return expr.E

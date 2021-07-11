@@ -1,11 +1,11 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Adaptive robust optimization for a lot-sizing problem
+### Robust Lot-Sizing
 
 In this example, we consider a lot-sizing problem described in [Bertsimas and de Ruiter (2016)](#ref1). In a network with \\(N\\) stores, the stock allocation \\(x_i\\) for each store \\(i\\) is determined prior to knowing the realization of the demand at each location. The demand, denoted by the vector \\(d\\),  is uncertain and assumed to be in a budget uncertainty set
 
 $$
-\mathcal{U}=\left\{\pmb{d}: \pmb{0}\leq \pmb{d} \leq d_{\text{max}}\pmb{e}, \pmb{e}^T\pmb{d} \leq \Gamma\right\}.
+\mathcal{U}=\left\{\pmb{d}: \pmb{0}\leq \pmb{d} \leq d_{\text{max}}\pmb{e}, \pmb{e}^{\top}\pmb{d} \leq \Gamma\right\}.
 $$
 
 After the demand realization of demand is observed, stock \\(y_{ij}\\) could be transported from store \\(i\\) to store \\(j\\) at a cost of \\(t_{ij}\\), in order to meet all demand. The objective is to minimize the worst-case total cost, expressed as the storage cost (with unit cost \\(c_i\\) for each store \\(i\\)) and cost of shifting products from one store to another. Such an adaptive model can be written as

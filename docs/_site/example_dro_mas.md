@@ -1,6 +1,6 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### Distributionally robust optimization for medical appointment scheduling
+### Distributionally Robust Medical Appointment
 
 In this example,  we consider a medical appointment scheduling problem described in [Bertsimas et al. (2019)](#ref1), where \\(N\\) patients arrive at their stipulated schedule and may have to wait in a queue to be served by a physician. The patients’ consultation times are uncertain and their arrival schedules are determined at the first stage, which can influence the waiting times of the patients and the overtime of the physician.
 
@@ -29,10 +29,10 @@ $$
 ~(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
 \pmb{z} \geq \pmb{0} & \\
 (z_j - \mu_j)^2 \leq u_j, & \forall j \in [N] \\
-(\pmb{1}^T(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
+(\pmb{1}^{\top}(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
 \mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} & \\
 \mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j^2, & \forall j \in [N] \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^T\pmb{\Sigma}\pmb{e}
+\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.
 \right\}.
@@ -119,4 +119,4 @@ Running time: 0.0516s
 
 <a id="ref1"></a>
 
-Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. [Adaptive distributionally robust optimization](http://www.optimization-online.org/DB_FILE/2016/03/5353.pdf). <i>Management Science</i> <b>65</b>(2) 604-618.
+Bertsimas, Dimitris, Melvyn Sim, and Meilin Zhang. 2019. [Adaptive distributionally robust optimization](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2017.2952). <i>Management Science</i> <b>65</b>(2) 604-618.

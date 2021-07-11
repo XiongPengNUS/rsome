@@ -1,0 +1,370 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3b0f96239933734f90d1bfb29c01b2aa2c057c90">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="multi-stage-inventory-control">Multi-Stage Inventory Control</h3>
+
+<p>In this example we consider a multi-stage inventory control problem to showcase how different distributionally
+robust models can be deployed in RSOME with little switching cost.  The inventory control problem assumes that at the beginning of each time period \(t\in[T]\), the decision maker starts with \(I_{0}\) units of product in inventory and selects a production quantity \(x_t \in [0, \bar{x}_t]\) with zero lead time at a unit cost \(c_t\). After realization of demand \(d_t \geq 0\), the inventory is updated to \(I_t = I_{t−1}+x_t −d_t\) and it may incur a holding cost of \(h_t \max\{I_t, 0\}\) or a backorder cost of \(b_t \max\{−I_t, 0\}\). We use the same parameters and data generation as in <a href="#ref4">See and Sim (2010)</a>. Specifically, the demand follows a non-stationary autoregressive stochastic process of the form:</p>
+
+\[\tilde{d}_t(\pmb{v}) = \tilde{v}_t + \alpha \tilde{v}_{t-1} + \alpha \tilde{v}_{t-2} + \cdots + \alpha \tilde{v}_1 + \mu = d_{t-1}(\tilde{\pmb{v}}) - (1-\alpha)\tilde{v}_{t-1} + \tilde{v}_t ~~~\forall t \in [T],\]
+
+<p>where \(\tilde{v}_1,\dots,\tilde{v}_T\) are independent and identically distributed uniform random variables in \([-\bar{v}, \bar{v}]\), and other parameters are given as:</p>
+<ul>
+  <li>Number of time steps: \(T=10\).</li>
+  <li>Constant in the autoregressive process: \(\alpha=0.25\).</li>
+  <li>Initial inventory status: \(I_0=0\).</li>
+  <li>Bounds of each random variable: \(\bar{v}=10\).</li>
+  <li>Mean demand: \(\mu_t=200\).</li>
+  <li>Upper bound of the order quantity: \(\bar{x}_t=260\).</li>
+  <li>Order cost: \(c_t=0.1\).</li>
+  <li>Holding cost: \(h_t=0.02\).</li>
+  <li>Backorder cost: \(b_t=0.4\) if \(t=1, 2, \cdots, T-1\), and \(b_T=4.0\).</li>
+</ul>
+
+<p>These parameters are defined by the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="mi">10</span>		
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">I0</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">vbar</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">xbar</span> <span class="o">=</span> <span class="mi">260</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">h</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">b</span><span class="p">[</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">4.0</span>
+</code></pre></div></div>
+
+<p>With a null inventory on hand (<i>i.e</i>, \(I_0= 0\)), the decision maker dynamically selects production quantities to minimize the expected total cost over the entire planning horizon, given by</p>
+
+\[\begin{align}
+\min_{\pmb{x}, ~\pmb{y}} ~&amp; \sup_{\mathbb{P} \in \mathcal{F}}\mathbb{E}_{\mathbb{P}}\left[c_1 x_1 + \sum_{t\in[T]\setminus\{1\}}c_t x_t(\tilde{s}, \tilde{\pmb{z}}) + \sum_{t\in[T]}y_t(\tilde{s}, \tilde{\pmb{z}})\right] \hspace{-0.4in} &amp;\\
+\text{s.t.}~ &amp; I_1(s, \pmb{z}) = I_0 + x_1 - d_{1}(s, \pmb{z}) &amp; \forall \pmb{z} \in \mathcal{Z}_s, \; s \in [S] \\
+&amp;I_t(s, \pmb{z}) = I_{t-1}(s, \pmb{z}) + x_t(s, \pmb{z}) - d_t(s, \pmb{z}) &amp; \forall \pmb{z} \in \mathcal{Z}_s, \; s \in [S], \; t \in [T]\setminus\{1\} \\
+&amp;y_t(s, \pmb{z}) \geq h_t I_t(s, \pmb{z}) &amp; \forall \pmb{z} \in \mathcal{Z}_s, \; s \in [S], \; t \in [T] \\
+&amp;y_t(s, \pmb{z}) \geq -b_t I_t(s, \pmb{z}) &amp; \forall \pmb{z} \in \mathcal{Z}_s, \; s \in [S], \; t \in [T] \\
+&amp; 0 \leq x_1 \leq \bar{x}_1 \\
+&amp; 0 \leq x_t(s, \pmb{z}) \leq \bar{x}_t &amp; \forall \pmb{z} \in \mathcal{Z}_s, \; s\in [S], \; t \in [T]\setminus\{1\} \\
+&amp; x_t \in \overline{\mathcal{A}}(\mathcal{C}, \mathcal{J}_{t-1}) &amp;\forall t \in [T]\setminus\{1\} \\
+&amp; y_t, \; I_t \in \overline{\mathcal{A}}(\mathcal{C}, \mathcal{J}_t), &amp;\forall t \in [T].
+\end{align}\]
+
+<p>With different choices of \(\mathcal{F}\) based on a number \(S\) of historical demand samples \(\hat{\pmb{d}}_1,\cdots,\hat{\pmb{d}}_S\) (<i>i.e.</i>, \(\hat{\pmb{v}}_1,\cdots,\hat{\pmb{v}}_S\)), the array of random variables \(\tilde{\pmb{z}}\) (including those auxiliary ones) may be formulated differently.  We next present some examples of approaches proposed in the literature—all fit well in the distributionally robust optimization framework of RSOME</p>
+
+<h4 id="partial-cross-moment">Partial Cross-Moment</h4>
+<p>Since random factors \(\tilde{\pmb{v}}_1,\cdots,\tilde{\pmb{v}}_S\) are uncorrelated and they share an identical standard deviation \(\bar{v}/\sqrt{3}\), the standard deviation of a partial \(\sum_{\tau=r}^t\tilde{v}_{\tau}\) can be bounded by \(\bar{v}\sqrt{(t-r+1)/3}\).  Let \(\tilde{\pmb{z}}=(\tilde{\pmb{v}}, \tilde{\pmb{u}})\), where \(\tilde{\pmb{u}}\in\mathbb{R}^{T(T+1)/2}\) is a vector of auxiliary random variables that captures the partial cross-moment  information, the ambiguity set \(\mathcal{F}\) can then be formulated as follows</p>
+
+\[\mathcal{F} = \left\{\mathbb{P} \in \mathcal{P}_0 (\mathbb{R}^T \times \mathbb{R}^{T(T+1)/2} \times \{1\}) ~\left|~
+\begin{array}{l@{\quad}l}
+((\tilde{\pmb{v}},\tilde{\pmb{u}}), \tilde{s}) \sim \mathbb{P} \\
+\mathbb{E}_{\mathbb{P}}[\tilde{\pmb{v}} \mid \tilde{s} = 1] = \pmb{0} \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u}_{rt} \mid \tilde{s} = 1] \leq \phi_{rt} &amp; \forall r \leq t, \; t \in [T] \\
+\mathbb{P}[(\pmb{v},\tilde{\pmb{u}}) \in \mathcal{Z}_s \mid \tilde{s} = 1] = 1
+\end{array}
+\right.
+\right\},\]
+
+<p>where the variance \(\phi_{rt}=(\bar{v}^2(t-r+1))/3\) and the support set takes the form</p>
+
+\[\mathcal{Z}_s = \left\{(\pmb{v}, \pmb{u}) \in \mathbb{R}^T \times \mathbb{R}^{T(T+1)/2}: \;
+\pmb{v} \in [\underline{\pmb{v}}, \bar{\pmb{v}}], \; u_{st} \geq \left(\sum_{\tau=r}^t v_{\tau}\right)^2 ~~~\forall s \leq t, \; t \in [T]
+\right\},\]
+
+<p>and the corresponding event-wise recourse adaptation is characterized by</p>
+
+\[\begin{cases}
+x_t \in \overline{\mathcal{A}}(\{\{1\}\}, \mathcal{J}_{t-1}) &amp;~\forall t \in [T]\setminus\{1\} \\
+y_t, \; I_t \in \overline{\mathcal{A}}(\{\{1\}\}, \mathcal{J}_t) &amp;~\forall t \in [T],
+\end{cases}\]
+
+<p>where for each \(t\in[T]\), \(\mathcal{J}_t\) consists of (i) the indices of \(\tilde{v}_1\) to \(\tilde{v}_t\) and (ii) the indices of \(\tilde{u}_{\tau r}\) such that \(\tau \leq r \leq t\). The model can be formulated and solved by the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>				
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">vbar</span><span class="o">*</span><span class="p">((</span><span class="n">t</span><span class="o">-</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span> <span class="c1"># ambiguity set parameter phi
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                    <span class="c1"># random variable v
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>           <span class="c1"># auxiliary random variable u
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>             <span class="c1"># create an ambiguity set
+</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">phi</span><span class="p">)</span> <span class="c1"># define the uncertainty set of expectations
+</span><span class="n">fset</span><span class="p">.</span><span class="n">suppset</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">vbar</span><span class="p">,</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">vbar</span><span class="p">,</span>
+             <span class="p">[</span><span class="n">square</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">r</span><span class="p">:</span><span class="n">t</span><span class="p">].</span><span class="nb">sum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r</span><span class="p">]</span>
+              <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t</span><span class="p">)])</span>    <span class="c1"># define the support of random variables
+</span><span class="n">temp</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">eye</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">v</span><span class="o">@</span><span class="n">temp</span> <span class="o">+</span> <span class="n">mu</span>                      <span class="c1"># random demand
+</span>
+<span class="n">x1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                    <span class="c1"># variable x1
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>                  <span class="c1"># an array of variables x2, x3, ..., xT
+</span><span class="n">I</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                    <span class="c1"># an array of variables I1, I2, ..., IT
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                    <span class="c1"># an array of variables y1, y2, ..., yT
+</span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>              <span class="c1"># x[t] adapts to v[0], ..., v[t]
+</span>    <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">[:(</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">])</span>   <span class="c1"># x[t] adapts to u[0], ..., u[t*(t+3)//2]
+</span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>              <span class="c1"># I[t] adapts to v[0], ..., v[t]
+</span>    <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">[:(</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">])</span>   <span class="c1"># I[t] adapts to u[0], ..., u[t*(t+3)//2]
+</span>    <span class="n">y</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>              <span class="c1"># y[t] adapts to v[0], ..., v[t]
+</span>    <span class="n">y</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">[:(</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">])</span>   <span class="c1"># y[t] adapts to u[0], ..., u[t*(t+3)//2]
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x1</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">@</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">I0</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">h</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">I</span><span class="p">)</span>				
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>				
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                     <span class="c1"># solve the model by Gurobi
+</span></code></pre></div></div>
+
+<p>Note that when specifying the affine adaptation of decisions <code class="language-plaintext highlighter-rouge">x[t]</code>, <code class="language-plaintext highlighter-rouge">I[t]</code>, and <code class="language-plaintext highlighter-rouge">y[t]</code>, the indices are different from the mathematical formulation. For example, here <code class="language-plaintext highlighter-rouge">x[0]</code> and <code class="language-plaintext highlighter-rouge">v[0]</code> are respectively \(x_2\) and \(v_1\) in the mathematical formulation, so the index set \(\mathcal{J}_{t-1}\) is specified by the a loop such that for all <code class="language-plaintext highlighter-rouge">t in range(T-1)</code>, <code class="language-plaintext highlighter-rouge">x[t]</code> adapts to random variables <code class="language-plaintext highlighter-rouge">v[:t+1]</code> and <code class="language-plaintext highlighter-rouge">u[:(t+1)*(t+2)//2]</code>, as defined in each iteration.</p>
+
+<h4 id="type-1-wasserstein-metric">Type-1 Wasserstein Metric</h4>
+
+<p>According to <b>Theorem 2</b> in <a href="#ref3">Chen et al. (2020)</a>, we consider a data-driven ambiguity set based on the type-1 Wasserstein metric, which is representable in the format of an event-wise ambiguity set</p>
+
+\[\mathcal{F} = \left\{
+\mathbb{P} \in \mathcal{P}_0 (\mathbb{R}^{T} \times \mathbb{R} \times [S])
+~\left|~
+\begin{array}{l@{\quad}l}
+((\tilde{\pmb{v}}, \tilde{u}),\tilde{s}) \sim \mathbb{P} \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u} \mid \tilde{s} \in [S]] \leq \theta \\
+\mathbb{P}[(\tilde{\pmb{z}},\tilde{u}) \in \mathcal{Z}_s \mid \tilde{s} = s] = 1 &amp; \forall s \in [S] \\
+\mathbb{P}[\tilde{s} = s] = \frac{1}{S} &amp; \forall s \in [S]
+\end{array}
+\right.
+\right\},\]
+
+<p>where \(S\) is the sample size of the dataset, and for each sample \(s\), the support set is defined as \(\mathcal{Z}_s = \left\{(\pmb{v},u) \in \mathbb{R}^{T\times R}: \pmb{v}\in [\bar{\pmb{v}}, -\bar{\pmb{v}}], u \geq|\pmb{v}−\hat{\pmb{v}}_s| \right\}\). In this case, \(\tilde{\pmb{z}} = (\tilde{\pmb{v}}, \tilde{u}) \) with \(\tilde{u}\) being an auxiliary random scalar. The accompanying event-wise recourse adaptation is given by</p>
+
+\[\begin{cases}
+x_t \in \overline{\mathcal{A}}(\{\{1,\dots,S\}\}, \mathcal{J}_{t-1}) &amp;~\forall t \in [T] \setminus \{1\} \\
+y_t, \; I_t \in \overline{\mathcal{A}}(\{\{1,\dots,S\}\}, \mathcal{J}_t) &amp;~\forall t \in [T],
+\end{cases}\]
+
+<p>where for each \(t \in [T−1]\), \(\mathcal{J}_t\) corresponds to the indices of \(\tilde{v}_1\) to \(\tilde{v}_t\); while \(\mathcal{J}_T\) contains the indices of \(\tilde{v}_1\) to \(\tilde{v}_T\) as well as that of \(\tilde{u}\).  In this example, the sample size of the demand data is \(S=50\) and the robustness parameter \(\theta=0.02T\), then the model can be implemented by the sample code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
+
+<span class="n">S</span> <span class="o">=</span> <span class="mi">50</span>                              <span class="c1"># sample size S=50
+</span><span class="n">vhat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">vbar</span>   <span class="c1"># random sample of v
+</span><span class="n">theta</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">T</span>                    <span class="c1"># Wasserstein metric parameter
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                <span class="c1"># a model with S scenarios
+</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                   <span class="c1"># random variable array v
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>                    <span class="c1"># auxiliary variable u
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>            <span class="c1"># create an ambiguity set
+</span><span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">theta</span><span class="p">)</span>         <span class="c1"># define the uncertainty set for expectations
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>                  <span class="c1"># a loop to define the scenario-wise support
+</span>    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">vbar</span><span class="p">,</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">vbar</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">vhat</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">eye</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">v</span><span class="o">@</span><span class="n">temp</span> <span class="o">+</span> <span class="n">mu</span>                         
+
+<span class="n">x1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                   <span class="c1"># variable x1
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>                 <span class="c1"># an array of variables x2, x3, ..., xT
+</span><span class="n">I</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                   <span class="c1"># an array of variables I1, I2, ..., IT
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                   <span class="c1"># an array of variables y1, y2, ..., yT
+</span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>             <span class="c1"># x[t] adapts to v[0], v[1], ..., v[t]
+</span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>             <span class="c1"># I[t] adapts to v[0], v[1], ..., v[t]
+</span>    <span class="n">y</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>             <span class="c1"># y[t] adapts to v[0], v[1], ..., v[t]
+</span><span class="n">I</span><span class="p">[</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                     <span class="c1"># I[T-1] adapt to all u
+</span><span class="n">y</span><span class="p">[</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                     <span class="c1"># y[T-1] adapt to all u
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x1</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">@</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">I0</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">h</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">I</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># solve the model by Gurobi
+</span></code></pre></div></div>
+<p>Note that the ambiguity set is defined upon \(S\) scenarios, and the scenario number is specified when creating the RSOME model using the <code class="language-plaintext highlighter-rouge">dro.Model()</code> function. For each scenario <code class="language-plaintext highlighter-rouge">s</code>, the support set is defined by calling the <code class="language-plaintext highlighter-rouge">fset[s].suppset()</code> method in a for loop.  For all adaptive decisions in this example, we leave the scenario partitions unspecified since the default setting is \(\mathcal{C}=\{\{1,2,\cdots,S\}\}\), implying that adaptive decisions do not adapt to scenarios; see also <a href="#ref1">Bertsimas et al. (2019a)</a>.</p>
+
+<h4 id="type-infty-wasserstein-metric">Type-\(\infty\) Wasserstein Metric</h4>
+
+<p>The sample robust approach (which is based on the type-\(\infty\) Wasserstein metric) in <a href="#ref2">Bertsimas et al. (2019b)</a> can be readily extended to this multi-stage problem. The type-\(\infty\) Wasserstein ambiguity set for the random variable \(\tilde{\pmb{v}}\) and random scenario \(\tilde{s}\) is given by</p>
+
+\[\mathcal{F} = \left\{\mathbb{P} \in \mathcal{P}_0 (\mathbb{R}^T \times [S]) ~\left|~
+\begin{array}{l@{\quad}l}			
+(\tilde{\pmb{v}},\tilde{s}) \sim \mathbb{P} &amp; \\			
+\mathbb{P}[\pmb{v} \in [\underline{\pmb{v}}, \bar{\pmb{v}}], \; \|\tilde{\pmb{v}} - \hat{\pmb{v}}_s\| \leq \theta \mid \tilde{s} = s] = 1 &amp; \forall s \in [S] \\
+\mathbb{P}[\tilde{s} = s] = \frac{1}{S} &amp; \forall s \in [S]
+\end{array}
+\right.
+\right\},\]
+
+<p>while the event-wise recourse adaptation is specified as</p>
+
+\[\begin{cases}
+x_t \in \overline{\mathcal{A}}(\{\{1\},\cdots,\{S\}\}, \mathcal{J}_{t-1}) &amp;~\forall t \in [T] \setminus \{1\} \\[1mm]
+y_t, \; I_t \in \overline{\mathcal{A}}(\{\{1\},\cdots,\{S\}\}, \mathcal{J}_t) &amp;~\forall t \in [T].
+\end{cases}\]
+
+<p>Here, for each \(t \in [T]\), \(\mathcal{J}_t\) corresponds to the indices of \(\tilde{v}_1\) to \(\tilde{v}_t\) and the specific partition \(\{\{1\},\cdots,\{S\}\}\) implies that the adaptive decisions can adapt to each scenario. The type-\(\infty\) is implemented by the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
+
+<span class="n">S</span> <span class="o">=</span> <span class="mi">50</span>                              <span class="c1"># sample size S=50
+</span><span class="n">vhat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rd</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">vbar</span>   <span class="c1"># random sample of v
+</span><span class="n">theta</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">T</span>                    <span class="c1"># maximum radius of the Wasserstein ball
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                <span class="c1"># a model with S scenarios
+</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                   <span class="c1"># # random variable array v
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>            <span class="c1"># create an ambiguity set
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>                  <span class="c1"># a loop to define the scenario-wise support
+</span>    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">vbar</span><span class="p">,</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">vbar</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">vhat</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">theta</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">eye</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">v</span><span class="o">@</span><span class="n">temp</span> <span class="o">+</span> <span class="n">mu</span>
+
+<span class="n">x1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                   <span class="c1"># variable x1
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>                 <span class="c1"># an array of variables x2, x3, ..., xT
+</span><span class="n">I</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                   <span class="c1"># an array of variables I1, I2, ..., IT
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                   <span class="c1"># an array of variables y1, y2, ..., yT
+</span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>             <span class="c1"># x[t] adapts to v[0], v[1], ..., v[t]
+</span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>             <span class="c1"># I[t] adapts to v[0], v[1], ..., v[t]
+</span>    <span class="n">y</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">adapt</span><span class="p">(</span><span class="n">v</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>             <span class="c1"># y[t] adapt to v[0], v[1], ..., v[t]
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>                  
+    <span class="n">x</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                      <span class="c1"># x adapts to each scenario s
+</span>    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                      <span class="c1"># y adapts to each scenario s
+</span>    <span class="n">I</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                      <span class="c1"># I adapts to each scenario s
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x1</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">@</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">.</span><span class="nb">sum</span><span class="p">()),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">I0</span> <span class="o">+</span> <span class="n">w</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">h</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">I</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># solve the model by Gurobi
+</span></code></pre></div></div>
+
+<p>In this example, the scenario partition \(\mathcal{C}=\{\{1\},\cdots,\{S\}\}\) is defined by a loop where in each iteration, the <code class="language-plaintext highlighter-rouge">adapt()</code> method is used to indicate that the given decision variable adapts to the scenario <code class="language-plaintext highlighter-rouge">s</code>.</p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Bertsimas, Dimitris, Christopher McCord, Bradley Sturt. 2019a. <a href="https://arxiv.org/abs/1907.07307">Dynamic optimization with side information</a>. <i>arXiv preprint arXiv:1907.07307</i>.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Bertsimas, Dimitris, Shimrit Shtern, and Bradley Sturt. 2021. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.2020.2096">Two-stage sample robust optimization</a>. <i>Operations Research</i>.</p>
+
+<p><a id="ref3"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>. <i>Management Science</i> <b>66</b>(8) 3329–3339.</p>
+
+<p><a id="re43"></a></p>
+
+<p>See, Chuen-Teck, Melvyn Sim. 2010. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.1090.0746">Robust approximation to multiperiod inventory management</a>. <i>Operations Research</i> <b>58</b>(3) 583–594.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

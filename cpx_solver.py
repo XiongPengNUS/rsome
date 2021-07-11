@@ -1,5 +1,9 @@
-import cplex
+"""
+This module is used as an interface to call the CPLEX solver for solving 
+(mixed-integer) linear or second-order cone programs.
+"""
 
+import cplex
 import numpy as np
 import warnings
 import time

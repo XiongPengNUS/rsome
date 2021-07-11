@@ -5,7 +5,7 @@
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for modeling generic optimization problems. Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of optimization models and their applications.
 
 
-## Installing RSOME and solvers
+## Installing RSOME and Solvers
 
 The RSOME package can be installed with the `pip` command:
 
@@ -27,7 +27,7 @@ The current version of RSOME supports deterministic, robust optimization and dis
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | `cpx_solver` | Yes | Yes |
 
 
-## A linear programming example
+## A Linear Programming Example
 
 The RSOME package supports specifying models using highly readable algebraic expressions that are consistent with NumPy syntax. A very simple linear program example is provided below,
 

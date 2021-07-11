@@ -85,6 +85,19 @@ class Model:
         self.dupdate = True
 
     def min(self, obj):
+        """
+        Minimize the given objective function.
+
+        Parameters
+        ----------
+        obj
+            An objective function
+
+        Notes
+        -----
+        The objective function given as an array must have the size
+        to be one.
+        """
 
         if obj.size > 1:
             raise ValueError('Incorrect function dimension.')
@@ -95,6 +108,19 @@ class Model:
         self.dupdate = True
 
     def max(self, obj):
+        """
+        Maximize the given objective function.
+
+        Parameters
+        ----------
+        obj
+            An objective function
+
+        Notes
+        -----
+        The objective function given as an array must have the size
+        to be one.
+        """
 
         if obj.size > 1:
             raise ValueError('Incorrect function dimension.')
@@ -1405,6 +1431,9 @@ class Bounds:
 
 
 class ConeConstr:
+    """
+    The ConeConstr class creates an object of second-order cone constraints
+    """
 
     def __init__(self, model, left_var, left_index, right_var, right_index):
 
@@ -1516,6 +1545,10 @@ class RoConstr:
 
 
 class DecVar(Vars):
+    """
+    The DecVar class creates an object of generic variable array
+    (here-and-now or wait-and-see) for adaptive DRO models
+    """
 
     def __init__(self, dro_model, dvars, fixed=True, name=None):
 
@@ -1728,6 +1761,9 @@ class DecVarSub(VarSub):
 
 
 class RandVar(Vars):
+    """
+    The RandVar class creates an object of random variable array
+    """
 
     def __init__(self, svars, evars):
 

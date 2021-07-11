@@ -1,16 +1,16 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-# RSOME for distributionally robust optimization
+# RSOME for Distributionally Robust Optimization
 
-## The general formulation for distributionally robust optimization models <a name="section3.1"></a>
+## The General Formulation for Distributionally Robust Optimization Models <a name="section3.1"></a>
 
 The RSOME package supports optimization models that fit the general formulation below
 
 $$
 \begin{align}
-\min ~~ &\sup\limits_{\mathbb{P}\in\mathcal{F}_0} \mathbb{E}_{\mathbb{P}} \left\{\pmb{a}_0^T(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_0^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_0(\tilde{s}, \tilde{\pmb{z}})\right\} &&\\
-\text{s.t.} ~~ &\max\limits_{s\in[S], \pmb{z}\in\mathcal{Z}_{ms}}\left\{\pmb{a}_m^T(s, \pmb{z})\pmb{x}(s) + \pmb{b}_m^T\pmb{y}(s, \pmb{z}) + c_m(s, \pmb{z})\right\} \leq 0, && \forall m\in \mathcal{M}_1 \\
-& \sup\limits_{\mathbb{P}\in\mathcal{F}_m}\mathbb{E}_{\mathbb{P}}\left\{\pmb{a}_m^T(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_m^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_m(\tilde{s}, \tilde{\pmb{z}})\right\} \leq 0, && \forall m\in \mathcal{M}_2 \\
+\min ~~ &\sup\limits_{\mathbb{P}\in\mathcal{F}_0} \mathbb{E}_{\mathbb{P}} \left\{\pmb{a}_0^{\top}(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_0^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_0(\tilde{s}, \tilde{\pmb{z}})\right\} &&\\
+\text{s.t.} ~~ &\max\limits_{s\in[S], \pmb{z}\in\mathcal{Z}_{ms}}\left\{\pmb{a}_m^{\top}(s, \pmb{z})\pmb{x}(s) + \pmb{b}_m^{\top}\pmb{y}(s, \pmb{z}) + c_m(s, \pmb{z})\right\} \leq 0, && \forall m\in \mathcal{M}_1 \\
+& \sup\limits_{\mathbb{P}\in\mathcal{F}_m}\mathbb{E}_{\mathbb{P}}\left\{\pmb{a}_m^{\top}(\tilde{s}, \tilde{\pmb{z}})\pmb{x}(\tilde{s}) + \pmb{b}_m^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}) + c_m(\tilde{s}, \tilde{\pmb{z}})\right\} \leq 0, && \forall m\in \mathcal{M}_2 \\
 & x_i \in \mathcal{A}\left(\mathcal{C}_x^i\right) && \forall i \in [I_x] \\
 & y_n \in \overline{\mathcal{A}}\left(\mathcal{C}_y^n, \mathcal{J}_y^n\right) && \forall n \in [I_y] \\
 & \pmb{x}(s) \in \mathcal{X}_s && s \in [S]. \\
@@ -51,7 +51,7 @@ Here for each constraint indexed by \\(m\in\mathcal{M}\_2\\),
 
 1. The conditional expectation of \\(\tilde{\pmb{z}}\\) over events (defined as subsets of scenarios and denoted by \\(\mathcal{E}\_{km}\\) are known to reside in an SOC representable set \\(\mathcal{Q}\_{km}\\);
 2. The support of \\(\tilde{\pmb{z}}\\) in each scenario \\(s\in[S]\\) is specified to be another SOC representable set \\(\mathcal{Z}\_{sm}\\);
-3. Probabilities of scenarios, collectively denoted by a vector \\(\pmb{p}\\), are constrained by a third SOC representable subset \\(\mathcal{P}_m\subseteq\left\\{\pmb{p}\in \mathbb{R}\_{+\+}^S \left\| \pmb{e}^T\pmb{p}=1 \right\. \right\\}\\) in the probability simplex.
+3. Probabilities of scenarios, collectively denoted by a vector \\(\pmb{p}\\), are constrained by a third SOC representable subset \\(\mathcal{P}_m\subseteq\left\\{\pmb{p}\in \mathbb{R}\_{+\+}^S \left\| \pmb{e}^{\top}\pmb{p}=1 \right\. \right\\}\\) in the probability simplex.
 
 Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types—-the <i>event-wise static adaptation</i> denoted by \\(\mathcal{A}(C)\\) as well as the <i>event-wise affine adaptation</i> denoted by \\(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\\). In particular, given a fixed number of \\(S\\) scenarios and a
 partition \\(\mathcal{C}\\) of these scenarios (<i>i.e.</i>, a collection of mutually exclusive and collectively exhaustive
@@ -81,9 +81,9 @@ $$
 
 Here, \\(\mathcal{H}\_{\mathcal{C}}: [S] \mapsto \mathcal{C}\\) is a function such that \\(\mathcal{H}_{\mathcal{C}}= \mathcal{E}\\) maps the scenario \\(s\\) to the only event \\(\mathcal{E}\\) in \\(\mathcal{C}\\) that contains \\(s\\), and \\(\mathcal{J} \subseteq [J]\\) is an index subset of random components \\(\tilde{z}_1\\),..., \\(\tilde{z}_J\\) that the affine adaptation depends on. In the remaining part of the guide, we will introduce the RSOME code for specifying the event-wise ambiguity set and recourse adaptation rules.
 
-## Introduction to the `rsome.dro` environment <a name="section3.2"></a>
+## Introduction to the `rsome.dro` Environment <a name="section3.2"></a>
 
-In general, the `rsome.dro` modeling environment is very similar to `rsome.ro` discussed in the section [Introduction to the <code>rsome.ro</code> environment](get_start#section1.2), so almost all array operations, indexing and slicing syntax could be applied to `dro` models. The unique features of the `dro` model mainly come from the scenario-representation of uncertainties and a different way of specifying the event-wise adaptation of decision variables.
+In general, the `rsome.dro` modeling environment is very similar to `rsome.ro` discussed in the section [Introduction to the <code>rsome.ro</code> Environment](get_start#section1.2), so almost all array operations, indexing and slicing syntax could be applied to `dro` models. The unique features of the `dro` model mainly come from the scenario-representation of uncertainties and a different way of specifying the event-wise adaptation of decision variables.
 
 ### Models
 Similar to the `rsome.ro` modeling environment, the `dro` models are all defined upon `Model` type objects, which are created by the constructor `Model()` imported from the sub-package `rsome.dro`.
@@ -119,7 +119,7 @@ labels = ['sunny', 'cloudy', 'rainy', 'windy', 'snowy']
 model2 = dro.Model(labels)  # a DRO model with 5 scenarios given by a list.
 ```
 
-### Decision variables
+### Decision Variables
 
 In the general formulation, decision variables \\(\pmb{x}(s)\\) are event-wise static and \\(\pmb{y}(s, \pmb{z})\\) are event-wise affinely adaptive. The `dro` modeling environment does not differentiate the two in creating these variables. Both types of decision variables are created by the `dvar()` method of the model object, with the same syntax as the `rsome.ro` models.
 
@@ -146,7 +146,7 @@ dvar(shape=(1,), vtype='C', name=None) method of rsome.dro.Model instance
 
 All decision variables are created to be non-adaptive at first. The event-wise and affine adaptation can be then specified by the method `adapt()` of the variable object. Details of specifying the adaptive decisions are provided in the section [Event-wise recourse adaptations](#section3.3)
 
-### Random variables
+### Random Variables
 The syntax of creating random variables for a `dro` model is exactly the same as the `ro` models. You may refer to the section [Random variables and uncertainty sets](ro_rsome#section2.2) for more details.
 
 The `dro` model supports the expectation of random variables, so that we could define the expectation sets \\(\mathcal{Q}_{km}\\) in the ambiguity set \\(\mathcal{F}_m\\). This is different from `ro` models. The expectation is indicated by the `E()` function imported from `rsome`, as demonstrated by the sample code below.
@@ -163,9 +163,9 @@ E(z) >= -1              # E(z) is larger than or equal to -1
 E(z).sum() == 0         # sum of E(z) is zero
 ```
 
-## Event-wise ambiguity set <a name="section3.3"></a>
+## Event-wise Ambiguity Set <a name="section3.3"></a>
 
-### Create an ambiguity set
+### Create an Ambiguity Set
 
 Ambiguity sets \\(\mathcal{F}_m\\) of a `dro` model can be created by the `ambiguity()` method. The associated scenario indices of the ambiguity set can be accessed by the `s` attribute of the ambiguity set object, as shown by the following sample code.
 
@@ -261,7 +261,7 @@ dtype: int64
 
 The indices of the scenarios are crucial in defining components of the ambiguity set, such as sets \\(\mathcal{Q}\_{km}\\), and \\(\mathcal{Z}_{sm}\\), which will be discussed next.
 
-### \\(\mathcal{Q}_{km}\\) as the support of conditional expectations
+### \\(\mathcal{Q}_{km}\\) as the Support of Conditional Expectations
 
 According to the formulation of the ambiguity set \\(\mathcal{F}_m\\) presented in the section [The general formulation for distributionally robust optimization models](#section3.1), the SOC representable set \\(\mathcal{Q}\_{km}\\) is defined as the support of the conditional expectation of random variables under the event \\(\mathcal{E}_k\\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \\(\mathcal{Q}\_{km}\\) are defined by the `exptset()` method of the ambiguity set object. Take the supports of conditional expectations below, for example,
 
@@ -302,7 +302,7 @@ fset.loc[::2].exptset(E(z) == 0)     # the 2nd support of conditional expectatio
 
 The ambiguity set `fset` itself represents the event \\(\mathcal{E}_1\\) of all scenarios, and the `loc` indexer is used to form the event \\(\mathcal{E}_2\\) with three scenarios included. Besides `loc`, other indexing and slicing expressions described in the previous section can also be used to construct the events for the support sets of the expectations.
 
-### \\(\mathcal{Z}_{sm}\\) as the support of random variables
+### \\(\mathcal{Z}_{sm}\\) as the Support of Random Variables
 
 The support \\(\mathcal{Z}_{sm}\\) of random variables can be specified by the method `suppset()` method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. Take the following supports of random variables \\(\tilde{\pmb{z}}\in\mathbb{R}^3\\) for example,
 
@@ -418,7 +418,7 @@ fset.showevents()            # display how the ambiguity set is specified
 
 As the example above shows, supports for all scenarios have been defined, and there are two supports defined for the conditional expectations.
 
-### \\(\mathcal{P}_m\\) as the support of scenario probabilities
+### \\(\mathcal{P}_m\\) as the Support of Scenario Probabilities
 
 In the event-wise ambiguity set, the support of scenario probabilities can also be specified via the calling the method `probset()`, as demonstrated by the following sample code.
 
@@ -435,9 +435,9 @@ p = model.p                         # p is the array of scenario probabilities
 fset.probset(norm(p-0.2) <= 0.05)   # define the support of the array p
 ```
 
-The scenario probabilities are formatted as a one-dimensional array, which can be accessed via the attribute `p` of the model object. Notice that two underlying constraints for probabilities: \\(\pmb{p}\geq \pmb{0}\\) and \\(\pmb{e}^T\pmb{p}=1\\), are already integrated in the ambiguity set, so there is no need to specify them in defining the support of scenario probabilities.
+The scenario probabilities are formatted as a one-dimensional array, which can be accessed via the attribute `p` of the model object. Notice that two underlying constraints for probabilities: \\(\pmb{p}\geq \pmb{0}\\) and \\(\pmb{e}^{\top}\pmb{p}=1\\), are already integrated in the ambiguity set, so there is no need to specify them in defining the support of scenario probabilities.
 
-## Event-wise recourse adaptations <a name="section3.4"></a>
+## Event-wise Recourse Adaptations <a name="section3.4"></a>
 
 Here we introduce how the event-wise static adaptation \\(\mathcal{A}(\mathcal{C})\\) and the event-wise affine adaptation \\(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\\) are specified in RSOME. Note that decision variables created in the `rsome.dro` modeling environment are initially non-adaptive, in the sense that the event set \\(\mathcal{C} = \\{[S]\\}\\) and the dependent set \\(\mathcal{J}=\varnothing\\). These two sets can be modified by the `adapt()` method of the decision variable object for specifying the decision adaptation, as demonstrated by the following sample code.
 
@@ -461,7 +461,7 @@ Similar to the linear decision rule defined in the `ro` module, coefficients of 
 - `y.get()` returns the constant coefficients of the recourse adaptation. In cases of multiple scenarios, the returned object is a `pandas.Series` with the length to be the same as the number of scenarios. Each element of the series is an array that has the same shape as `y`.
 - `y.get(z)` returns the linear coefficients of the recourse adaptation. In cases of multiple scenarios, the returned object is a `pandas.Series` with the length to be the same as the number of scenarios. Each element of the series is an array, and the shape of the array is `y.shape + z.shape`, <i>i.e.</i>, the combination of dimensions of `y` and `z`.
 
-## The worst-case expectations <a name="section3.5"></a>
+## The Worst-Case Expectations <a name="section3.5"></a>
 
 Once the ambiguity sets \\(\mathcal{F}_m\\) and the recourse adaptation of decision variables are defined, the worst-case expectations in the objective function or constraints can be then specified. The ambiguity set of the objective function can be specified by the `minsup()` method, for minimizing, or the `maxinf()` method, for maximizing, the objective function involving the worst-case expectations. The documentation of the `minsup()` method is given below.
 
@@ -510,12 +510,14 @@ model.st(2x >= z)               # worst-case over the support of fset
 
 
 
-## Application examples <a name="section3.6"></a>
-### [Multi-stage stochastic financial planning](example_dro_finpl)
-### [Distributionally robust optimization for medical appointment scheduling](example_dro_mas)
-### [A multi-item newsvendor problem considering the Wasserstein ambiguity set](example_dro_nv)
-### [Distributionally robust optimization approaches for a lot-size problem](example_dro_ls)
-### [Robust vehicle pre-allocation with uncertain covariates](example_dro_vehicle)
+## Application Examples <a name="section3.6"></a>
+### [Distributionally Robust Portfolio](example_dro_portfolio)
+### [Distributionally Robust Medical Appointment](example_dro_mas)
+### [Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets](example_dro_nv)
+### [Adaptive Distributionally Robust Lot-Sizing](example_dro_ls)
+### [Robust Vehicle Pre-Allocation with Uncertain Covariates](example_dro_vehicle)
+### [Multi-Stage Inventory Control](example_dro_inv)
+### [Multi-Stage Stochastic Financial Planning](example_dro_finpl)
 
 
 ## Reference

@@ -226,6 +226,10 @@ class SOCProg(LinProg):
         return table
 
     def show(self):
+        """
+        Returns a pandas.DataFrame that summarizes the information on the
+        optimization problem.
+        """
 
         table = self.showlc()
         obj_row = pd.DataFrame(self.obj.reshape((1, self.obj.size)),

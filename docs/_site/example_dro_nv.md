@@ -1,15 +1,15 @@
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-### A multi-item newsvendor problem considering the Wasserstein ambiguity set
+### Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets
 
 In this example, we consider the multi-item newsvendor problem discussed in the paper [Chen et al. (2020)](#ref1). This newsvendor problem determines the order quantity \\(w_i\\) of each of the \\(I\\) products under a total budget \\(d\\). The unit selling price and ordering cost for each product item are denoted by \\(p_i\\) and \\(c_i\\), respectively. The uncertain demand of each product item is denoted by the random variable \\(\tilde{z}_i\\). Once the demand realizes, the selling quantity \\(y_i\\) is expressed as \\(\min\{x_i, z_i\}\\), and the newsvendor problem can be written as the following distributionally robust optimization model,
 
 $$
 \begin{align}
-\min~& -\pmb{p}^T\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^T\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] && \\
+\min~& -\pmb{p}^{\top}\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] && \\
 \text{s.t.}~&\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, && \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S] \\
 & \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} && \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S]\\
-& \pmb{c}^T\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
+& \pmb{c}^{\top}\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
 \end{align}
 $$    
 
