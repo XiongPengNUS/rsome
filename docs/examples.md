@@ -18,7 +18,7 @@
   <li> <a href="example_ro_portfolio">Robust Portfolio</a></li>
   <li> <a href="example_ro_cvar_portfolio">Conditional Value-at-Risk in Robust Portfolio</a></li>
   <li> <a href="example_ro_knapsack">Robust/Robustness Knapsack</a></li>
-  <li> <a href="example_ls">Robust Lot-Sizing</a></li>
+  <li> <a href="example_ls">Adaptive Robust Lot-Sizing</a></li>
   <li> <a href="example_ro_inv">Joint Production-Inventory</a></li>
 </ul>
 </toc></th></tr>

@@ -249,7 +249,7 @@ Finally, after the model is solved, coefficients of a decision rule `y` could be
 ### [Robust Portfolio](example_ro_portfolio)
 ### [Conditional Value-at-Risk in Robust Portfolio Management](example_ro_cvar_portfolio)
 ### [Robust/Robustness Knapsack](example_ro_knapsack)
-### [Robust Lot-Sizing](example_ls)
+### [Adaptive Robust Lot-Sizing](example_ls)
 ### [Joint Production-Inventory](example_ro_inv)
 
 ## Reference

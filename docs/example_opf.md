@@ -28,7 +28,7 @@ and parameters:
 - \\(P_i^{\min}\\) and \\(P_i^{\max}\\): the minimum and maximum output of the \\(i\\)th generator
 - \\(\pmb{R}\\): the array of transmission line capacity ratings
 
-In this case study, we consider the [IEEE-RTS 1996](https://ieeexplore.ieee.org/document/780914), and the dataset is generated according to the one used in [MATPOWER](https://matpower.org/). You may find the dataset as an Excel file from [here](ieee_rts.xlsx). The following code is used to import system parameters from the file.
+In this case study, we consider the [IEEE RTS-1996](https://ieeexplore.ieee.org/document/780914), and the dataset is generated according to the one used in [MATPOWER](https://matpower.org/). You may find the dataset as an Excel file from [here](ieee_rts.xlsx). The following code is used to import system parameters from the file.
 
 ```python
 # Load data from the Excel file
