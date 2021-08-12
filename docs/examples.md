@@ -20,6 +20,7 @@
   <li> <a href="example_ro_knapsack">Robust/Robustness Knapsack</a></li>
   <li> <a href="example_ls">Adaptive Robust Lot-Sizing</a></li>
   <li> <a href="example_ro_inv">Joint Production-Inventory</a></li>
+  <li> <a href="example_ro_vehicle">Robust Vehicle Pre-Allocation</a></li>
 </ul>
 </toc></th></tr>
 
@@ -30,7 +31,7 @@
   <li> <a href="example_dro_mas">Distributionally Robust Medical Appointment </a></li>
   <li> <a href="example_dro_nv">Multi-Item Newsvendor Problem with the Wasserstein Ambiguity Sets </a></li>
   <li> <a href="example_dro_ls">Adaptive Distributionally Robust Lot-Sizing </a></li>
-  <li> <a href="example_dro_vehicle">Robust Vehicle Pre-Allocation with Uncertain Covariates</a></li>
+  <li> <a href="example_dro_vehicle">Distributionally Robust Vehicle Pre-Allocation</a></li>
   <li> <a href="example_dro_inv">Multi-Stage Inventory Control </a></li>
   <li> <a href="example_dro_finpl">Multi-Stage Stochastic Financial Planning </a></li>
 </ul>

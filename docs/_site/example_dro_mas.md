@@ -10,12 +10,13 @@ $$
 \begin{align}
 \min~&\sup\limits_{\mathbb{P}\in\mathcal{F}}~\mathbb{E}_{\mathbb{P}}\left[\sum\limits_{j=1}^N y_i(\tilde{\pmb{z}}, \tilde{\pmb{u}}) + \gamma y_{N+1}(\tilde{\pmb{z}}, \tilde{\pmb{u}})\right] && \\
 \text{s.t.}~&y_j(\pmb{z}, \pmb{u}) - y_{j-1}(\pmb{z}, \pmb{u}) + x_{j+1} \geq z_{j-1} && \forall (\pmb{z}, \pmb{u})\in \mathcal{Z}, ~\forall j \in \{2, 3, ..., N+1\} \\
-&\pmb{y}(\pmb{z}, \pmb{u}) \geq \pmb{0}, && \forall (\pmb{z}, \pmb{u})\in \mathcal{Z} \\
+&\pmb{y}(\pmb{z}, \pmb{u}) \geq \pmb{0} && \forall (\pmb{z}, \pmb{u})\in \mathcal{Z} \\
+&y_j \in \overline{\mathcal{A}}(\{\{1\}\}, [N+1]) && \forall j \in [N]\\
 &\pmb{x} \geq \pmb{0},~\sum\limits_{j=1}^N x_j \leq T && \\
 \end{align}
 $$
 
-with the random variable \\(\tilde{z}\_j\\) representing the uncertain consultation time of each patient. The first-stage decision \\(x_j\\) denotes the inter-interval time between patient \\(j\\) to the adjacent patient \\(j+1\\), for \\(j\in[N-1]\\), and \\(x_N\\) is the arrival of the last patient and the scheduled completion time for the physician before overtime commences. The second-stage decision \\(y_j\\) denotes the waiting time of patient \\(j\\), with \\(i \in [N]\\) and \\(y_{N+1}\\) represents the overtime of the physician. In order to achieve a tractable formulation, it is approximated by the decision rule \\(\pmb{y}(\pmb{z}, \pmb{u})\\) which affinely adapts to random variables \\(\pmb{z}\\) and auxiliary variables \\(\pmb{u}\\).
+with the random variable \\(\tilde{z}\_j\\) representing the uncertain consultation time of each patient. The first-stage decision \\(x_j\\) denotes the inter-interval time between patient \\(j\\) to the adjacent patient \\(j+1\\), for \\(j\in[N-1]\\), and \\(x_N\\) is the arrival of the last patient and the scheduled completion time for the physician before overtime commences. The second-stage decision \\(y_j\\) denotes the waiting time of patient \\(j\\), with \\(i \in [N]\\) and \\(y_{N+1}\\) represents the overtime of the physician.
 
 In this numerical experiment, we consider the lifted form of the partial cross moment ambiguity set \\(\mathcal{F}\\) given below.
 
@@ -27,16 +28,26 @@ $$
 \left|
 \begin{array}
 ~(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
-\pmb{z} \geq \pmb{0} & \\
-(z_j - \mu_j)^2 \leq u_j, & \forall j \in [N] \\
-(\pmb{1}^{\top}(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
-\mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} & \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j^2, & \forall j \in [N] \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
+\mathbb{P}[\pmb{z}\in\mathcal{Z}] = 1 \\
+\mathbb{E}_{\mathbb{P}}[\tilde{\pmb{z}}] = \pmb{\mu} & \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u}_j] \leq \sigma_j^2, & \forall j \in [N] \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u}_{N+1}] \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.
 \right\}.
 \end{align}
+$$
+
+where the support \\(\mathcal{Z}\\) is defined as
+
+$$
+\mathcal{Z}=\left\{(\tilde{\pmb{z}}, \tilde{\pmb{u}}):~
+\begin{array}{ll}
+\pmb{z} \geq 0 &\\
+(z_j - \mu_j)^2 \leq u_j & \forall j \in [N] \\
+\left(\pmb{1}^{\top}(\pmb{z}-\pmb{\mu})\right)^2 \leq u_{N+1} \\
+\end{array}
+\right\}.
 $$
 
 Values of model and ambiguity set parameters are specified as follows:
@@ -61,7 +72,7 @@ $$
 \end{cases}
 $$
 
-The RSOME code for implementing this distributionally robust optimization model is given below.
+The decision rule is defined as \\(y_j \in \overline{\mathcal{A}}(\\{\\{1\\}\\}, [2N+1])\\), which implies that each \\(y_j\\) affinely depends on the random variables \\(\pmb{z}\\) and \\(\pmb{u}\\). The RSOME code for implementing this distributionally robust optimization model is given below.
 
 ```python
 from rsome import dro

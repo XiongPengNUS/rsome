@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -148,7 +148,8 @@ Running time: 0.0119s
 \right\}
 \end{align}\]
 
-<p>with \(\hat{\pmb{d}}_s\) being each sample record of demands. Model with such an ambiguity set can be implemented by the code below.</p>
+<p>with \(\hat{\pmb{d}}_s\) being each sample record of demands. Note that for the SAA model, each wait-and-see decision \(y_{ij}\) adapts to each sample record, hence event-wise adaptation is defined as \(y_{ij}\in\mathcal{A}(\{\{1\}, \{2\}, \dots, \{N\}\})\).
+Model with such an ambiguity set and adaptation pattern can be implemented by the code below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># define a model with N scenarios
 </span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># here-and-now location decisions
@@ -156,7 +157,7 @@ Running time: 0.0119s
 </span><span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># define random variables as the demand
 </span>
 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>          <span class="c1"># the decision rule y adapts to all scenarios
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>          <span class="c1"># the decision rule y adapts to each scenario
 </span>
 <span class="c1"># define the ambiguity set
 </span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
@@ -184,7 +185,7 @@ Running time: 0.0193s
 <p><img src="/ls_saa.png" alt="" /></p>
 
 <h4 id="sp-affine">SP affine</h4>
-<p>The second data-driven approach is referred to as sample robust optimization, where an uncertainty set around each data sample is considered. Here the recourse decisions are approximated by a single-policy linear decision rule, thus the name SP affine. The ambiguity set of the sample robust model is presented below.</p>
+<p>The second data-driven approach is referred to as sample robust optimization, where an uncertainty set around each data sample is considered. Here the recourse decisions are approximated by a single-policy linear decision rule (SP affine), expressed as \(y_{ij}\in\overline{\mathcal{A}}(\{1, 2, \dots, N\}, [n])\). The ambiguity set of the sample robust model is presented below.</p>
 
 \[\begin{align}
 \mathbb{F} = \left\{
@@ -200,7 +201,7 @@ Running time: 0.0193s
 \right\}
 \end{align}\]
 
-<p>The code for implementing such an ambiguity set is given below.</p>
+<p>The code for implementing the sample robust model with SP affine adaptation is given below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># define a model with N scenarios
 </span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># here-and-now location decisions
@@ -235,7 +236,7 @@ Running time: 38.8390s
 <p><img src="/ls_sp_affine.png" alt="" /></p>
 
 <h4 id="mp-affine">MP affine</h4>
-<p>The sample robust optimization model above could be extended to the MP affine version, where the recourse decision \(\pmb{y}\) not only affinely depends on \(\pmb{d}\), but also adapts to various scenarios. The code together with the optimal allocation of stocks are presented below. It can be seen that the solution is less conservative compared with the SP affine case, because the recourse decision has a higher level of flexibility in approximating the actual recourse decisions.</p>
+<p>The sample robust optimization model above could be extended to the MP affine version, where the recourse decision \(\pmb{y}\) not only affinely depends on \(\pmb{d}\), but also adapts to various scenarios, <i>i.e.</i>, \(y_{ij}\in\overline{\mathcal{A}}(\{\{1\}, \{2\}, \dots, \{N\}\}, [n])\). The code together with the optimal allocation of stocks are presented below. It can be seen that the solution is less conservative compared with the SP affine case, because the recourse decision has a higher level of flexibility in approximating the actual recourse decisions.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>    <span class="c1"># define a model with N scenarios
 </span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>       <span class="c1"># here-and-now location decisions

@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -106,7 +106,7 @@
 
 \[\mathcal{Z}=\prod\limits_{t=1}^{24}[{d}_t^0 - \theta {d}_t^0, {d}_t^0 + \theta {d}_t^0].\]
 
-<p>and in the adaptive robust optimization framework, the recourse decision \(\pmb{p}(\pmb{d})\) is approximated by the affine decision rules \(p_{it}(\pmb{d}) = p_{it}^0 + \sum_{\tau\in [t-1]}p_{it}^{\tau} d_{\tau}\). The robust model can be implemented by the code below.</p>
+<p>and in the adaptive robust optimization framework, the recourse decision \(\pmb{p}(\pmb{d})\) is approximated by the expression \(p_{it}(\pmb{d}) = p_{it}^0 + \sum_{\tau\in [t-1]}p_{it}^{\tau} d_{\tau}\), <i>i.e.</i>, the affine decision rule \(p_{it}\in\mathcal{L}([t-1])\). The robust model can be then implemented by the code below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 

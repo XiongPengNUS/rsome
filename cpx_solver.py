@@ -1,5 +1,5 @@
 """
-This module is used as an interface to call the CPLEX solver for solving 
+This module is used as an interface to call the CPLEX solver for solving
 (mixed-integer) linear or second-order cone programs.
 """
 
@@ -19,7 +19,7 @@ def solve(formula, display=True, export=False, params={}):
     row = linear.shape[0]
     spmat = [[linear.indices[linear.indptr[i]:linear.indptr[i + 1]].tolist(),
               linear.data[linear.indptr[i]:linear.indptr[i + 1]].tolist()]
-              for i in range(row)]
+             for i in range(row)]
     sense = ['E' if s == 1 else 'L' for s in formula.sense]
     const = formula.const
     ub = formula.ub

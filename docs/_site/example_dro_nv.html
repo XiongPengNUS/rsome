@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -69,12 +69,13 @@
 
 \[\begin{align}
 \min~&amp; -\pmb{p}^{\top}\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] &amp;&amp; \\
-\text{s.t.}~&amp;\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S] \\
-&amp; \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S]\\
+\text{s.t.}~&amp;\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z} &amp;&amp; \forall (\pmb{z}, \pmb{u}) \in \mathcal{Z}_s, ~\forall s \in [S] \\
+&amp; \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} &amp;&amp; \forall (\pmb{z}, \pmb{u}) \in \mathcal{Z}_s, ~\forall s \in [S]\\
+&amp; y_i \in \overline{\mathcal{A}}(\{\{1\}, \{2\}, \dots, \{S\}\}, [I+1]) &amp;&amp;\forall i \in [I]\\
 &amp; \pmb{c}^{\top}\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
 \end{align}\]
 
-<p>with \(s\) the scenario index, and \(u\) the auxiliary random variable. The recourse decision \(y_i\) is approximated by the decision rule \(y_i(s, \pmb{z}, u)\) which adapts to different scenarios \(s\) and is affinely adaptive to the random variables \(\pmb{z}\) and the auxiliary variable \(u\). The model maximizes the worst-case expectation over a Wasserstein ambiguity set \(\mathcal{F}\), expressed as follows.</p>
+<p>with \(s\) the scenario index, and \(u\) the auxiliary random variable. The recourse decision \(y_i\) follows the approximated adaptation \(\overline{\mathcal{A}}(\{\{1\}, \{2\}, \dots, \{S\}\}, [I+1])\) indicating that \(y_i\) adapts to different scenarios \(s\) and is affinely adaptive to the random variables \(\pmb{z}\) and the auxiliary variable \(u\). The model maximizes the worst-case expectation over a Wasserstein ambiguity set \(\mathcal{F}\), expressed as follows.</p>
 
 \[\begin{align}
 \mathcal{F}(\theta) = \left\{
@@ -82,14 +83,19 @@
 \begin{array}
 ~(\tilde{\pmb{z}}, \tilde{u}, \tilde{s}) \in \mathbb{P} &amp;\\
 \mathbb{E}_{\mathbb{P}}\left[\tilde{u} | \tilde{s} \in [S]\right] \leq \theta &amp; \\
-\mathbb{P}\left[\left.\pmb{0}\leq \pmb{z} \leq \overline{\pmb{z}}, \|\pmb{z} - \hat{\pmb{z}}_s\|_2 \leq u ~\right| \tilde{s} = s\right] = 1, &amp; \forall s \in [S] \\
+\mathbb{P}\left[\left.(\pmb{z}, u)\in\mathcal{Z}_s ~\right| \tilde{s} = s\right] = 1, &amp; \forall s \in [S] \\
 \mathbb{P}\left[\tilde{s} = s\right] = \frac{1}{S} &amp;
 \end{array}
 \right.
 \right\}
 \end{align}\]
 
-<p>with \(\theta \geq 0\) the parameter capturing the distance between the distribution \(\mathbb{P}\) and the empirical distribution \(\hat{\pmb{z}}\). In this numerical experiment, parameters of the model and the ambiguity set are specified as follows:</p>
+<p>with \(\theta \geq 0\) the parameter capturing the distance between the distribution \(\mathbb{P}\) and the empirical distribution \(\hat{\pmb{z}}\). The support \(\mathcal{Z}_s\) for each sample \(s\) is defined as</p>
+
+\[\mathcal{Z}_s = \left\{ (\pmb{z}, u): \pmb{0} \leq \pmb{z} \leq \overline{\pmb{z}}, \|\pmb{z} - \hat{\pmb{z}}_s \|_2 \leq u
+\right\}.\]
+
+<p>In this numerical experiment, parameters of the model and the ambiguity set are specified as follows:</p>
 
 <ul>
   <li>The number of products: \(I=2\);</li>

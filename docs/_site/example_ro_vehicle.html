@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="robust-vehicle-pre-allocation">Robust Vehicle Pre-Allocation</h3>
+
+<p>In this example,  we consider the vehicle pre-allocation problem introduced in <a href="#ref2">Hao et al. (2020)</a>. Suppose that there are \(I\) supply nodes and \(J\) demand nodes in an urban area.  The operator,  before the random demand \(\tilde{d}_j = (\tilde{d})_{j\in[J]}\) realizes, allocates \(x_{ij}\) vehicles from supply node \(i\in[I]\) (which has a numbers \(i\) of idle vehicles) to demand node \(j\in[J]\) at a unit cost \(c_{ij}\), and the revenue is calculated as \(\sum_{j \in [J]} r_j \min\left\{\sum_{i \in [I]} x_{ij}, d_j\right\}\), as the uncertain demand is realized. Following the work done by <a href="#ref2">Hao et al. (2020)</a>, model parameters are summarized as follows:</p>
+<ul>
+  <li>Number of supply nodes \(I=1\);</li>
+  <li>Number of demand nodes \(J=10\);</li>
+  <li>Revenue coefficients \(\pmb{r}=(4.50, 4.41, 3.61, 4.49, 4.38, 4.58, 4.53, 4.64, 4.58, 4.32)\);</li>
+  <li>Cost coefficients \(c_j = 3\), where \(j=1, 2, …, J\);</li>
+  <li>Maximum supply of vehicles \(q_i=400\), where \(i=1, 2, …, I\).</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">I</span><span class="p">,</span> <span class="n">J</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.50</span><span class="p">,</span> <span class="mf">4.41</span><span class="p">,</span> <span class="mf">3.61</span><span class="p">,</span> <span class="mf">4.49</span><span class="p">,</span> <span class="mf">4.38</span><span class="p">,</span> <span class="mf">4.58</span><span class="p">,</span> <span class="mf">4.53</span><span class="p">,</span> <span class="mf">4.64</span><span class="p">,</span> <span class="mf">4.58</span><span class="p">,</span> <span class="mf">4.32</span><span class="p">])</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>
+<span class="n">q</span> <span class="o">=</span> <span class="mi">400</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The vehicle pre-allocation will be solved by the robust and sample robust optimization (proposed by <a href="#ref1">Bertsimas et al. 2021</a>) approaches using the RSOME <code class="language-plaintext highlighter-rouge">ro</code> framework.</p>
+
+<h4 id="the-robust-model">The Robust Model</h4>
+
+<p>The vehicle pre-allocation decision under demand uncertainty can be made by solving the robust optimization problem below:</p>
+
+\[\begin{align}
+\min\limits_{\pmb{x}, \pmb{y}}~&amp;\max\limits_{\pmb{d}\in\mathcal{Z}}\left\{\sum\limits_{i\in[I]}\sum\limits_{j\in[J]}(c_{ij} - r_j)x_{ij} + \sum\limits_{j\in[J]}r_jy_j(\pmb{d})\right\} \hspace{-1.5in}&amp;&amp; \\
+\text{s.t.}~&amp;y_j(\pmb{d}) \geq \sum\limits_{i\in[I]}x_{ij} - d_j &amp;&amp; \forall \pmb{d} \in \mathcal{Z}, \forall j \in [J] \\
+&amp;y_j(\pmb{d}) \geq 0 &amp;&amp; \forall \pmb{d} \in \mathcal{Z}, \forall j \in [J] \\
+&amp;y_j\in\mathcal{L}([J]) &amp;&amp; \forall j \in [J] \\
+&amp;\sum\limits_{j\in[J]}x_{ij} \leq q_i &amp;&amp; \forall i \in [I] \\
+&amp;x_{ij} \geq 0 &amp;&amp;\forall i \in[I], \forall j \in [J], \\
+\end{align}\]
+
+<p>where the wait-and-see decision \(\pmb{y}\) that represents the bookkeeping revenue is approximated by a linear decision rule \(\mathcal{L}([J])\), implying that each \(y_j\) affinely depends on the demand realization \(\pmb{d}\). Here \(\mathcal{Z}\) is a box uncertainty set where the upper and lower bounds are identified using the sample demand dataset <a href="/taxi_rain.csv">taxi_rain.csv</a>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'https://xiongpengnus.github.io/rsome/taxi_rain.csv'</span><span class="p">)</span>
+
+<span class="n">demand</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'Region1'</span><span class="p">:</span><span class="s">'Region10'</span><span class="p">]</span>      <span class="c1"># taxi demand data
+</span>
+<span class="n">d_ub</span> <span class="o">=</span> <span class="n">demand</span><span class="p">.</span><span class="nb">max</span><span class="p">().</span><span class="n">values</span>                      <span class="c1"># upper bound of demand
+</span><span class="n">d_lb</span> <span class="o">=</span> <span class="n">demand</span><span class="p">.</span><span class="nb">min</span><span class="p">().</span><span class="n">values</span>                      <span class="c1"># lower bound of demand
+</span></code></pre></div></div>
+
+<p>Then the robust model can be implemented by the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>                            <span class="c1"># import the ro module
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>             <span class="c1"># import Gurobi solver interface
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                              <span class="c1"># create an RO model
+</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                               <span class="c1"># create an array of random demand
+</span><span class="n">zset</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">,</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">)</span>                   <span class="c1"># define a box uncertainty set
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>                          <span class="c1"># define here-and-now decision x
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ldr</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                                <span class="c1"># define linear decision rule y
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                                      <span class="c1"># y affinely adapts to d
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">(((</span><span class="n">c</span><span class="o">-</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">r</span><span class="o">@</span><span class="n">y</span><span class="p">,</span> <span class="n">zset</span><span class="p">)</span>       <span class="c1"># the worst-case objective function
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>        <span class="c1"># robust constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">q</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>            <span class="c1"># deterministic constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                                <span class="c1"># solve the model with Gurobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0016s
+</code></pre></div></div>
+
+<p>The optimal vehicle pre-allocation decision is \(\pmb{x}=\)(0, 0, 0, 0, 0, 39.6138, 0, 0, 0, 0), which is rather conservative, and the optimal objective value is \(-62.59\).</p>
+
+<h4 id="the-sample-robust-model">The Sample Robust Model</h4>
+
+<p><a href="#ref1">Bertsimas et al. (2021)</a> recently proposed a two-stage sample robust model where a collection \(\left\{\hat{\pmb{d}}_1, \hat{\pmb{d}}, \dots \hat{\pmb{d}}_S\right\}\) of historical demand samples are integrated into the decision-making process. In the context of vehicle pre-allocation, the sample robust model can be written as the following two-stage problem:</p>
+
+\[\begin{align}
+\min\limits_{\pmb{x}, \pmb{y}}~&amp;\sum\limits_{i\in[I]}\sum\limits_{j\in[J]}(c_{ij} - r_j)x_{ij} + \frac{1}{S}\sum\limits_{s\in[S]}a_s \hspace{-1.5in}&amp;&amp; \\
+\text{s.t.}~&amp;a_s \geq \sum\limits_{j\in[J]}r_jy_{sj}(\pmb{d}) &amp;&amp;\forall \pmb{d} \in \mathcal{Z}_s, s \in [S] \\
+&amp;y_{sj}(\pmb{d}) \geq \sum\limits_{i\in[I]}x_{ij} - d_j &amp;&amp; \forall \pmb{d} \in \mathcal{Z}_s, j \in [J], s \in [S] \\
+&amp;y_{sj}(\pmb{d}) \geq 0 &amp;&amp; \forall \pmb{d} \in \mathcal{Z}_s, j \in [J], s \in [S] \\
+&amp;y_{sj}\in\mathcal{L}([J]) &amp;&amp; \forall j \in [J], s \in [S] \\
+&amp;\sum\limits_{j\in[J]}x_{ij} \leq q_i &amp;&amp; \forall i \in [I] \\
+&amp;x_{ij} \geq 0 &amp;&amp;\forall i \in[I], \forall j \in [J], \\
+\end{align}\]
+
+<p>where \(\pmb{a}\in\mathbb{R}^S\) is a vector of intermediate variables representing the worst-case recourse cost in each scenario, and \(\mathcal{Z}_s=\left\{\pmb{d} \in \left[\underline{\pmb{d}}, \bar{\pmb{d}}\right] \left\vert \left\|\pmb{d} - \hat{\pmb{d}}_s \right\| \leq \varepsilon \right. \right\}\) is an \(\varepsilon\)-neighborhood uncertainty set defined by a general norm \(\|\cdot\|\) around each demand sample \(\hat{\pmb{d}}_s\). Note that the multiple-policy approximation of the wait-and-see decision \(\pmb{y}\) allows different affine mappings for each demand sample \(\hat{\pmb{d}}_s\), thus the two-dimensional decision rule \(\left(\pmb{y}(\pmb{d})\right)_{s\in[S], j\in[J]}\). Such a sample robust model (assuming the conservatism parameter \(\varepsilon=0.25\)) is implemented by the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>                                    <span class="c1"># import the ro module
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>                                  <span class="c1"># import the norm function
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>                     <span class="c1"># import the Gurobi interface
+</span>
+<span class="n">dhat</span> <span class="o">=</span> <span class="n">demand</span><span class="p">.</span><span class="n">values</span>                                    <span class="c1"># sample demand as an array
+</span><span class="n">S</span> <span class="o">=</span> <span class="n">dhat</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                                       <span class="c1"># sample size of the dataset
+</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.25</span>                                          <span class="c1"># parameter of robustness
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>                                      <span class="c1"># create an RO model
+</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                                       <span class="c1"># random variable d
+</span><span class="n">a</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                                       <span class="c1"># variable as the recourse cost
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>                                  <span class="c1"># here-and-now decision x
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ldr</span><span class="p">((</span><span class="n">S</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>                                   <span class="c1"># linear decision rule y
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                                              <span class="c1"># y affinely adapts to d
+</span>
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(((</span><span class="n">c</span><span class="o">-</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">S</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>              <span class="c1"># minimize the objective
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="n">zset</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">,</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">,</span>
+            <span class="n">norm</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">dhat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">)</span>               <span class="c1"># uncertainty set for the sth sample
+</span>    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">r</span><span class="o">@</span><span class="n">y</span><span class="p">[</span><span class="n">s</span><span class="p">]).</span><span class="n">forall</span><span class="p">(</span><span class="n">zset</span><span class="p">))</span>             <span class="c1"># constraints for the sth sample
+</span>    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">y</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">d</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">zset</span><span class="p">))</span>  <span class="c1"># constraints for the sth sample
+</span>    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">y</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">zset</span><span class="p">))</span>                  <span class="c1"># constraints for the sth sample
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">q</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                    <span class="c1"># constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                                        <span class="c1"># solve the model by Gruobi
+</span></code></pre></div></div>
+
+<p>The optimal vehicle pre-allocation decision is \(\pmb{x}=\)(0.341, 0.358, 0,  4.289, 0, 69.456, 2.452, 4.578, 5.229, 2.486), and the optimal objective value is \(-103.656\). Notice that in a special case where \(\varepsilon=0\), the sample robust model is equivalent to the sample average approximation approach.</p>
+
+<p>We would like to highlight that the <code class="language-plaintext highlighter-rouge">ro</code> framework enables users to specify  different uncertainty sets for the objective function and each of the constraints: in the sample robust model above, different uncertainty sets are defined around samples and these sets for constraints can be easily specified by calling the <code class="language-plaintext highlighter-rouge">forall()</code> method. Besides using the <code class="language-plaintext highlighter-rouge">ro</code> framework, the <code class="language-plaintext highlighter-rouge">dro</code> module also provides neat and highly readable tools for implementing the sample robust model. We refer interested readers to the page <a href="example_dro_vehicle">Distributionally Robust Vehicle Pre-Allocation</a>.</p>
+
+<p><br /></p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Bertsimas, Dimitris, Shimrit Shtern, and Bradley Sturt. 2021. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.2020.2096">Two-stage sample robust optimization</a>. <i>Operations Research</i>.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Hao, Zhaowei, Long He, Zhenyu Hu, and Jun Jiang. 2020. <a href="(https://onlinelibrary.wiley.com/doi/abs/10.1111/poms.13143)">Robust vehicle pre‐allocation with uncertain covariates</a>. <i>Production and Operations Management</i> <b>29</b>(4) 955-972.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

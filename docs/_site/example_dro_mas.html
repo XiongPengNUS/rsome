@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -72,11 +72,12 @@
 \[\begin{align}
 \min~&amp;\sup\limits_{\mathbb{P}\in\mathcal{F}}~\mathbb{E}_{\mathbb{P}}\left[\sum\limits_{j=1}^N y_i(\tilde{\pmb{z}}, \tilde{\pmb{u}}) + \gamma y_{N+1}(\tilde{\pmb{z}}, \tilde{\pmb{u}})\right] &amp;&amp; \\
 \text{s.t.}~&amp;y_j(\pmb{z}, \pmb{u}) - y_{j-1}(\pmb{z}, \pmb{u}) + x_{j+1} \geq z_{j-1} &amp;&amp; \forall (\pmb{z}, \pmb{u})\in \mathcal{Z}, ~\forall j \in \{2, 3, ..., N+1\} \\
-&amp;\pmb{y}(\pmb{z}, \pmb{u}) \geq \pmb{0}, &amp;&amp; \forall (\pmb{z}, \pmb{u})\in \mathcal{Z} \\
+&amp;\pmb{y}(\pmb{z}, \pmb{u}) \geq \pmb{0} &amp;&amp; \forall (\pmb{z}, \pmb{u})\in \mathcal{Z} \\
+&amp;y_j \in \overline{\mathcal{A}}(\{\{1\}\}, [N+1]) &amp;&amp; \forall j \in [N]\\
 &amp;\pmb{x} \geq \pmb{0},~\sum\limits_{j=1}^N x_j \leq T &amp;&amp; \\
 \end{align}\]
 
-<p>with the random variable \(\tilde{z}_j\) representing the uncertain consultation time of each patient. The first-stage decision \(x_j\) denotes the inter-interval time between patient \(j\) to the adjacent patient \(j+1\), for \(j\in[N-1]\), and \(x_N\) is the arrival of the last patient and the scheduled completion time for the physician before overtime commences. The second-stage decision \(y_j\) denotes the waiting time of patient \(j\), with \(i \in [N]\) and \(y_{N+1}\) represents the overtime of the physician. In order to achieve a tractable formulation, it is approximated by the decision rule \(\pmb{y}(\pmb{z}, \pmb{u})\) which affinely adapts to random variables \(\pmb{z}\) and auxiliary variables \(\pmb{u}\).</p>
+<p>with the random variable \(\tilde{z}_j\) representing the uncertain consultation time of each patient. The first-stage decision \(x_j\) denotes the inter-interval time between patient \(j\) to the adjacent patient \(j+1\), for \(j\in[N-1]\), and \(x_N\) is the arrival of the last patient and the scheduled completion time for the physician before overtime commences. The second-stage decision \(y_j\) denotes the waiting time of patient \(j\), with \(i \in [N]\) and \(y_{N+1}\) represents the overtime of the physician.</p>
 
 <p>In this numerical experiment, we consider the lifted form of the partial cross moment ambiguity set \(\mathcal{F}\) given below.</p>
 
@@ -87,16 +88,24 @@
 \left|
 \begin{array}
 ~(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
-\pmb{z} \geq \pmb{0} &amp; \\
-(z_j - \mu_j)^2 \leq u_j, &amp; \forall j \in [N] \\
-(\pmb{1}^{\top}(\pmb{z} - \pmb{\mu}))^2 \leq u_{N+1} \\  
-\mathbb{E}_{\mathbb{P}}(\tilde{\pmb{z}}) = \pmb{\mu} &amp; \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_j) \leq \sigma_j^2, &amp; \forall j \in [N] \\
-\mathbb{E}_{\mathbb{P}}(\tilde{u}_{N+1}) \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
+\mathbb{P}[\pmb{z}\in\mathcal{Z}] = 1 \\
+\mathbb{E}_{\mathbb{P}}[\tilde{\pmb{z}}] = \pmb{\mu} &amp; \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u}_j] \leq \sigma_j^2, &amp; \forall j \in [N] \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u}_{N+1}] \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.
 \right\}.
 \end{align}\]
+
+<p>where the support \(\mathcal{Z}\) is defined as</p>
+
+\[\mathcal{Z}=\left\{(\tilde{\pmb{z}}, \tilde{\pmb{u}}):~
+\begin{array}{ll}
+\pmb{z} \geq 0 &amp;\\
+(z_j - \mu_j)^2 \leq u_j &amp; \forall j \in [N] \\
+\left(\pmb{1}^{\top}(\pmb{z}-\pmb{\mu})\right)^2 \leq u_{N+1} \\
+\end{array}
+\right\}.\]
 
 <p>Values of model and ambiguity set parameters are specified as follows:</p>
 <ul>
@@ -120,7 +129,7 @@
 \sigma_j^2 &amp; \text{otherwise}.
 \end{cases}\]
 
-<p>The RSOME code for implementing this distributionally robust optimization model is given below.</p>
+<p>The decision rule is defined as \(y_j \in \overline{\mathcal{A}}(\{\{1\}\}, [2N+1])\), which implies that each \(y_j\) affinely depends on the random variables \(\pmb{z}\) and \(\pmb{u}\). The RSOME code for implementing this distributionally robust optimization model is given below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>

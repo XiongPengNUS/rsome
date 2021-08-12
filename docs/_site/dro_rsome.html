@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -301,7 +301,26 @@ dtype: int64
 
 <h3 id="mathcalq_km-as-the-support-of-conditional-expectations">\(\mathcal{Q}_{km}\) as the Support of Conditional Expectations</h3>
 
-<p>According to the formulation of the ambiguity set \(\mathcal{F}_m\) presented in the section <a href="#section3.1">The general formulation for distributionally robust optimization models</a>, the SOC representable set \(\mathcal{Q}_{km}\) is defined as the support of the conditional expectation of random variables under the event \(\mathcal{E}_k\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \(\mathcal{Q}_{km}\) are defined by the <code class="language-plaintext highlighter-rouge">exptset()</code> method of the ambiguity set object. Take the supports of conditional expectations below, for example,</p>
+<p>According to the formulation of the ambiguity set \(\mathcal{F}_m\) presented in the section <a href="#section3.1">The general formulation for distributionally robust optimization models</a>, the SOC representable set \(\mathcal{Q}_{km}\) is defined as the support of the conditional expectation of random variables under the event \(\mathcal{E}_k\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \(\mathcal{Q}_{km}\) are defined by the <code class="language-plaintext highlighter-rouge">exptset()</code> method of the ambiguity set object. The help information of the <code class="language-plaintext highlighter-rouge">exptset()</code> method is given below.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exptset(*args) method of rsome.dro.Ambiguity instance
+    Specify the uncertainty set of the expected values of random
+    variables for an ambiguity set.
+
+    Parameters
+    ----------
+    args : tuple
+        Constraints or collections of constraints as iterable type of
+        objects, used for defining the feasible region of the uncertainty
+        set of expectations.
+
+    Notes
+    -----
+    RSOME leaves the uncertainty set of expectations unspecified if the
+    input argument is an empty iterable object.
+</code></pre></div></div>
+
+<p>Take the supports of conditional expectations below, for example,</p>
 
 \[\begin{align}
 &amp;\mathbb{E}\left[\tilde{\pmb{z}}|s\in\mathcal{E}_{1}\right] \in \left\{\pmb{z}: \mathbb{R}^3 \left|
@@ -339,7 +358,24 @@ dtype: int64
 
 <h3 id="mathcalz_sm-as-the-support-of-random-variables">\(\mathcal{Z}_{sm}\) as the Support of Random Variables</h3>
 
-<p>The support \(\mathcal{Z}_{sm}\) of random variables can be specified by the method <code class="language-plaintext highlighter-rouge">suppset()</code> method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. Take the following supports of random variables \(\tilde{\pmb{z}}\in\mathbb{R}^3\) for example,</p>
+<p>The support \(\mathcal{Z}_{sm}\) of random variables can be specified by the method <code class="language-plaintext highlighter-rouge">suppset()</code> method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. The help information of the <code class="language-plaintext highlighter-rouge">suppset()</code> method is given below.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>suppset(*args) method of rsome.dro.Ambiguity instance
+    Specify the support set(s) of an ambiguity set.
+
+    Parameters
+    ----------
+    args : Constraints or iterables
+        Constraints or collections of constraints as iterable type of
+        objects, used for defining the feasible region of the support set.
+
+    Notes
+    -----
+    RSOME leaves the support set unspecified if the given argument is
+    an empty iterable object.
+</code></pre></div></div>
+
+<p>Take the following supports of random variables \(\tilde{\pmb{z}}\in\mathbb{R}^3\) for example,</p>
 
 \[\begin{align}
 &amp;\mathbb{P}\left[\tilde{\pmb{z}}\in \left\{
@@ -451,7 +487,26 @@ dtype: int64
 
 <h3 id="mathcalp_m-as-the-support-of-scenario-probabilities">\(\mathcal{P}_m\) as the Support of Scenario Probabilities</h3>
 
-<p>In the event-wise ambiguity set, the support of scenario probabilities can also be specified via the calling the method <code class="language-plaintext highlighter-rouge">probset()</code>, as demonstrated by the following sample code.</p>
+<p>In the event-wise ambiguity set, the support of scenario probabilities can also be specified via calling the method <code class="language-plaintext highlighter-rouge">probset()</code>. The help information of this method is given below.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>probset(*args) method of rsome.dro.Ambiguity instance
+    Specify the uncertainty set of the scenario probabilities for an
+    ambiguity set.
+
+    Parameters
+    ----------
+    args : tuple
+        Constraints or collections of constraints as iterable type of
+        objects, used for defining the feasible region of the uncertainty
+        set of scenario probabilities.
+
+    Notes
+    -----
+    RSOME leaves the uncertainty set of probabilities unspecified if the
+    input argument is an empty iterable object.
+</code></pre></div></div>
+
+<p>The following sample code specifies an ellipsoidal uncertainty set of the scenario probabilities.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>
@@ -540,7 +595,7 @@ dtype: int64
 <h3 id="distributionally-robust-medical-appointment"><a href="example_dro_mas">Distributionally Robust Medical Appointment</a></h3>
 <h3 id="multi-item-newsvendor-problem-with-wasserstein-ambiguity-sets"><a href="example_dro_nv">Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets</a></h3>
 <h3 id="adaptive-distributionally-robust-lot-sizing"><a href="example_dro_ls">Adaptive Distributionally Robust Lot-Sizing</a></h3>
-<h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates"><a href="example_dro_vehicle">Robust Vehicle Pre-Allocation with Uncertain Covariates</a></h3>
+<h3 id="distributionally-robust-vehicle-pre-allocation"><a href="example_dro_vehicle">Distributionally Robust Vehicle Pre-Allocation</a></h3>
 <h3 id="multi-stage-inventory-control"><a href="example_dro_inv">Multi-Stage Inventory Control</a></h3>
 <h3 id="multi-stage-stochastic-financial-planning"><a href="example_dro_finpl">Multi-Stage Stochastic Financial Planning</a></h3>
 

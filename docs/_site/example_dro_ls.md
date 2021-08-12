@@ -92,7 +92,8 @@ $$
 \end{align}
 $$
 
-with \\(\hat{\pmb{d}}_s\\) being each sample record of demands. Model with such an ambiguity set can be implemented by the code below.
+with \\(\hat{\pmb{d}}_s\\) being each sample record of demands. Note that for the SAA model, each wait-and-see decision \\(y\_{ij}\\) adapts to each sample record, hence event-wise adaptation is defined as \\(y\_{ij}\in\mathcal{A}(\\{\\{1\\}, \\{2\\}, \dots, \\{N\\}\\})\\).
+Model with such an ambiguity set and adaptation pattern can be implemented by the code below.
 
 ```python
 model = dro.Model(N)    # define a model with N scenarios
@@ -101,7 +102,7 @@ y = model.dvar((n, n))  # wait-and-see transportation decisions
 d = model.rvar(n)       # define random variables as the demand
 
 for s in range(N):
-    y.adapt(s)          # the decision rule y adapts to all scenarios
+    y.adapt(s)          # the decision rule y adapts to each scenario
 
 # define the ambiguity set
 fset = model.ambiguity()
@@ -130,7 +131,7 @@ The optimal stock decision provided by the SAA model is shown by the following f
 ![](ls_saa.png)
 
 #### SP affine
-The second data-driven approach is referred to as sample robust optimization, where an uncertainty set around each data sample is considered. Here the recourse decisions are approximated by a single-policy linear decision rule, thus the name SP affine. The ambiguity set of the sample robust model is presented below.
+The second data-driven approach is referred to as sample robust optimization, where an uncertainty set around each data sample is considered. Here the recourse decisions are approximated by a single-policy linear decision rule (SP affine), expressed as \\(y_{ij}\in\overline{\mathcal{A}}(\\{1, 2, \dots, N\\}, [n])\\). The ambiguity set of the sample robust model is presented below.
 
 $$
 \begin{align}
@@ -148,7 +149,7 @@ $$
 \end{align}
 $$
 
-The code for implementing such an ambiguity set is given below.
+The code for implementing the sample robust model with SP affine adaptation is given below.
 
 ```python
 model = dro.Model(N)    # define a model with N scenarios
@@ -185,7 +186,7 @@ The optimal lot-sizing decisions of the SP affine sample robust optimization met
 ![](ls_sp_affine.png)
 
 #### MP affine
-The sample robust optimization model above could be extended to the MP affine version, where the recourse decision \\(\pmb{y}\\) not only affinely depends on \\(\pmb{d}\\), but also adapts to various scenarios. The code together with the optimal allocation of stocks are presented below. It can be seen that the solution is less conservative compared with the SP affine case, because the recourse decision has a higher level of flexibility in approximating the actual recourse decisions.
+The sample robust optimization model above could be extended to the MP affine version, where the recourse decision \\(\pmb{y}\\) not only affinely depends on \\(\pmb{d}\\), but also adapts to various scenarios, <i>i.e.</i>, \\(y_{ij}\in\overline{\mathcal{A}}(\\{\\{1\\}, \\{2\\}, \dots, \\{N\\}\\}, [n])\\). The code together with the optimal allocation of stocks are presented below. It can be seen that the solution is less conservative compared with the SP affine case, because the recourse decision has a higher level of flexibility in approximating the actual recourse decisions.
 
 ```python
 model = dro.Model(N)    # define a model with N scenarios

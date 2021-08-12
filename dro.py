@@ -736,16 +736,62 @@ class Ambiguity:
         return self.s.iloc
 
     def suppset(self, *args):
+        """
+        Specify the support set(s) of an ambiguity set.
+
+        Parameters
+        ----------
+        args : Constraints or iterables
+            Constraints or collections of constraints as iterable type of
+            objects, used for defining the feasible region of the support set.
+
+        Notes
+        -----
+        RSOME leaves the support set unspecified if the given argument is
+        an empty iterable object.
+        """
 
         self.update = True
         return self.s.suppset(*args)
 
     def exptset(self, *args):
+        """
+        Specify the uncertainty set of the expected values of random
+        variables for an ambiguity set.
+
+        Parameters
+        ----------
+        args : tuple
+            Constraints or collections of constraints as iterable type of
+            objects, used for defining the feasible region of the uncertainty
+            set of expectations.
+
+        Notes
+        -----
+        RSOME leaves the uncertainty set of expectations unspecified if the
+        input argument is an empty iterable object.
+        """
 
         self.update = True
         return self.s.exptset(*args)
 
     def probset(self, *args):
+        """
+        Specify the uncertainty set of the scenario probabilities for an
+        ambiguity set.
+
+        Parameters
+        ----------
+        args : tuple
+            Constraints or collections of constraints as iterable type of
+            objects, used for defining the feasible region of the uncertainty
+            set of scenario probabilities.
+
+        Notes
+        -----
+        RSOME leaves the uncertainty set of probabilities unspecified if the
+        input argument is an empty iterable object.
+        """
 
         self.update = True
         for arg in args:

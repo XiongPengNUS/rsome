@@ -46,7 +46,7 @@ $$
 \mathcal{Z}=\prod\limits_{t=1}^{24}[{d}_t^0 - \theta {d}_t^0, {d}_t^0 + \theta {d}_t^0].
 $$
 
-and in the adaptive robust optimization framework, the recourse decision \\(\pmb{p}(\pmb{d})\\) is approximated by the affine decision rules \\(p_{it}(\pmb{d}) = p_{it}^0 + \sum_{\tau\in [t-1]}p_{it}^{\tau} d_{\tau}\\). The robust model can be implemented by the code below.
+and in the adaptive robust optimization framework, the recourse decision \\(\pmb{p}(\pmb{d})\\) is approximated by the expression \\(p_{it}(\pmb{d}) = p_{it}^0 + \sum_{\tau\in [t-1]}p_{it}^{\tau} d_{\tau}\\), <i>i.e.</i>, the affine decision rule \\(p_{it}\in\mathcal{L}([t-1])\\). The robust model can be then implemented by the code below.
 
 ```python
 model = ro.Model()

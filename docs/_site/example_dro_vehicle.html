@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -63,29 +63,94 @@
 
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h3 id="robust-vehicle-pre-allocation-with-uncertain-covariates">Robust Vehicle Pre-Allocation with Uncertain Covariates</h3>
+<h3 id="distributionally-robust-vehicle-pre-allocation">Distributionally Robust Vehicle Pre-Allocation</h3>
 
-<p>In this example,  we consider the vehicle pre-allocation problem introduced in <a href="#ref1">Hao et al. (2020)</a>. Suppose that there are \(I\) supply nodes and \(J\) demand nodes in an urban area.  The operator,  before the random demand \(\tilde{d}_j = (\tilde{d})_{j\in[J]}\) realizes, allocates \(x_{ij}\) vehicles from supply node \(i\in[I]\) (which has a numbers \(i\) of idle vehicles) to demand node \(j\in[J]\) at a unit cost \(c_{ij}\), and the revenue is calculated as \(\sum_{j \in [J]} r_j \min\left\{\sum_{i \in [I]} x_{ij}, d_j\right\}\), as the uncertain demand is realized. Consider the demand randomness, the distributionally robust vehicle pre-allocation problem can be formulated as the following problem:</p>
+<p>Here, we consider the vehicle pre-allocation problem introduced in <a href="#ref3">Hao et al. (2020)</a>. Please refer to <a href="example_ro_vehicle">Robust Vehicle Pre-Allocation</a> for the detailed problem description and parameters. Such a vehicle pre-allocation problem can be formulated as the following distributionally robust optimization model:</p>
 
 \[\begin{align}
-\min~&amp;\sum\limits_{i\in[I]}\sum\limits_{j\in[J]}(c_{ij} - r_j)x_{ij} + \sup\limits_{\mathbb{P}\in\mathcal{F}}\mathbb{E}_{\mathbb{P}}\left[\sum\limits_{j\in[J]}r_jy_j(\tilde{s}, \tilde{\pmb{d}}, \tilde{\pmb{u}})\right] \hspace{-1.5in}&amp;&amp; \\
-\text{s.t.}~&amp;y_j(s, \pmb{d}, \pmb{u}) \geq \sum\limits_{i\in[I]}x_{ij} - d_j &amp;&amp; \forall (\pmb{d}, \pmb{u}) \in \mathcal{Z}_s, \forall s \in [S], \forall j \in [J] \\
-&amp;y_j(s, \pmb{d}, \pmb{u}) \geq 0 &amp;&amp; \forall (\pmb{d}, \pmb{u}) \in \mathcal{Z}_s, \forall s \in [S], \forall j \in [J] \\
+\min~&amp;\sum\limits_{i\in[I]}\sum\limits_{j\in[J]}(c_{ij} - r_j)x_{ij} + \sup\limits_{\mathbb{P}\in\mathcal{F}}\mathbb{E}_{\mathbb{P}}\left[\sum\limits_{j\in[J]}r_jy_j(\tilde{s}, \tilde{\pmb{z}})\right] \hspace{-1.5in}&amp;&amp; \\
+\text{s.t.}~&amp;y_j(s, \pmb{z}) \geq \sum\limits_{i\in[I]}x_{ij} - d_j &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_s, \forall s \in [S], \forall j \in [J] \\
+&amp;y_j(s, \pmb{z}) \geq 0 &amp;&amp; \forall \pmb{z} \in \mathcal{Z}_s, \forall s \in [S], \forall j \in [J] \\
+&amp;y_j \in \overline{\mathcal{A}}(\mathcal{C}, \mathcal{J}) &amp;&amp; \forall j \in [J] \\
 &amp;\sum\limits_{j\in[J]}x_{ij} \leq q_i &amp;&amp; \forall i \in [I] \\
 &amp;x_{ij} \geq 0 &amp;&amp;\forall i \in[I], \forall j \in [J], \\
 \end{align}\]
 
-<p>where \(y_j(s, \pmb{d}, \pmb{u})\) is the adaptive decision representing the demand surplus and it adapts to each scenario and affinely depends on random variables \(\pmb{d}\) and \(\pmb{u}\), as a tractable approximation of the non-anticipative decisions. Following the work done by <a href="#ref1">Hao et al. (2020)</a>, model parameters are summarized as follows:</p>
-<ul>
-  <li>Number of supply nodes \(I=1\);</li>
-  <li>Number of demand nodes \(J=10\);</li>
-  <li>Coefficients \(\hat{\pmb{r}} = (15.0,14.1,6.1,14.9,13.8,15.8,15.3,16.4,15.8,13.2)\);</li>
-  <li>Revenue coefficients \(r_j = 0.1\hat{r}_j + 3\), where \(j=1, 2, …, J\);</li>
-  <li>Cost coefficients \(c_j = 3\), where \(j=1, 2, …, J\);</li>
-  <li>Maximum supply of vehicles \(q_i=400\), where \(i=1, 2, …, I\).</li>
-</ul>
+<p>where \(\tilde{\pmb{z}}\) is a vector of all random variables, including the random demand \(\tilde{\pmb{d}}\) and possible auxiliary random variables, and its distribution is characterized by an event-wise ambiguity set \(\mathcal{F}\). The RSOME <code class="language-plaintext highlighter-rouge">dro</code> module provides modeling tools specifically designed for dealing with such event-wise ambiguity sets and the associated event-wise recourse adaptation \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\), as demonstrated by implementation of the following two data-driven approaches.</p>
 
-<p>The ambiguity set \(\mathcal{F}\) presented below considers the conditional means and variances of \(S\) scenario,</p>
+<h4 id="sample-robust-model-using-the-dro-framework">Sample Robust Model Using the <code>dro</code> Framework</h4>
+
+<p>In addition to implementing the sample robust models using the <code class="language-plaintext highlighter-rouge">ro</code> framework (<a href="example_ro_vehicle">Robust Vehicle Pre-Allocation</a>), <a href="#ref2">Chen et. al (2020)</a> points out that the sample robust model can also be cast into a distributionally robust optimization where the ambiguity set is written as</p>
+
+\[\mathcal{F} = \left\{\mathbb{P} \in \mathcal{P}_0(\mathbb{R}^J \times [S])
+~\left|~
+\begin{array}{l@{\quad}l}
+(\tilde{\pmb{d}}, \tilde{s}) \sim \mathbb{P} \\
+\mathbb{P}[\tilde{\pmb{d}}\in\mathcal{Z}_{s} \mid \tilde{s}=s] = 1 &amp; \forall s\in [S] \\
+\mathbb{P}[\tilde{s}=s] = w_s &amp; \forall s\in [S] \\
+\end{array}
+\right.
+\right\},\]
+
+<p>where the random variable vector \(\tilde{\pmb{z}}=\tilde{\pmb{d}}\), and for each sample \(s\in[S]\), the weight is \(w_s=1/S\) and the corresponding support (uncertainty set) is defined as \(\mathcal{Z}_s=\left\{\pmb{d} \in \left[\underline{\pmb{d}}, \bar{\pmb{d}}\right] \left\vert \left\|\pmb{d} - \hat{\pmb{d}}_s \right\| \leq \varepsilon \right. \right\}\), an \(\varepsilon\)-neighborhood around the sample data point \(\hat{\pmb{d}}\). The multiple-policy approximation mentioned in <a href="#ref2">Bertsimas et. al (2021)</a> suggests that each \(y_j\) affinely depends on the demand realization \(\pmb{d}\) and the affine dependency is different for each sample record, so it can be captured by the event-wise adaptation where \(\mathcal{C}=\{\{1\}, \{2\}, \dots, \{S\}\}\) and \(\mathcal{J}=[J]\).</p>
+
+<p>The same dataset file <a href="/taxi_rain.csv">taxi_rain.csv</a> is used in this example.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'https://xiongpengnus.github.io/rsome/taxi_rain.csv'</span><span class="p">)</span>
+
+<span class="n">demand</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'Region1'</span><span class="p">:</span><span class="s">'Region10'</span><span class="p">]</span>      <span class="c1"># taxi demand data
+</span>
+<span class="n">d_ub</span> <span class="o">=</span> <span class="n">demand</span><span class="p">.</span><span class="nb">max</span><span class="p">().</span><span class="n">values</span>                      <span class="c1"># upper bound of demand
+</span><span class="n">d_lb</span> <span class="o">=</span> <span class="n">demand</span><span class="p">.</span><span class="nb">min</span><span class="p">().</span><span class="n">values</span>                      <span class="c1"># lower bound of demand
+</span></code></pre></div></div>
+
+<p>The sample robust model cast into a distributionally robust optimization problem is implemented as follows.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>                               <span class="c1"># import the dro module
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">norm</span>                              <span class="c1"># import the norm function
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>                                 <span class="c1"># import the expectation notion
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>                 <span class="c1"># import the Gurobi interface
+</span>
+<span class="n">dhat</span> <span class="o">=</span> <span class="n">demand</span><span class="p">.</span><span class="n">values</span>                                <span class="c1"># sample demand as an array
+</span><span class="n">S</span> <span class="o">=</span> <span class="n">dhat</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                                   <span class="c1"># sample size of the dataset
+</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.25</span>                                      <span class="c1"># parameter of robustness
+</span><span class="n">w</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">S</span>                                             <span class="c1"># weights of scenarios
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                                <span class="c1"># a DRO model with S scenarios
+</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                                   <span class="c1"># random variable d
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                            <span class="c1"># create an ambiguity set
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>                                  <span class="c1"># for each scenario
+</span>    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">,</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">dhat</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">)</span>   <span class="c1"># define the support set
+</span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                        <span class="c1"># an array of scenario weights
+</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="n">w</span><span class="p">)</span>                               <span class="c1"># specify scenario weights
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>                              <span class="c1"># here-and-now decision x
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                                   <span class="c1"># wait-and-see decision y
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                                          <span class="c1"># y affinely adapts to d
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                                      <span class="c1"># y adapts to each scenario s
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(((</span><span class="n">c</span><span class="o">-</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">r</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>        <span class="c1"># the worst-case expectation
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>            <span class="c1"># robust constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">q</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                <span class="c1"># deterministic constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                                    <span class="c1"># solve the model by Gruobi
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 1.1454s
+</code></pre></div></div>
+
+<p>Recall the <code class="language-plaintext highlighter-rouge">ro</code> framework in <a href="example_ro_vehicle">Robust Vehicle Pre-Allocation</a>, the decision rules \((y_{sj}(\pmb{d}))_{s \in [S], j \in [J]}\) therein is defined as a two-dimensional array for devising the multiple-policy approximation. In the the <code class="language-plaintext highlighter-rouge">dro</code> framework, \(\pmb{y}\) is defined to be one-dimensional and the multiple-policy adaptation is defined by a loop where the affine adaptation for each sample is automatically created by calling the <code class="language-plaintext highlighter-rouge">adapt()</code> method, with <code class="language-plaintext highlighter-rouge">s</code> being the sample index.</p>
+
+<h4 id="moments-and-uncertain-covariates">Moments and Uncertain Covariates</h4>
+
+<p>In the works of <a href="#ref3">Hao et. al</a>, the ambiguity set \(\mathcal{F}\) is constructed to consider the conditional means \(\pmb{\mu}_s\) and variances \(\pmb{\phi}_s\), for \(S\) scenario,</p>
 
 \[\begin{align}
 \mathcal{F} = \left\{
@@ -101,24 +166,24 @@
 \right\}.
 \end{align}\]
 
-<p>The scenarios and parameters of the ambiguity sets are identified based on the dataset dataset <a href="/taxi_rain.csv">taxi_rain.csv</a> where the first ten columns are the taxi demand data for ten regions, and the remaining columns are corresponding side information in terms of rainfall records. Please note that the dataset is slightly different from the data used by <a href="#ref1">Hao et al. (2020)</a> as some small random noises are added to the demand data. We use a multivariate regression tree to generate \(S\) scenarios (leaf nodes of the tree) and the conditional means and variances for each scenario are calculated respectively. The code is provided as follows.</p>
+<p>where \(\mathcal{Z}_s=\left\{(\pmb{d},\pmb{u}) \in \mathbb{R}^J \times \mathbb{R}^J: \pmb{d} \in \left[\underline{\pmb{d}}_s, \overline{\pmb{d}}_s\right], ~ (d_j - \mu_j)^2 \leq u_j, ~\forall j \in [J]\right\}\) is the lifted support for each scenario \(s\), and the vector of all random variables is \(\tilde{\pmb{z}} = \left(\tilde{\pmb{d}}, \tilde{\pmb{u}}\right)\). The vector \(\pmb{w}\) is used to denote scenario weights, which amount to the fractions of data points residing in each scenario. Scenarios of the ambiguity set are generated from the dataset <a href="/taxi_rain.csv">taxi_rain.csv</a>, where the first ten columns are the taxi demand data for ten regions, and the remaining columns are corresponding side information in terms of rainfall records, using a decision tree regressor. Assuming the maximum lead node number is four, and the minimum sample size of each leaf is three, then the code for generating scenarios and calculating parameters \(\tilde{\pmb{\mu}}\), \(\tilde{\pmb{\phi}}\), \(\overline{\pmb{d}}\), \(\underline{\pmb{d}}\) and \(\pmb{w}\) (<i>i.e.</i>, <code class="language-plaintext highlighter-rouge">mu</code>, <code class="language-plaintext highlighter-rouge">phi</code>, <code class="language-plaintext highlighter-rouge">d\_ub</code>, <code class="language-plaintext highlighter-rouge">d\_lb</code>, and <code class="language-plaintext highlighter-rouge">w</code> in the code segment, respectively) is given as follows.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
-<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'taxi_rain.csv'</span><span class="p">)</span>
-<span class="n">D</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">10</span><span class="p">],</span> <span class="n">data</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">10</span><span class="p">:]</span>         <span class="c1"># D: demand &amp; V: side info.
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'https://xiongpengnus.github.io/rsome/taxi_rain.csv'</span><span class="p">)</span>
+
+<span class="n">D</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">10</span><span class="p">],</span> <span class="n">data</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">10</span><span class="p">:]</span>         <span class="c1"># D: demand &amp; V: side information
 </span>
-<span class="n">regr</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_leaf_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>      <span class="c1"># max leaf nodes
+<span class="n">S</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">regr</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_leaf_nodes</span><span class="o">=</span><span class="n">S</span><span class="p">,</span>      <span class="c1"># max leaf nodes
 </span>                             <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>    <span class="c1"># min sample size of each leaf
 </span><span class="n">regr</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
-
 <span class="n">mu</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">unique</span><span class="p">(</span><span class="n">regr</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">V</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                               <span class="n">return_inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                               <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>   <span class="c1"># mu as the conditional mean
-</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">counts</span><span class="o">/</span><span class="n">V</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                               <span class="c1"># scenario weights         
-</span><span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([(</span><span class="n">D</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="o">==</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</span><span class="n">w</span> <span class="o">=</span> <span class="n">counts</span><span class="o">/</span><span class="n">V</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                               <span class="c1"># scenario weights         
+</span><span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">D</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="o">==</span><span class="n">i</span><span class="p">].</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))])</span>       <span class="c1"># conditional variance
 </span><span class="n">d_ub</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">D</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="o">==</span><span class="n">i</span><span class="p">].</span><span class="nb">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))])</span>      <span class="c1"># upper bound of each scenario
@@ -130,53 +195,44 @@
 
 <p><img src="/taxi_demand_tree.png" alt="" /></p>
 
-<p>By exploiting the moment information of each leaf node, we can formulate the model by the following code segment.</p>
+<p>The event-wise affine adaptation is specified as \(\mathcal{J} = [2J]\) and \(\mathcal{C} = \{\{1\}, \{2\}, \dots, \{S\}\}\), implying that each recourse decision \(y_j\) affinely adapts to random variables \((\tilde{\pmb{d}}, \tilde{\pmb{u}})\) and the affine adaptation may vary in each scenario. The distributionally robust model is implemented by the code below.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
-
-<span class="n">J</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">I</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">rhat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">14.1</span><span class="p">,</span> <span class="mf">6.1</span><span class="p">,</span> <span class="mf">14.9</span><span class="p">,</span> <span class="mf">13.8</span><span class="p">,</span> <span class="mf">15.8</span><span class="p">,</span> <span class="mf">15.3</span><span class="p">,</span> <span class="mf">16.4</span><span class="p">,</span> <span class="mf">15.8</span><span class="p">,</span> <span class="mf">13.2</span><span class="p">])</span>
-<span class="n">b</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-<span class="n">r</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">rhat</span> <span class="o">+</span> <span class="n">b</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span> <span class="o">+</span> <span class="n">b</span>
-<span class="n">q</span> <span class="o">=</span> <span class="mi">400</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
-
-<span class="n">S</span> <span class="o">=</span> <span class="n">mu</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                             <span class="c1"># the number of leaf nodes (scenarios)
-</span><span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                        <span class="c1"># create a model with S scenarios
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>                         <span class="c1"># import the dro module
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">square</span>                      <span class="c1"># import the element-wise square function
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>                           <span class="c1"># import the notion of expectation
+</span><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>           <span class="c1"># import the solver interface for Gurobi
 </span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
-    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
-                    <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>         <span class="c1"># conditional expectation
-</span>    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
-                    <span class="n">square</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span> <span class="c1"># support of each scenario
-</span><span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                <span class="c1"># scenario weights
-</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="n">w</span><span class="p">)</span>                       <span class="c1"># w as scenario weights
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                          <span class="c1"># create a DRO model with S scenarios
 </span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
-    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                              <span class="c1"># y adapts to each scenario s
+<span class="n">d</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                             <span class="c1"># random demand as the variable d
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                             <span class="c1"># auxiliary random variable u
+</span><span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>                      <span class="c1"># create an ambiguity set
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>                            <span class="c1"># for each scenario:
+</span>    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">mu</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>            <span class="c1"># specify the expectation set of d and u
+</span>                    <span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>           
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="n">d_lb</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>             <span class="c1"># specify the support of d and u
+</span>                    <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">d_ub</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                    <span class="n">square</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span>   
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>                                  <span class="c1"># an array of scenario probabilities
+</span><span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="n">w</span><span class="p">)</span>                         <span class="c1"># w as scenario weights
 </span>
-<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(((</span><span class="n">c</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">r</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">q</span><span class="p">)</span>
-
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
-</code></pre></div></div>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>                        <span class="c1"># here-and-now decision x
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>                             <span class="c1"># wait-and-see decision y
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                                    <span class="c1"># y affinely adapts to d
+</span><span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>                                    <span class="c1"># y affinely adapts to u
+</span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>                            <span class="c1"># for each scenario:
+</span>    <span class="n">y</span><span class="p">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                                <span class="c1"># affine adaptation of y is different
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(((</span><span class="n">c</span><span class="o">-</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">r</span><span class="o">@</span><span class="n">y</span><span class="p">),</span> <span class="n">fset</span><span class="p">)</span>  <span class="c1"># minimize the worst-case expectation
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>      <span class="c1"># robust constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">q</span><span class="p">)</span>          <span class="c1"># deterministic constraints
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                              <span class="c1"># solve the model by Gurobi
+</span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
 Solution status: 2
-Running time: 0.0591s
+Running time: 0.1342s
 </code></pre></div></div>
 
 <p><br /></p>
@@ -184,6 +240,14 @@ Running time: 0.0591s
 <h4 id="reference">Reference</h4>
 
 <p><a id="ref1"></a></p>
+
+<p>Bertsimas, Dimitris, Shimrit Shtern, and Bradley Sturt. 2021. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.2020.2096">Two-stage sample robust optimization</a>. <i>Operations Research</i>.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>. <i>Management Science</i> <b>66</b>(8) 3329–3339.</p>
+
+<p><a id="ref3"></a></p>
 
 <p>Hao, Zhaowei, Long He, Zhenyu Hu, and Jun Jiang. 2020. <a href="(https://onlinelibrary.wiley.com/doi/abs/10.1111/poms.13143)">Robust vehicle pre‐allocation with uncertain covariates</a>. <i>Production and Operations Management</i> <b>29</b>(4) 955-972.</p>
 

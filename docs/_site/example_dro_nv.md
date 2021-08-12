@@ -7,13 +7,14 @@ In this example, we consider the multi-item newsvendor problem discussed in the 
 $$
 \begin{align}
 \min~& -\pmb{p}^{\top}\pmb{x} + \sup\limits_{\mathbb{P}\in\mathcal{F}(\theta)}\mathbb{E}_{\mathbb{P}}\left[\pmb{p}^{\top}\pmb{y}(\tilde{s}, \tilde{\pmb{z}}, \tilde{u})\right] && \\
-\text{s.t.}~&\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z}, && \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S] \\
-& \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} && \forall \pmb{z} \in \mathcal{Z}_s, ~\forall s \in [S]\\
+\text{s.t.}~&\pmb{y}(s, \pmb{z}, u) \geq \pmb{x} - \pmb{z} && \forall (\pmb{z}, \pmb{u}) \in \mathcal{Z}_s, ~\forall s \in [S] \\
+& \pmb{y}(s, \pmb{z}, u) \geq \pmb{0} && \forall (\pmb{z}, \pmb{u}) \in \mathcal{Z}_s, ~\forall s \in [S]\\
+& y_i \in \overline{\mathcal{A}}(\{\{1\}, \{2\}, \dots, \{S\}\}, [I+1]) &&\forall i \in [I]\\
 & \pmb{c}^{\top}\pmb{x} = d, ~ \pmb{x} \geq \pmb{0}
 \end{align}
 $$    
 
-with \\(s\\) the scenario index, and \\(u\\) the auxiliary random variable. The recourse decision \\(y_i\\) is approximated by the decision rule \\(y_i(s, \pmb{z}, u)\\) which adapts to different scenarios \\(s\\) and is affinely adaptive to the random variables \\(\pmb{z}\\) and the auxiliary variable \\(u\\). The model maximizes the worst-case expectation over a Wasserstein ambiguity set \\(\mathcal{F}\\), expressed as follows.
+with \\(s\\) the scenario index, and \\(u\\) the auxiliary random variable. The recourse decision \\(y_i\\) follows the approximated adaptation \\(\overline{\mathcal{A}}(\\{\\{1\\}, \\{2\\}, \dots, \\{S\\}\\}, [I+1])\\) indicating that \\(y_i\\) adapts to different scenarios \\(s\\) and is affinely adaptive to the random variables \\(\pmb{z}\\) and the auxiliary variable \\(u\\). The model maximizes the worst-case expectation over a Wasserstein ambiguity set \\(\mathcal{F}\\), expressed as follows.
 
 $$
 \begin{align}
@@ -22,7 +23,7 @@ $$
 \begin{array}
 ~(\tilde{\pmb{z}}, \tilde{u}, \tilde{s}) \in \mathbb{P} &\\
 \mathbb{E}_{\mathbb{P}}\left[\tilde{u} | \tilde{s} \in [S]\right] \leq \theta & \\
-\mathbb{P}\left[\left.\pmb{0}\leq \pmb{z} \leq \overline{\pmb{z}}, \|\pmb{z} - \hat{\pmb{z}}_s\|_2 \leq u ~\right| \tilde{s} = s\right] = 1, & \forall s \in [S] \\
+\mathbb{P}\left[\left.(\pmb{z}, u)\in\mathcal{Z}_s ~\right| \tilde{s} = s\right] = 1, & \forall s \in [S] \\
 \mathbb{P}\left[\tilde{s} = s\right] = \frac{1}{S} &
 \end{array}
 \right.
@@ -30,7 +31,14 @@ $$
 \end{align}
 $$
 
-with \\(\theta \geq 0\\) the parameter capturing the distance between the distribution \\(\mathbb{P}\\) and the empirical distribution \\(\hat{\pmb{z}}\\). In this numerical experiment, parameters of the model and the ambiguity set are specified as follows:
+with \\(\theta \geq 0\\) the parameter capturing the distance between the distribution \\(\mathbb{P}\\) and the empirical distribution \\(\hat{\pmb{z}}\\). The support \\(\mathcal{Z}_s\\) for each sample \\(s\\) is defined as
+
+$$
+\mathcal{Z}_s = \left\{ (\pmb{z}, u): \pmb{0} \leq \pmb{z} \leq \overline{\pmb{z}}, \|\pmb{z} - \hat{\pmb{z}}_s \|_2 \leq u
+\right\}.
+$$
+
+In this numerical experiment, parameters of the model and the ambiguity set are specified as follows:
 
 - The number of products: \\(I=2\\);
 - Sample size: \\(S=50\\);

@@ -2598,8 +2598,24 @@ class Scen:
         return ScenILoc(self)
 
     def suppset(self, *args):
+        """
+        Specify the support set(s) of an ambiguity set.
+
+        Parameters
+        ----------
+        args : tuple
+            Constraints or collections of constraints as iterable type of
+            objects, used for defining the feasible region of the support set.
+
+        Notes
+        -----
+        RSOME leaves the support set unspecified if the input argument is
+        an empty iterable object.
+        """
 
         args = flat(args)
+        if len(args) == 0:
+            return
 
         for arg in args:
             if arg.model is not self.ambset.model.sup_model:
@@ -2612,6 +2628,26 @@ class Scen:
             self.ambset.sup_constr[i] = tuple(args)
 
     def exptset(self, *args):
+        """
+        Specify the uncertainty set of the expected values of random
+        variables for an ambiguity set.
+
+        Parameters
+        ----------
+        args : tuple
+            Constraints or collections of constraints as iterable type of
+            objects, used for defining the feasible region of the uncertainty
+            set of expectations.
+
+        Notes
+        -----
+        RSOME leaves the uncertainty set of expectations unspecified if the
+        input argument is an empty iterable object.
+        """
+
+        args = flat(args)
+        if len(args) == 0:
+            return
 
         for arg in args:
             if arg.model is not self.ambset.model.exp_model:

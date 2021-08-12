@@ -94,7 +94,6 @@ minmax(obj, *args) method of rsome.ro.Model instance
     -----
     The uncertainty set defined for the objective function is considered
     the default uncertainty set for the robust model.
-
 ```
 The documentation shows that the objective function of the robust model is specified by the first argument `obj`, while the remaining arguments could be constraints, or collection of constraints, used for defining the uncertainty set. The `minmax()` and `maxmin()` methods thus enable two approaches for specifying the worst-case objective, as shown by the sample code below.
 
@@ -183,7 +182,7 @@ model.st(x*z + x >= 0)
 model.st((x[:i] <= z[:i].sum()).forall(norm(z, 2) <= i*0.5) for i in range(1, 6))
 ```
 
-The sample code above shows that the Python version of RSOME is able to specify defferent uncertainty sets \\(\mathcal{Z}_m\\), \\(m\in\mathcal{M}_1\cup\\{0\\}\\), for the objective function (with index 0) and each of the constraints (with index \\(m\in\mathcal{M}_1\\)).  Such a framework is more flexible than that in the MATLAB version introduced in [Chen et al.  (2020)](#ref2) and can be used to address a rich range of robust models, including the distributional interpretation of robust
+The sample code above shows that the Python version of RSOME is able to specify different uncertainty sets \\(\mathcal{Z}_m\\), \\(m\in\mathcal{M}_1\cup\\{0\\}\\), for the objective function (with index 0) and each of the constraints (with index \\(m\in\mathcal{M}_1\\)).  Such a framework is more flexible than that in the MATLAB version introduced in [Chen et al.  (2020)](#ref2) and can be used to address a rich range of robust models, including the distributional interpretation of robust
 formulation in [Xu et al. (2012)](#ref4), the notion of Pareto robustly optimal solution discussed in [de Ruiter et al. (2016)](#ref3), as well as the sample robust optimization models proposed by [Bertsimas et al. (2021)](#ref1).
 
 ## Linear Decision Rules for Adaptive Decision-Making <a name="section2.4"></a>
@@ -242,7 +241,7 @@ Once the decision rules are created and the affine dependency on random variable
 
 Finally, after the model is solved, coefficients of a decision rule `y` could be accessed by the `get()` method. More specifically:
 - `y.get()` returns the constant coefficients of the decision rule `y`. The returned array has the same shape as the decision rule array `y`.
-- `y.get(z)` returns the linear coefficients of `y` with respect to the random variable `z`. The shape of the returned array is `y.shape + z.shape`, <i>i.e.</i>, the combination of dimensions of `y` and `z`. For example, if `c = y.get(z)` where `y.dim=2`, and `z.dim=2`, the returned coefficients are presented as a four-dimensional array `c` and `c[i, j]` gives the linear coefficients of `y[i, j]` with respect to the random variable `z`.
+- `y.get(z)` returns the linear coefficients of `y` with respect to the random variable `z`. The shape of the returned array is `y.shape + z.shape`, <i>i.e.</i>, the combination of dimensions of `y` and `z`. For example, if `c = y.get(z)` where `y.dim=2` and `z.dim=2`, the returned coefficients are presented as a four-dimensional array `c` and `c[i, j]` gives the linear coefficients of `y[i, j]` with respect to the random variable `z`.
 
 ## Application Examples <a name="section2.5"></a>
 
@@ -251,6 +250,7 @@ Finally, after the model is solved, coefficients of a decision rule `y` could be
 ### [Robust/Robustness Knapsack](example_ro_knapsack)
 ### [Adaptive Robust Lot-Sizing](example_ls)
 ### [Joint Production-Inventory](example_ro_inv)
+### [Robust Vehicle Pre-Allocation](example_ro_vehicle)
 
 ## Reference
 

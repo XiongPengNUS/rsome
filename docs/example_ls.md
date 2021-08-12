@@ -18,13 +18,13 @@ $$
 \end{align}
 $$
 
-with \\(K_i\\) to be the stock capacity at each location, and the adaptive decision \\(y_{ij}\\) to be approximated by the affine decision rule
+with \\(K_i\\) to be the stock capacity at each location, and the adaptive decision \\(y_{ij}\\) to be approximated by
 
 $$
-y_{ij}(\pmb{d}) = y_{ij}^0 + \sum\limits_{k=1}^Ny_{ijk}^dd_k.
+y_{ij}(\pmb{d}) = y_{ij}^0 + \sum\limits_{k=1}^Ny_{ijk}^dd_k,
 $$
 
-For a test case, we pick \\(N=30\\) locations uniformly at random from \\([0, 10]^2\\). The shifting cost \\(t_{ij}\\) is calculated as the Euclidean distance between the stores \\(i\\) and \\(j\\), and the storage cost \\(c_i\\) is assumed to be 20. The maximum demand \\(d_{\text{max}}\\) and the stock capacity \\(K_i\\) are both set to be 20 units, and the parameter \\(\Gamma\\) in the uncertainty set is set to \\(20\sqrt{N}\\). Such an adaptive model can be implemented by the following Python code using RSOME.
+or in other words, the linear decision rule for each wait-and-see decision \\(y_{ij}\\) is \\(\mathcal{L}([N])\\). For a test case, we pick \\(N=30\\) locations uniformly at random from \\([0, 10]^2\\). The shifting cost \\(t_{ij}\\) is calculated as the Euclidean distance between the stores \\(i\\) and \\(j\\), and the storage cost \\(c_i\\) is assumed to be 20. The maximum demand \\(d_{\text{max}}\\) and the stock capacity \\(K_i\\) are both set to be 20 units, and the parameter \\(\Gamma\\) in the uncertainty set is set to \\(20\sqrt{N}\\). Such an adaptive model can be implemented by the following Python code using RSOME.
 
 ```python
 from rsome import ro

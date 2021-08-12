@@ -263,7 +263,27 @@ The indices of the scenarios are crucial in defining components of the ambiguity
 
 ### \\(\mathcal{Q}_{km}\\) as the Support of Conditional Expectations
 
-According to the formulation of the ambiguity set \\(\mathcal{F}_m\\) presented in the section [The general formulation for distributionally robust optimization models](#section3.1), the SOC representable set \\(\mathcal{Q}\_{km}\\) is defined as the support of the conditional expectation of random variables under the event \\(\mathcal{E}_k\\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \\(\mathcal{Q}\_{km}\\) are defined by the `exptset()` method of the ambiguity set object. Take the supports of conditional expectations below, for example,
+According to the formulation of the ambiguity set \\(\mathcal{F}_m\\) presented in the section [The general formulation for distributionally robust optimization models](#section3.1), the SOC representable set \\(\mathcal{Q}\_{km}\\) is defined as the support of the conditional expectation of random variables under the event \\(\mathcal{E}_k\\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \\(\mathcal{Q}\_{km}\\) are defined by the `exptset()` method of the ambiguity set object. The help information of the `exptset()` method is given below.
+
+```
+exptset(*args) method of rsome.dro.Ambiguity instance
+    Specify the uncertainty set of the expected values of random
+    variables for an ambiguity set.
+
+    Parameters
+    ----------
+    args : tuple
+        Constraints or collections of constraints as iterable type of
+        objects, used for defining the feasible region of the uncertainty
+        set of expectations.
+
+    Notes
+    -----
+    RSOME leaves the uncertainty set of expectations unspecified if the
+    input argument is an empty iterable object.
+```
+
+Take the supports of conditional expectations below, for example,
 
 $$
 \begin{align}
@@ -304,7 +324,25 @@ The ambiguity set `fset` itself represents the event \\(\mathcal{E}_1\\) of all 
 
 ### \\(\mathcal{Z}_{sm}\\) as the Support of Random Variables
 
-The support \\(\mathcal{Z}_{sm}\\) of random variables can be specified by the method `suppset()` method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. Take the following supports of random variables \\(\tilde{\pmb{z}}\in\mathbb{R}^3\\) for example,
+The support \\(\mathcal{Z}_{sm}\\) of random variables can be specified by the method `suppset()` method, and the scenario information of the support can also be specified by the indexing and slicing expressions of the ambiguity set object. The help information of the `suppset()` method is given below.
+
+```
+suppset(*args) method of rsome.dro.Ambiguity instance
+    Specify the support set(s) of an ambiguity set.
+
+    Parameters
+    ----------
+    args : Constraints or iterables
+        Constraints or collections of constraints as iterable type of
+        objects, used for defining the feasible region of the support set.
+
+    Notes
+    -----
+    RSOME leaves the support set unspecified if the given argument is
+    an empty iterable object.
+```
+
+Take the following supports of random variables \\(\tilde{\pmb{z}}\in\mathbb{R}^3\\) for example,
 
 $$
 \begin{align}
@@ -420,7 +458,27 @@ As the example above shows, supports for all scenarios have been defined, and th
 
 ### \\(\mathcal{P}_m\\) as the Support of Scenario Probabilities
 
-In the event-wise ambiguity set, the support of scenario probabilities can also be specified via the calling the method `probset()`, as demonstrated by the following sample code.
+In the event-wise ambiguity set, the support of scenario probabilities can also be specified via calling the method `probset()`. The help information of this method is given below.
+
+```
+probset(*args) method of rsome.dro.Ambiguity instance
+    Specify the uncertainty set of the scenario probabilities for an
+    ambiguity set.
+
+    Parameters
+    ----------
+    args : tuple
+        Constraints or collections of constraints as iterable type of
+        objects, used for defining the feasible region of the uncertainty
+        set of scenario probabilities.
+
+    Notes
+    -----
+    RSOME leaves the uncertainty set of probabilities unspecified if the
+    input argument is an empty iterable object.
+```
+
+The following sample code specifies an ellipsoidal uncertainty set of the scenario probabilities.
 
 ```python
 from rsome import dro
@@ -508,14 +566,12 @@ model.st(2x >= z)               # worst-case over the support of fset
 ```
 
 
-
-
 ## Application Examples <a name="section3.6"></a>
 ### [Distributionally Robust Portfolio](example_dro_portfolio)
 ### [Distributionally Robust Medical Appointment](example_dro_mas)
 ### [Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets](example_dro_nv)
 ### [Adaptive Distributionally Robust Lot-Sizing](example_dro_ls)
-### [Robust Vehicle Pre-Allocation with Uncertain Covariates](example_dro_vehicle)
+### [Distributionally Robust Vehicle Pre-Allocation](example_dro_vehicle)
 ### [Multi-Stage Inventory Control](example_dro_inv)
 ### [Multi-Stage Stochastic Financial Planning](example_dro_finpl)
 

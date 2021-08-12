@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=e1a2b6841ea4a414d5569d8694e163c77a626edd">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -148,7 +148,6 @@ y(\pmb{z}) = y^0 + \sum\limits_{j\in\mathcal{J}}y^jz_j
     -----
     The uncertainty set defined for the objective function is considered
     the default uncertainty set for the robust model.
-
 </code></pre></div></div>
 <p>The documentation shows that the objective function of the robust model is specified by the first argument <code class="language-plaintext highlighter-rouge">obj</code>, while the remaining arguments could be constraints, or collection of constraints, used for defining the uncertainty set. The <code class="language-plaintext highlighter-rouge">minmax()</code> and <code class="language-plaintext highlighter-rouge">maxmin()</code> methods thus enable two approaches for specifying the worst-case objective, as shown by the sample code below.</p>
 
@@ -233,7 +232,7 @@ y(\pmb{z}) = y^0 + \sum\limits_{j\in\mathcal{J}}y^jz_j
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">x</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">[:</span><span class="n">i</span><span class="p">].</span><span class="nb">sum</span><span class="p">()).</span><span class="n">forall</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 </code></pre></div></div>
 
-<p>The sample code above shows that the Python version of RSOME is able to specify defferent uncertainty sets \(\mathcal{Z}_m\), \(m\in\mathcal{M}_1\cup\{0\}\), for the objective function (with index 0) and each of the constraints (with index \(m\in\mathcal{M}_1\)).  Such a framework is more flexible than that in the MATLAB version introduced in <a href="#ref2">Chen et al.  (2020)</a> and can be used to address a rich range of robust models, including the distributional interpretation of robust
+<p>The sample code above shows that the Python version of RSOME is able to specify different uncertainty sets \(\mathcal{Z}_m\), \(m\in\mathcal{M}_1\cup\{0\}\), for the objective function (with index 0) and each of the constraints (with index \(m\in\mathcal{M}_1\)).  Such a framework is more flexible than that in the MATLAB version introduced in <a href="#ref2">Chen et al.  (2020)</a> and can be used to address a rich range of robust models, including the distributional interpretation of robust
 formulation in <a href="#ref4">Xu et al. (2012)</a>, the notion of Pareto robustly optimal solution discussed in <a href="#ref3">de Ruiter et al. (2016)</a>, as well as the sample robust optimization models proposed by <a href="#ref1">Bertsimas et al. (2021)</a>.</p>
 
 <h2 id="linear-decision-rules-for-adaptive-decision-making-">Linear Decision Rules for Adaptive Decision-Making <a name="section2.4"></a></h2>
@@ -289,7 +288,7 @@ formulation in <a href="#ref4">Xu et al. (2012)</a>, the notion of Pareto robust
 <p>Finally, after the model is solved, coefficients of a decision rule <code class="language-plaintext highlighter-rouge">y</code> could be accessed by the <code class="language-plaintext highlighter-rouge">get()</code> method. More specifically:</p>
 <ul>
   <li><code class="language-plaintext highlighter-rouge">y.get()</code> returns the constant coefficients of the decision rule <code class="language-plaintext highlighter-rouge">y</code>. The returned array has the same shape as the decision rule array <code class="language-plaintext highlighter-rouge">y</code>.</li>
-  <li><code class="language-plaintext highlighter-rouge">y.get(z)</code> returns the linear coefficients of <code class="language-plaintext highlighter-rouge">y</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>. The shape of the returned array is <code class="language-plaintext highlighter-rouge">y.shape + z.shape</code>, <i>i.e.</i>, the combination of dimensions of <code class="language-plaintext highlighter-rouge">y</code> and <code class="language-plaintext highlighter-rouge">z</code>. For example, if <code class="language-plaintext highlighter-rouge">c = y.get(z)</code> where <code class="language-plaintext highlighter-rouge">y.dim=2</code>, and <code class="language-plaintext highlighter-rouge">z.dim=2</code>, the returned coefficients are presented as a four-dimensional array <code class="language-plaintext highlighter-rouge">c</code> and <code class="language-plaintext highlighter-rouge">c[i, j]</code> gives the linear coefficients of <code class="language-plaintext highlighter-rouge">y[i, j]</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">y.get(z)</code> returns the linear coefficients of <code class="language-plaintext highlighter-rouge">y</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>. The shape of the returned array is <code class="language-plaintext highlighter-rouge">y.shape + z.shape</code>, <i>i.e.</i>, the combination of dimensions of <code class="language-plaintext highlighter-rouge">y</code> and <code class="language-plaintext highlighter-rouge">z</code>. For example, if <code class="language-plaintext highlighter-rouge">c = y.get(z)</code> where <code class="language-plaintext highlighter-rouge">y.dim=2</code> and <code class="language-plaintext highlighter-rouge">z.dim=2</code>, the returned coefficients are presented as a four-dimensional array <code class="language-plaintext highlighter-rouge">c</code> and <code class="language-plaintext highlighter-rouge">c[i, j]</code> gives the linear coefficients of <code class="language-plaintext highlighter-rouge">y[i, j]</code> with respect to the random variable <code class="language-plaintext highlighter-rouge">z</code>.</li>
 </ul>
 
 <h2 id="application-examples-">Application Examples <a name="section2.5"></a></h2>
@@ -299,6 +298,7 @@ formulation in <a href="#ref4">Xu et al. (2012)</a>, the notion of Pareto robust
 <h3 id="robustrobustness-knapsack"><a href="example_ro_knapsack">Robust/Robustness Knapsack</a></h3>
 <h3 id="adaptive-robust-lot-sizing"><a href="example_ls">Adaptive Robust Lot-Sizing</a></h3>
 <h3 id="joint-production-inventory"><a href="example_ro_inv">Joint Production-Inventory</a></h3>
+<h3 id="robust-vehicle-pre-allocation"><a href="example_ro_vehicle">Robust Vehicle Pre-Allocation</a></h3>
 
 <h2 id="reference">Reference</h2>
 
