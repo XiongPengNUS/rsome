@@ -3,15 +3,15 @@
 # RSOME: Robust Stochastic Optimization Made Easy
 
 [![PyPI Latest Release](https://img.shields.io/pypi/v/rsome.svg)](https://pypi.org/project/rsome/)
-[![PyPI - downloads](https://img.shields.io/pypi/dm/rsome.svg?label=Pypi%20downloads)](https://pypi.org/project/rsome/)
+[![PyPI - downloads](https://img.shields.io/pypi/dm/rsome?label=PyPI%20downloads)](https://pypi.org/project/rsome/)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/xiongpengnus/rsome)](https://github.com/XiongPengNUS/rsome/graphs/commit-activity)
 [![Last commit](https://img.shields.io/github/last-commit/xiongpengnus/rsome)](https://github.com/XiongPengNUS/rsome/graphs/commit-activity)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Issue stats](http://isitmaintained.com/badge/resolution/xiongpengnus/rsome.svg)](http://isitmaintained.com/project/xiongpengnus/rsome)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/xiongpengnus/rsome.svg)](http://isitmaintained.com/project/xiongpengnus/rsome "Percentage of issues still open")
 
 - Website: [RSOME for Python](https://xiongpengnus.github.io/rsome/)
 - PyPI: [RSOME 0.1.6](https://pypi.org/project/rsome/)
----
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling of optimization problems (subject to uncertainty). Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of robust optimization models and their applications.
 
@@ -34,14 +34,14 @@ The RSOME package can be installed by using the <code>pip</code> command:
 
 The RSOME package transforms robust or distributionally robust optimization models into deterministic second-order cone programming problems, and solved by external solvers. Details of compatible solvers and their interfaces are presented in the following table.
 
-| Solver | License  type | RSOME interface |Integer variables| Second-order cone constraints|
-|:-------|:--------------|:----------------|:------------------------|:---------------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | `lpg_solver` | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open-source | `clp_solver` | Yes | No |
-|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | `ort_solver` | Yes | No |
-|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | `grb_solver` | Yes | Yes |
-|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | `msk_solver` | Yes | Yes |
-|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | `cpx_solver` | Yes | Yes |
+| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints|
+|:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes |
+|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes |
 
 ## Getting started <a id="section4"></a>
 
@@ -52,7 +52,7 @@ Documents of RSOME are provided as follows:
 
 ## Team <a id="section5"></a>
 
-RSOME is a software project supported by Singapore Ministry of Education Tier 3 Grant *Science of Prescriptive Analytics*. It is primarly developed and maintained by [Zhi Chen](https://www.cb.cityu.edu.hk/staff/zchen96/), [Melvyn Sim](https://bizfaculty.nus.edu.sg/faculty-details/?profId=127), and [Peng Xiong](https://bizfaculty.nus.edu.sg/faculty-details/?profId=543). Many others have contributed and helped greatly in the way of developing RSOME, such as Erick Delage, Zhaowei Hao, Long He, Zhenyu Hu, Jun Jiang, Brad Sturt and Qinshen Tang.
+RSOME is a software project supported by Singapore Ministry of Education Tier 3 Grant *Science of Prescriptive Analytics*. It is primarly developed and maintained by [Zhi Chen](https://www.cb.cityu.edu.hk/staff/zchen96/), [Melvyn Sim](https://bizfaculty.nus.edu.sg/faculty-details/?profId=127), and [Peng Xiong](https://bizfaculty.nus.edu.sg/faculty-details/?profId=543). Many other researchers, including Erick Delage, Zhaowei Hao, Long He, Zhenyu Hu, Jun Jiang, Brad Sturt, Qinshen Tang, as well as anonymous users and paper reviewers, have helped greatly in the way of developing RSOME.
 
 ## Citation <a id="section6">
 
