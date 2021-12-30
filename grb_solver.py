@@ -32,7 +32,7 @@ def solve(formula, display=True, export=False, params={}):
 
     if isinstance(formula, SOCProg):
         for constr in formula.qmat:
-            index_right = constr[0]
+            index_right = constr[0:1]
             index_left = constr[1:]
             A = np.eye(len(index_left))
             grb.addConstr(x[index_left] @ A @ x[index_left] <=
