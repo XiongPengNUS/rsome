@@ -8,6 +8,7 @@ import numpy as np
 import warnings
 import time
 
+
 def solve(formula, display=True, export=False, params={}):
 
     if export:
