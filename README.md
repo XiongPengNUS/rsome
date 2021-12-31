@@ -57,7 +57,7 @@ RSOME is a software project supported by Singapore Ministry of Education Tier 3 
 
 ## Citation <a id="section6">
 
-IOf you use RSOME in your research, please cite our papers:
+If you use RSOME in your research, please cite our papers:
 
 - Chen, Zhi, and Peng Xiong. 2021. [RSOME in Python: an open-source package for robust stochastic optimization made easy](http://www.optimization-online.org/DB_HTML/2021/06/8443.html). <i>Optimization Online</i>.
 
