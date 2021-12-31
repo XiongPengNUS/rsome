@@ -532,15 +532,24 @@ It can be seen that the user needs to specify the `solver` argument for selectin
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes |
 
 
-The model above involves second-order cone constraints, so we could use CVXPY, Gurobi, or Mosek to solve it. The interfaces for these solvers are imported by the following commands.
+The model above involves second-order cone constraints, so we could use CVXPY, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.
 
 ```python
 from rsome import cvx_solver as cvx
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
+from rsome import cpx_solver as cpx
 ```
 
 The interfaces can be then used to attain the solution.
+
+```python
+model.solve(cvx)
+```    
+    Being solved by CVXPY...
+    Solution status: optimal
+    Running time: 0.0376s
+
 
 ```python
 model.solve(grb)
@@ -551,7 +560,6 @@ model.solve(grb)
     Running time: 0.0009s
 
 
-
 ```python
 model.solve(msk)
 ```
@@ -560,13 +568,14 @@ model.solve(msk)
     Solution status: optimal
     Running time: 0.0210s
 
+
 ```python
-model.solve(cvx)
+model.solve(cpx)
 ```
-    
-    Being solved by CVXPY...
+
+    Being solved by CPLEX...
     Solution status: optimal
-    Running time: 0.0376s
+    Running time: 0.0175s
 
 
 The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.  
