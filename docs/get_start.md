@@ -127,7 +127,7 @@ The RSOME package also supports several convex functions for specifying convex c
 
 - `norm()` for norms of vectors: the function `norm()` returns the first, second, or infinity norm of a vector. Users may use the second argument `degree` to specify the degree of the norm function. The default value of the `degree` argument is 2.
 
-- `quad()` for quadratic terms x @ Q @ x, where x is a vector, and Q is a positive semidefinite matrix.
+- `quad()` for quadratic terms `x @ Q @ x`, where `x` is a vector, and `Q` is a positive semidefinite matrix.
 
 Examples of specifying convex constraints are provided below.
 
@@ -521,19 +521,21 @@ The standard form of a model can be solved via calling the `solve()` method of t
 
 It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version RSOME uses the default LP solver if  `solver=None` or `solver=lpg_solver`. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please use other solvers by specifying the `solver` parameter to be the values in the table below.
 
-| Solver | License  type | RSOME interface |Integer variables| Second-order cone constraints|
-|:-------|:--------------|:----------------|:------------------------|:---------------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | `lpg_solver` | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open-source | `clp_solver` | Yes | No |
-|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | `ort_solver` | Yes | No |
-|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | `grb_solver` | Yes | Yes |
-|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | `msk_solver` | Yes | Yes |
-|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | `cpx_solver` | Yes | Yes |
+| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints|
+|:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No |
+|[CVXPY](https://www.cvxpy.org/install/index.html) | Open-source | >= 1.1.18 | `cvx_solver` | Yes | Yes |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes |
+|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes |
 
 
-The model above involves second-order cone constraints, so we could use either Gurobi or Mosek to solve it. The interfaces for these solvers are imported by the following commands.
+The model above involves second-order cone constraints, so we could use CVXPY, Gurobi, or Mosek to solve it. The interfaces for these solvers are imported by the following commands.
 
 ```python
+from rsome import cvx_solver as cvx
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
 ```
@@ -558,6 +560,13 @@ model.solve(msk)
     Solution status: optimal
     Running time: 0.0210s
 
+```python
+model.solve(cvx)
+```
+    
+    Being solved by CVXPY...
+    Solution status: optimal
+    Running time: 0.0376s
 
 
 The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.  
