@@ -6,6 +6,7 @@ import warnings
 from numbers import Real
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
+from scipy.linalg import sqrtm, eigh
 from collections import Iterable, Sized
 from .lpg_solver import solve as def_sol
 
@@ -838,6 +839,24 @@ class Affine:
         new_shape = (1,) * len(shape)
         return Convex(self, np.zeros(new_shape), 'Q', 1)
 
+    def quad(self, qmat):
+
+        eighvals = eigh(qmat, eigvals_only=True).round(6)
+        if all(eighvals >= 0):
+            sign = 1
+        elif all(eighvals <= 0):
+            sign = -1
+        else:
+            raise ValueError('The input matrix must be semidefinite.')
+
+        sqrt_mat = np.real(sqrtm(sign*qmat))
+        affine = sqrt_mat @ self.reshape(self.size)
+
+        if sign == 1:
+            return affine.sumsqr()
+        else:
+            return - affine.sumsqr()
+
     def __mul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
@@ -1115,7 +1134,7 @@ class Convex:
                   'E': 'Eclidean norm functions',
                   'I': 'Infinity norm functions',
                   'S': 'Element-wise square functions',
-                  'Q': 'Quadratic functions'}
+                  'Q': 'Sum of squares functions'}
         shapes = 'x'.join([str(dim) for dim in self.affine_out.shape])
         string = shapes + ' ' + xtypes[self.xtype]
 

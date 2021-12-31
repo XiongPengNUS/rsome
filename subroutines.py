@@ -268,6 +268,26 @@ def sumsqr(affine):
     return affine.to_affine().sumsqr()
 
 
+def quad(affine, qmat):
+    """
+    Return the quadratic expression affine @ qmat affine.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be a vector, i.e., the size of the
+        array must be the same as the largest dimension.
+    qmat : a positive or negative semidefinite matrix.
+
+    Returns
+    -------
+    q : Convex
+        The quadratic expression affine @ qmat affine
+    """
+
+    return affine.to_affine().quad(qmat)
+
+
 def E(expr):
     """
     The notion of the expectation of random variables and the worst-case

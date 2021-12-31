@@ -125,19 +125,24 @@ The RSOME package also supports several convex functions for specifying convex c
 
 - `sumsqr()` for sum of squares**: the function `sumsqr()` returns the sum of squares of a vector, which is a one-dimensional array, or an array with its `size` to be the same as maximum `shape` value.
 
-- `norm()` for norms of vectors: the function `norm()` returns the first, second, or infinity norm of a vector. Users may use the second argument `degree` to specify the degree of the norm function. The default value of the `degree` argument is 2. Examples of specifying convex constraints are provided below.
+- `norm()` for norms of vectors: the function `norm()` returns the first, second, or infinity norm of a vector. Users may use the second argument `degree` to specify the degree of the norm function. The default value of the `degree` argument is 2.
+
+- `quad()` for quadratic terms x @ Q @ x, where x is a vector, and Q is a positive semidefinite matrix.
+
+Examples of specifying convex constraints are provided below.
 
 
 ```python
 import rsome as rso
 from numpy import inf
 
-model.st(abs(x) <= 2)               # constraints with absolute terms
-model.st(rso.sumsqr(x) <= 10)       # a constraint with sum of squares
-model.st(rso.square(y) <= 5)        # constraints with squared terms
-model.st(rso.norm(y[:, 0]) <= 1)    # a constraint with 2-norm terms
-model.st(rso.norm(x, 1) <= y[0, 0]) # a constraint with 1-norm terms
-model.st(rso.norm(x, inf) <= x[0])  # a constraint with infinity norm
+model.st(abs(x) <= 2)                   # constraints with absolute terms
+model.st(rso.sumsqr(x) <= 10)           # a constraint with sum of squares
+model.st(rso.square(y) <= 5)            # constraints with squared terms
+model.st(rso.norm(y[:, 0]) <= 1)        # a constraint with 2-norm terms
+model.st(rso.norm(x, 1) <= y[0, 0])     # a constraint with 1-norm terms
+model.st(rso.norm(x, inf) <= x[0])      # a constraint with infinity norm
+model.st(rso.quad(x, Q) + x[1] <= x[0]) # a constraint with a quadratic term
 ```
 
 Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as `abs(x) >= 2` is invalid and gives an error message.

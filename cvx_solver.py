@@ -55,7 +55,7 @@ def solve(formula, display=True, export=False, params={}):
         time.sleep(0.2)
 
     t0 = time.time()
-    prob.solve()
+    prob.solve(solver='ECOS_BB')
     stime = time.time() - t0
 
     if display:
