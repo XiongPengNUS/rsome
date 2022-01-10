@@ -21,9 +21,6 @@ def solve(formula, display=True, export=False, params={}):
     if any(np.array(formula.vtype) != 'C'):
         warnings.warn('Integrality constraints are ignored in the LP solver. ')
 
-    nv = formula.linear.shape[1]
-    vtype = list(formula.vtype)
-
     indices_eq = (formula.sense == 1)
     indices_ineq = (formula.sense == 0)
     linear_eq = formula.linear[indices_eq, :]

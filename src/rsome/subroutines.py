@@ -2,7 +2,8 @@ import numpy as np
 import scipy.sparse as sp
 from numbers import Real
 from scipy.sparse import csr_matrix
-from collections import Iterable
+from collections.abc import Iterable
+from typing import List
 
 
 def flat(a_list):
@@ -197,8 +198,8 @@ def comb_set(s1, s2):
     dc = {item: str(d1[item]) + '-' + str(d2[item])
           for item in range(len(d1))}
 
-    values = []
-    output = []
+    values: List[str] = []
+    output: List[List[int]] = []
     for key in dc:
         if dc[key] in values:
             index = values.index(dc[key])

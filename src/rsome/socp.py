@@ -4,7 +4,7 @@ from .lp import LinProg
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from collections import Iterable
+from collections.abc import Iterable
 
 
 class Model(LPModel):
@@ -166,8 +166,6 @@ class Model(LPModel):
                 lb[lbz_index] = 0
                 linear[:, lbz_index] = - linear[:, lbz_index]
                 obj[lbz_index] = - obj[lbz_index]
-                # ub[dual_lp.linear[qc[0], :].indices] = 0
-                ################## To update in the future
                 qmat.append(list(dual_lp.linear[qc, :].indices))
 
             formula = SOCProg(linear, const, sense,
@@ -189,11 +187,11 @@ class SOCProg(LinProg):
         super().__init__(linear, const, sense, vtype, ub, lb, obj)
         self.qmat = qmat
 
-    def __repr__(self, header=False):
+    def __repr__(self):
 
         qmat = self.qmat
         string = 'Second order cone program object:\n'
-        string += super().__repr__(header=header)
+        string += super().__repr__()
         string += '---------------------------------------------\n'
         string += 'Number of SOC constraints:    {0}\n'.format(len(qmat))
 

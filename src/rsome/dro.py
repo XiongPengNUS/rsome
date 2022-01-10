@@ -8,11 +8,12 @@ from .lp import DecRoConstr
 from .lp import Scen
 from .lp import Solution
 from .lpg_solver import solve as def_sol
-from .subroutines import *
+from .subroutines import event_dict
 import numpy as np
 import pandas as pd
+import scipy.sparse as sp
 import warnings
-from collections import Sized, Iterable
+from collections.abc import Sized, Iterable
 
 
 class Model:
@@ -63,7 +64,7 @@ class Model:
         pr = self.pro_model.dvar(num_scen, name='probabilities')
         self.p = pr
 
-        self.obj = None
+        self.obj = 0
         self.sign = 1
 
         self.primal = None
@@ -491,8 +492,9 @@ class Model:
                                              constr.event_adapt, constr.ctype)
                         return self.ro_to_roc(left) + self.ro_to_roc(right)
 
-                    if (roaffine.raffine.linear.nnz == 0 and
-                        not roaffine.raffine.const.any()):
+                    left_empty = roaffine.raffine.linear.nnz == 0
+                    right_empty = not roaffine.raffine.const.any()
+                    if left_empty and right_empty:
                         ew_constr = LinConstr(roaffine.dec_model,
                                               roaffine.affine.linear,
                                               - roaffine.affine.const,

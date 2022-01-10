@@ -1,4 +1,7 @@
-from .subroutines import *
+from .subroutines import sv_to_csr, sp_trans, sparse_mul, sp_lmatmul, sp_matmul
+from .subroutines import array_to_sparse, index_array, check_numeric
+from .subroutines import add_linear
+from .subroutines import event_dict, comb_set, flat
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -7,7 +10,8 @@ from numbers import Real
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
 from scipy.linalg import sqrtm, eigh
-from collections import Iterable, Sized
+from collections.abc import Iterable, Sized
+from typing import List
 from .lpg_solver import solve as def_sol
 
 
@@ -46,12 +50,13 @@ class Model:
         if not isinstance(shape, tuple):
             shape = (shape, )
 
-        new_shape = ()
+        # new_shape = ()
         for item in shape:
             if not isinstance(item, (int, np.int8, np.int16,
                                      np.int32, np.int64)):
                 raise TypeError('Shape dimensions must be int type!')
-            new_shape += (item, )
+        # new_shape += (item, )
+        new_shape = tuple(np.array(shape).astype(int))
 
         new_var = Vars(self, self.last, new_shape, vtype, name)
 
@@ -279,7 +284,8 @@ class Model:
             dual_sense = np.zeros(dual_linear.shape[0])
             dual_sense[indices_free] = 1
             dual_ub = np.zeros(dual_linear.shape[1])
-            dual_lb = - np.ones(ndv) * np.infty
+            # dual_lb = - np.ones(ndv) * np.infty
+            dual_lb = - np.array([np.infty] * ndv)
 
             indices_eq = np.where(primal_sense == 1)[0]
             if len(indices_eq):
@@ -322,7 +328,7 @@ class Model:
             solution = solver.solve(self.do_math(obj=True),
                                     display, export, params)
 
-        if instance(solution, Solution):
+        if isinstance(solution, Solution):
             self.solution = solution
         else:
             if not solution:
@@ -1528,18 +1534,19 @@ class RoConstr:
                             -left.const.reshape(num_rc_constr),
                             sense2)
 
-        bounds = ()
+        # bounds = ()
+        bounds: List[LinConstr] = []
         index_pos = (support.ub == 0)
         if any(index_pos):
-            bounds += (dual_var[:, index_pos] <= 0, )
+            bounds.append(dual_var[:, index_pos] <= 0)
         index_neg = (support.lb == 0)
         if any(index_neg):
-            bounds += (dual_var[:, index_neg] >= 0, )
+            bounds.append(dual_var[:, index_neg] >= 0)
 
         if num_rand == support.linear.shape[0]:
-            constr_tuple = constr1, constr2
-            constr_tuple += () if bounds is None else (bounds,)
-            # constr_tuple = ((constr1, constr2) if bounds is None else
+            constr_list = [constr1, constr2]
+            constr_list += [] if bounds is None else bounds
+            # constr_list = ((constr1, constr2) if bounds is None else
             #                     (constr1, constr2, bounds))
         else:
             left = dual_var @ support.linear[num_rand:].T
@@ -1548,19 +1555,19 @@ class RoConstr:
             constr3 = LinConstr(left.model, left.linear,
                                 left.const.reshape(num_rc_constr),
                                 sense3)
-            # constr_tuple= ((constr1, constr2, constr3) if bounds is None else
+            # constr_list= ((constr1, constr2, constr3) if bounds is None else
             #                 (constr1, constr2, constr3, bounds))
-            constr_tuple = constr1, constr2, constr3
-            constr_tuple += () if bounds is None else (bounds,)
+            constr_list = [constr1, constr2, constr3]
+            constr_list += [] if bounds is None else bounds
 
         for n in range(num_constr):
             for qconstr in support.qmat:
                 indices = np.array(qconstr, dtype=int) + n*size_support
                 cone_constr = ConeConstr(self.dec_model, dual_var, indices[1:],
                                          dual_var, indices[0])
-                constr_tuple = constr_tuple + (cone_constr,)
+                constr_list.append(cone_constr)
 
-        return constr_tuple
+        return constr_list
 
 
 class DecVar(Vars):
@@ -1574,9 +1581,9 @@ class DecVar(Vars):
         super().__init__(dvars.model, dvars.first, dvars.shape,
                          dvars.vtype, dvars.name)
         self.dro_model = dro_model
-        self.event_adapt = [list(range(dro_model.num_scen))]
+        self.event_adapt: List[List[int]] = [list(range(dro_model.num_scen))]
         self.rand_adapt = None
-        self.ro_first = None
+        self.ro_first = - 1
         self.fixed = fixed
         self.name = name
 
@@ -1650,7 +1657,7 @@ class DecVar(Vars):
 
         dro_model = self.dro_model
         var_sol = dro_model.ro_model.rc_model.vars[1].get()
-        num_scen = dro_model.num_scen
+        # num_scen = dro_model.num_scen
         edict = event_dict(self.event_adapt)
         if rvar is None:
             outputs = []
@@ -1680,7 +1687,8 @@ class DecVar(Vars):
                 sol_vec = np.array(dro_model.solution.x)[sp.col]
                 sol_indices = sp.row
 
-                coeff = np.ones(sp.shape[0]) * np.NaN
+                # coeff = np.ones(sp.shape[0]) * np.NaN
+                coeff = np.array([np.NaN] * sp.shape[0])
                 coeff[sol_indices] = sol_vec
 
                 if rvar.to_affine().size == 1:
@@ -1695,7 +1703,6 @@ class DecVar(Vars):
                                  index=ind_label)
             else:
                 return outputs[0]
-
 
     @property
     def E(self):
@@ -1862,12 +1869,12 @@ class DecAffine(Affine):
         return DecAffine(self.dro_model, expr,
                          self.event_adapt, self.fixed, self.ctype)
 
-    def sum(self, axis=None):
+#     def sum(self, axis=None):
 
-        expr = super().sum(axis)
+#         expr = super().sum(axis)
 
-        return DecAffine(expr.dro_model, expr,
-                         self.event_adapt, self.fixed, self.ctype)
+#         return DecAffine(expr.dro_model, expr,
+#                          self.event_adapt, self.fixed, self.ctype)
 
     def to_affine(self):
 
@@ -2259,6 +2266,7 @@ class DecRoConstr(RoConstr):
 
         return self
 
+
 class DecRule:
 
     __array_priority__ = 102
@@ -2422,8 +2430,10 @@ class DecRule:
         else:
             if rvar.model.mtype != 'S':
                 ValueError('The input is not a random variable.')
-            ldr_coeff = np.ones((self.size,
-                                 self.model.rc_model.vars[-1].last)) * np.NAN
+            ldr_row, ldr_col = self.size, self.model.rc_model.vars[-1].last
+            # ldr_coeff = np.ones((self.size,
+            #                      self.model.rc_model.vars[-1].last)) * np.NAN
+            ldr_coeff = np.array([[np.NaN] * ldr_col] * ldr_row)
             rand_ind = rvar.get_ind()
             row_ind, col_ind = np.where(self.depend == 1)
             ldr_coeff[row_ind, col_ind] = self.var_coeff.get()
@@ -2530,7 +2540,7 @@ class LinProg:
         self.ub = ub
         self.lb = lb
 
-    def __repr__(self, header=True):
+    def __repr__(self):
 
         linear = self.linear
         nc, nb, ni = (sum(self.vtype == 'C'),
@@ -2539,11 +2549,7 @@ class LinProg:
         nineq, neq = sum(self.sense == 0), sum(self.sense == 1)
         nnz = self.linear.indptr[-1]
 
-        if header:
-            string = 'Linear program object:\n'
-        else:
-            string = ''
-        string += '=============================================\n'
+        string = '=============================================\n'
         string += 'Number of variables:          {0}\n'.format(linear.shape[1])
         string += 'Continuous/binaries/integers: {0}/{1}/{2}\n'.format(nc,
                                                                        nb, ni)
@@ -2674,11 +2680,12 @@ class Scen:
                                  'expectation sets.')
 
         self.ambset.exp_constr.append(tuple(args))
+        indices: Iterable[int]
         if not isinstance(self.series, Iterable):
             indices = [self.series]
         else:
             indices = self.series
-        self.ambset.exp_constr_indices.append(indices)
+        self.ambset.exp_constr_indices.append(list(indices))
 
 
 class ScenLoc:

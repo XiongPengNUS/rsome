@@ -1,6 +1,6 @@
 """
-This module is used as an interface to call the MOSEK solver for solving 
-(mixed-integer) linear or second-order cone programs.
+This module is used as an interface to call the MOSEK solver for solving (mixed-
+integer) linear or second-order cone programs.
 """
 
 import mosek
@@ -119,8 +119,8 @@ def solve(form, display=True, export=False, params={}):
                         print('Running time: {0:0.4f}s'.format(stime))
 
                     break
-                except:
-                    pass
+                except ValueError:
+                    raise ValueError('No solution is accessible')
 
             xx = [0.] * numvar
             task.getxx(stype, xx)

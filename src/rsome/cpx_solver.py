@@ -14,16 +14,13 @@ def solve(formula, display=True, export=False, params={}):
 
     cpx = cplex.Cplex()
 
-    obj = formula.obj.flatten()
+    # obj = formula.obj.flatten()
     linear = formula.linear
     row = linear.shape[0]
     spmat = [[linear.indices[linear.indptr[i]:linear.indptr[i + 1]].tolist(),
               linear.data[linear.indptr[i]:linear.indptr[i + 1]].tolist()]
              for i in range(row)]
     sense = ['E' if s == 1 else 'L' for s in formula.sense]
-    const = formula.const
-    ub = formula.ub
-    lb = formula.lb
     vtype = [cpx.variables.type.integer if vt == 'I' else
              cpx.variables.type.binary if vt == 'B' else
              cpx.variables.type.continuous for vt in formula.vtype]

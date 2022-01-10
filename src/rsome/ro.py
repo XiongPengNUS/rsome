@@ -1,13 +1,13 @@
 from .socp import Model as SOCModel
 from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
 from .lp import Vars, VarSub, Affine, Convex
-from .lp import DecRule, DecRuleSub
+from .lp import DecRule
 from .lp import RoAffine, RoConstr
 from .lp import Solution
-from .subroutines import *
+# import subroutines as sbr
 import numpy as np
-from scipy.sparse import csr_matrix
-from collections import Iterable
+# from scipy.sparse import csr_matrix
+from collections.abc import Iterable
 from .lpg_solver import solve as def_sol
 
 
