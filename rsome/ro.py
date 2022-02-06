@@ -46,7 +46,7 @@ class Model:
         self.dual = None
         self.rc_model.reset()
 
-    def dvar(self, shape=(1,), vtype='C', name=None, aux=False):
+    def dvar(self, shape=(), vtype='C', name=None, aux=False):
         """
         Returns an array of decision variables with the given shape
         and variable type.
@@ -71,7 +71,7 @@ class Model:
         new_var = self.rc_model.dvar(shape, vtype, name, aux)
         return new_var
 
-    def rvar(self, shape=(1,), name=None):
+    def rvar(self, shape=(), name=None):
 
         """
         Returns an array of random variables with the given shape.
@@ -92,7 +92,7 @@ class Model:
         new_var = self.sup_model.dvar(shape, 'C', name)
         return new_var
 
-    def ldr(self, shape=(1,), name=None):
+    def ldr(self, shape=(), name=None):
 
         """
         Returns an array with the given shape of linear decision rule
@@ -327,7 +327,8 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, grb_solver, msk_solver}
+            solver : {None, lpg_solver, ort_solver, cvx_solver, grb_solver,
+                      cpx_solver, msk_solver}
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool

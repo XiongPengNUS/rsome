@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 import warnings
+from numbers import Real
 from collections.abc import Sized, Iterable
 
 
@@ -86,7 +87,7 @@ class Model:
 
         return rand_var
 
-    def dvar(self, shape=(1,), vtype='C', name=None):
+    def dvar(self, shape=(), vtype='C', name=None):
         """
         Returns an array of decision variables with the given shape
         and variable type.
@@ -515,8 +516,12 @@ class Model:
                             np.any(aff_in.raffine.const)):
                         raise SyntaxError('Incorrect convex expressions.')
                     aff_in = aff_in.affine
-                linear_out = constr.affine_out.linear
-                const_out = constr.affine_out.const
+                if isinstance(constr.affine_out, (np.ndarray, Real)):
+                    linear_out = np.zeros((constr.affine_out.size, drule.shape[0]))
+                    const_out = constr.affine_out
+                else:
+                    linear_out = constr.affine_out.linear
+                    const_out = constr.affine_out.const
                 aff_out = linear_out@drule + const_out.reshape(const_out.size)
                 if isinstance(aff_out, RoAffine):
                     if (aff_out.raffine.linear.nnz > 0 or
@@ -581,6 +586,8 @@ class Model:
             linear = constr.affine.linear
             const = constr.affine.const
             raffine = constr.raffine
+        if const.ndim == 0:
+            const = np.array([const])
 
         # Standardize constraints
         ro_constr = []

@@ -45,7 +45,7 @@ class Model:
         if not nobj:
             self.dvar()
 
-    def dvar(self, shape=(1,), vtype='C', name=None, aux=False):
+    def dvar(self, shape=(), vtype='C', name=None, aux=False):
 
         if not isinstance(shape, tuple):
             shape = (shape, )
@@ -54,9 +54,17 @@ class Model:
         for item in shape:
             if not isinstance(item, (int, np.int8, np.int16,
                                      np.int32, np.int64)):
-                raise TypeError('Shape dimensions must be int type!')
+                raise TypeError('Shape values must be integers!')
         # new_shape += (item, )
         new_shape = tuple(np.array(shape).astype(int))
+
+        vtype = vtype.upper()
+        # if vtype not in list('CBI'):
+        #     raise ValueError('Unknown variable type!')
+        if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
+            raise ValueError('Unknown variable type.')
+        if len(vtype) != 1 and len(vtype) != np.prod(shape):
+            raise ValueError('Inconsistent variables and their types.')
 
         new_var = Vars(self, self.last, new_shape, vtype, name)
 
@@ -64,7 +72,7 @@ class Model:
             self.vars.append(new_var)
         else:
             self.auxs.append(new_var)
-        self.last += np.prod(shape)
+        self.last += int(np.prod(new_shape))
         return new_var
 
     def st(self, constr):
@@ -219,8 +227,6 @@ class Model:
                                     else np.array(list(item.vtype))
                                     for item in self.vars + self.auxs])
 
-            # ub = np.array([np.infty] * linear.shape[1])
-            # lb = np.array([-np.infty] * linear.shape[1])
             ub = np.array([np.infty] * self.last)
             lb = np.array([-np.infty] * self.last)
 
@@ -308,8 +314,8 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, mip_solver,
-                      clp_solver, grb_solver, msk_solver}
+            solver : {None, lpg_solver, clp_solver, ort_solver, cvx_solver
+                      cpx_solver, grb_solver, msk_solver}
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
@@ -354,16 +360,12 @@ class SparseVec:
         self.value = value
         self.nvar = nvar
 
-    def __str__(self):
+    def __repr__(self):
 
         string = 'Indices: ' + str(self.index) + ' | '
         string += 'Values: ' + str(self.value)
 
         return string
-
-    def __repr__(self):
-
-        return self.__str__()
 
     def __add__(self, other):
 
@@ -403,36 +405,35 @@ class Vars:
         self.name = name
         self.sparray = sparray
 
-    def __str__(self):
-
-        vtype = self.vtype
-        if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
-            raise ValueError('Unknown variable type.')
-
-        var_name = '' if self.name is None else self.name + ': '
-        """
-        model_type = ('RSO model' if self.model.mtype == 'R' else
-                      'Robust counterpart' if self.model.mtype == 'C' else
-                      'Support' if self.model.mtype == 'S' else
-                      'Expectation set' if self.model.mtype == 'E' else
-                      'Probability set')
-        """
-        var_type = ('continuous' if vtype == 'C' else
-                    'binary' if vtype == 'B' else
-                    'integer' if vtype == 'I' else
-                    'Mixed-type')
-        suffix = 's' if np.prod(self.shape) > 1 else ''
-
-        string = var_name
-        string += 'x'.join([str(size) for size in self.shape]) + ' '
-        string += var_type + ' variable' + suffix
-        # string += ' ({0})'.format(model_type)
-
-        return string
-
     def __repr__(self):
 
-        return self.__str__()
+        vtype = self.vtype
+        # if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
+        #     raise ValueError('Unknown variable type.')
+
+        var_name = '' if self.name is None else self.name + ': '
+        var_type = (' continuous' if vtype == 'C' else
+                    ' binary' if vtype == 'B' else
+                    ' integer' if vtype == 'I' else
+                    ' mixed-type')
+        suffix = 's' if np.prod(self.shape) > 1 else ''
+
+        # string = var_name
+
+        mtype = (' decision' if self.model.mtype == 'R' else
+                 ' random' if self.model.mtype == 'S' else
+                 ' probability' if self.model.mtype == 'P' else
+                 ' expectation of random' if self.model.mtype == 'E' else
+                 ' unknown')
+        var_type = var_type if mtype == ' decision' else ''
+        if self.shape == ():
+            num = 'an' if (var_type + mtype)[0:2] in [' i', ' a', ' e'] else 'a'
+        else:
+            num = 'x'.join([str(size) for size in self.shape])
+
+        string = '{}{}{}{} variable{}'.format(var_name, num, var_type, mtype,
+                                              suffix)
+        return string
 
     def sv_array(self, index=False):
 
@@ -463,6 +464,10 @@ class Vars:
 
         linear = csr_matrix((data, indices, indptr),
                             shape=(dim, self.model.last))
+        # if self.shape == ():
+        #     const = 0
+        # else:
+        #     const = np.zeros(self.shape)
         const = np.zeros(self.shape)
 
         return Affine(self.model, linear, const, self.sparray)
@@ -475,18 +480,40 @@ class Vars:
 
         return self.to_affine().reshape(shape)
 
+    def abs(self):
+
+        return self.to_affine().abs()
+
     def norm(self, degree):
 
         return self.to_affine().norm(degree)
 
+    def square(self):
+
+        return self.to_affine().square()
+
+    def sumsqr(self):
+
+        return self.to_affine().sumsqr()
+
+    def quad(self, qmat):
+
+        return self.to_affine().quad(qmat)
+
     def get(self):
+
+        if self.model.mtype not in 'VR':
+            raise TypeError('Not a decision variable.')
 
         if self.model.solution is None:
             raise SyntaxError('The model is unsolved.')
 
         indices = range(self.first, self.first + self.size)
         var_sol = np.array(self.model.solution.x)[indices]
-        if isinstance(var_sol, np.ndarray):
+        # if isinstance(var_sol, np.ndarray):
+        if self.shape == ():
+            var_sol = var_sol[0]
+        else:
             var_sol = var_sol.reshape(self.shape)
 
         return var_sol
@@ -495,8 +522,9 @@ class Vars:
 
         item_array = index_array(self.shape)
         indices = item_array[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ) * self.ndim)
+
+        # if not isinstance(indices, np.ndarray):
+        #     indices = np.array([indices]).reshape((1, ) * self.ndim)
 
         return VarSub(self, indices)
 
@@ -592,24 +620,26 @@ class VarSub(Vars):
 
     def __repr__(self):
 
-        var_name = '' if self.name is None else self.name + ': '
-        """
-        model_type = ('RSO model' if self.model.mtype == 'R' else
-                      'Robust counterpart' if self.model.mtype == 'C' else
-                      'Support' if self.model.mtype == 'S' else
-                      'Expectation set' if self.model.mtype == 'E' else
-                      'Probability set')
-        """
+        var_name = '' if not self.name else 'slice of {}: '.format(self.name)
         var_type = ('continuous' if self.vtype == 'C' else
                     'binary' if self.vtype == 'B' else 'integer')
-        suffix = 's' if np.prod(self.shape) > 1 else ''
 
-        string = var_name
-        string += 'x'.join([str(dim) for dim in self.indices.shape]) + ' '
-        string += 'slice of '
-        string += var_type + ' variable' + suffix
-        # string += ' ({0})'.format(model_type)
+        mtype = (' decision' if self.model.mtype == 'R' else
+                 'random' if self.model.mtype == 'S' else
+                 'probability' if self.model.mtype == 'P' else
+                 'expectation of random' if self.model.mtype == 'E' else
+                 'unknown')
+        var_type = var_type if mtype == ' decision' else ''
+        if isinstance(self.indices, np.ndarray):
+            num = 'x'.join([str(dim) for dim in self.indices.shape])
+            size = np.prod(self.indices.shape)
+        else:
+            num = 'an' if (var_type + mtype)[0:2] in [' i', ' a', ' e'] else 'a'
+            size = 1
+        suffix = 's' if size > 1 else ''
 
+        string = '{}{} {}{} variable{}'.format(var_name, num, var_type, mtype,
+                                               suffix)
         return string
 
     @property
@@ -695,21 +725,18 @@ class Affine:
         self.linear = linear
         self.const = const
         self.shape = const.shape
-        self.size = np.prod(self.shape)
+        self.size = int(np.prod(self.shape))
         self.sparray = sparray
         self.expect = False
 
     def __repr__(self):
 
-        """
-        model_type = ('RSO model' if self.model.mtype == 'R' else
-                      'Robust counterpart' if self.model.mtype == 'C' else
-                      'Support' if self.model.mtype == 'S' else
-                      'Expectation set' if self.model.mtype == 'E' else
-                      'Probability set')
-        """
-        string = 'x'.join([str(dim) for dim in self.shape]) + ' '
-        string += 'affine expressions '
+        if self.shape == ():
+            string = 'an '
+        else:
+            string = 'x'.join([str(dim) for dim in self.shape]) + ' '
+        suffix = 's' if self.size > 1 else ''
+        string += 'affine expression' + suffix
         # string += '({0})'.format(model_type)
 
         return string
@@ -721,14 +748,14 @@ class Affine:
             self.sparray = self.sv_array()
 
         indices = self.sparray[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ))
+        # if not isinstance(indices, np.ndarray):
+        #     indices = np.array([indices]).reshape((1, ))
 
         # linear = array_to_sparse(indices) @ self.linear
         linear = sv_to_csr(indices) @ self.linear
         const = self.const[item]
-        if not isinstance(const, np.ndarray):
-            const = np.array([const])
+        # if not isinstance(const, np.ndarray):
+        #     const = np.array([const])
 
         return Affine(self.model, linear, const)
 
@@ -754,8 +781,9 @@ class Affine:
     def sv_array(self, index=False):
 
         shape = self.shape
-        shape = shape if isinstance(shape, tuple) else (int(shape), )
-        size = np.prod(shape).item()
+        # shape = shape if isinstance(shape, tuple) else (int(shape), )
+        size = self.size
+        # print(shape)
 
         if index:
             elements = [SparseVec([i], [1], size) for i in range(size)]
@@ -784,7 +812,10 @@ class Affine:
 
     def reshape(self, shape):
 
-        new_const = self.const.reshape(shape)
+        if isinstance(self.const, np.ndarray):
+            new_const = self.const.reshape(shape)
+        else:
+            new_const = np.array([self.const]).reshape(shape)
         return Affine(self.model, self.linear, new_const)
 
     def sum(self, axis=None):
@@ -794,14 +825,14 @@ class Affine:
             self.sparray = self.sv_array()
 
         indices = self.sparray.sum(axis=axis)
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices])
+        # if not isinstance(indices, np.ndarray):
+        #     indices = np.array([indices])
 
         # linear = array_to_sparse(indices) @ self.linear
         linear = sv_to_csr(indices) @ self.linear
         const = self.const.sum(axis=axis)
-        if not isinstance(const, np.ndarray):
-            const = np.array([const])
+        # if not isinstance(const, np.ndarray):
+        #     const = np.array([const])
 
         return Affine(self.model, linear, const)
 
@@ -814,12 +845,32 @@ class Affine:
         return self.__abs__()
 
     def norm(self, degree):
+        """
+        Return the first, second, or infinity norm of a 1-D array.
 
-        shape = self.shape
-        if np.prod(shape) != max(shape):
-            raise ValueError('Funciton "norm" only applies to vectors.')
+        Parameters
+        ----------
+        affine : an array of variables or affine expressions.
+            Input array. The array must be 1-D.
+        degree : {1, 2, numpy.inf}, optional
+            Order of the norm function. It can only be 1, 2, or infinity. The
+            default value is 2, i.e., the Euclidean norm.
 
-        new_shape = (1,) * len(shape)
+        Returns
+        -------
+        n : Convex
+            The norm of the given array.
+        """
+
+        # if np.prod(shape) != max(shape):
+        #     raise ValueError('Funciton "norm" only applies to vectors.')
+        if len(self.shape) != 1:
+            err = 'Improper number of dimensions to norm. '
+            err += 'The array must be 1-D.'
+            raise ValueError(err)
+
+        # shape = self.shape
+        new_shape = ()
         if degree == 1:
             return Convex(self, np.zeros(new_shape), 'M', 1)
         elif degree == np.infty or degree == 'inf':
@@ -827,9 +878,22 @@ class Affine:
         elif degree == 2:
             return Convex(self, np.zeros(new_shape), 'E', 1)
         else:
-            raise ValueError('Incorrect degree for the norm function.')
+            raise ValueError('Invalid norm order for the array.')
 
     def square(self):
+        """
+        Return the element-wise square of an array.
+
+        Parameters
+        ----------
+        affine : an array of variables or affine expression
+            Input array.
+
+        Returns
+        -------
+        n : Convex
+            The element-wise squares of the given array
+        """
 
         size = self.size
         shape = self.shape
@@ -837,15 +901,49 @@ class Affine:
         return Convex(self.reshape((size,)), np.zeros(shape), 'S', 1)
 
     def sumsqr(self):
+        """
+        Return the sum of squares of an array.
+
+        Parameters
+        ----------
+        affine : an array of variables or affine expression
+            Input array. The array must be 1-D.
+
+        Returns
+        -------
+        n : Convex
+            The sum of squares of the given array
+        """
 
         shape = self.shape
-        if np.prod(shape) != max(shape):
-            raise ValueError('Funciton "sumsqr" only applies to vectors.')
+        if len(shape) != 1:
+            err = 'Improper number of dimensions to norm. '
+            err += 'The array must be 1-D.'
+            raise ValueError(err)
 
-        new_shape = (1,) * len(shape)
+        new_shape = ()
         return Convex(self, np.zeros(new_shape), 'Q', 1)
 
     def quad(self, qmat):
+        """
+        Return the quadratic expression affine @ qmat affine.
+
+        Parameters
+        ----------
+        affine : an array of variables or affine expression
+            Input array. The array must be 1-D.
+        qmat : a positive or negative semidefinite matrix.
+
+        Returns
+        -------
+        q : Convex
+            The quadratic expression affine @ qmat affine
+        """
+
+        if len(self.shape) != 1:
+            err = 'Improper number of dimensions to norm. '
+            err += 'The array must be 1-D.'
+            raise ValueError(err)
 
         eighvals = eigh(qmat, eigvals_only=True).round(6)
         if all(eighvals >= 0):
@@ -866,8 +964,11 @@ class Affine:
     def __mul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if self.model.mtype in 'VR' and other.model.mtype in 'SM':
-                other = other.to_affine()
+            other = other.to_affine()
+            if self.model.mtype == other.model.mtype:
+                raise TypeError('Bi-linear expressions are not supported.')
+            elif self.model.mtype in 'VR' and other.model.mtype in 'SM':
+                # other = other.to_affine()
                 if self.shape != other.shape:
                     raffine = self * np.ones(other.to_affine().shape)
                     other = np.ones(self.shape) * other.to_affine()
@@ -887,24 +988,31 @@ class Affine:
                 return RoAffine(raffine, affine, other.model)
             else:
                 return other.__mul__(self)
-
+        elif isinstance(other, (DecRule, DecRuleSub)):
+            return self.__mul__(other.to_affine())
         else:
             other = check_numeric(other)
 
-            if isinstance(other, Real):
-                other = np.array([other])
+            # if isinstance(other, Real):
+            #     other = np.array([other], dtype=float).reshape(self.const.shape)
 
-            new_linear = sparse_mul(other, self.to_affine()) @ self.linear
             new_const = self.const * other
+            # if not isinstance(new_const, np.ndarray):
+            #     new_const = np.array([new_const]).reshape(())
+            if not isinstance(other, np.ndarray):
+                other = np.array([other])
+            new_linear = sparse_mul(other, self.to_affine()) @ self.linear
 
             return Affine(self.model, new_linear, new_const)
 
     def __rmul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if self.model.mtype in 'VR' and other.model.mtype == 'S':
-
-                other = other.to_affine()
+            other = other.to_affine()
+            if self.model.mtype == other.model.mtype:
+                raise TypeError('Bi-linear expressions are not supported.')
+            elif self.model.mtype in 'VR' and other.model.mtype == 'S':
+                # other = other.to_affine()
                 if self.shape != other.shape:
                     raffine = self * np.ones(other.to_affine().shape)
                     other = np.ones(self.shape) * other.to_affine()
@@ -927,20 +1035,27 @@ class Affine:
         else:
             other = check_numeric(other)
 
-            if isinstance(other, Real):
-                other = np.array([other])
+            # if isinstance(other, Real):
+            #     other = np.array([other])
 
-            new_linear = sparse_mul(other, self.to_affine()) @ self.linear
             new_const = self.const * other
+            # if not isinstance(new_const, np.ndarray):
+            #     new_const = np.array([new_const]).reshape(())
+            if not isinstance(other, np.ndarray):
+                other = np.array([other])
+            new_linear = sparse_mul(other, self.to_affine()) @ self.linear
 
             return Affine(self.model, new_linear, new_const)
 
     def __matmul__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            if self.model.mtype in 'VR' and other.model.mtype in 'SM':
+            other = other.to_affine()
+            if self.model.mtype == other.model.mtype:
+                raise TypeError('Bi-linear expressions are not supported.')
+            elif self.model.mtype in 'VR' and other.model.mtype in 'SM':
 
-                other = other.to_affine()
+                # other = other.to_affine()
                 affine = self @ other.const
                 num_rand = other.model.vars[-1].last
 
@@ -1001,8 +1116,8 @@ class Affine:
             other = check_numeric(other)
 
             new_const = self.const @ other
-            if not isinstance(new_const, np.ndarray):
-                new_const = np.array([new_const])
+            # if not isinstance(new_const, np.ndarray):
+            #     new_const = np.array([new_const])
 
             new_linear = sp_lmatmul(other, self, new_const.shape) @ self.linear
 
@@ -1013,8 +1128,8 @@ class Affine:
         other = check_numeric(other)
 
         new_const = other @ self.const
-        if not isinstance(new_const, np.ndarray):
-            new_const = np.array([new_const])
+        # if not isinstance(new_const, np.ndarray):
+        #     new_const = np.array([new_const])
 
         new_linear = sp_matmul(other, self, new_const.shape) @ self.linear
 
@@ -1091,6 +1206,8 @@ class Affine:
     def __le__(self, other):
 
         left = self - other
+        # if left.shape == ():
+        #     left.const = np.array([left.const])
         if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size, )),
@@ -1101,6 +1218,8 @@ class Affine:
     def __ge__(self, other):
 
         left = other - self
+        # if left.shape == ():
+        #     left.const = np.array([left.const])
         if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size,)),
@@ -1111,13 +1230,14 @@ class Affine:
     def __eq__(self, other):
 
         left = self - other
+        # if left.shape == ():
+        #     left.const = np.array([left.const])
         if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size,)),
                              np.ones(left.const.size))
         else:
             return left.__eq__(0)
-        ##########
 
 
 class Convex:
@@ -1135,20 +1255,21 @@ class Convex:
         self.sign = sign
 
     def __repr__(self):
-        xtypes = {'A': 'Absolute functions',
-                  'M': 'One-norm functions',
-                  'E': 'Eclidean norm functions',
-                  'I': 'Infinity norm functions',
-                  'S': 'Element-wise square functions',
-                  'Q': 'Sum of squares functions'}
-        shapes = 'x'.join([str(dim) for dim in self.affine_out.shape])
-        string = shapes + ' ' + xtypes[self.xtype]
+        xtypes = {'A': 'absolute expression',
+                  'M': 'one-norm expression',
+                  'E': 'Eclidean norm expression',
+                  'I': 'infinity norm expression',
+                  'S': 'element-wise square expression',
+                  'Q': 'sum of squares expression'}
+        if self.affine_out.shape == ():
+            shapes = 'an' if self.xtype in 'AEIS' else 'a'
+        else:
+            shapes = 'x'.join([str(dim) for dim in self.affine_out.shape])
+
+        suffix = 's' if self.size > 1 else ''
+        string = shapes + ' ' + xtypes[self.xtype] + suffix
 
         return string
-
-    def __str__(self):
-
-        return self.__repr__()
 
     def __neg__(self):
 
@@ -1232,11 +1353,34 @@ class RoAffine:
         self.ndim = len(affine.shape)
         self.size = affine.size
 
+    def __repr__(self):
+
+        if self.shape == ():
+            string = 'a '
+        else:
+            string = 'x'.join([str(dim) for dim in self.shape]) + ' '
+        suffix = 's' if self.size > 1 else ''
+        string += 'bi-affine expression' + suffix
+
+        return string
+
+    def __getitem__(self, item):
+
+        if self.affine.sparray is None:
+            self.affine.sparray = self.affine.sv_array()
+
+        indices = self.affine.sparray[item]
+
+        trans_array = sv_to_csr(indices)
+        raffine = trans_array @ self.raffine
+        affine = self.affine[item]
+
+        return RoAffine(raffine, affine, self.rand_model)
+
     def sv_array(self, index=False):
 
         shape = self.shape
-        shape = shape if isinstance(shape, tuple) else (int(shape), )
-        size = np.prod(shape).item()
+        size = int(np.prod(shape).item())
 
         if index:
             elements = [SparseVec([i], [1], size) for i in range(size)]
@@ -1316,7 +1460,7 @@ class RoAffine:
                 raise TypeError('Unknown model types.')
         elif isinstance(other, (Real, np.ndarray)):
             if isinstance(other, Real):
-                other = np.array([other])
+                other = np.array([other]).reshape(())
 
             if other.shape == self.shape:
                 raffine = self.raffine
@@ -1428,6 +1572,14 @@ class LinConstr:
         self.sense = sense
         self.sign = sign
 
+    def __repr__(self):
+
+        size = self.linear.shape[0]
+        if size == 1:
+            return '1 linear constraint'
+        else:
+            return '{} linear constraints'.format(size)
+
 
 class CvxConstr:
     """
@@ -1440,6 +1592,14 @@ class CvxConstr:
         self.affine_in = affine_in
         self.affine_out = affine_out
         self.xtype = xtype
+
+    def __repr__(self):
+
+        size = self.affine_out.size
+        if size == 1:
+            return '1 convex constraint'
+        else:
+            return '{} convex constraints'.format(size)
 
 
 class Bounds:
@@ -1484,6 +1644,14 @@ class RoConstr:
         self.sense = sense
         self.support = None
 
+    def __repr__(self):
+
+        size = self.affine.size
+        if size == 1:
+            return '1 robust constraint'
+        else:
+            return '{} robust constraints'.format(size)
+
     def forall(self, *args):
         """
         Specify the uncertainty set of the constraints involving random
@@ -1518,6 +1686,8 @@ class RoConstr:
 
         num_constr, num_rand = self.raffine.shape
         support = self.support if not support else support
+        if support is None:
+            raise RuntimeError('The support of random variables is undefined.')
         size_support = support.linear.shape[1]
         num_rand = min(num_rand, support.linear.shape[0])
 
@@ -1555,8 +1725,6 @@ class RoConstr:
             constr3 = LinConstr(left.model, left.linear,
                                 left.const.reshape(num_rc_constr),
                                 sense3)
-            # constr_list= ((constr1, constr2, constr3) if bounds is None else
-            #                 (constr1, constr2, constr3, bounds))
             constr_list = [constr1, constr2, constr3]
             constr_list += [] if bounds is None else bounds
 
@@ -1587,12 +1755,30 @@ class DecVar(Vars):
         self.fixed = fixed
         self.name = name
 
+    def __repr__(self):
+
+        var_name = self.name + ': ' if self.name else ''
+        string = var_name
+        expr = 'event-wise ' if len(self.event_adapt) > 1 else ''
+        expr += 'static ' if self.fixed else 'affinely adaptive '
+
+        if self.shape == ():
+            string += 'an ' if expr[0] in 'ea' else 'a '
+        else:
+            string += 'x'.join([str(size) for size in self.shape]) + ' '
+
+        suffix = 's' if self.size > 1 else ''
+
+        string += expr + 'decision varaible' + suffix
+
+        return string
+
     def __getitem__(self, item):
 
         item_array = index_array(self.shape)
         indices = item_array[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ) * self.ndim)
+        # if not isinstance(indices, np.ndarray):
+        #     indices = np.array([indices]).reshape((1, ) * self.ndim)
 
         return DecVarSub(self.dro_model, self, indices)
 
@@ -1639,7 +1825,12 @@ class DecVar(Vars):
     def affadapt(self, rvars):
 
         self.fixed = False
-        self[:].affadapt(rvars)
+        if self.shape == ():
+            self.shape = (1, )
+            self[:].affadapt(rvars)
+            self.shape = ()
+        else:
+            self[:].affadapt(rvars)
 
     def __le__(self, other):
 
@@ -1664,7 +1855,12 @@ class DecVar(Vars):
             for eindex in range(len(self.event_adapt)):
                 indices = (self.ro_first + eindex*self.size
                            + np.arange(self.size, dtype=int))
-                outputs.append(var_sol[indices].reshape(self.shape))
+                result = var_sol[indices]
+                if self.shape == ():
+                    result = result[0]
+                else:
+                    result = result.reshape(self.shape)
+                outputs.append(result)
 
             if len(outputs) > 1:
                 ind_label = self.dro_model.series_scen.index
@@ -1707,7 +1903,8 @@ class DecVar(Vars):
     @property
     def E(self):
 
-        return DecAffine(self.dro_model, self.to_affine(), ctype='E')
+        return DecAffine(self.dro_model, self.to_affine(),
+                         fixed=self.fixed, ctype='E')
 
 
 class DecVarSub(VarSub):
@@ -1720,6 +1917,25 @@ class DecVarSub(VarSub):
         self.rand_adapt = dvars.rand_adapt
         self.dvars = dvars
         self.fixed = fixed
+
+    def __repr__(self):
+
+        var_name = '' if not self.name else 'slice of {}: '.format(self.name)
+        string = var_name
+        expr = 'event-wise ' if len(self.event_adapt) > 1 else ''
+        expr += 'static ' if self.fixed else 'affinely adaptive '
+
+        if isinstance(self.indices, np.ndarray):
+            string += 'x'.join([str(dim) for dim in self.indices.shape]) + ' '
+            size = np.prod(self.indices.shape)
+        else:
+            string += 'an ' if expr[0] in 'ea' else 'a '
+            size = 1
+
+        suffix = 's' if size > 1 else ''
+        string += expr + 'decision varaible' + suffix
+
+        return string
 
     def to_affine(self):
 
@@ -1783,7 +1999,8 @@ class DecVarSub(VarSub):
     @property
     def E(self):
 
-        return DecAffine(self.dro_model, self.to_affine(), ctype='E')
+        return DecAffine(self.dro_model, self.to_affine(),
+                         fixed=self.fixed, ctype='E')
 
 
 class RandVar(Vars):
@@ -1806,8 +2023,6 @@ class RandVar(Vars):
 
         item_array = index_array(self.shape)
         indices = item_array[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ) * self.ndim)
 
         return RandVarSub(self, indices)
 
@@ -1862,19 +2077,29 @@ class DecAffine(Affine):
         self.fixed = fixed
         self.ctype = ctype
 
+    def __repr__(self):
+
+        string = 'worst-case expectation of ' if self.ctype == 'E' else ''
+        suffix = 's' if self.size > 1 else ''
+
+        expr = 'affine expression' if self.fixed else 'bi-affine expression'
+        event = 'event-wise ' if len(self.event_adapt) > 1 else ''
+
+        if self.shape == ():
+            string += 'an ' if (event + expr)[0] in 'ea' else 'a '
+        else:
+            string += 'x'.join([str(dim) for dim in self.shape]) + ' '
+
+        string += event + expr + suffix
+
+        return string
+
     def reshape(self, shape):
 
         expr = super().reshape(shape)
 
         return DecAffine(self.dro_model, expr,
                          self.event_adapt, self.fixed, self.ctype)
-
-#     def sum(self, axis=None):
-
-#         expr = super().sum(axis)
-
-#         return DecAffine(expr.dro_model, expr,
-#                          self.event_adapt, self.fixed, self.ctype)
 
     def to_affine(self):
 
@@ -1887,6 +2112,13 @@ class DecAffine(Affine):
     def T(self):
 
         expr = super().T
+
+        return DecAffine(self.dro_model, expr, self.event_adapt,
+                         self.fixed, self.ctype)
+
+    def __getitem__(self, indices):
+
+        expr = super().__getitem__(indices)
 
         return DecAffine(self.dro_model, expr, self.event_adapt,
                          self.fixed, self.ctype)
@@ -1950,20 +2182,23 @@ class DecAffine(Affine):
                 raise TypeError('Incorrect expectation expressions.')
             event_adapt = comb_set(self.event_adapt, other.event_adapt)
             ctype = other.ctype
+            fixed = other.fixed
         elif isinstance(other, DecRoAffine):
             event_adapt = comb_set(self.event_adapt, other.event_adapt)
             ctype = other.ctype
+            fixed = False
         elif isinstance(other, (Real, np.ndarray, Affine, RoAffine,
                                 Vars, VarSub)) or sp.issparse(other):
             event_adapt = self.event_adapt
             ctype = 'R'
+            fixed = True
         else:
             return other.__add__(self)
 
-        if len(event_adapt) == 1:
-            fixed = True
-        else:
-            fixed = False
+        # if len(event_adapt) == 1:
+        #     fixed = True
+        # else:
+        #     fixed = False
 
         fixed = fixed and self.fixed
         ctype = 'E' if 'E' in (self.ctype + ctype) else 'R'
@@ -2029,7 +2264,7 @@ class DecAffine(Affine):
         if isinstance(left, DecAffine):
             return DecLinConstr(left.model, left.linear, -left.const,
                                 np.zeros(left.size), left.event_adapt,
-                                left.ctype)
+                                left.fixed, left.ctype)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 0, left.event_adapt, left.ctype)
         elif isinstance(left, DecConvex):
@@ -2042,7 +2277,7 @@ class DecAffine(Affine):
         if isinstance(left, DecAffine):
             return DecLinConstr(left.model, left.linear, -left.const,
                                 np.zeros(left.size), left.event_adapt,
-                                left.ctype)
+                                left.fixed, left.ctype)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 0, left.event_adapt, left.ctype)
         elif isinstance(left, DecConvex):
@@ -2053,7 +2288,8 @@ class DecAffine(Affine):
         left = self - other
         if isinstance(left, DecAffine):
             return DecLinConstr(left.model, left.linear, -left.const,
-                                np.ones(left.size), left.event_adapt)
+                                np.ones(left.size),
+                                left.fixed, left.event_adapt)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 1, left.event_adapt, left.ctype)
 
@@ -2061,7 +2297,7 @@ class DecAffine(Affine):
     def E(self):
 
         affine = Affine(self.model, self.linear, self.const)
-        return DecAffine(self.dro_model, affine, ctype='E')
+        return DecAffine(self.dro_model, affine, fixed=self.fixed, ctype='E')
 
 
 class DecConvex(Convex):
@@ -2224,12 +2460,27 @@ class DecRoAffine(RoAffine):
 class DecLinConstr(LinConstr):
 
     def __init__(self, model, linear, const, sense,
-                 event_adapt=None, ctype='R'):
+                 event_adapt=None, fixed=True, ctype='R'):
 
         super().__init__(model, linear, const, sense)
         self.event_adapt = event_adapt
+        self.fixed = fixed
         self.ctype = ctype
         self.ambset = None
+
+    def __repr__(self):
+
+        size = self.linear.shape[0]
+        suffix = 's' if size > 1 else ''
+        if self.ctype == 'E':
+            event = ' '
+            ctype = ' of expectation' + suffix
+        else:
+            event = ' event-wise ' if len(self.event_adapt) > 1 else ' '
+            ctype = ''
+        expr = 'linear' if self.fixed else 'robust'
+
+        return '{}{}{} constraint{}{}'.format(size, event, expr, suffix, ctype)
 
 
 class DecBounds(Bounds):
@@ -2260,6 +2511,20 @@ class DecRoConstr(RoConstr):
         self.ctype = ctype
         self.ambset = None
 
+    def __repr__(self):
+
+        size = self.affine.size
+        suffix = 's' if size > 1 else ''
+        if self.ctype == 'E':
+            event = ' '
+            ctype = ' of expectation' + suffix
+        else:
+            event = ' event-wise ' if len(self.event_adapt) > 1 else ' '
+            ctype = ''
+
+        string = '{}{}robust constriant{}{}'.format(size, event, suffix, ctype)
+        return string
+
     def forall(self, ambset):
 
         self.ambset = ambset
@@ -2271,30 +2536,29 @@ class DecRule:
 
     __array_priority__ = 102
 
-    def __init__(self, model, shape=(1,), name=None,):
+    def __init__(self, model, shape=(), name=None,):
 
         self.model = model
         self.name = name
         self.fixed = model.dvar(shape, 'C')
         self.shape = self.fixed.shape
-        self.size = np.prod(self.shape)
+        self.size = int(np.prod(self.shape))
         self.depend = None
         self.roaffine = None
         self.var_coeff = None
 
-    def __str__(self):
+    def __repr__(self):
 
         suffix = 's' if np.prod(self.shape) > 1 else ''
 
         string = '' if self.name is None else self.name + ': '
-        string += 'x'.join([str(size) for size in self.shape]) + ' '
+        if self.shape == ():
+            string += 'a '
+        else:
+            string += 'x'.join([str(size) for size in self.shape]) + ' '
         string += 'decision rule variable' + suffix
 
         return string
-
-    def __repr__(self):
-
-        return self.__str__()
 
     def reshape(self, shape):
 
@@ -2353,6 +2617,11 @@ class DecRule:
                 self.roaffine = self.fixed.to_affine()
 
             return self.roaffine
+
+    @property
+    def T(self):
+
+        return self.to_affine().T
 
     def __getitem__(self, item):
 
@@ -2468,6 +2737,11 @@ class DecRuleSub:
 
         return RoAffine(raffine, affine, self.dec_rule.model.sup_model)
 
+    @property
+    def T(self):
+
+        return self.to_affine().T
+
     def __neg__(self):
 
         return - self.to_affine()
@@ -2573,6 +2847,10 @@ class LinProg:
 
         return table
 
+    def show(self):
+
+        return self.showlc()
+
     def solve(self, solver):
 
         return solver.solve(self)
@@ -2596,16 +2874,12 @@ class Scen:
         self.series = series
         self.p = pr
 
-    def __str__(self):
+    def __repr__(self):
 
         if isinstance(self.series, Sized):
             return 'Scenario indices: \n' + self.series.__str__()
         else:
             return 'Scenario index: \n' + self.series.__str__()
-
-    def __repr__(self):
-
-        return self.__str__()
 
     def __getitem__(self, indices):
 

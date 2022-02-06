@@ -7,6 +7,7 @@ import cvxpy as cp
 import numpy as np
 import warnings
 import time
+from .socp import SOCProg
 from .lp import Solution
 
 
@@ -45,8 +46,11 @@ def solve(formula, display=True, export=False, params={}):
         bounds.append(x[indices_bin] >= 0)
         bounds.append(x[indices_bin] <= 1)
 
-    socs = [cp.SOC(x[ind[0]], x[ind[1:]])
-            for ind in formula.qmat]
+    if isinstance(formula, SOCProg):
+        socs = [cp.SOC(x[ind[0]], x[ind[1:]])
+                for ind in formula.qmat]
+    else:
+        socs = []
 
     prob = cp.Problem(cp.Minimize(formula.obj@x), constraints+bounds+socs)
 
