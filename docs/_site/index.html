@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -84,6 +84,7 @@
     <tr>
       <th style="text-align: left">Solver</th>
       <th style="text-align: left">License  type</th>
+      <th style="text-align: left">Required version</th>
       <th style="text-align: left">RSOME interface</th>
       <th style="text-align: left">Integer variables</th>
       <th style="text-align: left">Second-order cone constraints</th>
@@ -93,6 +94,7 @@
     <tr>
       <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
       <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 1.2.1</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
@@ -100,6 +102,7 @@
     <tr>
       <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
       <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 0.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
@@ -107,13 +110,23 @@
     <tr>
       <td style="text-align: left"><a href="https://developers.google.com/optimization/install">OR-Tools</a></td>
       <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 7.5.7466</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
+      <td style="text-align: left"><a href="https://www.cvxpy.org/install/index.html">CVXPY</a></td>
+      <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 1.1.18</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cvx_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+    <tr>
       <td style="text-align: left"><a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Gurobi</a></td>
       <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 9.1.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -121,6 +134,7 @@
     <tr>
       <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
       <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 9.1.11</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -128,6 +142,7 @@
     <tr>
       <td style="text-align: left"><a href="https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html">CPLEX</a></td>
       <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 12.9.0.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -173,14 +188,14 @@ Running time: 0.0426s
 
 <p>You may find the interpretation of the solution status code of <code class="language-plaintext highlighter-rouge">linprog()</code> from the website <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html"><code class="language-plaintext highlighter-rouge">scipy.optimize.linprog</code></a>. The status code <code class="language-plaintext highlighter-rouge">0</code> suggests that the problem was solved to optimality (subject to tolerances), and an optimal solution is available. The optimal solution and the corresponding objective value can be attained by the <code class="language-plaintext highlighter-rouge">get()</code> method.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="s">'x:'</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
-<span class="k">print</span><span class="p">(</span><span class="s">'y:'</span><span class="p">,</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
-<span class="k">print</span><span class="p">(</span><span class="s">'Objective:'</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="s">'x: {:.3f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'y: {:.3f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">()))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Objective: {:.3f}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()))</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>x: [4.8]
-y: [2.]
-Objective: 22.4
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>x: 4.800
+y: 2.000
+Objective: 22.400
 </code></pre></div></div>
 
 <p>The example above shows that RSOME models can be formulated via straightforward and highly readable algebraic expressions, and the formulated model can be transformed into a standard form, which is then solved by the integrated solver. The basic information of the standard form can be retrieved by calling the <code class="language-plaintext highlighter-rouge">do_math()</code> method of the RSOME model object.</p>

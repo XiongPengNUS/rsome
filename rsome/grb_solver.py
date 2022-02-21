@@ -11,7 +11,7 @@ from .socp import SOCProg
 from .lp import Solution
 
 
-def solve(formula, display=True, export=False, params={}):
+def solve(formula, display=True, params={}):
 
     nv = formula.linear.shape[1]
     vtype = list(formula.vtype)
@@ -26,8 +26,10 @@ def solve(formula, display=True, export=False, params={}):
     const_eq = formula.const[indices_eq]
     const_ineq = formula.const[indices_ineq]
     if len(indices_eq) > 0:
+        # grb.addMConstr(linear_eq, x, '=', const_eq)
         grb.addMConstrs(linear_eq, x, '=', const_eq)
     if len(indices_ineq) > 0:
+        # grb.addMConstr(linear_ineq, x, '<', const_ineq)
         grb.addMConstrs(linear_ineq, x, '<', const_ineq)
 
     if isinstance(formula, SOCProg):
@@ -43,7 +45,10 @@ def solve(formula, display=True, export=False, params={}):
     grb.setParam('LogToConsole', 0)
     try:
         for param, value in params.items():
+            if eval('grb.Params.{}'.format(param)) is None:
+                raise ValueError('Unknown parameter')
             grb.setParam(param, value)
+
     except (TypeError, ValueError):
         raise ValueError('Incorrect parameters or values.')
     if display:
@@ -54,8 +59,8 @@ def solve(formula, display=True, export=False, params={}):
         print('Solution status: {0}'.format(grb.Status))
         print('Running time: {0:0.4f}s'.format(grb.Runtime))
 
-    if export:
-        grb.write("out.lp")
+    # if export:
+    #     grb.write("out.lp")
 
     try:
         solution = Solution(grb.ObjVal, grb.getAttr('X'), grb.Status)
