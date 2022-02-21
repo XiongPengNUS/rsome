@@ -8,22 +8,20 @@ import numpy as np
 import warnings
 import time
 from .lp import Solution
+from .socp import SOCProg
 
 
-def solve(formula, display=True, export=False, params={}):
+def solve(formula, display=True, params={}):
 
     cpx = cplex.Cplex()
 
-    obj = formula.obj.flatten()
+    # obj = formula.obj.flatten()
     linear = formula.linear
     row = linear.shape[0]
     spmat = [[linear.indices[linear.indptr[i]:linear.indptr[i + 1]].tolist(),
               linear.data[linear.indptr[i]:linear.indptr[i + 1]].tolist()]
              for i in range(row)]
     sense = ['E' if s == 1 else 'L' for s in formula.sense]
-    const = formula.const
-    ub = formula.ub
-    lb = formula.lb
     vtype = [cpx.variables.type.integer if vt == 'I' else
              cpx.variables.type.binary if vt == 'B' else
              cpx.variables.type.continuous for vt in formula.vtype]
@@ -37,11 +35,12 @@ def solve(formula, display=True, export=False, params={}):
     cpx.linear_constraints.add(lin_expr=spmat,
                                senses=sense, rhs=formula.const)
 
-    for cone in formula.qmat:
-        cone_data = [-1] + [1] * (len(cone) - 1)
-        cone = [int(index) for index in cone]
-        q = cplex.SparseTriple(ind1=cone, ind2=cone, val=cone_data)
-        cpx.quadratic_constraints.add(quad_expr=q)
+    if isinstance(formula, SOCProg):
+        for cone in formula.qmat:
+            cone_data = [-1] + [1] * (len(cone) - 1)
+            cone = [int(index) for index in cone]
+            q = cplex.SparseTriple(ind1=cone, ind2=cone, val=cone_data)
+            cpx.quadratic_constraints.add(quad_expr=q)
 
     if display:
         print('Being solved by CPLEX...', flush=True)
@@ -53,7 +52,7 @@ def solve(formula, display=True, export=False, params={}):
         for param, value in params.items():
             text = 'cpx.parameters.' + param + '.set({0})'.format(value)
             eval(text)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, AttributeError):
         raise ValueError('Incorrect parameters or values.')
 
     t0 = time.time()

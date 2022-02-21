@@ -2,7 +2,8 @@ import numpy as np
 import scipy.sparse as sp
 from numbers import Real
 from scipy.sparse import csr_matrix
-from collections import Iterable
+from collections.abc import Iterable
+from typing import List
 
 
 def flat(a_list):
@@ -33,56 +34,76 @@ def sparse_mul(ndarray, affine):
 
 def sp_matmul(ndarray, affine, shape):
 
-    size = np.prod(shape)
+    size = int(np.prod(shape))
 
-    left = (ndarray.reshape((ndarray.size//ndarray.shape[-1],
-                             ndarray.shape[-1])) if ndarray.ndim > 1
-            else ndarray.reshape((1, ndarray.size)))
-    right = (affine if len(affine.shape) > 1
-             else affine.reshape((affine.size, 1)))
+    if len(shape) < 1:
+        return csr_matrix(ndarray)
+    else:
+        if len(affine.shape) == 1:
+            affine = affine.reshape((affine.size, 1))
+            row, col = shape[-1], 1
+        elif len(ndarray.shape) == 1:
+            ndarray = ndarray.reshape((1, ndarray.size))
+            row, col = 1, shape[-1]
+            # outer = shape[:-1]
+        else:
+            row, col = shape[-2], shape[-1]
+            # outer = shape[:-2]
 
-    row, inner = left.shape
-    column = right.shape[-1]
+        inner = ndarray.shape[-1]
 
-    index = np.arange(affine.size).reshape(affine.shape)
-    indim = index.ndim
-    index = np.transpose(np.tile(index, (1, row)),
-                         axes=list(range(indim-2)) + [indim-1,
-                                                      indim-2]).flatten()
-    index = np.tile(index, (size*inner//index.size, ))
+        affine_index = np.arange(affine.size).reshape(affine.shape)
+        dim = len(affine.shape)
+        axes = list(range(dim-2)) + [dim-1, dim-2]
+        index = np.transpose(np.tile(affine_index, row), axes=axes).flatten()
+        index_rep = size // (len(index)//inner)
+        if index_rep > 1:
+            index = np.tile(index, index_rep)
 
-    data = np.tile(ndarray, (1, column)).flatten()
-    data = np.tile(data, size*inner//data.size)
+        data = np.tile(ndarray, col).flatten()
+        data_rep = size // (len(data)//inner)
+        if data_rep > 1:
+            data = np.tile(data, data_rep)
 
-    indptr = [inner*i for i in range(size+1)]
+        indptr = [inner*i for i in range(size+1)]
 
-    return csr_matrix((data, index, indptr), shape=[size, affine.size])
+        return csr_matrix((data, index, indptr), shape=[size, affine.size])
 
 
 def sp_lmatmul(ndarray, affine, shape):
 
     size = int(np.prod(shape))
 
-    left = (affine.reshape((affine.size // affine.shape[-1],
-                            affine.shape[-1])) if len(affine.shape) > 1
-            else affine.reshape((1, affine.size)))
-    right = (ndarray if ndarray.ndim > 1
-             else ndarray.reshape((ndarray.size, 1)))
+    if len(shape) <= 0:
+        return csr_matrix(ndarray)
+    else:
+        if len(affine.shape) == 1:
+            affine = affine.reshape((1, affine.size))
+            row, col = 1, shape[-1]
+        elif len(ndarray.shape) == 1:
+            ndarray = ndarray.reshape((ndarray.size, 1))
+            row, col = shape[-1], 1
+        else:
+            row, col = shape[-2], shape[-1]
 
-    row, inner = left.shape
-    column = right.shape[-1]
+        inner = affine.shape[-1]
 
-    index = np.tile(np.arange(left.size).reshape(left.shape),
-                    (1, column)).flatten()
-    index = np.tile(index, (size * inner // index.size))
-    andim = right.ndim
-    data = np.tile(np.transpose(right,
-                                axes=list(range(andim - 2)) + [andim - 1,
-                                                               andim - 2]),
-                   (size * inner // ndarray.size, 1)).flatten()
-    indptr = [inner * i for i in range(size + 1)]
+        affine_index = np.arange(affine.size).reshape(affine.shape)
+        index = np.tile(affine_index, col).flatten()
+        index_rep = size // (len(index)//inner)
+        if index_rep > 1:
+            index = np.tile(index, index_rep)
 
-    return csr_matrix((data, index, indptr), shape=[size, affine.size])
+        dim = len(ndarray.shape)
+        axes = list(range(dim-2)) + [dim-1, dim-2]
+        data = np.transpose(np.tile(ndarray, row), axes=axes).flatten()
+        data_rep = size // (len(data)//inner)
+        if data_rep > 1:
+            data = np.tile(data, data_rep)
+
+        indptr = [inner*i for i in range(size+1)]
+
+        return csr_matrix((data, index, indptr), shape=[size, affine.size])
 
 
 def sp_trans(affine):
@@ -105,17 +126,6 @@ def index_array(shape):
     return np.arange(size, dtype=int).reshape(shape)
 
 
-def sparse_array(shape):
-
-    shape = shape if isinstance(shape, tuple) else (int(shape), )
-    size = np.prod(shape).item()
-    sparse = csr_matrix(([1.0]*size, np.arange(size, dtype=int),
-                         np.arange(size+1, dtype=int)), (size, size))
-    elements = [sparse[i, :] for i in range(size)]
-
-    return np.array(elements).reshape(shape)
-
-
 def array_to_sparse(array):
 
     size = array.size
@@ -135,8 +145,12 @@ def array_to_sparse(array):
 
 def sv_to_csr(array):
 
-    size = array.size
-    all_items = list(array.reshape((size, )))
+    if not isinstance(array, np.ndarray):
+        size = 1
+        all_items = [array]
+    else:
+        size = array.size
+        all_items = list(array.reshape((size, )))
 
     indices = np.concatenate(tuple(item.index for item in all_items))
     data = np.concatenate(tuple([item.value for item in all_items]))
@@ -155,7 +169,7 @@ def sv_to_csr(array):
 def check_numeric(array):
 
     array = np.array(array.todense()) if sp.issparse(array) else array
-    array = np.array([array]) if not isinstance(array, np.ndarray) else array
+    # array = np.array([array]) if not isinstance(array, np.ndarray) else array
 
     if isinstance(array, np.ndarray):
         if not isinstance(array.flat[0], np.number):
@@ -197,8 +211,8 @@ def comb_set(s1, s2):
     dc = {item: str(d1[item]) + '-' + str(d2[item])
           for item in range(len(d1))}
 
-    values = []
-    output = []
+    values: List[str] = []
+    output: List[List[int]] = []
     for key in dc:
         if dc[key] in values:
             index = values.index(dc[key])
@@ -212,20 +226,20 @@ def comb_set(s1, s2):
 
 def norm(affine, degree=2):
     """
-    Return the first, second, or infinity norm of an array.
+    Return the first, second, or infinity norm of a 1-D array.
 
     Parameters
     ----------
-    affine : an array of variables or affine expression
-        Input array. The array must be a vector, i.e., the size of the
-        array must be the same as the largest dimension.
+    affine : an array of variables or affine expressions.
+        Input array. The array must be 1-D.
     degree : {1, 2, numpy.inf}, optional
-        Order of the norm function. It can only be 1, 2, or infinity.
+        Order of the norm function. It can only be 1, 2, or infinity. The
+        default value is 2, i.e., the Euclidean norm.
 
     Returns
     -------
     n : Convex
-        The norm of the given array
+        The norm of the given array.
     """
 
     return affine.norm(degree)
@@ -256,8 +270,7 @@ def sumsqr(affine):
     Parameters
     ----------
     affine : an array of variables or affine expression
-        Input array. The array must be a vector, i.e., the size of the
-        array must be the same as the largest dimension.
+        Input array. The array must be 1-D.
 
     Returns
     -------
@@ -275,8 +288,7 @@ def quad(affine, qmat):
     Parameters
     ----------
     affine : an array of variables or affine expression
-        Input array. The array must be a vector, i.e., the size of the
-        array must be the same as the largest dimension.
+        Input array. The array must be 1-D.
     qmat : a positive or negative semidefinite matrix.
 
     Returns

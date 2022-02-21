@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -181,19 +181,25 @@
     <p><code class="language-plaintext highlighter-rouge">sumsqr()</code> for sum of squares**: the function <code class="language-plaintext highlighter-rouge">sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code class="language-plaintext highlighter-rouge">size</code> to be the same as maximum <code class="language-plaintext highlighter-rouge">shape</code> value.</p>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">norm()</code> for norms of vectors: the function <code class="language-plaintext highlighter-rouge">norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code class="language-plaintext highlighter-rouge">degree</code> to specify the degree of the norm function. The default value of the <code class="language-plaintext highlighter-rouge">degree</code> argument is 2. Examples of specifying convex constraints are provided below.</p>
+    <p><code class="language-plaintext highlighter-rouge">norm()</code> for norms of vectors: the function <code class="language-plaintext highlighter-rouge">norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code class="language-plaintext highlighter-rouge">degree</code> to specify the degree of the norm function. The default value of the <code class="language-plaintext highlighter-rouge">degree</code> argument is 2.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">quad()</code> for quadratic terms <code class="language-plaintext highlighter-rouge">x @ Q @ x</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a vector, and <code class="language-plaintext highlighter-rouge">Q</code> is a positive semidefinite matrix.</p>
   </li>
 </ul>
+
+<p>Examples of specifying convex constraints are provided below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>               <span class="c1"># constraints with absolute terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>       <span class="c1"># a constraint with sum of squares
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>        <span class="c1"># constraints with squared terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>    <span class="c1"># a constraint with 2-norm terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># a constraint with 1-norm terms
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># a constraint with infinity norm
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>                   <span class="c1"># constraints with absolute terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>           <span class="c1"># a constraint with sum of squares
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>            <span class="c1"># constraints with squared terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>        <span class="c1"># a constraint with 2-norm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>     <span class="c1"># a constraint with 1-norm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>      <span class="c1"># a constraint with infinity norm
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># a constraint with a quadratic term
 </span></code></pre></div></div>
 
 <p>Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as <code class="language-plaintext highlighter-rouge">abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
@@ -259,7 +265,7 @@ Number of coefficients:       7
 Number of SOC constraints:    1
 </code></pre></div></div>
 
-<p>More details on the standard forms can be retrieved by the method <code class="language-plaintext highlighter-rouge">show()</code>, and the problem information is summarized in a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> table.</p>
+<p>More details on the standard forms can be retrieved by the method <code class="language-plaintext highlighter-rouge">show()</code>, and the problem information is summarized in a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> data table.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">primal</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div></div>
@@ -528,33 +534,52 @@ Number of SOC constraints:    1
 </table>
 </div>
 
+<p>Besides returned as a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> data table, the standard form can also be saved as a <code class="language-plaintext highlighter-rouge">.lp</code> file using the <code class="language-plaintext highlighter-rouge">to_lp()</code> method.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>to_lp(name='out') method of rsome.socp.SOCProg instance
+Export the standard form of the optimization model as a .lp file.
+
+    Parameters
+    ----------
+        name : file name of the .lp file
+
+    Notes
+    -----
+    There is no need to specify the .lp extension. The default file name
+    is "out".
+</code></pre></div></div>
+
+<p>The code segment below exports the standard form of the model as a file named “model.lp”.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">do_math</span><span class="p">().</span><span class="n">to_lp</span><span class="p">(</span><span class="s">'model'</span><span class="p">)</span>
+</code></pre></div></div>
+
 <p>The standard form of a model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, export=False, params={}) method of rsome.ro.Model instance
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, params={}) method of rsome.ro.Model instance
 Solve the model with the selected solver interface.
 
     Parameters
     ----------
-        solver : {None, lpg_solver, grb_solver, msk_solver}
+        solver : {None, lpg_solver, clp_solver, ort_solver, cvx_solver,
+                  grb_solver, msk_solver, cpx_solver}
             Solver interface used for model solution. Use default solver
-            if solver=None.
+            lpg_solver if solver=None.
         display : bool
             Display option of the solver interface.
-        export : bool
-            Export option of the solver interface. A standard model file
-            is generated if the option is True.
         params : dict
             A dictionary that specifies parameters of the selected solver.
             So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 </code></pre></div></div>
 
-<p>It can be seen that the user needs to specify the <code class="language-plaintext highlighter-rouge">solver</code> argument for selecting the solver interface when calling the <code class="language-plaintext highlighter-rouge">solve()</code> method. The current version RSOME uses the default LP solver if  <code class="language-plaintext highlighter-rouge">solver=None</code> or <code class="language-plaintext highlighter-rouge">solver=lpg_solver</code>. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please use other solvers by specifying the <code class="language-plaintext highlighter-rouge">solver</code> parameter to be the values in the table below.</p>
+<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver <code class="language-plaintext highlighter-rouge">linprog</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package as the default solver. Warnings will be raised if integer variables or second-order cone constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.</p>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: left">Solver</th>
       <th style="text-align: left">License  type</th>
+      <th style="text-align: left">Required version</th>
       <th style="text-align: left">RSOME interface</th>
       <th style="text-align: left">Integer variables</th>
       <th style="text-align: left">Second-order cone constraints</th>
@@ -564,6 +589,7 @@ Solve the model with the selected solver interface.
     <tr>
       <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
       <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 1.2.1</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
@@ -571,6 +597,7 @@ Solve the model with the selected solver interface.
     <tr>
       <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
       <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 0.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
@@ -578,13 +605,23 @@ Solve the model with the selected solver interface.
     <tr>
       <td style="text-align: left"><a href="https://developers.google.com/optimization/install">OR-Tools</a></td>
       <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 7.5.7466</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
+      <td style="text-align: left"><a href="https://www.cvxpy.org/install/index.html">CVXPY</a></td>
+      <td style="text-align: left">Open-source</td>
+      <td style="text-align: left">&gt;= 1.1.18</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cvx_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+    </tr>
+    <tr>
       <td style="text-align: left"><a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Gurobi</a></td>
       <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 9.1.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -592,6 +629,7 @@ Solve the model with the selected solver interface.
     <tr>
       <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
       <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 9.1.11</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -599,6 +637,7 @@ Solve the model with the selected solver interface.
     <tr>
       <td style="text-align: left"><a href="https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html">CPLEX</a></td>
       <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 12.9.0.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -606,13 +645,22 @@ Solve the model with the selected solver interface.
   </tbody>
 </table>
 
-<p>The model above involves second-order cone constraints, so we could use either Gurobi or Mosek to solve it. The interfaces for these solvers are imported by the following commands.</p>
+<p>The model above involves second-order cone constraints, so we could use CVXPY, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cvx_solver</span> <span class="k">as</span> <span class="n">cvx</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cpx_solver</span> <span class="k">as</span> <span class="n">cpx</span>
 </code></pre></div></div>
 
 <p>The interfaces can be then used to attain the solution.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cvx</span><span class="p">)</span>
+</code></pre></div></div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by CVXPY...
+Solution status: optimal
+Running time: 0.0376s
+</code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
 </code></pre></div></div>
@@ -630,15 +678,31 @@ Solution status: optimal
 Running time: 0.0210s
 </code></pre></div></div>
 
-<p>The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpx</span><span class="p">)</span>
+</code></pre></div></div>
 
-<p>Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the <code class="language-plaintext highlighter-rouge">dict</code> type argument <code class="language-plaintext highlighter-rouge">params</code> in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;..., }</code>. For example, the following code solves the problem using Gurobi while configuring the parameter <code class="language-plaintext highlighter-rouge">LogToConsole</code> to be <code class="language-plaintext highlighter-rouge">True</code> so that the log information is displayed in the coding Console.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by CPLEX...
+Solution status: optimal
+Running time: 0.0175s
+</code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span>                                <span class="c1"># Use Gurobi as the solver
-</span>            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'LogToConsole'</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>      <span class="c1"># Set LogToConsole to be True
-</span></code></pre></div></div>
+<p>It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument <code class="language-plaintext highlighter-rouge">display</code> to be <code class="language-plaintext highlighter-rouge">False</code>.</p>
 
-<p>For Gurobi, you may find the parameter names and their values from <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">Parameters</a>. Parameter information on MOSEK is given by <a href="https://docs.mosek.com/9.2/pythonfusion/parameters.html">Parameters (alphabetical list sorted by type)</a>. CPLEX solver parameters can be found from <a href="https://www.ibm.com/support/knowledgecenter/SSSA5P_12.7.1/ilog.odms.cplex.help/CPLEX/Parameters/topics/introListAlpha.html">List of CPLEX parameters</a>. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
+<p>The third argument <code class="language-plaintext highlighter-rouge">params</code> is used to tune solver parameters. The current RSOME package enables users to adjust parameters for commercials solvers, <i>i.e.</i>, Gurobi, MOSEK, and CPLEX. The <code class="language-plaintext highlighter-rouge">params</code> argument is a <code class="language-plaintext highlighter-rouge">dict</code> type object in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;, ..., &lt;paramk&gt;: &lt;valuek&gt;}</code>. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
+<ul>
+  <li>Gurobi parameters: <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">https://www.gurobi.com/documentation/9.1/refman/parameters.html</a></li>
+  <li>MOSEK parameters: <a href="https://docs.mosek.com/latest/pythonapi/parameters.html">https://docs.mosek.com/latest/pythonapi/parameters.html</a></li>
+  <li>CPLEX parameters: <a href="https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters">https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters</a></li>
+</ul>
+
+<p>For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be <code class="language-plaintext highlighter-rouge">1e-2</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'MIPGap'</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">})</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mio_rel_gap_const'</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">})</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpx</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mip.tolerances.mipgap'</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. The <code class="language-plaintext highlighter-rouge">get()</code> method raises an error message if no optimal solution is available if the problem is unsolved or the model is infeasible, unbounded, or encounters numeric issues.</p>
 
 <h2 id="application-examples-">Application Examples <a name="section1.4"></a></h2>
 

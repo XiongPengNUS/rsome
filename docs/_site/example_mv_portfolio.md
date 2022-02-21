@@ -40,7 +40,8 @@ model = ro.Model('mv-portfolio')            # create an RSOME model
 
 x = model.dvar(n)                           # fractions of investment
 
-model.max(p@x - phi*rso.sumsqr(sigma*x))    # mean-variance objective
+Q = np.diag(sigma**2)                       # covariance matrix
+model.max(p@x - phi*rso.quad(x, Q))         # mean-variance objective
 model.st(x.sum() == 1)                      # summation of x is one
 model.st(x >= 0)                            # x is non-negative
 

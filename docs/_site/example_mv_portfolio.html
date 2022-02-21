@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=9225c52ca1b1128be08003ed5267aecc76be3897">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -97,7 +97,8 @@
 </span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                           <span class="c1"># fractions of investment
 </span>
-<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">phi</span><span class="o">*</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">sigma</span><span class="o">*</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># mean-variance objective
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>                       <span class="c1"># covariance matrix
+</span><span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">phi</span><span class="o">*</span><span class="n">rso</span><span class="p">.</span><span class="n">quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">))</span>         <span class="c1"># mean-variance objective
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                      <span class="c1"># summation of x is one
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                            <span class="c1"># x is non-negative
 </span>
