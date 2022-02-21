@@ -12,7 +12,7 @@ import time
 from .lp import Solution
 
 
-def solve(formula, display=True, export=False, params={}):
+def solve(formula, display=True, params={}):
 
     try:
         if formula.qmat:
@@ -56,9 +56,9 @@ def solve(formula, display=True, export=False, params={}):
 
     nbv = sum(is_bin)
     if nbv:
-        bv = s.addVariable('bv', nbv)
-        s += bv <= 1
-        s += bv >= 0
+        bv = s.addVariable('bv', nbv, isInt=True)
+        s += bv <= np.minimum(1, ub[is_bin])
+        s += bv >= np.maximum(0, lb[is_bin])
         obj_expr += CyLPArray(obj[is_bin]) * bv
     s.objective = obj_expr
 
@@ -71,7 +71,7 @@ def solve(formula, display=True, export=False, params={}):
         if nbv:
             left += eq_linear[:, is_bin] * bv
 
-        s += left == eq_const
+        s += (left == eq_const)
 
     if ineq_linear.shape[0] > 0:
         left = 0
@@ -82,29 +82,35 @@ def solve(formula, display=True, export=False, params={}):
         if nbv:
             left += ineq_linear[:, is_bin] * bv
 
-        s += left <= ineq_const
+        s += (left <= ineq_const)
+        # print(ineq_linear[:, is_bin].toarray())
+
+    cbcModel = s.getCbcModel()
 
     if display:
         print('Being solved by CyLP...', flush=True)
         time.sleep(0.2)
     t0 = time.time()
-    status = s.primal()
+    # status = s.primal()
+    cbcModel.solve()
     stime = time.time() - t0
+    status = cbcModel.status
     if display:
         print('Solution status: {0}'.format(status))
         print('Running time: {0:0.4f}s'.format(stime))
 
-    try:
+    if status == 'solution':
         x_sol = np.zeros(linear.shape[1])
         if ncv:
-            x_sol[is_con] = s.primalVariableSolution['cv']
+            x_sol[is_con] = cbcModel.primalVariableSolution['cv']
         if niv:
-            x_sol[is_int] = s.primalVariableSolution['iv'].round()
+            x_sol[is_int] = cbcModel.primalVariableSolution['iv']
         if nbv:
-            x_sol[is_bin] = s.primalVariableSolution['bv'].round()
+            x_sol[is_bin] = cbcModel.primalVariableSolution['bv']
 
-        solution = Solution(s.objectiveValue, x_sol, status)
-    except AttributeError:
+        solution = Solution(cbcModel.objectiveValue, x_sol, status)
+
+    else:
         warnings.warn('No feasible solution can be found.')
         solution = None
 

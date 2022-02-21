@@ -11,7 +11,7 @@ import time
 from .lp import Solution
 
 
-def solve(formula, display=True, export=False, params={}):
+def solve(formula, display=True, params={}):
 
     try:
         if formula.qmat:
@@ -35,7 +35,8 @@ def solve(formula, display=True, export=False, params={}):
     row, col = linear.shape
 
     xs = [solver.NumVar(lb[i], ub[i], 'x' + str(i)) if vtype[i] == 'C' else
-          solver.IntVar(0, 1, 'x' + str(i)) if vtype[i] == 'B' else
+          solver.IntVar(max(0, lb[i]), min(1, ub[i]),
+                        'x' + str(i)) if vtype[i] == 'B' else
           solver.IntVar(lb[i], ub[i], 'x' + str(i)) for i in range(col)]
 
     solver.Minimize(sum([obj[i] * xs[i] for i in range(col)]))

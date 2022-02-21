@@ -217,7 +217,7 @@ dual
     Number of SOC constraints:    1
 
 
-More details on the standard forms can be retrieved by the method `show()`, and the problem information is summarized in a `pandas.DataFrame` table.
+More details on the standard forms can be retrieved by the method `show()`, and the problem information is summarized in a `pandas.DataFrame` data table.
 
 
 ```python
@@ -498,28 +498,48 @@ dual.show()
 </table>
 </div>
 
+Besides returned as a `pandas.DataFrame` data table, the standard form can also be saved as a `.lp` file using the `to_lp()` method.
+
+```
+to_lp(name='out') method of rsome.socp.SOCProg instance
+Export the standard form of the optimization model as a .lp file.
+
+    Parameters
+    ----------
+        name : file name of the .lp file
+
+    Notes
+    -----
+    There is no need to specify the .lp extension. The default file name
+    is "out".
+```
+
+The code segment below exports the standard form of the model as a file named "model.lp".
+
+```python
+model.do_math().to_lp('model')
+```
+
 The standard form of a model can be solved via calling the `solve()` method of the model object. Arguments of the `solve()` method are listed below.
 
-    solve(solver=None, display=True, export=False, params={}) method of rsome.ro.Model instance
-    Solve the model with the selected solver interface.
+```
+solve(solver=None, display=True, params={}) method of rsome.ro.Model instance
+Solve the model with the selected solver interface.
 
-        Parameters
-        ----------
-            solver : {None, lpg_solver, grb_solver, msk_solver}
-                Solver interface used for model solution. Use default solver
-                if solver=None.
-            display : bool
-                Display option of the solver interface.
-            export : bool
-                Export option of the solver interface. A standard model file
-                is generated if the option is True.
-            params : dict
-                A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi, CPLEX, and MOSEK.
+    Parameters
+    ----------
+        solver : {None, lpg_solver, clp_solver, ort_solver, cvx_solver,
+                  grb_solver, msk_solver, cpx_solver}
+            Solver interface used for model solution. Use default solver
+            lpg_solver if solver=None.
+        display : bool
+            Display option of the solver interface.
+        params : dict
+            A dictionary that specifies parameters of the selected solver.
+            So far the argument only applies to Gurobi, CPLEX, and MOSEK.
+```
 
-
-
-It can be seen that the user needs to specify the `solver` argument for selecting the solver interface when calling the `solve()` method. The current version RSOME uses the default LP solver if  `solver=None` or `solver=lpg_solver`. Warnings will be raised if second-order cone constraints or integer variables appearing in the model. For such models, please use other solvers by specifying the `solver` parameter to be the values in the table below.
+The `solve()` method calls for external solvers to solve the optimization problem. The first argument `solver` is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver `linprog` imported from the `scipy.optimize` package as the default solver. Warnings will be raised if integer variables or second-order cone constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.  
 
 | Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints|
 |:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|
@@ -578,16 +598,23 @@ model.solve(cpx)
     Running time: 0.0175s
 
 
-The other two arguments control the display and export options of the solution. Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. No optimal value or solution can be retrieved if the problem is infeasible, unbounded, or terminated by a numeric issue.  
+It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument `display` to be `False`.
 
-Finally, parameters of the Gurobi, MOSEK, or CPLEX solver can be specified by the `dict` type argument `params` in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>..., }`. For example, the following code solves the problem using Gurobi while configuring the parameter `LogToConsole` to be `True` so that the log information is displayed in the coding Console.
+The third argument `params` is used to tune solver parameters. The current RSOME package enables users to adjust parameters for commercials solvers, <i>i.e.</i>, Gurobi, MOSEK, and CPLEX. The `params` argument is a `dict` type object in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>, ..., <paramk>: <valuek>}`. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
+- Gurobi parameters: [https://www.gurobi.com/documentation/9.1/refman/parameters.html](https://www.gurobi.com/documentation/9.1/refman/parameters.html)
+- MOSEK parameters: [https://docs.mosek.com/latest/pythonapi/parameters.html](https://docs.mosek.com/latest/pythonapi/parameters.html)
+- CPLEX parameters: [https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters](https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters)
+
+
+For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be `1e-2`.
 
 ```python
-model.solve(grb,                                # Use Gurobi as the solver
-            params={'LogToConsole': True})      # Set LogToConsole to be True
+model.solve(grb, params={'MIPGap': 1e-2})
+model.solve(msk, params={'mio_rel_gap_const': 1e-2})
+model.solve(cpx, params={'mip.tolerances.mipgap': 1e-2})
 ```
 
-For Gurobi, you may find the parameter names and their values from [Parameters](https://www.gurobi.com/documentation/9.1/refman/parameters.html). Parameter information on MOSEK is given by [Parameters (alphabetical list sorted by type)](https://docs.mosek.com/9.2/pythonfusion/parameters.html). CPLEX solver parameters can be found from [List of CPLEX parameters](https://www.ibm.com/support/knowledgecenter/SSSA5P_12.7.1/ilog.odms.cplex.help/CPLEX/Parameters/topics/introListAlpha.html). Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
+Once the solution completes, you may use the command `model.get()` to retrieve the optimal objective value. The optimal solution of the variable `x` can be attained as an array by calling `x.get()`. The `get()` method raises an error message if no optimal solution is available if the problem is unsolved or the model is infeasible, unbounded, or encounters numeric issues.
 
 ## Application Examples <a name="section1.4"></a>
 

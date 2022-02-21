@@ -6,13 +6,71 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 import warnings
+import time
+import scipy.optimize as opt
 from numbers import Real
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
 from scipy.linalg import sqrtm, eigh
 from collections.abc import Iterable, Sized
 from typing import List
-from .lpg_solver import solve as def_sol
+
+
+def def_sol(formula, display=True, params={}):
+
+    # if export:
+    #     warnings.warn('Cannot export model by the linprog() function. ')
+    try:
+        if formula.qmat:
+            warnings.warn('SOC constriants are ignored in the LP solver. ')
+    except AttributeError:
+        pass
+    if any(np.array(formula.vtype) != 'C'):
+        warnings.warn('Integrality constraints are ignored in the LP solver. ')
+
+    indices_eq = (formula.sense == 1)
+    indices_ineq = (formula.sense == 0)
+    linear_eq = formula.linear[indices_eq, :] if len(indices_eq) else None
+    linear_ineq = formula.linear[indices_ineq, :] if len(indices_ineq) else None
+    const_eq = formula.const[indices_eq] if len(indices_eq) else None
+    const_ineq = formula.const[indices_ineq] if len(indices_ineq) else None
+
+    # if len(indices_ineq) == 0:
+    #     linear_ineq = None
+    #     const_ineq = None
+    # if len(indices_eq) == 0:
+    #     linear_eq = None
+    #     const_eq = None
+
+    bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
+
+    default = {'maxiter': 1000000000,
+               'sparse': True}
+
+    if display:
+        print('Being solved by the default LP solver...', flush=True)
+        time.sleep(0.2)
+    t0 = time.time()
+    res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
+                      A_eq=linear_eq, b_eq=const_eq,
+                      bounds=bounds, options=default)
+    stime = time.time() - t0
+    if display:
+        print('Solution status: {0}'.format(res.status))
+        print('Running time: {0:0.4f}s'.format(stime))
+
+    if res.status == 0:
+        return Solution(res.x[0], res.x, res.status)
+    else:
+        status = res.status
+        msg = 'The optimal solution can not be found, '
+        reasons = ('iteration limit is reached.' if status == 1 else
+                   'the problem appears to be infeasible.' if status == 2 else
+                   'the problem appears to be unbounded.' if status == 3 else
+                   'numerical difficulties encountered.')
+        msg += 'because {}'.format(reasons)
+        warnings.warn(msg)
+        return None
 
 
 class Model:
@@ -20,9 +78,10 @@ class Model:
     The Model class creates an LP model object
     """
 
-    def __init__(self, nobj=False, mtype='R', name=None):
+    def __init__(self, nobj=False, mtype='R', name=None, top=None):
 
         self.mtype = mtype
+        self.top = top
         self.nobj = nobj
         self.name = name
 
@@ -81,6 +140,8 @@ class Model:
             for item in constr:
                 self.st(item)
         else:
+            if not isinstance(constr, (LinConstr, CvxConstr, Bounds)):
+                raise TypeError('Unknown constraint type.')
             if constr.model is not self:
                 raise ValueError('Constraints are not defined for this model.')
             if isinstance(constr, LinConstr):
@@ -92,8 +153,6 @@ class Model:
                     raise TypeError('Incorrect constraint type.')
             elif isinstance(constr, Bounds):
                 self.bounds.append(constr)
-            else:
-                raise TypeError('Unknown constraint type.')
 
         self.pupdate = True
         self.dupdate = True
@@ -113,8 +172,12 @@ class Model:
         to be one.
         """
 
-        if obj.size > 1:
-            raise ValueError('Incorrect function dimension.')
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
+        if not isinstance(obj, Real):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = 1
@@ -136,15 +199,19 @@ class Model:
         to be one.
         """
 
-        if obj.size > 1:
-            raise ValueError('Incorrect function dimension.')
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
+        if not isinstance(obj, Real):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = - 1
         self.pupdate = True
         self.dupdate = True
 
-    def do_math(self, primal=True, refresh=True, obj=False):
+    def do_math(self, primal=True, refresh=True, obj=True):
 
         if primal:
             if self.primal is not None and not self.pupdate:
@@ -157,8 +224,8 @@ class Model:
                 self.last = self.vars[-1].first + self.vars[-1].size
 
             more_cvx = []
-            if self.obj:
-                obj_constr = (self.vars[0] >= self.sign * self.obj)
+            if self.obj is not None:
+                obj_constr = (self.vars[0] - self.sign * self.obj >= 0)
                 if isinstance(obj_constr, LinConstr):
                     self.aux_constr.append(obj_constr)
                 elif isinstance(obj_constr, CvxConstr):
@@ -308,7 +375,7 @@ class Model:
 
             return formula
 
-    def solve(self, solver=None, display=True, export=False, params={}):
+    def solve(self, solver=None, display=True, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -320,34 +387,30 @@ class Model:
                 if solver=None.
             display : bool
                 Display option of the solver interface.
-            export : bool
-                Export option of the solver interface. A standard model file
-                is generated if the option is True.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi, CPLEX,and MOSEK.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(obj=True), display, export, params)
+            solution = def_sol(self.do_math(obj=True), display, params)
         else:
-            solution = solver.solve(self.do_math(obj=True),
-                                    display, export, params)
+            solution = solver.solve(self.do_math(obj=True), display, params)
 
         if isinstance(solution, Solution):
             self.solution = solution
         else:
-            if not solution:
-                warnings.warn('No feasible solutions can be found.')
-            else:
-                x = solution.x
-                self.solution = Solution(x[0], x, solution.status)
+            self.solution = None
 
     def get(self):
 
         if self.solution is None:
-            raise SyntaxError('The model is unsolved or no feasible solution.')
+            raise RuntimeError('The model is unsolved or infeasible.')
         return self.sign * self.solution.objval
+
+    def optimal(self):
+
+        return self.solution is not None
 
 
 class SparseVec:
@@ -359,13 +422,6 @@ class SparseVec:
         self.index = index
         self.value = value
         self.nvar = nvar
-
-    def __repr__(self):
-
-        string = 'Indices: ' + str(self.index) + ' | '
-        string += 'Values: ' + str(self.value)
-
-        return string
 
     def __add__(self, other):
 
@@ -411,7 +467,9 @@ class Vars:
         # if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
         #     raise ValueError('Unknown variable type.')
 
-        var_name = '' if self.name is None else self.name + ': '
+        var_name = ('' if self.name is None else
+                    f'E({self.name}): ' if self.model.mtype == 'E' else
+                    f'{self.name}: ')
         var_type = (' continuous' if vtype == 'C' else
                     ' binary' if vtype == 'B' else
                     ' integer' if vtype == 'I' else
@@ -434,19 +492,6 @@ class Vars:
         string = '{}{}{}{} variable{}'.format(var_name, num, var_type, mtype,
                                               suffix)
         return string
-
-    def sv_array(self, index=False):
-
-        shape = self.shape
-        shape = shape if isinstance(shape, tuple) else (int(shape), )
-        size = np.prod(shape).item()
-
-        if index:
-            elements = [SparseVec([i], [1], size) for i in range(size)]
-        else:
-            elements = [SparseVec([i], [1.0], size) for i in range(size)]
-
-        return np.array(elements).reshape(shape)
 
     # noinspection PyPep8Naming
     @property
@@ -506,7 +551,7 @@ class Vars:
             raise TypeError('Not a decision variable.')
 
         if self.model.solution is None:
-            raise SyntaxError('The model is unsolved.')
+            raise RuntimeError('The model is unsolved or infeasible.')
 
         indices = range(self.first, self.first + self.size)
         var_sol = np.array(self.model.solution.x)[indices]
@@ -528,7 +573,7 @@ class Vars:
 
         return VarSub(self, indices)
 
-    def __iter__(self):
+    def iter(self):
 
         shape = self.shape
         for i in range(shape[0]):
@@ -654,7 +699,9 @@ class VarSub(Vars):
 
     def __getitem__(self, item):
 
-        raise SyntaxError('Nested indexing of variables is forbidden.')
+        new_indices = self.indices[item]
+
+        return VarSub(self, new_indices)
 
     def sum(self, axis=None):
 
@@ -792,15 +839,6 @@ class Affine:
 
         return np.array(elements).reshape(shape)
 
-    def sv_zeros(self, nvar):
-
-        shape = (self.shape if isinstance(self.shape, tuple) else
-                 (int(self.shape),))
-        size = np.prod(self.shape).item()
-        elements = [SparseVec([], [], nvar) for _ in range(size)]
-
-        return np.array(elements).reshape(shape)
-
     # noinspection PyPep8Naming
     @property
     def T(self):
@@ -862,14 +900,11 @@ class Affine:
             The norm of the given array.
         """
 
-        # if np.prod(shape) != max(shape):
-        #     raise ValueError('Funciton "norm" only applies to vectors.')
         if len(self.shape) != 1:
             err = 'Improper number of dimensions to norm. '
             err += 'The array must be 1-D.'
             raise ValueError(err)
 
-        # shape = self.shape
         new_shape = ()
         if degree == 1:
             return Convex(self, np.zeros(new_shape), 'M', 1)
@@ -968,7 +1003,8 @@ class Affine:
             if self.model.mtype == other.model.mtype:
                 raise TypeError('Bi-linear expressions are not supported.')
             elif self.model.mtype in 'VR' and other.model.mtype in 'SM':
-                # other = other.to_affine()
+                if self.model.top is not other.model.top:
+                    raise ValueError('Models of operands mismatch.')
                 if self.shape != other.shape:
                     raffine = self * np.ones(other.to_affine().shape)
                     other = np.ones(self.shape) * other.to_affine()
@@ -992,13 +1028,7 @@ class Affine:
             return self.__mul__(other.to_affine())
         else:
             other = check_numeric(other)
-
-            # if isinstance(other, Real):
-            #     other = np.array([other], dtype=float).reshape(self.const.shape)
-
             new_const = self.const * other
-            # if not isinstance(new_const, np.ndarray):
-            #     new_const = np.array([new_const]).reshape(())
             if not isinstance(other, np.ndarray):
                 other = np.array([other])
             new_linear = sparse_mul(other, self.to_affine()) @ self.linear
@@ -1007,45 +1037,17 @@ class Affine:
 
     def __rmul__(self, other):
 
-        if isinstance(other, (Vars, VarSub, Affine)):
-            other = other.to_affine()
-            if self.model.mtype == other.model.mtype:
-                raise TypeError('Bi-linear expressions are not supported.')
-            elif self.model.mtype in 'VR' and other.model.mtype == 'S':
-                # other = other.to_affine()
-                if self.shape != other.shape:
-                    raffine = self * np.ones(other.to_affine().shape)
-                    other = np.ones(self.shape) * other.to_affine()
-                else:
-                    raffine = self
-                    other = other.to_affine()
-
-                raffine = raffine.reshape((raffine.size, 1))
-
-                rvar_last = other.model.vars[-1].last
-                reduced_linear = other.linear[:, :rvar_last]
-                trans_sparray = np.array([line for line in reduced_linear])
-
-                raffine = raffine * array_to_sparse(trans_sparray)
-                affine = self * other.const
-
-                return RoAffine(raffine, affine, other.model)
-            else:
-                return other.__rmul__(self)
-        else:
+        if isinstance(other, (Real, np.ndarray)) or sp.issparse(other):
             other = check_numeric(other)
 
-            # if isinstance(other, Real):
-            #     other = np.array([other])
-
             new_const = self.const * other
-            # if not isinstance(new_const, np.ndarray):
-            #     new_const = np.array([new_const]).reshape(())
             if not isinstance(other, np.ndarray):
                 other = np.array([other])
             new_linear = sparse_mul(other, self.to_affine()) @ self.linear
 
             return Affine(self.model, new_linear, new_const)
+        else:
+            return other.__mul__(self)
 
     def __matmul__(self, other):
 
@@ -1054,8 +1056,8 @@ class Affine:
             if self.model.mtype == other.model.mtype:
                 raise TypeError('Bi-linear expressions are not supported.')
             elif self.model.mtype in 'VR' and other.model.mtype in 'SM':
-
-                # other = other.to_affine()
+                if self.model.top is not other.model.top:
+                    raise ValueError('Models of operands mismatch.')
                 affine = self @ other.const
                 num_rand = other.model.vars[-1].last
 
@@ -1081,7 +1083,8 @@ class Affine:
 
                 return RoAffine(raffine, affine, other.model)
             elif self.model.mtype in 'SM' and other.model.mtype in 'VR':
-
+                if self.model.top is not other.model.top:
+                    raise ValueError('Models of operands mismatch.')
                 affine = self.const @ other
                 other = other.to_affine()
                 num_rand = self.model.vars[-1].last
@@ -1109,6 +1112,10 @@ class Affine:
                 roaffine = RoAffine(raffine, affine, self.model)
 
                 if isinstance(other, DecAffine):
+                    if not other.fixed:
+                        msg = 'Affine decision rule '
+                        msg += 'cannot be multiplied by random variables.'
+                        raise TypeError(msg)
                     return DecRoAffine(roaffine, other.event_adapt, 'R')
                 else:
                     return roaffine
@@ -1116,9 +1123,6 @@ class Affine:
             other = check_numeric(other)
 
             new_const = self.const @ other
-            # if not isinstance(new_const, np.ndarray):
-            #     new_const = np.array([new_const])
-
             new_linear = sp_lmatmul(other, self, new_const.shape) @ self.linear
 
             return Affine(self.model, new_linear, new_const)
@@ -1128,9 +1132,6 @@ class Affine:
         other = check_numeric(other)
 
         new_const = other @ self.const
-        # if not isinstance(new_const, np.ndarray):
-        #     new_const = np.array([new_const])
-
         new_linear = sp_matmul(other, self, new_const.shape) @ self.linear
 
         return Affine(self.model, new_linear, new_const)
@@ -1138,19 +1139,22 @@ class Affine:
     def __add__(self, other):
 
         if isinstance(other, (Vars, VarSub, Affine)):
-            # if isinstance(other, (Vars, VarSub)):
             other = other.to_affine()
 
             if self.model.mtype != other.model.mtype:
+                if self.model.top is not other.model.top:
+                    raise ValueError('Models of operands mismatch.')
                 if self.model.mtype in 'VR':
-                    return other.rand_to_roaffine(self.model).__add__(self)
-                # elif other.model.mtype == 'R':
-                #     return self.rand_to_roaffine(other.model).__add__(other)
+                    temp = other.rand_to_roaffine(self.model)
+                    return temp.__add__(self)
                 elif other.model.mtype in 'VR':
                     temp = self.rand_to_roaffine(other.model)
                     return other.__add__(temp)
                 else:
-                    raise ValueError('Models mismatch.')
+                    raise ValueError('Models of operands mismatch.')
+
+            if self.model is not other.model:
+                raise ValueError('Models of operands mismatch.')
 
             new_const = other.const + self.const
 
@@ -1170,10 +1174,6 @@ class Affine:
                 new_linear = self.linear
             else:
                 if self.shape != other.shape:
-                    # sparray = self.sv_array()
-                    # zero = self.sv_zeros(other.size)
-                    # sparse = sv_to_csr(sparray + zero)
-
                     new_linear = (self*np.ones(other.shape)).linear
                 else:
                     new_linear = self.linear
@@ -1182,7 +1182,6 @@ class Affine:
             new_const = other + self.const
             new_linear = self.linear
         else:
-            # raise TypeError('Incorrect data type.')
             return other.__add__(self)
 
         return Affine(self.model, new_linear, new_const)
@@ -1206,8 +1205,6 @@ class Affine:
     def __le__(self, other):
 
         left = self - other
-        # if left.shape == ():
-        #     left.const = np.array([left.const])
         if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size, )),
@@ -1218,8 +1215,6 @@ class Affine:
     def __ge__(self, other):
 
         left = other - self
-        # if left.shape == ():
-        #     left.const = np.array([left.const])
         if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size,)),
@@ -1230,8 +1225,6 @@ class Affine:
     def __eq__(self, other):
 
         left = self - other
-        # if left.shape == ():
-        #     left.const = np.array([left.const])
         if isinstance(left, Affine) and not isinstance(left, DecAffine):
             return LinConstr(left.model, left.linear,
                              -left.const.reshape((left.const.size,)),
@@ -1244,6 +1237,8 @@ class Convex:
     """
     The Convex class creates an object of convex functions
     """
+
+    __array_priority__ = 101
 
     def __init__(self, affine_in, affine_out, xtype, sign):
 
@@ -1277,8 +1272,16 @@ class Convex:
 
     def __add__(self, other):
 
+        cond1 = not isinstance(other, (Real, np.ndarray, Vars, Affine))
+        cond2 = not sp.issparse(other)
+        if cond1 and cond2:
+            raise TypeError('The expression is not supported.')
+
         affine_in = self.affine_in
         affine_out = self.affine_out + other
+        if self.xtype in 'S':
+            affine_in = (affine_in.reshape(self.affine_out.shape) + 0*other)
+            affine_in = affine_in.reshape(affine_in.size)
         if not isinstance(affine_out,
                           (Vars, VarSub, Affine, Real, np.ndarray)):
             raise TypeError('Incorrect data types.')
@@ -1302,7 +1305,7 @@ class Convex:
     def __mul__(self, other):
 
         if not isinstance(other, Real):
-            raise SyntaxError('Incorrect syntax.')
+            raise TypeError('Incorrect syntax.')
 
         if self.xtype in 'AMIE':
             multiplier = abs(other)
@@ -1321,7 +1324,7 @@ class Convex:
 
         left = self - other
         if left.sign == -1:
-            raise ValueError('Non-convex constraints.')
+            raise ValueError('Nonconvex constraints.')
 
         return CvxConstr(left.model, left.affine_in, left.affine_out,
                          left.xtype)
@@ -1334,6 +1337,10 @@ class Convex:
 
         return CvxConstr(right.model, right.affine_in, right.affine_out,
                          right.xtype)
+
+    def __eq__(self, other):
+
+        raise TypeError('Convex expressions are not applied to equality constraints')
 
 
 class RoAffine:
@@ -1376,27 +1383,6 @@ class RoAffine:
         affine = self.affine[item]
 
         return RoAffine(raffine, affine, self.rand_model)
-
-    def sv_array(self, index=False):
-
-        shape = self.shape
-        size = int(np.prod(shape).item())
-
-        if index:
-            elements = [SparseVec([i], [1], size) for i in range(size)]
-        else:
-            elements = [SparseVec([i], [1.0], size) for i in range(size)]
-
-        return np.array(elements).reshape(shape)
-
-    def sv_zeros(self, nvar):
-
-        shape = (self.shape if isinstance(self.shape, tuple) else
-                 (int(self.shape),))
-        size = np.prod(self.shape).item()
-        elements = [SparseVec([], [], nvar) for _ in range(size)]
-
-        return np.array(elements).reshape(shape)
 
     def reshape(self, shape):
 
@@ -1476,7 +1462,7 @@ class RoAffine:
             affine = self.affine + other
             return RoAffine(raffine, affine, self.rand_model)
         else:
-            raise SyntaxError('Syntax error.')
+            raise TypeError('Expression not supported.')
 
     def __radd__(self, other):
 
@@ -1671,14 +1657,14 @@ class RoConstr:
             else:
                 constraints.append(items)
 
-        sup_model = constraints[0].model
+        sup_model = self.rand_model
         sup_model.reset()
         for item in constraints:
             if item.model is not sup_model:
-                raise SyntaxError('Models mismatch.')
+                raise ValueError('Models mismatch.')
             sup_model.st(item)
 
-        self.support = sup_model.do_math(primal=False)
+        self.support = sup_model.do_math(primal=False, obj=False)
 
         return self
 
@@ -1704,7 +1690,6 @@ class RoConstr:
                             -left.const.reshape(num_rc_constr),
                             sense2)
 
-        # bounds = ()
         bounds: List[LinConstr] = []
         index_pos = (support.ub == 0)
         if any(index_pos):
@@ -1757,7 +1742,7 @@ class DecVar(Vars):
 
     def __repr__(self):
 
-        var_name = self.name + ': ' if self.name else ''
+        var_name = '' if not self.name else self.name + ': '
         string = var_name
         expr = 'event-wise ' if len(self.event_adapt) > 1 else ''
         expr += 'static ' if self.fixed else 'affinely adaptive '
@@ -1769,7 +1754,7 @@ class DecVar(Vars):
 
         suffix = 's' if self.size > 1 else ''
 
-        string += expr + 'decision varaible' + suffix
+        string += expr + 'decision variable' + suffix
 
         return string
 
@@ -1780,7 +1765,7 @@ class DecVar(Vars):
         # if not isinstance(indices, np.ndarray):
         #     indices = np.array([indices]).reshape((1, ) * self.ndim)
 
-        return DecVarSub(self.dro_model, self, indices)
+        return DecVarSub(self.dro_model, self, indices, fixed=self.fixed)
 
     def to_affine(self):
 
@@ -1794,13 +1779,9 @@ class DecVar(Vars):
         elif isinstance(to, (RandVar, RandVarSub)):
             self.affadapt(to)
         else:
-            raise ValueError('Can not define adaption for the inputs.')
+            raise TypeError('Can not define adaption for the inputs.')
 
     def evtadapt(self, scens):
-
-        # self.fixed = False
-        if self.event_adapt is None:
-            self.event_adapt = [list(range(self.dro_model.num_scen))]
 
         if isinstance(scens, Scen):
             events = scens.series
@@ -1814,8 +1795,8 @@ class DecVar(Vars):
             if index in self.event_adapt[0]:
                 self.event_adapt[0].remove(index)
             else:
-                raise ValueError('Wrong scenario index or {0} '.format(event) +
-                                 'has been redefined.')
+                raise KeyError('Wrong scenario index or {0} '.format(event) +
+                               'has been redefined.')
 
         if not self.event_adapt[0]:
             self.event_adapt.pop(0)
@@ -1847,6 +1828,9 @@ class DecVar(Vars):
     def get(self, rvar=None):
 
         dro_model = self.dro_model
+        if dro_model.solution is None:
+            raise RuntimeError('The model is unsolved or infeasible')
+
         var_sol = dro_model.ro_model.rc_model.vars[1].get()
         # num_scen = dro_model.num_scen
         edict = event_dict(self.event_adapt)
@@ -1887,11 +1871,11 @@ class DecVar(Vars):
                 coeff = np.array([np.NaN] * sp.shape[0])
                 coeff[sol_indices] = sol_vec
 
-                if rvar.to_affine().size == 1:
-                    outputs.append(coeff.reshape(self.shape))
-                else:
-                    rv_shape = rvar.to_affine().shape
-                    outputs.append(coeff.reshape(self.shape + rv_shape))
+                # if rvar.to_affine().size == 1:
+                #     outputs.append(coeff.reshape(self.shape))
+                # else:
+                rv_shape = rvar.to_affine().shape
+                outputs.append(coeff.reshape(self.shape + rv_shape))
 
             if len(outputs) > 1:
                 ind_label = self.dro_model.series_scen.index
@@ -1933,7 +1917,7 @@ class DecVarSub(VarSub):
             size = 1
 
         suffix = 's' if size > 1 else ''
-        string += expr + 'decision varaible' + suffix
+        string += expr + 'decision variable' + suffix
 
         return string
 
@@ -1952,6 +1936,11 @@ class DecVarSub(VarSub):
 
     def affadapt(self, rvars):
 
+        if self.vtype in ['B', 'I']:
+            raise ValueError('No affine adaptation for integer variables.')
+        if self.dro_model is not rvars.model.top:
+            raise ValueError('Model mismatch.')
+
         self.fixed = False
         if self.rand_adapt is None:
             sup_model = self.dro_model.sup_model
@@ -1969,32 +1958,22 @@ class DecVarSub(VarSub):
                              rand_indices).flatten()
 
         if self.rand_adapt[dec_indices_flat, rand_indices_flat].any():
-            raise SyntaxError('Redefinition of adaptation is not allowed.')
+            raise RuntimeError('Redefinition of adaptation is not allowed.')
 
         self.rand_adapt[dec_indices_flat, rand_indices_flat] = 1
         self.dvars.rand_adapt = self.rand_adapt
 
     def __le__(self, other):
 
-        """
-        if isinstance(other, (Real, np.ndarray)):
-            bounds = super().__le__(other)
-            return DecBounds(bounds, self.event_adapt)
-        else:
-            return self.to_affine().__le__(other)
-        """
         return self.to_affine().__le__(other)
 
     def __ge__(self, other):
 
-        """
-        if isinstance(other, (Real, np.ndarray)):
-            bounds = super().__ge__(other)
-            return DecBounds(bounds, self.event_adapt)
-        else:
-            return self.to_affine().__ge__(other)
-        """
         return self.to_affine().__ge__(other)
+
+    def __eq__(self, other):
+
+        return self.to_affine().__eq__(other)
 
     @property
     def E(self):
@@ -2131,6 +2110,10 @@ class DecAffine(Affine):
                              event_adapt=self.event_adapt,
                              ctype=self.ctype, fixed=self.fixed)
         elif isinstance(expr, RoAffine):
+            if not self.fixed:
+                msg = 'Affine decision rule '
+                msg += 'cannot be multiplied by random variables.'
+                raise TypeError(msg)
             return DecRoAffine(expr, self.event_adapt, 'R')
 
     def __rmul__(self, other):
@@ -2145,6 +2128,10 @@ class DecAffine(Affine):
                              event_adapt=self.event_adapt,
                              ctype=self.ctype, fixed=self.fixed)
         elif isinstance(expr, RoAffine):
+            if not self.fixed:
+                msg = 'Affine decision rule '
+                msg += 'cannot be multiplied by random variables.'
+                raise TypeError(msg)
             return DecRoAffine(expr, self.event_adapt, 'R')
 
     def __rmatmul__(self, other):
@@ -2159,6 +2146,10 @@ class DecAffine(Affine):
                              event_adapt=self.event_adapt,
                              ctype=self.ctype, fixed=self.fixed)
         elif isinstance(expr, RoAffine):
+            if not self.fixed:
+                msg = 'Affine decision rule '
+                msg += 'cannot be multiplied by random variables.'
+                raise TypeError(msg)
             return DecRoAffine(expr, self.event_adapt, 'R')
 
     def __neg__(self):
@@ -2195,11 +2186,6 @@ class DecAffine(Affine):
         else:
             return other.__add__(self)
 
-        # if len(event_adapt) == 1:
-        #     fixed = True
-        # else:
-        #     fixed = False
-
         fixed = fixed and self.fixed
         ctype = 'E' if 'E' in (self.ctype + ctype) else 'R'
 
@@ -2227,7 +2213,7 @@ class DecAffine(Affine):
     def norm(self, degree):
 
         if not self.fixed:
-            raise SyntaxError('Incorrect convex expressions.')
+            raise ValueError('Incorrect convex expressions.')
 
         expr = super().norm(degree)
 
@@ -2236,7 +2222,7 @@ class DecAffine(Affine):
     def square(self):
 
         if not self.fixed:
-            raise SyntaxError('Incorrect convex expressions.')
+            raise ValueError('Incorrect convex expressions.')
 
         expr = super().square()
 
@@ -2245,7 +2231,7 @@ class DecAffine(Affine):
     def sumsqr(self):
 
         if not self.fixed:
-            raise SyntaxError('Incorrect convex expressions.')
+            raise ValueError('Incorrect convex expressions.')
 
         expr = super().sumsqr()
 
@@ -2288,8 +2274,8 @@ class DecAffine(Affine):
         left = self - other
         if isinstance(left, DecAffine):
             return DecLinConstr(left.model, left.linear, -left.const,
-                                np.ones(left.size),
-                                left.fixed, left.event_adapt)
+                                np.ones(left.size), left.event_adapt,
+                                left.fixed, left.ctype)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 1, left.event_adapt, left.ctype)
 
@@ -2359,6 +2345,18 @@ class DecRoAffine(RoAffine):
         self.event_adapt = event_adapt
         self.ctype = ctype
 
+    def __repr__(self):
+
+        event = 'event-wise ' if len(self.event_adapt) > 1 else ''
+        if self.shape == ():
+            string = 'a ' if event == '' else 'an '
+        else:
+            string = 'x'.join([str(dim) for dim in self.shape]) + ' '
+        suffix = 's' if self.size > 1 else ''
+        string += event + 'bi-affine expression' + suffix
+
+        return string
+
     def sum(self, axis=None):
 
         expr = super().sum(axis)
@@ -2394,7 +2392,7 @@ class DecRoAffine(RoAffine):
         elif isinstance(other, (Vars, VarSub, Affine)):
             if other.model.mtype != 'V':
                 if self.ctype == 'E':
-                    raise SyntaxError('Incorrect affine expressions.')
+                    raise ValueError('Incorrect affine expressions.')
             event_adapt = self.event_adapt
             ctype = self.ctype
         else:
@@ -2522,14 +2520,24 @@ class DecRoConstr(RoConstr):
             event = ' event-wise ' if len(self.event_adapt) > 1 else ' '
             ctype = ''
 
-        string = '{}{}robust constriant{}{}'.format(size, event, suffix, ctype)
+        string = '{}{}robust constraint{}{}'.format(size, event, suffix, ctype)
         return string
 
     def forall(self, ambset):
 
-        self.ambset = ambset
+        if isinstance(ambset, (LinConstr, Bounds, CvxConstr, Iterable)):
+            suppset = flat([ambset])
+            for constr in suppset:
+                if constr.model is not self.rand_model:
+                    raise ValueError('Models mismatch.')
+            self.ambset = suppset
+            return self
+        else:
+            if self.dec_model.top is not ambset.model:
+                raise ValueError('Models mismatch.')
 
-        return self
+            self.ambset = ambset
+            return self
 
 
 class DecRule:
@@ -2570,6 +2578,9 @@ class DecRule:
             raise SyntaxError('Adaptation must be defined ' +
                               'before used in constraints')
 
+        if self.model is not rvar.model.top:
+            raise ValueError('Models mismatch.')
+
         if self.depend is None:
             self.depend = np.zeros((self.size,
                                     self.model.sup_model.vars[-1].last),
@@ -2585,7 +2596,7 @@ class DecRule:
         col_ind = (np.ones(ldr_indices.shape, dtype=int) * indices).flatten()
 
         if self.depend[row_ind, col_ind].any():
-            raise SyntaxError('Redefinition of adaptation is not allowed.')
+            raise RuntimeError('Redefinition of adaptation is not allowed.')
 
         self.depend[ldr_indices, indices] = 1
 
@@ -2627,8 +2638,8 @@ class DecRule:
 
         item_array = index_array(self.shape)
         indices = item_array[item]
-        if not isinstance(indices, np.ndarray):
-            indices = np.array([indices]).reshape((1, ) * indices.ndim)
+        # if not isinstance(indices, np.ndarray):
+        #     indices = np.array([indices]).reshape((1, ) * indices.ndim)
 
         return DecRuleSub(self, indices, item)
 
@@ -2694,24 +2705,22 @@ class DecRule:
 
     def get(self, rvar=None):
 
+        if self.model.solution is None:
+            raise RuntimeError('The model is unsolved or infeasible')
+
         if rvar is None:
             return self.fixed.get()
         else:
             if rvar.model.mtype != 'S':
-                ValueError('The input is not a random variable.')
+                raise ValueError('The input is not a random variable.')
             ldr_row, ldr_col = self.size, self.model.rc_model.vars[-1].last
-            # ldr_coeff = np.ones((self.size,
-            #                      self.model.rc_model.vars[-1].last)) * np.NAN
             ldr_coeff = np.array([[np.NaN] * ldr_col] * ldr_row)
             rand_ind = rvar.get_ind()
             row_ind, col_ind = np.where(self.depend == 1)
             ldr_coeff[row_ind, col_ind] = self.var_coeff.get()
 
-            if rvar.to_affine().size == 1:
-                return ldr_coeff[:, rand_ind].reshape(self.shape)
-            else:
-                rv_shape = rvar.to_affine().shape
-                return ldr_coeff[:, rand_ind].reshape(self.shape + rv_shape)
+            rv_shape = rvar.to_affine().shape
+            return ldr_coeff[:, rand_ind].reshape(self.shape + rv_shape)
 
 
 class DecRuleSub:
@@ -2732,10 +2741,16 @@ class DecRuleSub:
     def to_affine(self):
 
         roaffine = self.dec_rule.to_affine()
-        raffine = roaffine.raffine[self.indices, :]
-        affine = roaffine.affine[self.item]
 
-        return RoAffine(raffine, affine, self.dec_rule.model.sup_model)
+        if isinstance(roaffine, Affine):
+            linear = roaffine.linear[self.indices]
+            const = roaffine.const.flatten()[self.indices].reshape(self.shape)
+            return Affine(roaffine.model, linear, const)
+        else:
+            raffine = roaffine.raffine[self.indices, :]
+            affine = roaffine.affine[self.item]
+
+            return RoAffine(raffine, affine, self.dec_rule.model.sup_model)
 
     @property
     def T(self):
@@ -2747,6 +2762,10 @@ class DecRuleSub:
         return - self.to_affine()
 
     def __add__(self, other):
+
+        return self.to_affine().__add__(other)
+
+    def __radd__(self, other):
 
         return self.to_affine().__add__(other)
 
@@ -2855,6 +2874,81 @@ class LinProg:
 
         return solver.solve(self)
 
+    def lp_export(self):
+
+        string = 'Minimize\n'
+        string += ' obj: '
+        obj_str = ' '.join(['{} {} x{}'.format('-' if coeff < 0 else '+',
+                                               abs(coeff), i+1)
+                            for i, coeff in enumerate(self.obj[0]) if coeff])
+        string += obj_str[2:] if obj_str[:2] == '+ ' else obj_str
+
+        string += '\nSubject To\n'
+        for i in range(self.linear.shape[0]):
+            row = self.linear[i]
+            coeffs = row.data
+            indices = row.indices
+            each = ['{} {} x{}'.format('-' if coeff < 0 else '+',
+                                       abs(coeff), index+1)
+                    for coeff, index in zip(coeffs, indices)]
+            each_line = ' '.join(each)
+            if each_line[:2] == '+ ':
+                each_line = each_line[2:]
+
+            string += ' c{}: '.format(i+1) + each_line
+            string += ' <= ' if self.sense[i] == 0 else ' == '
+            string += '{}\n'.format(self.const[i])
+
+        ub, lb = self.ub, self.lb
+        nvar = len(ub)
+        ub_string = '\n'.join([' x{} <= {}'.format(i+1, ub[i])
+                               for i in range(nvar) if ub[i] < np.inf])
+        lb_string = '\n'.join([' {} <= x{}'.format(lb[i], i+1)
+                               for i in range(nvar) if lb[i] > -np.inf])
+        free_string = '\n'.join([' x{} free'.format(i+1)
+                                 for i in range(nvar)
+                                 if lb[i] == -np.inf and ub[i] == np.inf])
+        string += 'Bounds\n'
+        if len(ub_string) > 0:
+            string += ub_string + '\n'
+        if len(lb_string) > 0:
+            string += lb_string + '\n'
+        if len(free_string) > 0:
+            string += free_string + '\n'
+
+        ind_int, = np.where(self.vtype == 'I')
+        int_string = '\n'.join(['x{}'.format(i+1) for i in ind_int])
+        if len(ind_int) > 0:
+            string += 'General\n'
+            string += ' ' + int_string + '\n'
+
+        ind_bin, = np.where(self.vtype == 'B')
+        bin_string = '\n'.join(['x{}'.format(i+1) for i in ind_bin])
+        if len(ind_bin) > 0:
+            string += 'Binary\n'
+            string += ' ' + bin_string + '\n'
+
+        string += 'End'
+
+        return string
+
+    def to_lp(self, name='out'):
+        '''
+        Export the standard form of the optimization model as a .lp file.
+
+        Parameters
+        ----------
+        name : file name of the .lp file
+
+        Notes
+        -----
+        There is no need to specify the .lp extension. The default file name
+        is "out".
+        '''
+
+        with open(name + '.lp', 'w') as f:
+            f.write(self.lp_export())
+
 
 class Solution:
 
@@ -2919,6 +3013,8 @@ class Scen:
         for arg in args:
             if arg.model is not self.ambset.model.sup_model:
                 raise ValueError('Constraints are not for this support.')
+            if not isinstance(arg, (LinConstr, CvxConstr, Bounds, ConeConstr)):
+                raise TypeError('Invalid constraint type.')
 
         # for i in self.series:
         indices = (self.series if isinstance(self.series, pd.Series)

@@ -1,18 +1,16 @@
 from .socp import Model as SOCModel
 from .ro import Model as ROModel
-from .lp import LinConstr, ConeConstr, CvxConstr
+from .lp import DecBounds, LinConstr, ConeConstr, CvxConstr
 from .lp import Vars, Affine
 from .lp import RoAffine, RoConstr
 from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr
 from .lp import DecRoConstr
 from .lp import Scen
-from .lp import Solution
-from .lpg_solver import solve as def_sol
+from .lp import Solution, def_sol
 from .subroutines import event_dict
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-import warnings
 from numbers import Real
 from collections.abc import Sized, Iterable
 
@@ -38,10 +36,12 @@ class Model:
     def __init__(self, scens=1, name=None):
 
         self.ro_model = ROModel()
-        self.vt_model = SOCModel(mtype='V')
+        self.vt_model = SOCModel(mtype='V', top=self)
         self.sup_model = self.ro_model.sup_model
-        self.exp_model = SOCModel(nobj=True, mtype='E')
-        self.pro_model = SOCModel(nobj=True, mtype='P')
+        self.sup_model.top = self
+        self.ro_model.rc_model.top = self
+        self.exp_model = SOCModel(nobj=True, mtype='E', top=self)
+        self.pro_model = SOCModel(nobj=True, mtype='P', top=self)
 
         self.obj_ambiguity = None
 
@@ -50,9 +50,9 @@ class Model:
             series = pd.Series(np.arange(num_scen).astype(int))
         elif isinstance(scens, Sized):
             num_scen = len(scens)
-            series = pd.Series(np.arange(num_scen).astype(int), index=scens)
+            series = pd.Series(np.arange(num_scen).astype(int), index=list(scens))
         else:
-            raise ValueError('Incorrect scenarios.')
+            raise TypeError('Incorrect scenario type.')
         self.num_scen = num_scen
         self.series_scen = series
 
@@ -65,7 +65,7 @@ class Model:
         pr = self.pro_model.dvar(num_scen, name='probabilities')
         self.p = pr
 
-        self.obj = 0
+        self.obj = None
         self.sign = 1
 
         self.primal = None
@@ -78,7 +78,22 @@ class Model:
 
         self.name = name
 
-    def rvar(self, shape=(1,), name=None):
+    def rvar(self, shape=(), name=None):
+        """
+        Returns an array of random variables with the given shape.
+
+        Parameters
+        ----------
+        shape : int or tuple
+            Shape of the variable array.
+        name : str
+            Name of the variable array
+
+        Returns
+        -------
+        new_var : rsome.lp.RandVar
+            An array of new random variables
+        """
 
         sup_var = self.sup_model.dvar(shape, 'C', name)
         exp_var = self.exp_model.dvar(shape, 'C', name)
@@ -125,49 +140,6 @@ class Model:
                               'before defining constraints.')
 
         return Ambiguity(self)
-
-    def bou(self, *args):
-
-        if self.num_scen != 1:
-            raise ValueError('The uncertainty set can only be applied '
-                             'to a one-scenario model')
-
-        bou_set = self.ambiguity()
-        for arg in args:
-            if arg.model is not self.sup_model:
-                raise ValueError('Constraints are not for this support.')
-
-        bou_set.sup_constr = [tuple(args)]
-
-        return bou_set
-
-    def wks(self, *args):
-
-        if self.num_scen != 1:
-            raise ValueError('The WKS ambiguity set can only be applied '
-                             'to a one-scenario model')
-
-        wks_set = self.ambiguity()
-        sup_constr = []
-        exp_constr = []
-        for arg in args:
-            if arg.model is self.sup_model:
-                sup_constr.append(arg)
-            elif arg.model is self.exp_model:
-                exp_constr.append(arg)
-            else:
-                raise ValueError('Constraints are not defined for the '
-                                 'ambiguity support.')
-
-        wks_set.sup_constr = [tuple(sup_constr)]
-        wks_set.exp_constr = [tuple(exp_constr)]
-        wks_set.exp_constr_indices = [np.array([0], dtype=np.int32)]
-
-        return wks_set
-
-    def adro(self, *args):
-
-        return self.wks(*args)
 
     def rule_var(self):
 
@@ -269,8 +241,12 @@ class Model:
         to be one.
         """
 
-        if obj.size > 1:
-            raise ValueError('Incorrect function dimension.')
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
+        if not isinstance(obj, Real):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = 1
@@ -292,8 +268,12 @@ class Model:
         to be one.
         """
 
-        if obj.size > 1:
-            raise ValueError('Incorrect function dimension.')
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
+        if not isinstance(obj, Real):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = - 1
@@ -317,6 +297,9 @@ class Model:
         The ambiguity set defined for the objective function is considered
         the default ambiguity set for the distritionally robust model.
         """
+
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
 
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
@@ -346,6 +329,9 @@ class Model:
         the default ambiguity set for the distritionally robust model.
         """
 
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
 
@@ -362,7 +348,19 @@ class Model:
                 for item in constr:
                     self.st(item)
             else:
+                if isinstance(constr, (DecLinConstr, DecBounds, DecCvxConstr)):
+                    if constr.model is not self.vt_model:
+                        raise ValueError('Models mismatch.')
+                elif isinstance(constr, DecRoConstr):
+                    if constr.dec_model is not self.vt_model or \
+                       constr.rand_model is not self.sup_model:
+                        raise ValueError('Models mismatch.')
+                else:
+                    raise TypeError('Unsupported constraints.')
                 self.all_constr.append(constr)
+
+        self.pupdate = True
+        self.dupdate = True
 
     def do_math(self, primal=True):
 
@@ -380,6 +378,7 @@ class Model:
         self.rule_var()
 
         # Event-wise objective function
+        self.ro_model.obj = None
         self.ro_model.min(self.ro_model.rc_model.vars[1][0].to_affine())
         sign = self.sign
         constr = (self.dec_vars[0] >= self.obj * sign)
@@ -512,9 +511,6 @@ class Model:
                 const_in = constr.affine_in.const
                 aff_in = linear_in@drule + const_in.reshape(const_in.size)
                 if isinstance(aff_in, RoAffine):
-                    if (aff_in.raffine.linear.nnz > 0 or
-                            np.any(aff_in.raffine.const)):
-                        raise SyntaxError('Incorrect convex expressions.')
                     aff_in = aff_in.affine
                 if isinstance(constr.affine_out, (np.ndarray, Real)):
                     linear_out = np.zeros((constr.affine_out.size, drule.shape[0]))
@@ -524,9 +520,6 @@ class Model:
                     const_out = constr.affine_out.const
                 aff_out = linear_out@drule + const_out.reshape(const_out.size)
                 if isinstance(aff_out, RoAffine):
-                    if (aff_out.raffine.linear.nnz > 0 or
-                            np.any(aff_out.raffine.const)):
-                        raise SyntaxError('Incorrect convex expressions.')
                     aff_out = aff_out.affine
                 ew_constr = CvxConstr(aff_in.model, aff_in, aff_out,
                                       constr.xtype)
@@ -549,6 +542,7 @@ class Model:
                             support = constr.ambset.sup_constr[s]
                         elif isinstance(ambset, Iterable):
                             support = ambset
+                        # support = constr.ambset.sup_constr[s]
                     ew_constr = ew_constr.forall(support)
                 else:
                     ew_constr = LinConstr(ew_constr.affine.model,
@@ -581,10 +575,12 @@ class Model:
         if isinstance(constr, DecLinConstr):
             linear = constr.linear
             const = constr.const
+            const = const.reshape((const.size, 1))
             raffine = None
         else:
             linear = constr.affine.linear
             const = constr.affine.const
+            const = const.reshape([const.size, 1])
             raffine = constr.raffine
         if const.ndim == 0:
             const = np.array([const])
@@ -640,7 +636,7 @@ class Model:
 
         return ro_constr
 
-    def solve(self, solver=None, display=True, export=False, params={}):
+    def solve(self, solver=None, display=True, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -651,27 +647,20 @@ class Model:
                 if solver=None.
             display : bool
                 Display option of the solver interface.
-            export : bool
-                Export option of the solver interface. A standard model file
-                is generated if the option is True.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi and MOSEK.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(), display, export, params)
+            solution = def_sol(self.do_math(), display, params)
         else:
-            solution = solver.solve(self.do_math(), display, export, params)
+            solution = solver.solve(self.do_math(), display, params)
 
         if isinstance(solution, Solution):
             self.ro_model.solution = solution
         else:
-            if not solution:
-                warnings.warn('No feasible solutions can be found.')
-            else:
-                x = solution.x
-                self.ro_model.solution = Solution(x[0], x, solution.status)
+            self.ro_model.solution = None
 
         self.ro_model.rc_model.solution = solution
         self.solution = solution
@@ -679,8 +668,12 @@ class Model:
     def get(self):
 
         if self.solution is None:
-            raise SyntaxError('The model is unsolved or no feasible solution.')
+            raise RuntimeError('The model is unsolved or infeasible.')
         return self.sign * self.solution.objval
+
+    def optimal(self):
+
+        return self.solution is not None
 
 
 class Ambiguity:
@@ -711,13 +704,13 @@ class Ambiguity:
     def showevents(self):
 
         num_scen = self.model.num_scen
-        table = pd.DataFrame(['undefined']*num_scen,
+        table = pd.DataFrame([False]*num_scen,
                              columns=['support'],
                              index=self.s.series.index)
         sup_constr = self.sup_constr
         defined = pd.notnull(pd.Series(sup_constr,
                                        index=self.s.series.index))
-        table.loc[defined, 'support'] = 'defined'
+        table.loc[defined, 'support'] = True
 
         # exp_cosntr = self.model.exp_constr
         exp_constr_indices = self.exp_constr_indices
@@ -814,12 +807,12 @@ class Ambiguity:
     def mix_support(self, primal=True):
 
         if not self.update and self.mix_model is not None:
-            return self.mix_model.do_math(primal)
+            return self.mix_model.do_math(primal, obj=False)
 
         self.model.pro_model.reset()
         self.model.pro_model.st(self.pro_constr)
-        pro_support = self.model.pro_model.do_math()
-        self.mix_model = SOCModel(nobj=True, mtype='M')
+        pro_support = self.model.pro_model.do_math(obj=False)
+        self.mix_model = SOCModel(nobj=True, mtype='M', top=self.model)
 
         # Constraints for probabilities
         p = self.mix_model.dvar(pro_support.linear.shape[1])
@@ -835,7 +828,7 @@ class Ambiguity:
         for econstr, indices in zip(self.exp_constr, self.exp_constr_indices):
             self.model.exp_model.reset()
             self.model.exp_model.st(econstr)
-            exp_support = self.model.exp_model.do_math()
+            exp_support = self.model.exp_model.do_math(obj=False)
             exp_var = self.mix_model.dvar(exp_support.linear.shape[1])
             affine = (exp_support.linear @ exp_var
                       - p[indices].sum() * exp_support.const)
@@ -847,4 +840,4 @@ class Ambiguity:
                                      exp_var, q[0])
                 self.mix_model.st(cconstr)
 
-        return self.mix_model.do_math(primal)
+        return self.mix_model.do_math(primal, obj=False)

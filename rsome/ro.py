@@ -3,12 +3,11 @@ from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import DecRule
 from .lp import RoAffine, RoConstr
-from .lp import Solution
-# import subroutines as sbr
+from .lp import Solution, def_sol
 import numpy as np
-# from scipy.sparse import csr_matrix
+from numbers import Real
 from collections.abc import Iterable
-from .lpg_solver import solve as def_sol
+# from .lpg_solver import solve as def_sol
 
 
 class Model:
@@ -18,8 +17,8 @@ class Model:
 
     def __init__(self, name=None):
 
-        self.rc_model = SOCModel(mtype='R')
-        self.sup_model = SOCModel(nobj=True, mtype='S')
+        self.rc_model = SOCModel(mtype='R', top=self)
+        self.sup_model = SOCModel(nobj=True, mtype='S', top=self)
 
         self.all_constr = []
 
@@ -129,8 +128,12 @@ class Model:
         to be one.
         """
 
-        if obj.size > 1:
-            raise ValueError('Incorrect function dimension.')
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
+        if not isinstance(obj, Real):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = 1
@@ -152,8 +155,12 @@ class Model:
         to be one.
         """
 
-        if obj.size > 1:
-            raise ValueError('Incorrect function dimension.')
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
+        if not isinstance(obj, Real):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = - 1
@@ -179,6 +186,9 @@ class Model:
         the default uncertainty set for the robust model.
         """
 
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
 
@@ -193,11 +203,11 @@ class Model:
         sup_model.reset()
         for item in constraints:
             if item.model is not sup_model:
-                raise SyntaxError('Models mismatch.')
+                raise ValueError('Models mismatch.')
             sup_model.st(item)
 
         self.obj = obj
-        self.obj_support = sup_model.do_math(primal=False)
+        self.obj_support = sup_model.do_math(primal=False, obj=False)
         self.sign = 1
         self.pupdate = True
         self.dupdate = True
@@ -221,6 +231,9 @@ class Model:
         the default uncertainty set for the robust model.
         """
 
+        if self.obj is not None:
+            raise SyntaxError('Redefinition of the objective is not allowed.')
+
         if np.prod(obj.shape) > 1:
             raise ValueError('Incorrect function dimension.')
 
@@ -235,11 +248,11 @@ class Model:
         sup_model.reset()
         for item in constraints:
             if item.model is not sup_model:
-                raise SyntaxError('Models mismatch.')
+                raise ValueError('Models mismatch.')
             sup_model.st(item)
 
         self.obj = obj
-        self.obj_support = sup_model.do_math(primal=False)
+        self.obj_support = sup_model.do_math(primal=False, obj=False)
         self.sign = - 1
         self.pupdate = True
         self.dupdate = True
@@ -270,10 +283,17 @@ class Model:
                                     constr.rand_model)
                     right = RoAffine(-constr.raffine, -constr.affine,
                                      constr.rand_model)
-                    self.all_constr.append(RoConstr(left, sense=0))
-                    self.all_constr.append(RoConstr(right, sense=0))
+                    left_constr = RoConstr(left, sense=0)
+                    left_constr.support = constr.support
+                    right_constr = RoConstr(right, sense=0)
+                    right_constr.support = constr.support
+                    self.all_constr.append(left_constr)
+                    self.all_constr.append(right_constr)
             else:
                 raise TypeError('Unknown type of constraints')
+
+        self.pupdate = True
+        self.dupdate = True
 
     def do_math(self, primal=True):
 
@@ -288,7 +308,7 @@ class Model:
                 return self.rc_model.do_math(False, obj=True)
 
         self.rc_model.reset()
-        if isinstance(self.obj, (Vars, VarSub, Affine, Convex)):
+        if isinstance(self.obj, (Vars, VarSub, Affine, Convex, Real)):
             self.rc_model.obj = self.obj
             self.rc_model.sign = self.sign
             more_roc = []
@@ -321,7 +341,7 @@ class Model:
 
         return formula
 
-    def solve(self, solver=None, display=True, export=False, params={}):
+    def solve(self, solver=None, display=True, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -333,32 +353,29 @@ class Model:
                 if solver=None.
             display : bool
                 Display option of the solver interface.
-            export : bool
-                Export option of the solver interface. A standard model file
-                is generated if the option is True.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi and MOSEK.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(), display, export, params)
+            solution = def_sol(self.do_math(), display, params)
         else:
-            solution = solver.solve(self.do_math(), display, export, params)
+            solution = solver.solve(self.do_math(), display, params)
 
         if isinstance(solution, Solution):
             self.rc_model.solution = solution
         else:
-            if solution is None:
-                self.rc_model.solution = None
-            else:
-                x = solution.x
-                self.rc_model.solution = Solution(x[0], x, solution.status)
+            self.rc_model.solution = None
 
         self.solution = self.rc_model.solution
 
     def get(self):
 
         if self.rc_model.solution is None:
-            raise SyntaxError('The model is unsolved or no feasible solution.')
+            raise RuntimeError('The model is unsolved or infeasible.')
         return self.sign * self.rc_model.solution.objval
+
+    def optimal(self):
+
+        return self.solution is not None

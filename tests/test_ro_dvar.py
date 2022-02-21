@@ -65,6 +65,12 @@ def test_dvar_array():
     assert x.vtype == 'C'
     assert x.__repr__() == '2x3x4 continuous decision variables'
 
+    for var in x.iter():
+        assert var.__repr__() == '3x4 continuous decision variables'
+    for vars in x.iter():
+        for var in vars.iter():
+            assert var.__repr__() == '4 continuous decision variables'
+
     xa = x.to_affine()
     assert xa.shape == x.shape
     assert (xa.const == np.zeros(x.shape)).all()
@@ -78,6 +84,11 @@ def test_dvar_array():
     assert x[0, 1:3].__repr__() == '2x4 continuous decision variables'
     assert x[0, 2, 1].to_affine().shape == ()
     assert x[0, 2, 1].__repr__() == 'a continuous decision variable'
+    assert x[0, 2, 1].T.__repr__() == 'an affine expression'
+    assert x[:, 1].T.shape == (4, 2)
+    assert x[:, 1].T.__repr__() == '4x2 affine expressions'
+    assert x.reshape((3, 8)).__repr__() == '3x8 affine expressions'
+    assert x[:, 1].reshape((8, 1)).__repr__() == '8x1 affine expressions'
 
     assert x.T.shape == (4, 3, 2)
     assert (x.T.const == np.zeros((4, 3, 2))).all()

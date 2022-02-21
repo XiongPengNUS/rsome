@@ -12,7 +12,7 @@ import time
 from .lp import Solution
 
 
-def solve(form, display=True, export=False, params={}):
+def solve(form, display=True, params={}):
 
     numlc, numvar = form.linear.shape
     if isinstance(form, SOCProg):
@@ -24,8 +24,8 @@ def solve(form, display=True, export=False, params={}):
     ind_bin = np.where(form.vtype == 'B')[0]
 
     if ind_bin.size:
-        form.ub[ind_bin] = 1
-        form.lb[ind_bin] = 0
+        form.ub[ind_bin] = np.minimum(1, form.ub[ind_bin])
+        form.lb[ind_bin] = np.maximum(0, form.lb[ind_bin])
 
     ind_ub = np.where((form.ub != np.inf) & (form.lb == -np.inf))[0]
     ind_lb = np.where((form.lb != -np.inf) & (form.ub == np.inf))[0]
@@ -102,7 +102,7 @@ def solve(form, display=True, export=False, params={}):
                         task.putintparam(getattr(mosek.iparam, param), value)
                     if isinstance(value, str):
                         task.putstrparam(getattr(mosek.sparam, param), value)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, AttributeError):
                 raise ValueError('Incorrect parameters or values.')
 
             t0 = time.time()
@@ -111,22 +111,24 @@ def solve(form, display=True, export=False, params={}):
 
             soltype = mosek.soltype
             solsta = None
-            for stype in [soltype.bas, soltype.itr, soltype.itg]:
-                try:
-                    solsta = task.getsolsta(stype)
-                    if display:
-                        print('Solution status: {0}'.format(solsta.__repr__()))
-                        print('Running time: {0:0.4f}s'.format(stime))
 
-                    break
-                except ValueError:
-                    raise ValueError('No solution is accessible')
+            if 'B' in form.vtype or 'I' in form.vtype:
+                stype = soltype.itg
+            elif not qmat:
+                stype = soltype.bas
+            else:
+                stype = soltype.itr
+
+            solsta = task.getsolsta(stype)
+            if display:
+                print('Solution status: {0}'.format(solsta.__repr__()))
+                print('Running time: {0:0.4f}s'.format(stime))
 
             xx = [0.] * numvar
             task.getxx(stype, xx)
 
-            if export:
-                task.writedata("out.mps")
+            # if export:
+            #     task.writedata("out.mps")
 
             if solsta in [mosek.solsta.optimal, mosek.solsta.integer_optimal]:
                 solution = Solution(xx @ form.obj.flatten(), xx, solsta)

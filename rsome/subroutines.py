@@ -105,29 +105,6 @@ def sp_lmatmul(ndarray, affine, shape):
 
         return csr_matrix((data, index, indptr), shape=[size, affine.size])
 
-    """
-    left = (affine.reshape((affine.size // affine.shape[-1],
-                            affine.shape[-1])) if len(affine.shape) > 1
-            else affine.reshape((1, affine.size)))
-    right = (ndarray if ndarray.ndim > 1
-             else ndarray.reshape((ndarray.size, 1)))
-
-    row, inner = left.shape
-    column = right.shape[-1]
-
-    index = np.tile(np.arange(left.size).reshape(left.shape),
-                    (1, column)).flatten()
-    index = np.tile(index, (size * inner // index.size))
-    andim = right.ndim
-    data = np.tile(np.transpose(right,
-                                axes=list(range(andim - 2)) + [andim - 1,
-                                                               andim - 2]),
-                   (size * inner // ndarray.size, 1)).flatten()
-    indptr = [inner * i for i in range(size + 1)]
-
-    return csr_matrix((data, index, indptr), shape=[size, affine.size])
-    """
-
 
 def sp_trans(affine):
 
@@ -147,17 +124,6 @@ def index_array(shape):
         shape = int(shape),
 
     return np.arange(size, dtype=int).reshape(shape)
-
-
-def sparse_array(shape):
-
-    shape = shape if isinstance(shape, tuple) else (int(shape), )
-    size = np.prod(shape).item()
-    sparse = csr_matrix(([1.0]*size, np.arange(size, dtype=int),
-                         np.arange(size+1, dtype=int)), (size, size))
-    elements = [sparse[i, :] for i in range(size)]
-
-    return np.array(elements).reshape(shape)
 
 
 def array_to_sparse(array):
