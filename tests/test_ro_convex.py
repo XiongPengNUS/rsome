@@ -221,8 +221,8 @@ def test_norm_inf(array, const):
     (rd.rand(3, 5), rd.rand(5)),
     (rd.rand(3, 5), rd.rand(2, 3, 5)),
     (rd.rand(2, 3, 5), rd.rand(3, 5)),
-    (rd.rand(2, 3, 4, 2), rd.rand(4, 1)),
-    (rd.rand(2, 1, 4, 3), rd.rand(4, 3)),
+    (rd.rand(2, 3, 3, 2), rd.rand(3, 1)),
+    (rd.rand(2, 1, 2, 3), rd.rand(2, 3)),
     (rd.rand(2, 4), rd.rand(2, 3, 2, 4))
 ])
 def test_squares(array, const):
