@@ -6,7 +6,7 @@
 [![PyPI - downloads](https://img.shields.io/pypi/dm/rsome?label=PyPI%20downloads)](https://pypi.org/project/rsome/)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/xiongpengnus/rsome)](https://github.com/XiongPengNUS/rsome/graphs/commit-activity)
 [![Last commit](https://img.shields.io/github/last-commit/xiongpengnus/rsome)](https://github.com/XiongPengNUS/rsome/graphs/commit-activity)
-![Tests](https://github.com/XiongPengNUS/rsome/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/XiongPengNUS/rsome/blob/master/.github/workflows/tests.yml/badge.svg)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Issue stats](http://isitmaintained.com/badge/resolution/xiongpengnus/rsome.svg)](http://isitmaintained.com/project/xiongpengnus/rsome)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/xiongpengnus/rsome.svg)](http://isitmaintained.com/project/xiongpengnus/rsome "Percentage of issues still open")
