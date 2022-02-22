@@ -9,8 +9,8 @@
 [![Tests](https://github.com/XiongPengNUS/rsome/actions/workflows/test.yml/badge.svg)](https://github.com/XiongPengNUS/rsome/actions/workflows/test.yml)
 [![Docs](https://github.com/XiongPengNUS/rsome/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/XiongPengNUS/rsome/actions/workflows/pages/pages-build-deployment)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Issue stats](http://isitmaintained.com/badge/resolution/xiongpengnus/rsome.svg)](http://isitmaintained.com/project/xiongpengnus/rsome)
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/xiongpengnus/rsome.svg)](http://isitmaintained.com/project/xiongpengnus/rsome "Percentage of issues still open")
+![GitHub closed issues](https://img.shields.io/github/issues-closed/XiongPengNUS/rsome)
+![GitHub issues](https://img.shields.io/github/issues-raw/XiongPengNUS/rsome)
 
 - Website: [RSOME for Python](https://xiongpengnus.github.io/rsome/)
 - PyPI: [RSOME 1.0.0](https://pypi.org/project/rsome/)
