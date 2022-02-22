@@ -1,5 +1,5 @@
 from rsome import ro
-from rsome import grb_solver as grb
+from rsome import ort_solver as ort
 import numpy as np
 import numpy.random as rd
 import pytest
@@ -77,15 +77,15 @@ def test_scalar_opt():
 
 
 @pytest.mark.parametrize('array1, array2, const, solver', [
-    (rd.rand(1).reshape(()), rd.rand(1).reshape(()), 2.5, grb),
-    (rd.rand(7), rd.rand(7), rd.rand(7), grb),
-    (rd.rand(3, 7), rd.rand(7), rd.rand(7), grb),
-    (rd.rand(2, 3, 7), rd.rand(7), rd.rand(3, 7), grb),
-    (rd.rand(3, 4), rd.rand(3, 4), rd.rand(3, 4), grb),
-    (rd.rand(2, 3, 4), rd.rand(4), rd.rand(3, 4), grb),
-    (rd.rand(5), rd.rand(3, 5), -2.0, grb),
-    (rd.rand(2, 4, 2, 5), rd.rand(1, 2, 5), -np.arange(5), grb),
-    (rd.rand(3, 4), rd.rand(2, 3, 4), rd.rand(3, 4), grb)
+    (rd.rand(1).reshape(()), rd.rand(1).reshape(()), 2.5, ort),
+    (rd.rand(7), rd.rand(7), rd.rand(7), ort),
+    (rd.rand(3, 7), rd.rand(7), rd.rand(7), ort),
+    (rd.rand(2, 3, 7), rd.rand(7), rd.rand(3, 7), ort),
+    (rd.rand(3, 4), rd.rand(3, 4), rd.rand(3, 4), ort),
+    (rd.rand(2, 3, 4), rd.rand(4), rd.rand(3, 4), ort),
+    (rd.rand(5), rd.rand(3, 5), -2.0, ort),
+    (rd.rand(2, 4, 2, 5), rd.rand(1, 2, 5), -np.arange(5), ort),
+    (rd.rand(3, 4), rd.rand(2, 3, 4), rd.rand(3, 4), ort)
 ])
 def test_array_mul(array1, array2, const, solver):
     """
@@ -145,7 +145,7 @@ def test_random_array_add(array1, array2, array3, const):
     m.st((expr - target <= d).forall(z + (-array3) == 0))
     m.st((target - expr <= d).forall((-array3) + z == 0))
     m.st(v == array1)
-    m.solve(grb)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == ro.RoAffine
@@ -187,7 +187,7 @@ def test_random_array_mul(array1, array2, array3, const):
     m.st((expr - target <= d).forall(uset))
     m.st((target - expr <= d).forall(uset))
     m.st(v == array1)
-    m.solve(grb)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == ro.RoAffine
@@ -202,15 +202,15 @@ def test_random_array_mul(array1, array2, array3, const):
 
 
 @pytest.mark.parametrize('array1, array2, const, solver', [
-    (rd.rand(3), rd.rand(3), 1.5, grb),
-    (rd.rand(7), rd.rand(7, 3), rd.rand(3), grb),
-    (rd.rand(7), rd.rand(3, 4, 7, 2), rd.rand(3, 4, 2), grb),
-    (rd.rand(2, 3, 4), rd.rand(4), rd.rand(3), grb),
-    (rd.rand(7, 3), rd.rand(3), rd.rand(7), grb),
-    (rd.rand(4, 5), rd.rand(5, 3), -2.0, grb),
-    (rd.rand(4, 2, 5), rd.rand(5, 6), np.arange(6), grb),
-    (rd.rand(2, 4, 2, 5), rd.rand(4, 5, 3), -np.arange(3), grb),
-    (rd.rand(4, 5), rd.rand(2, 5, 3), np.arange(12).reshape(4, 3), grb)
+    (rd.rand(3), rd.rand(3), 1.5, ort),
+    (rd.rand(7), rd.rand(7, 3), rd.rand(3), ort),
+    (rd.rand(7), rd.rand(3, 4, 7, 2), rd.rand(3, 4, 2), ort),
+    (rd.rand(2, 3, 4), rd.rand(4), rd.rand(3), ort),
+    (rd.rand(7, 3), rd.rand(3), rd.rand(7), ort),
+    (rd.rand(4, 5), rd.rand(5, 3), -2.0, ort),
+    (rd.rand(4, 2, 5), rd.rand(5, 6), np.arange(6), ort),
+    (rd.rand(2, 4, 2, 5), rd.rand(4, 5, 3), -np.arange(3), ort),
+    (rd.rand(4, 5), rd.rand(2, 5, 3), np.arange(12).reshape(4, 3), ort)
 ])
 def test_mat_rmul(array1, array2, const, solver):
     """
@@ -244,15 +244,15 @@ def test_mat_rmul(array1, array2, const, solver):
 
 
 @pytest.mark.parametrize('array1, array2, const, solver', [
-    (rd.rand(3), rd.rand(3), 1.5, grb),
-    (rd.rand(7), rd.rand(7, 3), rd.rand(3), grb),
-    (rd.rand(7), rd.rand(3, 4, 7, 2), rd.rand(3, 4, 2), grb),
-    (rd.rand(2, 3, 4), rd.rand(4), rd.rand(3), grb),
-    (rd.rand(7, 3), rd.rand(3), rd.rand(7), grb),
-    (rd.rand(4, 5), rd.rand(5, 3), -2.0, grb),
-    (rd.rand(4, 2, 5), rd.rand(5, 6), np.arange(6), grb),
-    (rd.rand(2, 4, 2, 5), rd.rand(4, 5, 3), -np.arange(3), grb),
-    (rd.rand(4, 5), rd.rand(2, 5, 3), np.arange(12).reshape(4, 3), grb)
+    (rd.rand(3), rd.rand(3), 1.5, ort),
+    (rd.rand(7), rd.rand(7, 3), rd.rand(3), ort),
+    (rd.rand(7), rd.rand(3, 4, 7, 2), rd.rand(3, 4, 2), ort),
+    (rd.rand(2, 3, 4), rd.rand(4), rd.rand(3), ort),
+    (rd.rand(7, 3), rd.rand(3), rd.rand(7), ort),
+    (rd.rand(4, 5), rd.rand(5, 3), -2.0, ort),
+    (rd.rand(4, 2, 5), rd.rand(5, 6), np.arange(6), ort),
+    (rd.rand(2, 4, 2, 5), rd.rand(4, 5, 3), -np.arange(3), ort),
+    (rd.rand(4, 5), rd.rand(2, 5, 3), np.arange(12).reshape(4, 3), ort)
 ])
 def test_mat_mul(array1, array2, const, solver):
     """
@@ -318,7 +318,7 @@ def test_random_mat_mul(array1, array2, array3, const):
     m.st((expr - target <= d).forall(uset))
     m.st((target - expr <= d).forall(uset))
     m.st(v == array2)
-    m.solve(grb)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
     assert type(expr) == ro.RoAffine
@@ -365,7 +365,7 @@ def test_mat_random_mul(array1, array2, array3, const):
     m.st((expr - target <= d).forall(uset))
     m.st((target - expr <= d).forall(uset))
     m.st(v == array1)
-    m.solve(grb)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == ro.RoAffine

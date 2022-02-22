@@ -1,5 +1,5 @@
 from rsome import dro
-from rsome import cpx_solver as cpx
+from rsome import cvx_solver as cvx
 from rsome import E
 import rsome as rso
 import numpy as np
@@ -11,7 +11,7 @@ def test_dro_model():
     rd.seed(5)
 
     N = 3
-    S = 20
+    S = 10
     c = np.ones(N)
     d = 50 * N
     p = 1 + 4*rd.rand(N)
@@ -44,10 +44,10 @@ def test_dro_model():
     model.st(x >= 0)
     model.st(c@x == d)
 
-    model.solve(cpx)
+    model.solve(cvx)
 
-    objval = -229.1826
-    x_sol = np.array([65.79278894, 45.06811655, 39.13909451])
+    objval = -193.8652
+    x_sol = np.array([70.35713115, 36.83036526, 42.81250359])
 
     assert abs(model.get() - objval) < 1e-4
     assert (abs(x_sol - x.get()) < 1e-4).all()
@@ -55,5 +55,5 @@ def test_dro_model():
     assert len(y.get(z)) == S
     assert len(y.get(u)) == S
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(cvx)
     assert abs(dual_sol.objval + objval) < 1e-4

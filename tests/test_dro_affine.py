@@ -1,6 +1,6 @@
 from rsome import dro
 from rsome import E
-from rsome import cpx_solver as cpx
+from rsome import ort_solver as ort
 import rsome as rso
 import numpy as np
 import numpy.random as rd
@@ -51,7 +51,7 @@ def test_array_mul(array1, array2, const):
     expr = array1*v + const
     m.min(a)
     m.st(a >= abs(expr - target), v == array2)
-    m.solve(cpx)
+    m.solve(ort)
 
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
@@ -95,7 +95,7 @@ def test_random_array_add(array1, array2, array3, const):
     m.st((expr - target <= d).forall(fset))
     m.st((target - expr <= d).forall(fset))
     m.st(v == array1)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -148,7 +148,7 @@ def test_event_exp_random_array_add(array1, array2, array3, const):
     m.st((E(expr) - target <= d).forall(fset))
     m.st((target - E(expr) <= d).forall(fset))
     m.st(v == array1)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -194,7 +194,7 @@ def test_event_ro_random_array_add(array1, array2, const):
     m.st(a >= 0)
     m.st(d >= expr)
     m.st(d <= expr)
-    m.solve(cpx)
+    m.solve(ort)
 
     for s in range(ns):
         assert (abs(d.get()[s] - target[s]) < 1e-4).all()
@@ -233,7 +233,7 @@ def test_random_array_mul(array1, array2, array3, const):
     m.st((expr - target <= d).forall(fset))
     m.st((target - expr <= d).forall(fset))
     m.st(v == array1)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -282,7 +282,7 @@ def test_event_exp_random_array_mul(array1, array2, array3, const):
     m.st((E(expr) - target <= d).forall(fset))
     m.st((target - E(expr) <= d).forall(fset))
     m.st(v == array1)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -319,7 +319,7 @@ def test_random_adaptive_array_mul(array, const):
     m.min(a)
     m.st(a >= 0)
     m.st((y == array*z + const).forall(uset))
-    m.solve(cpx)
+    m.solve(ort)
 
     y0 = y.get() * np.ones(cshape)
     yz = y.get(z).sum(axis=tuple(range(len(shape), len(shape+cshape))))
@@ -365,7 +365,7 @@ def test_event_random_adaptive_array_mul(array1, array2, const):
     m.st(d >= expr)
     m.st(d <= expr)
     m.st(v == u)
-    m.solve(cpx)
+    m.solve(ort)
 
     ones = np.zeros(array2.shape[1:])
     for s in range(ns):
@@ -413,7 +413,7 @@ def test_mat_rmul(array1, array2, const):
     m.st(a >= abs(d))
     m.st(d == expr - target)
     m.st(v == array2)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
     assert type(expr) == rso.lp.DecAffine
@@ -447,7 +447,7 @@ def test_mat_mul(array1, array2, const):
     m.st(a >= abs(d))
     m.st(d == expr - target)
     m.st(v == array1)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == rso.lp.DecAffine
@@ -486,7 +486,7 @@ def test_random_mat_mul(array1, array2, array3, const):
     m.st((expr - target <= d).forall(uset))
     m.st((target - expr <= d).forall(uset))
     m.st(v == array2)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -525,7 +525,7 @@ def test_mat_random_mul(array1, array2, array3, const):
     m.st((expr - target <= d).forall(uset))
     m.st((target - expr <= d).forall(uset))
     m.st(v == array1)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -556,7 +556,7 @@ def test_roaffine_mat_mul(array1, array2, const, array3):
     m.st((expr - target <= d).forall(fset))
     m.st((target - expr <= d).forall(fset))
     m.st(v == array2)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine
@@ -587,7 +587,7 @@ def test_mat_roaffine_mul(array1, array2, const, array3):
     m.st((expr - target <= d).forall(fset))
     m.st((target - expr <= d).forall(fset))
     m.st(v == array2)
-    m.solve(cpx)
+    m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
     assert type(expr) == rso.lp.DecRoAffine

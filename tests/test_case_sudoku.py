@@ -1,7 +1,6 @@
 from rsome import ro
 from rsome import dro
-from rsome import clp_solver as clp
-from rsome import cpx_solver as cpx
+from rsome import ort_solver as ort
 import numpy as np
 
 
@@ -30,7 +29,7 @@ def test_ro_model():
         for j in range(0, 9, 3):
             model.st(x[i: i+3, j: j+3, :].sum(axis=(0, 1)) == 1)
 
-    model.solve(clp)
+    model.solve(ort)
 
     solution = np.array([[5., 3., 4., 6., 7., 8., 9., 1., 2.],
                          [6., 7., 2., 1., 9., 5., 3., 4., 8.],
@@ -72,7 +71,7 @@ def test_dro_model():
         for j in range(0, 9, 3):
             model.st(x[i: i+3, j: j+3, :].sum(axis=(0, 1)) == 1)
 
-    model.solve(cpx)
+    model.solve(ort)
 
     solution = np.array([[5., 3., 4., 6., 7., 8., 9., 1., 2.],
                          [6., 7., 2., 1., 9., 5., 3., 4., 8.],

@@ -9,6 +9,7 @@ import numpy as np
 import warnings
 import time
 from .lp import Solution
+from numbers import Real
 
 
 def solve(formula, display=True, params={}):
@@ -45,12 +46,12 @@ def solve(formula, display=True, params={}):
         indices = linear[j].indices
         coeff = linear[j].data
         nz = len(indices)
-        if sense[j] == 1:
-            solver.Add(sum([coeff[i] * xs[indices[i]]
-                            for i in range(nz)]) == const[j])
-        else:
-            solver.Add(sum([coeff[i] * xs[indices[i]]
-                            for i in range(nz)]) <= const[j])
+        left = sum([coeff[i] * xs[indices[i]] for i in range(nz)])
+        if not isinstance(left, Real):
+            if sense[j] == 1:
+                solver.Add(left == const[j])
+            else:
+                solver.Add(left <= const[j])
 
     if display:
         print('Being solved by OR-Tools...', flush=True)

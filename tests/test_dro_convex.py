@@ -81,8 +81,7 @@ def test_norm_one(array, const):
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3, 8), rd.rand()),
-    (rd.rand(4, 8), rd.rand()),
+    (rd.rand(3, 5), rd.rand()),
     (rd.rand(5, 1), rd.rand())
 ])
 def test_norm_two(array, const):
@@ -227,14 +226,14 @@ def test_norm_inf(array, const):
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(4, 8), rd.rand(4, 1)),
-    (rd.rand(4, 8), rd.rand(4, 8)),
+    (rd.rand(2, 3), rd.rand(2, 1)),
+    (rd.rand(2, 3), rd.rand(2, 3)),
     (rd.rand(3, 1), rd.rand(3, 1)),
-    (rd.rand(5, 1, 8), rd.rand(5, 3, 8)),
-    (rd.rand(2, 3, 5), rd.rand(2, 3, 1)),
-    (rd.rand(4, 3, 5), rd.rand(4, 1, 5)),
-    (rd.rand(4, 1, 3, 5), rd.rand(4, 2, 3, 5)),
-    (rd.rand(4, 2, 3, 5), rd.rand(4, 1, 3, 5))
+    (rd.rand(2, 1, 3), rd.rand(2, 2, 3)),
+    (rd.rand(2, 3, 4), rd.rand(2, 3, 1)),
+    (rd.rand(3, 3, 2), rd.rand(3, 1, 2)),
+    (rd.rand(3, 1, 3, 2), rd.rand(3, 2, 3, 2)),
+    (rd.rand(3, 2, 3, 2), rd.rand(3, 1, 3, 2))
 ])
 def test_squares(array, const):
 
@@ -317,8 +316,7 @@ def test_squares(array, const):
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3, 8), rd.rand(3)),
-    (rd.rand(4, 8), rd.rand(4)),
+    (rd.rand(3, 4), rd.rand(3)),
     (rd.rand(5, 1), rd.rand(5))
 ])
 def test_square_sum(array, const):

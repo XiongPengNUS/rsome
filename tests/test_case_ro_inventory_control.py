@@ -1,6 +1,6 @@
 from rsome import ro
 from rsome import dro
-from rsome import cpx_solver as cpx
+from rsome import ort_solver as ort
 import numpy as np
 
 
@@ -30,22 +30,21 @@ def test_ro_model():
     model.minmax((c*p).sum(), uset)
     model.st(0 <= p, p <= P)
     model.st(p.sum(axis=1) <= Q)
-    # for t in range(T):
     model.st(v + p[:, :t+1].sum() - d[:t+1].sum() >= vmin for t in range(T))
     model.st(v + p[:, :t+1].sum() - d[:t+1].sum() <= vmax for t in range(T))
 
-    model.solve(cpx)
+    model.solve(ort)
 
     objval = 44272.82749
     assert abs(objval - model.get()) < 1e-4
 
-    primal_sol = model.do_math().solve(cpx)
+    primal_sol = model.do_math().solve(ort)
     assert abs(primal_sol.objval - objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval + objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval + objval) < 1e-4
 
 
@@ -76,22 +75,21 @@ def test_dro_model():
     model.minsup((c*p).sum(), fset)
     model.st(0 <= p, p <= P)
     model.st(p.sum(axis=1) <= Q)
-    # for t in range(T):
     model.st(v + p[:, :t+1].sum() - d[:t+1].sum() >= vmin for t in range(T))
     model.st(v + p[:, :t+1].sum() - d[:t+1].sum() <= vmax for t in range(T))
 
-    model.solve(cpx)
+    model.solve(ort)
 
     objval = 44272.82749
     assert abs(objval - model.get()) < 1e-4
 
-    primal_sol = model.do_math().solve(cpx)
+    primal_sol = model.do_math().solve(ort)
     assert abs(primal_sol.objval - objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval + objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval + objval) < 1e-4
 
     assert p.get().shape == (3, T)
