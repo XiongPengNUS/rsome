@@ -230,9 +230,9 @@ def test_norm_inf(array, const):
     (rd.rand(2, 3), rd.rand(2, 3)),
     (rd.rand(3, 1), rd.rand(3, 1)),
     (rd.rand(2, 1, 2), rd.rand(2, 2, 2)),
-    (rd.rand(2, 3, 2), rd.rand(2, 3, 1)),
-    (rd.rand(2, 3, 2), rd.rand(2, 1, 2)),
-    (rd.rand(2, 1, 3, 1), rd.rand(2, 2, 3, 1))
+    (rd.rand(2, 2, 2), rd.rand(2, 2, 1)),
+    (rd.rand(2, 2, 2), rd.rand(2, 1, 2)),
+    (rd.rand(2, 1, 2, 1), rd.rand(2, 2, 2, 1))
 ])
 def test_squares(array, const):
 
