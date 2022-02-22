@@ -1,6 +1,6 @@
 from rsome import ro
 from rsome import dro
-from rsome import cpx_solver as cpx
+from rsome import ort_solver as ort
 import rsome as rso
 import numpy as np
 import pytest
@@ -25,20 +25,20 @@ def test_ro_model():
     model.st(sum(x) == 1)
     model.st(x >= 0)
 
-    model.solve(cpx)
+    model.solve(ort)
     model.get()
 
     objval = 1.17089
 
     assert abs(model.get() - objval) < 1e-4
 
-    primal_sol = model.do_math().solve(cpx)
+    primal_sol = model.do_math().solve(ort)
     assert abs(primal_sol.objval + objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval - objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval - objval) < 1e-4
 
     with pytest.raises(TypeError):
@@ -66,20 +66,20 @@ def test_dro_model():
     model.st(sum(x) == 1)
     model.st(x >= 0)
 
-    model.solve(cpx)
+    model.solve(ort)
     model.get()
 
     objval = 1.17089
 
     assert abs(model.get() - objval) < 1e-4
 
-    primal_sol = model.do_math().solve(cpx)
+    primal_sol = model.do_math().solve(ort)
     assert abs(primal_sol.objval + objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval - objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cpx)
+    dual_sol = model.do_math(primal=False).solve(ort)
     assert abs(dual_sol.objval - objval) < 1e-4
 
     with pytest.raises(TypeError):

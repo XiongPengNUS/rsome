@@ -8,8 +8,8 @@ import pytest
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3, 8), rd.rand()),
-    (rd.rand(4, 8), rd.rand()),
+    (rd.rand(3, 7), rd.rand()),
+    (rd.rand(4, 7), rd.rand()),
     (rd.rand(5, 1), rd.rand())
 ])
 def test_norm_one(array, const):
@@ -153,8 +153,8 @@ def test_norm_two(array, const):
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3, 8), rd.rand()),
-    (rd.rand(4, 8), rd.rand()),
+    (rd.rand(3, 7), rd.rand()),
+    (rd.rand(4, 7), rd.rand()),
     (rd.rand(5, 1), rd.rand())
 ])
 def test_norm_inf(array, const):
