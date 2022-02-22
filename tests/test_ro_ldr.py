@@ -384,7 +384,7 @@ def test_array_ldr_opt():
     (rd.rand(7), rd.rand()),
     (rd.rand(7), rd.rand(1)),
     (rd.rand(3, 7), rd.rand(7)),
-    (rd.rand(3, 7), rd.rand(3, 7))
+    (rd.rand(3, 4), rd.rand(3, 4))
 ])
 def test_ro_ldr_adapt(array, const):
 

@@ -1,6 +1,7 @@
 import rsome as rso
 from rsome import dro
-from rsome import grb_solver as grb
+# from rsome import grb_solver as grb
+from rsome import msk_solver as msk
 from rsome import E
 import numpy as np
 import numpy.random as rd
@@ -36,7 +37,7 @@ def test_norm_one(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean()) < 1e-4
     for s in range(ns):
@@ -64,7 +65,7 @@ def test_norm_one(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean()) < 1e-4
     for s in range(ns):
@@ -108,7 +109,7 @@ def test_norm_two(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean()) < 1e-4
     for s in range(ns):
@@ -136,7 +137,7 @@ def test_norm_two(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean()) < 1e-4
     for s in range(ns):
@@ -181,7 +182,7 @@ def test_norm_inf(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean()) < 1e-4
     for s in range(ns):
@@ -209,7 +210,7 @@ def test_norm_inf(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean()) < 1e-4
     for s in range(ns):
@@ -229,8 +230,8 @@ def test_norm_inf(array, const):
     (rd.rand(2, 3), rd.rand(2, 1)),
     (rd.rand(2, 3), rd.rand(2, 3)),
     (rd.rand(3, 1), rd.rand(3, 1)),
-    (rd.rand(2, 1, 3), rd.rand(2, 2, 3)),
-    (rd.rand(2, 3, 4), rd.rand(2, 3, 1)),
+    (rd.rand(2, 1, 2), rd.rand(2, 2, 2)),
+    (rd.rand(2, 3, 2), rd.rand(2, 3, 1)),
     (rd.rand(2, 3, 2), rd.rand(2, 1, 2)),
     (rd.rand(2, 1, 3, 2), rd.rand(2, 2, 3, 2)),
     (rd.rand(2, 2, 3, 2), rd.rand(2, 1, 3, 2))
@@ -265,7 +266,7 @@ def test_squares(array, const):
     m.st(a >= d.sum())
     m.st(d >= expr)
     m.st(x == z, y == u)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean(axis=0).sum()) < 1e-4
     for s in range(ns):
@@ -299,7 +300,7 @@ def test_squares(array, const):
     m.st(a <= d.sum())
     m.st(d <= expr)
     m.st(x == z, y == u)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.mean(axis=0).sum()) < 1e-4
     for s in range(ns):
@@ -316,7 +317,7 @@ def test_squares(array, const):
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3, 4), rd.rand(3)),
+    (rd.rand(2, 3), rd.rand(2)),
     (rd.rand(5, 1), rd.rand(5))
 ])
 def test_square_sum(array, const):
@@ -346,7 +347,7 @@ def test_square_sum(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z, y == u)
-    m.solve(grb)
+    m.solve(msk)
 
     assert (abs(a.get().values - target) < 1e-4).all()
     assert abs(m.get() - target.mean()) < 1e-4
@@ -376,7 +377,7 @@ def test_square_sum(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
-    m.solve(grb)
+    m.solve(msk)
 
     assert (abs(a.get().values - target) < 1e-4).all()
     assert abs(m.get() - target.mean()) < 1e-4
@@ -412,7 +413,7 @@ def test_quad(array, const):
     m.min(a)
     m.st(a >= expr)
     m.st(x == array)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.max()) < 1e-4
     assert type(expr) == rso.lp.DecConvex
@@ -433,7 +434,7 @@ def test_quad(array, const):
     m.max(a)
     m.st(a <= expr)
     m.st(x == array)
-    m.solve(grb)
+    m.solve(msk)
 
     assert abs(m.get() - target.min()) < 1e-4
     assert type(expr) == rso.lp.DecConvex
