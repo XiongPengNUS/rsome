@@ -2,12 +2,12 @@
 
 # RSOME: Robust Stochastic Optimization Made Easy
 
-[![PyPI Latest Release](https://img.shields.io/pypi/v/rsome.svg)](https://pypi.org/project/rsome/)
+[![PyPI](https://img.shields.io/pypi/v/rsome?label=PyPI)](https://pypi.org/project/rsome/)
 [![PyPI - downloads](https://img.shields.io/pypi/dm/rsome?label=PyPI%20downloads)](https://pypi.org/project/rsome/)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/xiongpengnus/rsome)](https://github.com/XiongPengNUS/rsome/graphs/commit-activity)
 [![Last commit](https://img.shields.io/github/last-commit/xiongpengnus/rsome)](https://github.com/XiongPengNUS/rsome/graphs/commit-activity)
 [![Tests](https://github.com/XiongPengNUS/rsome/actions/workflows/test.yml/badge.svg)](https://github.com/XiongPengNUS/rsome/actions/workflows/test.yml)
-[![Docs](https://github.com/XiongPengNUS/rsome/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/XiongPengNUS/rsome/actions/workflows/pages/pages-build-deployment)
+[![Docs](https://github.com/XiongPengNUS/rsome/actions/workflows/pages/pages-build-deployment/badge.svg?label=Docs)](https://github.com/XiongPengNUS/rsome/actions/workflows/pages/pages-build-deployment)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 ![GitHub closed issues](https://img.shields.io/github/issues-closed/XiongPengNUS/rsome)
 ![GitHub issues](https://img.shields.io/github/issues-raw/XiongPengNUS/rsome)
