@@ -1,10 +1,6 @@
 from rsome import ro
 from rsome import dro
-<<<<<<< HEAD
 from rsome import ort_solver as ort
-=======
-from rsome import cpx_solver as cpx
->>>>>>> effe1a99ee3ebf751755a6a010a849c43b3dc409
 import numpy as np
 
 
@@ -33,11 +29,7 @@ def test_ro_model():
         for j in range(0, 9, 3):
             model.st(x[i: i+3, j: j+3, :].sum(axis=(0, 1)) == 1)
 
-<<<<<<< HEAD
     model.solve(ort)
-=======
-    model.solve(cpx)
->>>>>>> effe1a99ee3ebf751755a6a010a849c43b3dc409
 
     solution = np.array([[5., 3., 4., 6., 7., 8., 9., 1., 2.],
                          [6., 7., 2., 1., 9., 5., 3., 4., 8.],
