@@ -41,6 +41,5 @@ jobs:
         python -m pip install --upgrade --user ortools
         python -m pip install cvxpy
         python -m pip install cplex
-        python -m pip install cylp
         python -m pip install mosek
         pytest
