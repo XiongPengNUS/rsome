@@ -30,6 +30,15 @@ class Model(LPModel):
         self.cvx_constr = []
 
     def st(self, constr):
+        """
+        Define constraints that an optimization model subject to.
+
+        Parameters
+        ----------
+        constr
+            Constraints or collections of constraints that the model
+            subject to.
+        """
 
         if isinstance(constr, Iterable):
             for item in constr:
@@ -54,6 +63,16 @@ class Model(LPModel):
         self.dupdate = True
 
     def do_math(self, primal=True, refresh=True, obj=True):
+        """
+        Return the linear or second-order cone programming problem
+        as the standard formula of the model.
+
+        Parameters
+        ----------
+        primal : bool, default True
+            Specify whether return the primal formula of the model.
+            If primal=False, the method returns the daul formula.
+        """
 
         if primal:
             if self.primal is not None and not self.pupdate:

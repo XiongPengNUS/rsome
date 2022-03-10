@@ -18,8 +18,6 @@ from typing import List
 
 def def_sol(formula, display=True, params={}):
 
-    # if export:
-    #     warnings.warn('Cannot export model by the linprog() function. ')
     try:
         if formula.qmat:
             warnings.warn('SOC constriants are ignored in the LP solver. ')
@@ -34,13 +32,6 @@ def def_sol(formula, display=True, params={}):
     linear_ineq = formula.linear[indices_ineq, :] if len(indices_ineq) else None
     const_eq = formula.const[indices_eq] if len(indices_eq) else None
     const_ineq = formula.const[indices_ineq] if len(indices_ineq) else None
-
-    # if len(indices_ineq) == 0:
-    #     linear_ineq = None
-    #     const_ineq = None
-    # if len(indices_eq) == 0:
-    #     linear_eq = None
-    #     const_eq = None
 
     bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
 
@@ -109,17 +100,13 @@ class Model:
         if not isinstance(shape, tuple):
             shape = (shape, )
 
-        # new_shape = ()
         for item in shape:
             if not isinstance(item, (int, np.int8, np.int16,
                                      np.int32, np.int64)):
                 raise TypeError('Shape values must be integers!')
-        # new_shape += (item, )
         new_shape = tuple(np.array(shape).astype(int))
 
         vtype = vtype.upper()
-        # if vtype not in list('CBI'):
-        #     raise ValueError('Unknown variable type!')
         if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
             raise ValueError('Unknown variable type.')
         if len(vtype) != 1 and len(vtype) != np.prod(shape):
@@ -135,6 +122,15 @@ class Model:
         return new_var
 
     def st(self, constr):
+        """
+        Define constraints that an optimization model subject to.
+
+        Parameters
+        ----------
+        constr
+            Constraints or collections of constraints that the model
+            subject to.
+        """
 
         if isinstance(constr, Iterable):
             for item in constr:
@@ -212,6 +208,16 @@ class Model:
         self.dupdate = True
 
     def do_math(self, primal=True, refresh=True, obj=True):
+        """
+        Return the linear programming problem as the standard formula 
+        of the model.
+
+        Parameters
+        ----------
+        primal : bool, default True
+            Specify whether return the primal formula of the model.
+            If primal=False, the method returns the daul formula.
+        """
 
         if primal:
             if self.primal is not None and not self.pupdate:
@@ -403,9 +409,17 @@ class Model:
             self.solution = None
 
     def get(self):
+        """
+        Return the optimal objective value of the solved model.
+
+        Notes
+        -----
+        An error message is given if the model is unsolved or no solution
+        is obtained.
+        """
 
         if self.solution is None:
-            raise RuntimeError('The model is unsolved or infeasible.')
+            raise RuntimeError('The model is unsolved or no solution is obtained.')
         return self.sign * self.solution.objval
 
     def optimal(self):
@@ -546,12 +560,24 @@ class Vars:
         return self.to_affine().quad(qmat)
 
     def get(self):
+        """
+        Return the optimal solution of the decision variable.
+
+        Notes
+        -----
+        The optimal solution is returned as a NumPy array with the
+        same shape as the defined decision variable. 
+        An error message is raised if:
+        1. The variable is not a decision variable.
+        2. The model is unsolved, or no solution is obtained due to 
+        infeasibility, unboundedness, or numeric issues.
+        """
 
         if self.model.mtype not in 'VR':
             raise TypeError('Not a decision variable.')
 
         if self.model.solution is None:
-            raise RuntimeError('The model is unsolved or infeasible.')
+            raise RuntimeError('The model is unsolved or no solution is obtained.')
 
         indices = range(self.first, self.first + self.size)
         var_sol = np.array(self.model.solution.x)[indices]
@@ -1826,6 +1852,38 @@ class DecVar(Vars):
         return self.to_affine().__eq__(other)
 
     def get(self, rvar=None):
+        """
+        Return the optimal solution of the decision variable, in
+        terms of the optimal static decision or optimal coefficients
+        of the decision rule.
+
+        Parameters
+        ----------
+        rvar : RandVar
+            The random varaible that the affine decision rule
+            coefficients are with respect to 
+
+        Notes
+        -----
+        If the decision variable is event-wise, the method returns a
+        series, where each element is a NumPy array representing the
+        optimal solution for each scenario. If the decision is not 
+        adaptive to scenarios, the method returns a NumPy array. 
+
+        If the decision is static, the scenario-wise solution is a
+        NumPy array with the same shape of the decision variable. 
+        
+        If the decision is affinely adapt to random varaibles, the 
+        scenario-wise solution is 1) the constant term of the affine 
+        decision rule, if the argument rvar is unspecified; and 2) the
+        linear ceofficients of the decision rule with respect to the
+        random variable specified by rvar. 
+        
+        An error message is raised if:
+        1. The variable is not a decision variable.
+        2. The model is unsolved, or no solution is obtained due to 
+        infeasibility, unboundedness, or numeric issues.
+        """
 
         dro_model = self.dro_model
         if dro_model.solution is None:
@@ -2704,6 +2762,36 @@ class DecRule:
         return (self - other).__eq__(0)
 
     def get(self, rvar=None):
+        """
+        Return the optimal coefficients of the affine decision rule.
+
+        Parameters
+        ----------
+        rvar : Vars
+            The random varaible that the affine decision rule
+            coefficients are with respect to 
+
+        Notes
+        -----
+        If the decision variable is event-wise, the method returns a
+        series, where each element is a NumPy array representing the
+        optimal solution for each scenario. If the decision is not 
+        adaptive to scenarios, the method returns a NumPy array. 
+
+        If the decision is static, the scenario-wise solution is a
+        NumPy array with the same shape of the decision variable. 
+        
+        If the decision is affinely adapt to random varaibles, the 
+        scenario-wise solution is 1) the constant term of the affine 
+        decision rule, if the argument rvar is unspecified; and 2) the
+        linear ceofficients of the decision rule with respect to the
+        random variable specified by rvar. 
+        
+        An error message is raised if:
+        1. The variable is not a decision variable.
+        2. The model is unsolved, or no solution is obtained due to 
+        infeasibility, unboundedness, or numeric issues.
+        """
 
         if self.model.solution is None:
             raise RuntimeError('The model is unsolved or infeasible')

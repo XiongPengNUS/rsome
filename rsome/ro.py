@@ -119,7 +119,7 @@ class Model:
 
         Parameters
         ----------
-        obj
+        obj : RSOME expression, numeric constant
             An objective function
 
         Notes
@@ -146,8 +146,8 @@ class Model:
 
         Parameters
         ----------
-        obj
-            An objective function
+        obj : RSOME expression, numeric constant
+            The objective function
 
         Notes
         -----
@@ -174,7 +174,7 @@ class Model:
 
         Parameters
         ----------
-        obj
+        obj : RSOME expression, numeric constant
             Objective function involving random variables
         *args
             Constraints or collections of constraints of random variables
@@ -219,7 +219,7 @@ class Model:
 
         Parameters
         ----------
-        obj
+        obj : RSOME expression, numeric constant
             Objective function involving random variables
         *args
             Constraints or collections of constraints of random variables
@@ -258,6 +258,20 @@ class Model:
         self.dupdate = True
 
     def st(self, *arg):
+        """
+        Define constraints that an optimization model subject to.
+
+        Parameters
+        ----------
+        *args : RSOME constraints, iterables
+            Constraints or collections of constraints that the model
+            subject to.
+        
+        Notes
+        -----
+        Multiple constraints can be defined altogether as the argument
+        of the st method.
+        """
 
         for constr in arg:
             if isinstance(constr, Iterable):
@@ -296,6 +310,16 @@ class Model:
         self.dupdate = True
 
     def do_math(self, primal=True):
+        """
+        Return the linear or second-order cone programming problem
+        as the standard formula or robust counterpart of the model.
+
+        Parameters
+        ----------
+        primal : bool, default True
+            Specify whether return the primal formula of the model.
+            If primal=False, the method returns the daul formula.
+        """
 
         if primal:
             if self.primal is not None and not self.pupdate:
@@ -371,9 +395,17 @@ class Model:
         self.solution = self.rc_model.solution
 
     def get(self):
+        """
+        Return the optimal objective value of the solved model.
+
+        Notes
+        -----
+        An error message is given if the model is unsolved or no solution
+        is obtained.
+        """
 
         if self.rc_model.solution is None:
-            raise RuntimeError('The model is unsolved or infeasible.')
+            raise RuntimeError('The model is unsolved or no solution is obtained.')
         return self.sign * self.rc_model.solution.objval
 
     def optimal(self):
