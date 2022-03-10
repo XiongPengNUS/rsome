@@ -17,7 +17,7 @@ def solve(formula, display=True, params={}):
     indices_int, = np.where(formula.vtype == 'I')
     indices_bin, = np.where(formula.vtype == 'B')
     indices_con, = np.where(formula.vtype == 'C')
-    x_vec = np.zeros(num_col)
+    x_vec = 0
     if len(indices_con) > 0:
         x = cp.Variable(shape=len(indices_con), integer=False)
         coeff_con = np.zeros((num_col, len(indices_con)))
