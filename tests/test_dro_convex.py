@@ -110,7 +110,7 @@ def test_norm_two(array, const):
     m.st(x == z)
     m.solve(grb)
 
-    assert abs(m.get() - target.mean()) < 1e-4
+    assert abs(m.get() - target.mean()) < 5e-4
     for s in range(ns):
         assert abs(a.get()[s] - (array[s]**2).sum()**0.5 - const) < 1e-4
 
@@ -138,9 +138,9 @@ def test_norm_two(array, const):
     m.st(x == z)
     m.solve(grb)
 
-    assert abs(m.get() - target.mean()) < 1e-4
+    assert abs(m.get() - target.mean()) < 5e-4
     for s in range(ns):
-        assert abs(a.get()[s] + (array[s]**2).sum()**0.5 - const) < 1e-4
+        assert abs(a.get()[s] + (array[s]**2).sum()**0.5 - const) < 5e-4
 
     with pytest.raises(ValueError):
         rso.norm(x, 2) + const >= 0
@@ -266,9 +266,9 @@ def test_squares(array, const):
     m.st(x == z, y == u)
     m.solve(grb)
 
-    assert abs(m.get() - target.mean(axis=0).sum()) < 1e-4
+    assert abs(m.get() - target.mean(axis=0).sum()) < 5e-4
     for s in range(ns):
-        assert (abs(d.get()[s] - (array**2 + const)[s]) < 1e-4).all()
+        assert (abs(d.get()[s] - (array**2 + const)[s]) < 5e-4).all()
 
     target = -array**2 + const
     ns = target.shape[0]
@@ -300,9 +300,9 @@ def test_squares(array, const):
     m.st(x == z, y == u)
     m.solve(grb)
 
-    assert abs(m.get() - target.mean(axis=0).sum()) < 1e-4
+    assert abs(m.get() - target.mean(axis=0).sum()) < 5e-4
     for s in range(ns):
-        assert (abs(d.get()[s] - (-array**2 + const)[s]) < 1e-4).all()
+        assert (abs(d.get()[s] - (-array**2 + const)[s]) < 5e-4).all()
 
     with pytest.raises(ValueError):
         rso.square(x) + y >= 0
@@ -347,8 +347,8 @@ def test_square_sum(array, const):
     m.st(x == z, y == u)
     m.solve(grb)
 
-    assert (abs(a.get().values - target) < 1e-4).all()
-    assert abs(m.get() - target.mean()) < 1e-4
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
 
     target = -(array**2).sum(axis=1) + const
     ns = target.shape[0]
@@ -377,8 +377,8 @@ def test_square_sum(array, const):
     m.st(x == z, y == u)
     m.solve(grb)
 
-    assert (abs(a.get().values - target) < 1e-4).all()
-    assert abs(m.get() - target.mean()) < 1e-4
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
 
     with pytest.raises(ValueError):
         rso.sumsqr(x) + y >= 0
@@ -398,7 +398,6 @@ def test_square_sum(array, const):
 def test_quad(array, const):
 
     vec = rd.rand(array.shape[0]).round(4)
-    # qmat = vec.reshape((vec.size, 1)) @ vec.reshape((1, vec.size))
     qmat = np.diag(vec)
 
     target = array@qmat@array + const
@@ -413,7 +412,7 @@ def test_quad(array, const):
     m.st(x == array)
     m.solve(grb)
 
-    assert abs(m.get() - target.max()) < 1e-4
+    assert abs(m.get() - target.max()) < 5e-4
     assert type(expr) == rso.lp.DecConvex
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
@@ -434,7 +433,7 @@ def test_quad(array, const):
     m.st(x == array)
     m.solve(grb)
 
-    assert abs(m.get() - target.min()) < 1e-4
+    assert abs(m.get() - target.min()) < 5e-4
     assert type(expr) == rso.lp.DecConvex
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'

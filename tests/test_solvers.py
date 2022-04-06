@@ -6,6 +6,7 @@ from rsome import lpg_solver as lpg
 from rsome import clp_solver as clp
 from rsome import ort_solver as ort
 from rsome import cvx_solver as cvx
+from rsome import eco_solver as eco
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
 from rsome import cpx_solver as cpx
@@ -52,7 +53,14 @@ def test_lp():
     assert abs(y.get() - 2) < 1e-6
     assert model.optimal()
 
-    model.solve(cvx)
+    with pytest.warns(FutureWarning):
+        model.solve(cvx)
+    assert abs(model.get() - 22.4) < 1e-6
+    assert abs(x.get() - 4.8) < 1e-6
+    assert abs(y.get() - 2) < 1e-6
+    assert model.optimal()
+
+    model.solve(eco)
     assert abs(model.get() - 22.4) < 1e-6
     assert abs(x.get() - 4.8) < 1e-6
     assert abs(y.get() - 2) < 1e-6
@@ -116,7 +124,12 @@ def test_mip():
     assert (x_sol == x.get().round()).all()
     assert model.optimal()
 
-    model.solve(cvx)
+    with pytest.warns(FutureWarning):
+        model.solve(cvx)
+    assert (x_sol == x.get().round()).all()
+    assert model.optimal()
+
+    model.solve(eco)
     assert (x_sol == x.get().round()).all()
     assert model.optimal()
 
@@ -162,7 +175,13 @@ def test_socp():
         model.solve(ort)
     assert not model.optimal()
 
-    model.solve(cvx)
+    with pytest.warns(FutureWarning):
+        model.solve(cvx)
+    assert abs(model.get() - objval) < 1e-6
+    assert (abs(x_sol - x.get()) < 1e-3).all()
+    assert model.optimal()
+
+    model.solve(eco)
     assert abs(model.get() - objval) < 1e-6
     assert (abs(x_sol - x.get()) < 1e-3).all()
     assert model.optimal()
@@ -213,15 +232,15 @@ def test_mip_socp():
     with pytest.warns(UserWarning):
         model.solve(ort)
 
-    try:
+    with pytest.warns(FutureWarning):
         model.solve(cvx)
-    except Warning:
-        with pytest.warns(UserWarning):
-            model.solve(cvx)
-    else:
-        if model.solution.stats == 'optimal':
-            assert abs(model.get() - objval) < 1e-3
-            assert (abs(x_sol - x.get()) < 1e-3).all()
+    if model.solution.status == 'optimal':
+        assert abs(model.get() - objval) < 1e-3
+        assert (abs(x_sol - x.get()) < 1e-3).all()
+
+    model.solve(eco)
+    assert abs(model.get() - objval) < 1e-3
+    assert (abs(x_sol - x.get()) < 1e-3).all()
 
     model.solve(grb)
     assert abs(model.get() - objval) < 1e-3
@@ -260,8 +279,11 @@ def test_no_solution():
     with pytest.warns(UserWarning):
         model.solve(ort)
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(FutureWarning):
         model.solve(cvx)
+
+    with pytest.warns(UserWarning):
+        model.solve(eco)
 
     with pytest.warns(UserWarning):
         model.solve(grb)

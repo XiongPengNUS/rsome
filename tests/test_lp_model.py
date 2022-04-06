@@ -45,7 +45,7 @@ def test_model():
     assert type(df) == pd.DataFrame
 
     model.solve(grb)
-    print(model.solution.stats)
+    print(model.solution.status)
     assert abs(model.get() - 22.4) < 1e-4
     assert abs(x.get() - 4.8) < 1e-4
     assert abs(y.get() - 2) < 1e-4

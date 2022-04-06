@@ -266,7 +266,7 @@ class Model:
         *args : RSOME constraints, iterables
             Constraints or collections of constraints that the model
             subject to.
-        
+
         Notes
         -----
         Multiple constraints can be defined altogether as the argument

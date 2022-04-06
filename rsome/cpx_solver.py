@@ -68,9 +68,9 @@ def solve(formula, display=True, params={}):
                   101, 102, 105, 107, 109, 111, 113, 116]:
         obj_val = cpx.solution.get_objective_value()
         x_sol = np.array(cpx.solution.get_values())
-        solution = Solution(obj_val, x_sol, status)
+        solution = Solution(obj_val, x_sol, status, stime)
     else:
-        warnings.warn('No feasible solution can be found.')
+        warnings.warn('Fail to find the optimal solution.')
         solution = None
 
     return solution

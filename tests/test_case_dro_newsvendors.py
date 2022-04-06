@@ -1,5 +1,5 @@
 from rsome import dro
-from rsome import cvx_solver as cvx
+from rsome import eco_solver as eco
 from rsome import E
 import rsome as rso
 import numpy as np
@@ -44,7 +44,7 @@ def test_dro_model():
     model.st(x >= 0)
     model.st(c@x == d)
 
-    model.solve(cvx)
+    model.solve(eco)
 
     objval = -193.8652
     x_sol = np.array([70.35713115, 36.83036526, 42.81250359])
@@ -55,5 +55,5 @@ def test_dro_model():
     assert len(y.get(z)) == S
     assert len(y.get(u)) == S
 
-    dual_sol = model.do_math(primal=False).solve(cvx)
+    dual_sol = model.do_math(primal=False).solve(eco)
     assert abs(dual_sol.objval + objval) < 1e-4

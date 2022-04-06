@@ -13,6 +13,9 @@ from .lp import Solution
 
 def solve(formula, display=True, params={}):
 
+    warnings.warn('This interface will be deprecated in future versions.',
+                  FutureWarning)
+
     num_col = formula.linear.shape[1]
     indices_int, = np.where(formula.vtype == 'I')
     indices_bin, = np.where(formula.vtype == 'B')
@@ -95,9 +98,9 @@ def solve(formula, display=True, params={}):
             x_vec[indices_int] = xin.value
         if len(indices_bin) > 0:
             x_vec[indices_bin] = xbin.value
-        solution = Solution(prob.value, x_vec, prob.status)
+        solution = Solution(prob.value, x_vec, prob.status, stime)
     else:
-        warnings.warn('No feasible solution can be found.')
+        warnings.warn('Fail to find the optimal solution.')
         solution = None
 
     return solution

@@ -65,9 +65,9 @@ def solve(formula, display=True, params={}):
 
     if status == pywraplp.Solver.OPTIMAL:
         x_sol = np.array([xs[i].solution_value() for i in range(col)])
-        solution = Solution(solver.Objective().Value(), x_sol, status)
+        solution = Solution(solver.Objective().Value(), x_sol, status, stime)
     else:
-        warnings.warn('No feasible solution can be found.')
+        warnings.warn('Fail to find the optimal solution.')
         solution = None
 
     return solution

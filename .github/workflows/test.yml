@@ -41,4 +41,5 @@ jobs:
         python -m pip install --upgrade --user ortools
         python -m pip install cvxpy
         python -m pip install mosek
+        python -m pip install ecos
         pytest

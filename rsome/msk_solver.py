@@ -131,9 +131,9 @@ def solve(form, display=True, params={}):
             #     task.writedata("out.mps")
 
             if solsta in [mosek.solsta.optimal, mosek.solsta.integer_optimal]:
-                solution = Solution(xx @ form.obj.flatten(), xx, solsta)
+                solution = Solution(xx @ form.obj.flatten(), xx, solsta, stime)
             else:
-                warnings.warn('No feasible solution can be found.')
+                warnings.warn('Fail to find the optimal solution.')
                 solution = None
 
             return solution

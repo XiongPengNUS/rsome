@@ -1,6 +1,6 @@
 from rsome import ro
 from rsome import dro
-from rsome import cvx_solver as cvx
+from rsome import eco_solver as eco
 import rsome as rso
 import numpy as np
 
@@ -21,20 +21,20 @@ def test_ro_model():
     model.st(sum(x) == 1)
     model.st(x >= 0)
 
-    model.solve(cvx)
+    model.solve(eco)
     model.get()
 
     objval = 1.18534
 
     assert abs(model.get() - objval) < 1e-4
 
-    primal_sol = model.do_math().solve(cvx)
+    primal_sol = model.do_math().solve(eco)
     assert abs(primal_sol.objval + objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cvx)
+    dual_sol = model.do_math(primal=False).solve(eco)
     assert abs(dual_sol.objval - objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cvx)
+    dual_sol = model.do_math(primal=False).solve(eco)
     assert abs(dual_sol.objval - objval) < 1e-4
 
 
@@ -54,18 +54,18 @@ def test_dro_model():
     model.st(sum(x) == 1)
     model.st(x >= 0)
 
-    model.solve(cvx)
+    model.solve(eco)
     model.get()
 
     objval = 1.18534
 
     assert abs(model.get() - objval) < 1e-4
 
-    primal_sol = model.do_math().solve(cvx)
+    primal_sol = model.do_math().solve(eco)
     assert abs(primal_sol.objval + objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cvx)
+    dual_sol = model.do_math(primal=False).solve(eco)
     assert abs(dual_sol.objval - objval) < 1e-4
 
-    dual_sol = model.do_math(primal=False).solve(cvx)
+    dual_sol = model.do_math(primal=False).solve(eco)
     assert abs(dual_sol.objval - objval) < 1e-4

@@ -51,7 +51,7 @@ def def_sol(formula, display=True, params={}):
         print('Running time: {0:0.4f}s'.format(stime))
 
     if res.status == 0:
-        return Solution(res.x[0], res.x, res.status)
+        return Solution(res.x[0], res.x, res.status, stime)
     else:
         status = res.status
         msg = 'The optimal solution can not be found, '
@@ -209,7 +209,7 @@ class Model:
 
     def do_math(self, primal=True, refresh=True, obj=True):
         """
-        Return the linear programming problem as the standard formula 
+        Return the linear programming problem as the standard formula
         of the model.
 
         Parameters
@@ -566,10 +566,10 @@ class Vars:
         Notes
         -----
         The optimal solution is returned as a NumPy array with the
-        same shape as the defined decision variable. 
+        same shape as the defined decision variable.
         An error message is raised if:
         1. The variable is not a decision variable.
-        2. The model is unsolved, or no solution is obtained due to 
+        2. The model is unsolved, or no solution is obtained due to
         infeasibility, unboundedness, or numeric issues.
         """
 
@@ -1861,27 +1861,27 @@ class DecVar(Vars):
         ----------
         rvar : RandVar
             The random varaible that the affine decision rule
-            coefficients are with respect to 
+            coefficients are with respect to
 
         Notes
         -----
         If the decision variable is event-wise, the method returns a
         series, where each element is a NumPy array representing the
-        optimal solution for each scenario. If the decision is not 
-        adaptive to scenarios, the method returns a NumPy array. 
+        optimal solution for each scenario. If the decision is not
+        adaptive to scenarios, the method returns a NumPy array.
 
         If the decision is static, the scenario-wise solution is a
-        NumPy array with the same shape of the decision variable. 
-        
-        If the decision is affinely adapt to random varaibles, the 
-        scenario-wise solution is 1) the constant term of the affine 
+        NumPy array with the same shape of the decision variable.
+
+        If the decision is affinely adapt to random varaibles, the
+        scenario-wise solution is 1) the constant term of the affine
         decision rule, if the argument rvar is unspecified; and 2) the
         linear ceofficients of the decision rule with respect to the
-        random variable specified by rvar. 
-        
+        random variable specified by rvar.
+
         An error message is raised if:
         1. The variable is not a decision variable.
-        2. The model is unsolved, or no solution is obtained due to 
+        2. The model is unsolved, or no solution is obtained due to
         infeasibility, unboundedness, or numeric issues.
         """
 
@@ -2769,27 +2769,27 @@ class DecRule:
         ----------
         rvar : Vars
             The random varaible that the affine decision rule
-            coefficients are with respect to 
+            coefficients are with respect to
 
         Notes
         -----
         If the decision variable is event-wise, the method returns a
         series, where each element is a NumPy array representing the
-        optimal solution for each scenario. If the decision is not 
-        adaptive to scenarios, the method returns a NumPy array. 
+        optimal solution for each scenario. If the decision is not
+        adaptive to scenarios, the method returns a NumPy array.
 
         If the decision is static, the scenario-wise solution is a
-        NumPy array with the same shape of the decision variable. 
-        
-        If the decision is affinely adapt to random varaibles, the 
-        scenario-wise solution is 1) the constant term of the affine 
+        NumPy array with the same shape of the decision variable.
+
+        If the decision is affinely adapt to random varaibles, the
+        scenario-wise solution is 1) the constant term of the affine
         decision rule, if the argument rvar is unspecified; and 2) the
         linear ceofficients of the decision rule with respect to the
-        random variable specified by rvar. 
-        
+        random variable specified by rvar.
+
         An error message is raised if:
         1. The variable is not a decision variable.
-        2. The model is unsolved, or no solution is obtained due to 
+        2. The model is unsolved, or no solution is obtained due to
         infeasibility, unboundedness, or numeric issues.
         """
 
@@ -3040,11 +3040,12 @@ class LinProg:
 
 class Solution:
 
-    def __init__(self, objval, x, stats):
+    def __init__(self, objval, x, status, time):
 
         self.objval = objval
         self.x = x
-        self.stats = stats
+        self.status = status
+        self.time = time
 
 
 class Scen:

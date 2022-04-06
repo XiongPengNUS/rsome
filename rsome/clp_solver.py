@@ -108,10 +108,10 @@ def solve(formula, display=True, params={}):
         if nbv:
             x_sol[is_bin] = cbcModel.primalVariableSolution['bv']
 
-        solution = Solution(cbcModel.objectiveValue, x_sol, status)
+        solution = Solution(cbcModel.objectiveValue, x_sol, status, stime)
 
     else:
-        warnings.warn('No feasible solution can be found.')
+        warnings.warn('Fail to find the optimal solution.')
         solution = None
 
     return solution

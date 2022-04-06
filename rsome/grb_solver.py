@@ -63,9 +63,9 @@ def solve(formula, display=True, params={}):
     #     grb.write("out.lp")
 
     try:
-        solution = Solution(grb.ObjVal, grb.getAttr('X'), grb.Status)
+        solution = Solution(grb.ObjVal, grb.getAttr('X'), grb.Status, grb.Runtime)
     except AttributeError:
-        warnings.warn('No feasible solution can be found.')
+        warnings.warn('Fail to find the optimal solution.')
         solution = None
 
     return solution
