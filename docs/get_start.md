@@ -567,7 +567,7 @@ The interfaces can be then used to attain the solution.
 model.solve(eco)
 ```    
     Being solved by ECOS...
-    Solution status: optimal
+    Solution status: Optimal solution found
     Running time: 0.0006s
 
 
@@ -594,7 +594,7 @@ model.solve(cpx)
 ```
 
     Being solved by CPLEX...
-    Solution status: optimal
+    Solution status: 1
     Running time: 0.0175s
 
 
