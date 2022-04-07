@@ -371,8 +371,8 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, ort_solver, cvx_solver, grb_solver,
-                      cpx_solver, msk_solver}
+            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                      cpx_solver, grb_solver, msk_solver}
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
