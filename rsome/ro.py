@@ -1,5 +1,6 @@
-from .socp import Model as SOCModel
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
+# from .socp import Model as SOCModel
+from .gcp import Model as GCPModel
+from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import DecRule
 from .lp import RoAffine, RoConstr
@@ -17,8 +18,8 @@ class Model:
 
     def __init__(self, name=None):
 
-        self.rc_model = SOCModel(mtype='R', top=self)
-        self.sup_model = SOCModel(nobj=True, mtype='S', top=self)
+        self.rc_model = GCPModel(mtype='R', top=self)
+        self.sup_model = GCPModel(nobj=True, mtype='S', top=self)
 
         self.all_constr = []
 
@@ -132,8 +133,12 @@ class Model:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
         if not isinstance(obj, Real):
-            if obj.size > 1:
-                raise ValueError('Incorrect function dimension.')
+            if isinstance(obj, VarSub):
+                if obj.indices.size > 1:
+                    raise ValueError('Incorrect function dimension.')
+            else:
+                if obj.size > 1:
+                    raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = 1
@@ -159,8 +164,12 @@ class Model:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
         if not isinstance(obj, Real):
-            if obj.size > 1:
-                raise ValueError('Incorrect function dimension.')
+            if isinstance(obj, VarSub):
+                if obj.indices.size > 1:
+                    raise ValueError('Incorrect function dimension.')
+            else:
+                if obj.size > 1:
+                    raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = - 1
@@ -278,7 +287,8 @@ class Model:
                 for item in constr:
                     self.st(item)
 
-            elif isinstance(constr, (LinConstr, Bounds, CvxConstr, ConeConstr)):
+            elif isinstance(constr, (LinConstr, Bounds, CvxConstr,
+                                     ConeConstr, ExpConstr, KLConstr)):
                 if (constr.model is not self.rc_model) or \
                         (constr.model.mtype != 'R'):
                     raise ValueError('Models mismatch.')
@@ -311,14 +321,20 @@ class Model:
 
     def do_math(self, primal=True):
         """
-        Return the linear or second-order cone programming problem
-        as the standard formula or robust counterpart of the model.
+        Return the linear, second-order cone, or exponential cone
+        programming problem as the standard formula or deterministic
+        counterpart of the model.
 
         Parameters
         ----------
         primal : bool, default True
             Specify whether return the primal formula of the model.
             If primal=False, the method returns the daul formula.
+
+        Returns
+        -------
+        prog : GCProg
+            An exponential cone programming problem.
         """
 
         if primal:
@@ -344,7 +360,8 @@ class Model:
             raise TypeError('Incorrect type for the objective function.')
 
         for constr in self.all_constr + more_roc:
-            if isinstance(constr, (LinConstr, Bounds, CvxConstr)):
+            if isinstance(constr, (LinConstr, Bounds, CvxConstr,
+                                   ExpConstr, KLConstr)):
                 self.rc_model.st(constr)
             if isinstance(constr, RoConstr):
                 if constr.support:

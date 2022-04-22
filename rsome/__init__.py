@@ -2,4 +2,9 @@ from .subroutines import norm
 from .subroutines import square
 from .subroutines import sumsqr
 from .subroutines import quad
+from .subroutines import expcone
+from .subroutines import exp
+from .subroutines import log
+from .subroutines import entropy
+from .subroutines import kldiv
 from .subroutines import E

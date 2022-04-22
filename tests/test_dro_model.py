@@ -1,6 +1,8 @@
 import rsome as rso
 from rsome import dro
+from rsome import ro
 from rsome import grb_solver as grb
+from rsome import eco_solver as eco
 from rsome import E
 import numpy as np
 import numpy.random as rd
@@ -88,6 +90,40 @@ def test_model():
 
     with pytest.raises(RuntimeError):
         x_sol = x.get()
+
+
+@pytest.mark.parametrize('array, r', [
+    (rd.rand(3, 5), 0.02),
+    (rd.rand(5, 2), 0.01),
+    (rd.rand(9, 3), 0.001),
+])
+def test_kl_prob(array, r):
+
+    ns, n = array.shape
+    m1 = dro.Model(ns)
+    x = m1.dvar(n)
+
+    z = m1.rvar(n)
+    fset = m1.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s])
+    pr = m1.p
+    fset.probset(pr.kldiv(1/ns, r))
+
+    m1.maxinf(E(z @ x), fset)
+    m1.st(x == 1)
+    m1.solve(eco)
+
+    m2 = ro.Model()
+    p = m2.dvar(ns)
+
+    values = array.sum(axis=1)
+    m2.min(p @ values)
+    m2.st(p >= 0, p.sum() == 1)
+    m2.st(p.kldiv(1/ns, r))
+    m2.solve(eco)
+
+    assert abs(m1.get() - m2.get()) < 1e-5
 
 
 def test_model_match():

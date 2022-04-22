@@ -15,7 +15,7 @@ $$
 \end{align}
 $$
 
-Here \\(\mathcal{X}\subseteq \mathbb{R}^{I_x}\\) is a feasible of \\(\pmb{x}\\) which is second-order cone representable, \\(\pmb{b}_m\in\mathbb{R}^{I_y}\\), \\(m \in \mathcal{M}_1\cup \\{0\\}\\) are fixed parameters of \\(\pmb{y}\\), and uncertain parameters \\(\pmb{a}_m(\pmb{z})\\) as well as \\(c_m(\pmb{z})\\) are expressed as affine mappings of random variable \\(\pmb{z}\\):
+Here \\(\mathcal{X}\subseteq \mathbb{R}^{I_x}\\) is a feasible of \\(\pmb{x}\\) which is second-order conic or exponential conic representable, \\(\pmb{b}_m\in\mathbb{R}^{I_y}\\), \\(m \in \mathcal{M}_1\cup \\{0\\}\\) are fixed parameters of \\(\pmb{y}\\), and uncertain parameters \\(\pmb{a}_m(\pmb{z})\\) as well as \\(c_m(\pmb{z})\\) are expressed as affine mappings of random variable \\(\pmb{z}\\):
 
 $$
 \begin{align}

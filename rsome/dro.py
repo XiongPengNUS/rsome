@@ -1,6 +1,6 @@
-from .socp import Model as SOCModel
+from .gcp import Model as GCPModel
 from .ro import Model as ROModel
-from .lp import DecBounds, LinConstr, ConeConstr, CvxConstr
+from .lp import DecBounds, DecExpConstr, LinConstr, ConeConstr, CvxConstr, ExpConstr
 from .lp import Vars, Affine
 from .lp import RoAffine, RoConstr
 from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr
@@ -36,12 +36,12 @@ class Model:
     def __init__(self, scens=1, name=None):
 
         self.ro_model = ROModel()
-        self.vt_model = SOCModel(mtype='V', top=self)
+        self.vt_model = GCPModel(mtype='V', top=self)
         self.sup_model = self.ro_model.sup_model
         self.sup_model.top = self
         self.ro_model.rc_model.top = self
-        self.exp_model = SOCModel(nobj=True, mtype='E', top=self)
-        self.pro_model = SOCModel(nobj=True, mtype='P', top=self)
+        self.exp_model = GCPModel(nobj=True, mtype='E', top=self)
+        self.pro_model = GCPModel(nobj=True, mtype='P', top=self)
 
         self.obj_ambiguity = None
 
@@ -362,7 +362,8 @@ class Model:
                 for item in constr:
                     self.st(item)
             else:
-                if isinstance(constr, (DecLinConstr, DecBounds, DecCvxConstr)):
+                if isinstance(constr, (DecLinConstr, DecBounds,
+                                       DecCvxConstr, DecExpConstr)):
                     if constr.model is not self.vt_model:
                         raise ValueError('Models mismatch.')
                 elif isinstance(constr, DecRoConstr):
@@ -378,14 +379,20 @@ class Model:
 
     def do_math(self, primal=True):
         """
-        Return the linear or second-order cone programming problem
-        as the standard formula or robust counterpart of the model.
+        Return the linear, second-order cone, or exponential cone
+        programming problem as the standard formula or robust
+        counterpart of the model.
 
         Parameters
         ----------
         primal : bool, default True
             Specify whether return the primal formula of the model.
             If primal=False, the method returns the daul formula.
+
+        Returns
+        -------
+        prog : GCProg
+            An exponential cone programming problem.
         """
 
         if primal:
@@ -419,7 +426,7 @@ class Model:
 
         # Event-wise Constraints
         for constr in self.all_constr:
-            if isinstance(constr, DecCvxConstr):
+            if isinstance(constr, (DecCvxConstr, DecExpConstr)):
                 ro_constr_list = self.ro_to_roc(constr)
             elif constr.ctype == 'R':
                 ro_constr_list = self.ro_to_roc(constr)
@@ -546,7 +553,34 @@ class Model:
                 if isinstance(aff_out, RoAffine):
                     aff_out = aff_out.affine
                 ew_constr = CvxConstr(aff_in.model, aff_in, aff_out,
-                                      constr.xtype)
+                                      constr.multiplier, constr.xtype)
+            elif isinstance(constr, DecExpConstr):
+                if isinstance(drule, RoAffine):
+                    drule_affine = drule.affine
+                else:
+                    drule_affine = drule
+
+                affine1 = constr.expr1.to_affine()
+                expr1 = affine1.linear@drule_affine + affine1.const
+
+                if isinstance(constr.expr2, Real):
+                    expr2 = constr.expr2
+                else:
+                    affine2 = constr.expr2.to_affine()
+                    linear2 = affine2.linear
+                    const2 = affine2.const
+                    expr2 = linear2@drule_affine + const2
+
+                if isinstance(constr.expr3, Real):
+                    expr3 = constr.expr3
+                else:
+                    affine3 = constr.expr3.to_affine()
+                    linear3 = affine3.linear
+                    const3 = affine3.const
+                    expr3 = linear3@drule_affine + const3
+
+                ew_constr = ExpConstr(expr1.model, expr1, expr2, expr3)
+
             else:
                 raise TypeError('Unknown constraint type.')
 
@@ -591,7 +625,6 @@ class Model:
             raise ValueError('The ambiguity set is undefined.')
         mixed_support = ambset.mix_support(primal=False)
         p = ambset.mix_model.vars[0][:num_scen]
-        # p = ambset.mix_model.vars[0]
         var_exp_list = ambset.mix_model.vars[1:]
         num_event = len(ambset.exp_constr)
 
@@ -618,7 +651,6 @@ class Model:
             else:
                 beta = 0
 
-            # left = alpha @ p[:num_scen]
             left = alpha @ p
             for j in range(num_event):
                 left += var_exp_list[j][:num_rand] @ beta[:, j]
@@ -850,7 +882,7 @@ class Ambiguity:
         self.model.pro_model.reset()
         self.model.pro_model.st(self.pro_constr)
         pro_support = self.model.pro_model.do_math(obj=False)
-        self.mix_model = SOCModel(nobj=True, mtype='M', top=self.model)
+        self.mix_model = GCPModel(nobj=True, mtype='M', top=self.model)
 
         # Constraints for probabilities
         p = self.mix_model.dvar(pro_support.linear.shape[1])
@@ -861,6 +893,9 @@ class Ambiguity:
         for q in pro_support.qmat:
             cconstr = ConeConstr(self.mix_model, p, q[1:], p, q[0])
             self.mix_model.st(cconstr)
+        for ex in pro_support.xmat:
+            econstr = ExpConstr(self.mix_model, p[ex[0]], p[ex[1]], p[ex[2]])
+            self.mix_model.st(econstr)
 
         # Constraints for expectations
         for econstr, indices in zip(self.exp_constr, self.exp_constr_indices):

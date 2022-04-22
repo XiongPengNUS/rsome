@@ -16,7 +16,13 @@ def solve(formula, display=True, params={}):
 
     try:
         if formula.qmat:
-            warnings.warn('SOC constriants are ignored in the LP solver. ')
+            warnings.warn('the LP solver ignnores SOC constriants.')
+    except AttributeError:
+        pass
+
+    try:
+        if formula.xmat:
+            warnings.warn('The LP solver ignores exponential cone constriants.')
     except AttributeError:
         pass
 
@@ -86,6 +92,7 @@ def solve(formula, display=True, params={}):
         # print(ineq_linear[:, is_bin].toarray())
 
     cbcModel = s.getCbcModel()
+    s.writeLp('blah.lp')
 
     if display:
         print('Being solved by CyLP...', flush=True)

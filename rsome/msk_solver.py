@@ -7,6 +7,7 @@ import mosek
 import numpy as np
 from scipy.sparse import coo_matrix
 from .socp import SOCProg
+from .gcp import GCProg
 import warnings
 import time
 from .lp import Solution
@@ -15,10 +16,14 @@ from .lp import Solution
 def solve(form, display=True, params={}):
 
     numlc, numvar = form.linear.shape
-    if isinstance(form, SOCProg):
+    if isinstance(form, (SOCProg, GCProg)):
         qmat = form.qmat
     else:
         qmat = []
+    if isinstance(form, GCProg):
+        xmat = form.xmat
+    else:
+        xmat = []
 
     ind_int = np.where(form.vtype == 'I')[0]
     ind_bin = np.where(form.vtype == 'B')[0]
@@ -89,6 +94,9 @@ def solve(form, display=True, params={}):
             for cone in qmat:
                 task.appendcone(mosek.conetype.quad,
                                 0.0, cone)
+            for cone in xmat:
+                msk_cone = [cone[1], cone[2], cone[0]]
+                task.appendcone(mosek.conetype.pexp, 0.0, msk_cone)
 
             if display:
                 print('Being solved by Mosek...', flush=True)
@@ -114,7 +122,7 @@ def solve(form, display=True, params={}):
 
             if 'B' in form.vtype or 'I' in form.vtype:
                 stype = soltype.itg
-            elif not qmat:
+            elif not qmat and not xmat:
                 stype = soltype.bas
             else:
                 stype = soltype.itr

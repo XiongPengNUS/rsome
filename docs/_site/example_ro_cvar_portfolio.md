@@ -19,17 +19,16 @@ with investment decisions\\(\pmb{x}\in\mathbb{R}^n\\) and auxiliary variables \\
 
 ```python
 import pandas as pd
-import pandas_datareader.data as web
-import numpy as np
+import yfinance as yf
 
 stocks = ['JPM', 'AMZN', 'TSLA', 'AAPL', 'GOOG']
-start = '1/1/2020'              # starting date of historical data
-end='12/31/2020'                # end date of historical data
+start = '2020-1-2'              # starting date of historical data
+end='2020-12-31'                # end date of historical data
 
 data = pd.DataFrame([])
 for stock in stocks:
-    each = web.DataReader(stock, 'yahoo', start=start, end=end)
-    close = each['Adj Close'].values
+    each = yf.Ticker(stock).history(start=start, end=end)
+    close = each['Close'].values
     returns = (close[1:] - close[:-1]) / close[:-1]
     data[stock] = returns
 
@@ -51,14 +50,6 @@ data
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.012124</td>
-      <td>0.027151</td>
-      <td>0.028518</td>
-      <td>0.022816</td>
-      <td>0.022700</td>
-    </tr>
-    <tr>
-      <th>1</th>
       <td>-0.013197</td>
       <td>-0.012139</td>
       <td>0.029633</td>
@@ -66,7 +57,7 @@ data
       <td>-0.004907</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>1</th>
       <td>-0.000795</td>
       <td>0.014886</td>
       <td>0.019255</td>
@@ -74,7 +65,7 @@ data
       <td>0.024657</td>
     </tr>
     <tr>
-      <th>3</th>
+      <th>2</th>
       <td>-0.017001</td>
       <td>0.002092</td>
       <td>0.038801</td>
@@ -82,7 +73,7 @@ data
       <td>-0.000624</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>3</th>
       <td>0.007801</td>
       <td>-0.007809</td>
       <td>0.049205</td>
@@ -98,7 +89,7 @@ data
       <td>...</td>
     </tr>
     <tr>
-      <th>248</th>
+      <th>247</th>
       <td>-0.004398</td>
       <td>-0.003949</td>
       <td>0.024444</td>
@@ -106,7 +97,7 @@ data
       <td>0.003735</td>
     </tr>
     <tr>
-      <th>249</th>
+      <th>248</th>
       <td>0.006585</td>
       <td>0.035071</td>
       <td>0.002901</td>
@@ -114,7 +105,7 @@ data
       <td>0.021416</td>
     </tr>
     <tr>
-      <th>250</th>
+      <th>249</th>
       <td>-0.002633</td>
       <td>0.011584</td>
       <td>0.003465</td>
@@ -122,24 +113,16 @@ data
       <td>-0.009780</td>
     </tr>
     <tr>
-      <th>251</th>
+      <th>250</th>
       <td>0.002800</td>
       <td>-0.010882</td>
       <td>0.043229</td>
       <td>-0.008527</td>
       <td>-0.010917</td>
     </tr>
-    <tr>
-      <th>252</th>
-      <td>0.013641</td>
-      <td>-0.008801</td>
-      <td>0.015674</td>
-      <td>-0.007703</td>
-      <td>0.007105</td>
-    </tr>
   </tbody>
 </table>
-<p>253 rows × 5 columns</p>
+<p>251 rows × 5 columns</p>
 </div>
 
 ```python
@@ -159,12 +142,12 @@ mu = 0.001          # target minimum expected return rate
 In the nominal model, the CVaR and expected returns are evaluated assuming the exact distribution of stock returns is accurately represented by the historical samples without any distributional ambiguity. In other words, \\(\Pi\\) is written as a singleton uncertainty \\(\Pi = \\{\pmb{\pi}^0 \\}\\), where \\(\pi_k^0=1/s\\), with \\(k=1, 2, ..., s\\). The Python code for implementing the nominal model is given below.
 
 ```python
-from rsome import ro
-from rsome import grb_solver as grb
+from rsome.rsome import ro
+from rsome.rsome import msk_solver as msk
 
 model = ro.Model()
 
-pi = np.ones(s) / s         # no ambiguity in probability distribution
+pi = np.ones(s) / s
 
 x = model.dvar(n)
 u = model.dvar(s)
@@ -176,13 +159,13 @@ model.st(u >= 0)
 model.st(pi@y@x >= mu)
 model.st(x >= x_lb, x <= x_ub, x.sum() == w0)
 
-model.solve(grb)
+model.solve(msk)
 ```
 
 ```
-Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0073s
+Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0213s
 ```
 
 The portfolio decision for the nominal model is retrieved by the following code.
@@ -205,6 +188,9 @@ $$
 In this case study, we assume that \\(-\underline{\pmb{\eta}}=\bar{\pmb{\eta}}=0.0001\\), and the Python code for implementation is provided below.
 
 ```python
+from rsome.rsome import ro
+from rsome.rsome import msk_solver as msk
+
 model = ro.Model()
 
 eta_ub = 0.0001                 # upper bound of eta
@@ -226,13 +212,13 @@ model.st(u >= 0)
 model.st(pi@y@x >= mu)
 model.st(x >= x_lb, x <= x_ub, x.sum() == w0)
 
-model.solve(grb)
+model.solve(msk)
 ```
 
 ```
-Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0268s
+Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0295s
 ```
 
 ```python
@@ -277,9 +263,9 @@ model.solve(grb)
 ```
 
 ```
-Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0285s
+Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0396s
 ```
 
 ```python
@@ -287,8 +273,58 @@ x.get().round(4)    # the optimal portfolio decision with 4 d.p.
 ```
 
 ```
-array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
+array([0.1486, 0.6231, 0.0132, 0.    , 0.2151])
 ```
+
+#### Worst-case CVaR with KL divergence
+Here, we consider the KL divergence-constrained ambiguity of probabilities
+
+$$
+\Pi = \left\{\boldsymbol{\pi}: \sum_{k=1}^s\pi_k\log(\pi_k/\hat{\pi}_k) \leq \epsilon\right\}, 
+$$
+
+where \\(\hat{\pi}_k = 1/s\\) is the empirical probability of each sample. Assume that the constant \\(\epsilon=0.001\\), the code for implementing such a robust model is given below.
+
+```python
+from rsome.rsome import ro
+from rsome.rsome import msk_solver as msk
+import rsome.rsome as rso
+
+model = ro.Model()
+
+epsilon = 0.001
+
+pi = model.rvar(s)
+uset = (pi.sum() ==1, pi >= 0,
+        rso.kldiv(pi, 1/s, epsilon))    # uncertainty set of pi
+
+x = model.dvar(n)
+u = model.dvar(s)
+alpha = model.dvar()
+
+model.minmax(alpha + 1/(1-beta) * (pi@u), uset)
+model.st(u >= y@x - alpha)
+model.st(u >= 0)
+model.st(pi@y@x >= mu)
+model.st(x >= x_lb, x <= x_ub, x.sum() == w0)
+
+model.solve(msk)
+```
+
+```
+Being solved by Mosek...
+Solution status: optimal
+Running time: 0.2003s
+```
+
+```python
+x.get().round(4)    # the optimal portfolio decision with 4 d.p.
+```
+
+```
+array([0.0904, 0.6185, 0.0446, 0.    , 0.2465])
+```
+
 
 In this example, we show that data acquisition tools provided in the Python ecosystem (<i>e.g.</i>, `pandas-datareader`) can be readily used to collect and feed real data into RSOME models.  Apart from acquiring data, rich machine learning tools in the Python ecosystem can also be used to develop data-driven optimization models. More such examples will be provided in introducing the `dro` module for modeling distributionally robust optimization problems.  
 

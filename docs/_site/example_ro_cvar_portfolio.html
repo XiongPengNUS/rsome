@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2639ca9d477eee0219e642f7152ec7e578cb29bf">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -79,17 +79,16 @@
 <p>with investment decisions\(\pmb{x}\in\mathbb{R}^n\) and auxiliary variables \(\pmb{u}\in\mathbb{R}^s\) and \(\alpha\in\mathbb{R}\), where \(n\) is the number of stocks, and \(s\) is the number of samples. The array \(\pmb{\pi}\) denotes the probabilities of samples, and \(\Pi\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \(\pmb{y}_k\in\mathbb{R}^n\) indicates the \(k\)th sample of stock return rates, and \(\bar{x}\) and \(\underline{x}\) are the lower and upper bounds of \(x\). The worst-case minimum expected overall return rate is set to be \(\mu=0.001\), the confidence level is \(\beta=0.95\), and the budget of investment is set to be \(w_0=1\). In this case study, we consider the sample data of five stocks “JPM”, “AMZN”, “TSLA”, “AAPL”, and	“GOOG” in the year of 2020, and the other parameters are specified by the following code segment.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
-<span class="kn">import</span> <span class="nn">pandas_datareader.data</span> <span class="k">as</span> <span class="n">web</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="n">yf</span>
 
 <span class="n">stocks</span> <span class="o">=</span> <span class="p">[</span><span class="s">'JPM'</span><span class="p">,</span> <span class="s">'AMZN'</span><span class="p">,</span> <span class="s">'TSLA'</span><span class="p">,</span> <span class="s">'AAPL'</span><span class="p">,</span> <span class="s">'GOOG'</span><span class="p">]</span>
-<span class="n">start</span> <span class="o">=</span> <span class="s">'1/1/2020'</span>              <span class="c1"># starting date of historical data
-</span><span class="n">end</span><span class="o">=</span><span class="s">'12/31/2020'</span>                <span class="c1"># end date of historical data
+<span class="n">start</span> <span class="o">=</span> <span class="s">'2020-1-2'</span>              <span class="c1"># starting date of historical data
+</span><span class="n">end</span><span class="o">=</span><span class="s">'2020-12-31'</span>                <span class="c1"># end date of historical data
 </span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">([])</span>
 <span class="k">for</span> <span class="n">stock</span> <span class="ow">in</span> <span class="n">stocks</span><span class="p">:</span>
-    <span class="n">each</span> <span class="o">=</span> <span class="n">web</span><span class="p">.</span><span class="n">DataReader</span><span class="p">(</span><span class="n">stock</span><span class="p">,</span> <span class="s">'yahoo'</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
-    <span class="n">close</span> <span class="o">=</span> <span class="n">each</span><span class="p">[</span><span class="s">'Adj Close'</span><span class="p">].</span><span class="n">values</span>
+    <span class="n">each</span> <span class="o">=</span> <span class="n">yf</span><span class="p">.</span><span class="n">Ticker</span><span class="p">(</span><span class="n">stock</span><span class="p">).</span><span class="n">history</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+    <span class="n">close</span> <span class="o">=</span> <span class="n">each</span><span class="p">[</span><span class="s">'Close'</span><span class="p">].</span><span class="n">values</span>
     <span class="n">returns</span> <span class="o">=</span> <span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">data</span><span class="p">[</span><span class="n">stock</span><span class="p">]</span> <span class="o">=</span> <span class="n">returns</span>
 
@@ -111,14 +110,6 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.012124</td>
-      <td>0.027151</td>
-      <td>0.028518</td>
-      <td>0.022816</td>
-      <td>0.022700</td>
-    </tr>
-    <tr>
-      <th>1</th>
       <td>-0.013197</td>
       <td>-0.012139</td>
       <td>0.029633</td>
@@ -126,7 +117,7 @@
       <td>-0.004907</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>1</th>
       <td>-0.000795</td>
       <td>0.014886</td>
       <td>0.019255</td>
@@ -134,7 +125,7 @@
       <td>0.024657</td>
     </tr>
     <tr>
-      <th>3</th>
+      <th>2</th>
       <td>-0.017001</td>
       <td>0.002092</td>
       <td>0.038801</td>
@@ -142,7 +133,7 @@
       <td>-0.000624</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>3</th>
       <td>0.007801</td>
       <td>-0.007809</td>
       <td>0.049205</td>
@@ -158,7 +149,7 @@
       <td>...</td>
     </tr>
     <tr>
-      <th>248</th>
+      <th>247</th>
       <td>-0.004398</td>
       <td>-0.003949</td>
       <td>0.024444</td>
@@ -166,7 +157,7 @@
       <td>0.003735</td>
     </tr>
     <tr>
-      <th>249</th>
+      <th>248</th>
       <td>0.006585</td>
       <td>0.035071</td>
       <td>0.002901</td>
@@ -174,7 +165,7 @@
       <td>0.021416</td>
     </tr>
     <tr>
-      <th>250</th>
+      <th>249</th>
       <td>-0.002633</td>
       <td>0.011584</td>
       <td>0.003465</td>
@@ -182,24 +173,16 @@
       <td>-0.009780</td>
     </tr>
     <tr>
-      <th>251</th>
+      <th>250</th>
       <td>0.002800</td>
       <td>-0.010882</td>
       <td>0.043229</td>
       <td>-0.008527</td>
       <td>-0.010917</td>
     </tr>
-    <tr>
-      <th>252</th>
-      <td>0.013641</td>
-      <td>-0.008801</td>
-      <td>0.015674</td>
-      <td>-0.007703</td>
-      <td>0.007105</td>
-    </tr>
   </tbody>
 </table>
-<p>253 rows × 5 columns</p>
+<p>251 rows × 5 columns</p>
 </div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">values</span>     <span class="c1"># stock data as an array
@@ -217,13 +200,13 @@
 
 <p>In the nominal model, the CVaR and expected returns are evaluated assuming the exact distribution of stock returns is accurately represented by the historical samples without any distributional ambiguity. In other words, \(\Pi\) is written as a singleton uncertainty \(\Pi = \{\pmb{\pi}^0 \}\), where \(\pi_k^0=1/s\), with \(k=1, 2, …, s\). The Python code for implementing the nominal model is given below.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 
-<span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>         <span class="c1"># no ambiguity in probability distribution
-</span>
+<span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>
+
 <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
@@ -234,12 +217,12 @@
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">mu</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_lb</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_ub</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">w0</span><span class="p">)</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0073s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0213s
 </code></pre></div></div>
 
 <p>The portfolio decision for the nominal model is retrieved by the following code.</p>
@@ -257,7 +240,10 @@ Running time: 0.0073s
 
 <p>In this case study, we assume that \(-\underline{\pmb{\eta}}=\bar{\pmb{\eta}}=0.0001\), and the Python code for implementation is provided below.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 
 <span class="n">eta_ub</span> <span class="o">=</span> <span class="mf">0.0001</span>                 <span class="c1"># upper bound of eta
 </span><span class="n">eta_lb</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0001</span>                <span class="c1"># lower bound of eta
@@ -278,12 +264,12 @@ Running time: 0.0073s
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">mu</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_lb</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_ub</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">w0</span><span class="p">)</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0268s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0295s
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># the optimal portfolio decision with 4 d.p.
@@ -322,15 +308,58 @@ Running time: 0.0268s
 <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.0285s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: optimal
+Running time: 0.0396s
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># the optimal portfolio decision with 4 d.p.
 </span></code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.1702, 0.6098, 0.0255, 0.    , 0.1945])
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.1486, 0.6231, 0.0132, 0.    , 0.2151])
+</code></pre></div></div>
+
+<h4 id="worst-case-cvar-with-kl-divergence">Worst-case CVaR with KL divergence</h4>
+<p>Here, we consider the KL divergence-constrained ambiguity of probabilities</p>
+
+\[\Pi = \left\{\boldsymbol{\pi}: \sum_{k=1}^s\pi_k\log(\pi_k/\hat{\pi}_k) \leq \epsilon\right\},\]
+
+<p>where \(\hat{\pi}_k = 1/s\) is the empirical probability of each sample. Assume that the constant \(\epsilon=0.001\), the code for implementing such a robust model is given below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+<span class="n">pi</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">pi</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span><span class="mi">1</span><span class="p">,</span> <span class="n">pi</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">rso</span><span class="p">.</span><span class="n">kldiv</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">))</span>    <span class="c1"># uncertainty set of pi
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">u</span><span class="p">),</span> <span class="n">uset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">pi</span><span class="o">@</span><span class="n">y</span><span class="o">@</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_lb</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_ub</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">w0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: optimal
+Running time: 0.2003s
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>    <span class="c1"># the optimal portfolio decision with 4 d.p.
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([0.0904, 0.6185, 0.0446, 0.    , 0.2465])
 </code></pre></div></div>
 
 <p>In this example, we show that data acquisition tools provided in the Python ecosystem (<i>e.g.</i>, <code class="language-plaintext highlighter-rouge">pandas-datareader</code>) can be readily used to collect and feed real data into RSOME models.  Apart from acquiring data, rich machine learning tools in the Python ecosystem can also be used to develop data-driven optimization models. More such examples will be provided in introducing the <code class="language-plaintext highlighter-rouge">dro</code> module for modeling distributionally robust optimization problems.</p>

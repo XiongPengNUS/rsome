@@ -17,15 +17,15 @@ The RSOME package can be installed with the `pip` command:
 
 The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
 
-| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints|
-|:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No |
-|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No |
-|[CVXPY](https://www.cvxpy.org/install/index.html) | Open-source | >= 1.1.18 | `cvx_solver` | Yes | Yes |
-|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes |
-|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes |
-|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes |
+| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints| Exponential cone constraints
+|:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|:--------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No | No |
+|[ECOS](https://github.com/embotech/ecos-python) | Open-source | >= 2.0.10 | `eco_solver` | Yes | Yes | Yes |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes | No |
+|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes | No |
 
 
 ## A Linear Programming Example
@@ -90,13 +90,17 @@ formula = model.do_math()
 print(formula)
 ```
 
-    Second order cone program object:
+    Conic program object:
     =============================================
-    Number of variables:          3
-    Continuous/binaries/integers: 3/0/0
+    Number of variables:           3
+    Continuous/binaries/integers:  3/0/0
     ---------------------------------------------
-    Number of linear constraints: 6
-    Inequalities/equalities:      6/0
-    Number of coefficients:       11
+    Number of linear constraints:  6
+    Inequalities/equalities:       6/0
+    Number of coefficients:        11
     ---------------------------------------------
-    Number of SOC constraints:    0
+    Number of SOC constraints:     0
+    ---------------------------------------------
+    Number of ExpCone constraints: 0
+    
+```

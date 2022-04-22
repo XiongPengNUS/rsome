@@ -13,6 +13,12 @@ from .lp import Solution
 
 def solve(formula, display=True, params={}):
 
+    try:
+        if formula.xmat:
+            warnings.warn('The SOCP solver ignores exponential cone constraints. ')
+    except AttributeError:
+        pass
+
     nv = formula.linear.shape[1]
     vtype = list(formula.vtype)
 
@@ -26,11 +32,11 @@ def solve(formula, display=True, params={}):
     const_eq = formula.const[indices_eq]
     const_ineq = formula.const[indices_ineq]
     if len(indices_eq) > 0:
-        # grb.addMConstr(linear_eq, x, '=', const_eq)
-        grb.addMConstrs(linear_eq, x, '=', const_eq)
+        grb.addMConstr(linear_eq, x, '=', const_eq)
+        # grb.addMConstrs(linear_eq, x, '=', const_eq)
     if len(indices_ineq) > 0:
-        # grb.addMConstr(linear_ineq, x, '<', const_ineq)
-        grb.addMConstrs(linear_ineq, x, '<', const_ineq)
+        grb.addMConstr(linear_ineq, x, '<', const_ineq)
+        # grb.addMConstrs(linear_ineq, x, '<', const_ineq)
 
     if isinstance(formula, SOCProg):
         for constr in formula.qmat:

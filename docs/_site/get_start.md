@@ -8,16 +8,15 @@ This guide introduces the main components, basic data structures, and syntax rul
 
 ## Modeling Environments <a name="section1.1"></a>
 
-The current version of RSOME provides four layers of modeling environments, as illustrated by the structure diagram below.
+The RSOME package provides the following two modules for formulating optimization problems under uncertainty:
 
-<img src="rsome_modules.png" width=600/>
+- The `ro` module is a tailored modeling framework for robust optimization problems. This module provides modelng tools designed specifically for constructing uncertainty sets and specifying affine decision rules in multi-stage decision-making applications. 
 
+- The `dro` module is built upon the distributionally robust optimization framework proposed in [Chen et al.  (2020)](#ref1). Modeling tools are provided for constructing event-wise ambiguity sets and specifying event-wise adaptation policies.
 
-The lower two layers of RSOME modules provide modeling tools for deterministic linear and second-order cone (SOC) programs, which are the cornerstone for building the upper-level robust and distributionally robust optimization modules. In RSOME, all robust counterparts of upper-level robust and distributionally robust models are formulated into the lower-level deterministic problems before being sent to solvers.
+These two modeling frameworks follow consistent syntax in defining variables, objective functions, and constraints. The only differences are in specifying recourse adaptations and uncertainty/ambiguity sets. Notice that the `dro` module is a more general modeling framework, since a classic robust optimization problem can be treated as a special case of distributionally robust optimization, where the ambiguity set, specifying only the support information, reduces to an uncertainty set. The `ro` module is less general but the toolkit enables users to formulate uncertainty sets and decision adaptations in a more concise and intuitive manner. 
 
-A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer `dro` module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in [Chen et al.  (2020)](#ref1), is the most general framework among all. For example, classic robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The `ro` module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.
-
-Though each layer of RSOME modules are targeting different types of optimization problems, they follow consistent syntax in defining variables, objective functions, and constraints. In this section, we will use the `ro` module as a general modeling environment for deterministic problems, and cases of robust optimization problems will be discussed in [RSOME for robust optimization](ro_rsome). The `dro` module is specially designed for distributionally robust optimization problems, and it is different from `ro` in specifying recourse adaptations and uncertainty/ambiguity sets. It will be introduced separately in [RSOME for distributionall robust optimization](dro_rsome).
+In this section, we will use the `ro` module as a general modeling environment for deterministic problems. Guidelines of robust and distributionally robust optimization problems are presented in [RSOME for robust optimization](ro_rsome) and [RSOME for distributionall robust optimization](dro_rsome), respectively.
 
 ## Introduction to the `rsome.ro` Environment <a name="section1.2"></a>
 
@@ -129,6 +128,16 @@ The RSOME package also supports several convex functions for specifying convex c
 
 - `quad()` for quadratic terms `x @ Q @ x`, where `x` is a vector, and `Q` is a positive semidefinite matrix.
 
+- `expcone()` for creating an exponential cone constraint `z * exp(x/z) <= y`, where `x` and `z` are scalars. 
+
+- `exp()` for natural exponential function `exp(x)`, where `x` is a scalar.
+
+- `log()` for natural logarithm function `log(x)`, where `x` is a scalar.
+
+- `entropy()` for entropy expression `x * log(x)`, where `x` is a scalar.
+
+- `kldiv()` for creating a KL divergence constraint `sum(p * log(p/phat)) <= r`, where `p` is a vector of probability variables, `phat` is a vector of empirical probabilities, and `r` is a scalar.
+
 Examples of specifying convex constraints are provided below.
 
 
@@ -143,6 +152,11 @@ model.st(rso.norm(y[:, 0]) <= 1)        # a constraint with 2-norm terms
 model.st(rso.norm(x, 1) <= y[0, 0])     # a constraint with 1-norm terms
 model.st(rso.norm(x, inf) <= x[0])      # a constraint with infinity norm
 model.st(rso.quad(x, Q) + x[1] <= x[0]) # a constraint with a quadratic term
+model.st(rso.expcone(x, x[0], 1.5))     # an exponential cone constraint
+model.st(rso.exp(x[1]) <= 3.5)          # a constriant with an exponential term
+model.st(rso.log(x[0]) >= 1.2)          # a constraint with a logarithm term
+model.st(rso.entropy(x[0]) >= x[1])     # a constraint with an entropy expression
+model.st(rso.kldiv(x, 1/len(x), 0.01))  # a KL divergence constraint
 ```
 
 Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as `abs(x) >= 2` is invalid and gives an error message.
@@ -153,12 +167,21 @@ All RSOME models are transformed into their standard forms, which are then solve
 
 ```
 Model.do_math(primal=True)
-    Returns a SOCProg type object representing the standard form
-    as a second-order cone program. The parameter primal controls
-    the returned formula is for the primal or the dual problem.
+    Return the linear, second-order cone, or exponential cone programming problem as the standard formula or deterministic counterpart of the model.
+
+    Parameters
+    ----------
+    primal : bool, default True
+        Specify whether return the primal formula of the model.
+        If primal=False, the method returns the daul formula.
+        
+    Returns
+    -------
+    prog : GCProg
+        An exponential cone programming problem.
 ```
 
-You may use the `do_math()` method together with the `show()` method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.
+You may use the `do_math()` method together with the `show()` method to display important information on the standard form, <i>i.e.</i>, the objective function, linear, second-order cone, and exponential cone constraints, bounds and variable types.
 
 
 ```python
@@ -185,19 +208,18 @@ The variables `primal` and `dual` represent the standard forms of the primal and
 primal
 ```
 
-
-
-
-    Second order cone program object:
+    Conic program object:
     =============================================
-    Number of variables:          8
-    Continuous/binaries/integers: 8/0/0
+    Number of variables:           8
+    Continuous/binaries/integers:  8/0/0
     ---------------------------------------------
-    Number of linear constraints: 5
-    Inequalities/equalities:      1/4
-    Number of coefficients:       11
+    Number of linear constraints:  5
+    Inequalities/equalities:       2/3
+    Number of coefficients:        11
     ---------------------------------------------
-    Number of SOC constraints:    1
+    Number of SOC constraints:     1
+    ---------------------------------------------
+    Number of ExpCone constraints: 0
 
 
 ```python
@@ -205,16 +227,18 @@ dual
 ```
 
 
-    Second order cone program object:
+    Conic program object:
     =============================================
-    Number of variables:          5
-    Continuous/binaries/integers: 5/0/0
+    Number of variables:           5
+    Continuous/binaries/integers:  5/0/0
     ---------------------------------------------
-    Number of linear constraints: 4
-    Inequalities/equalities:      0/4
-    Number of coefficients:       7
+    Number of linear constraints:  4
+    Inequalities/equalities:       0/4
+    Number of coefficients:        7
     ---------------------------------------------
-    Number of SOC constraints:    1
+    Number of SOC constraints:     1
+    ---------------------------------------------
+    Number of ExpCone constraints: 0
 
 
 More details on the standard forms can be retrieved by the method `show()`, and the problem information is summarized in a `pandas.DataFrame` data table.
@@ -528,8 +552,8 @@ Solve the model with the selected solver interface.
 
     Parameters
     ----------
-        solver : {None, lpg_solver, clp_solver, ort_solver, cvx_solver,
-                  grb_solver, msk_solver, cpx_solver}
+        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                  cpx_solver, grb_solver, msk_solver}
             Solver interface used for model solution. Use default solver
             lpg_solver if solver=None.
         display : bool
@@ -539,23 +563,23 @@ Solve the model with the selected solver interface.
             So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 ```
 
-The `solve()` method calls for external solvers to solve the optimization problem. The first argument `solver` is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver `linprog` imported from the `scipy.optimize` package as the default solver. Warnings will be raised if integer variables or second-order cone constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.  
+The `solve()` method calls for external solvers to solve the optimization problem. The first argument `solver` is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver `linprog` imported from the `scipy.optimize` package as the default solver. Warnings will be raised if integer variables or nonlinear constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.  
 
-| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints|
-|:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No |
-|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No |
-|[CVXPY](https://www.cvxpy.org/install/index.html) | Open-source | >= 1.1.18 | `cvx_solver` | Yes | Yes |
-|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes |
-|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes |
-|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes |
+| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints| Exponential cone constraints
+|:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|:--------------|
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No | No |
+|[ECOS](https://github.com/embotech/ecos-python) | Open-source | >= 2.0.10 | `eco_solver` | Yes | Yes | Yes |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes | No |
+|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes | No |
 
 
-The model above involves second-order cone constraints, so we could use CVXPY, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.
+The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.
 
 ```python
-from rsome import cvx_solver as cvx
+from rsome import eco_solver as eco
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
 from rsome import cpx_solver as cpx
@@ -564,11 +588,11 @@ from rsome import cpx_solver as cpx
 The interfaces can be then used to attain the solution.
 
 ```python
-model.solve(cvx)
+model.solve(eco)
 ```    
-    Being solved by CVXPY...
-    Solution status: optimal
-    Running time: 0.0376s
+    Being solved by ECOS...
+    Solution status: Optimal solution found
+    Running time: 0.0006s
 
 
 ```python
@@ -594,7 +618,7 @@ model.solve(cpx)
 ```
 
     Being solved by CPLEX...
-    Solution status: optimal
+    Solution status: 1
     Running time: 0.0175s
 
 

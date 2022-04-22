@@ -37,7 +37,7 @@ def test_model():
         x.get()
 
     primal = model.do_math()
-    string = 'Second order cone program object:\n'
+    string = 'Conic program object:\n'
     string += '=============================================\n'
     string += 'Number of variables:          8\n'
     string += 'Continuous/binaries/integers: 8/0/0\n'
@@ -47,6 +47,8 @@ def test_model():
     string += 'Number of coefficients:       11\n'
     string += '---------------------------------------------\n'
     string += 'Number of SOC constraints:    1\n'
+    string += '---------------------------------------------\n'
+    string += 'Number of ExpCone constraints: 0\n'
     assert primal.__repr__() == string
 
     df = primal.show()
@@ -80,7 +82,7 @@ def test_model():
     assert (abs(primal_sol.x[1:4] - x_sol) < 1e-4).all()
 
     dual = model.do_math(primal=False)
-    string = 'Second order cone program object:\n'
+    string = 'Conic program object:\n'
     string += '=============================================\n'
     string += 'Number of variables:          5\n'
     string += 'Continuous/binaries/integers: 5/0/0\n'
@@ -90,6 +92,8 @@ def test_model():
     string += 'Number of coefficients:       7\n'
     string += '---------------------------------------------\n'
     string += 'Number of SOC constraints:    1\n'
+    string += '---------------------------------------------\n'
+    string += 'Number of ExpCone constraints: 0\n'
     assert dual.__repr__() == string
 
     df = dual.show()

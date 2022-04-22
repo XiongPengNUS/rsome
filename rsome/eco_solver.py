@@ -9,6 +9,7 @@ import warnings
 import time
 import scipy.sparse as sp
 from .socp import SOCProg
+from .gcp import GCProg
 from .lp import Solution
 
 
@@ -48,13 +49,22 @@ def solve(formula, display=True, params={}):
         Gsc.append(socone)
         sc_dim.append(num)
 
-    G = sp.csc_matrix(sp.vstack([Gl, Glb, Gub] + Gsc))
+    Gec = []
+    xmat = formula.xmat if isinstance(formula, GCProg) else []
+    for e in xmat:
+        expcone = sp.csc_matrix((-np.ones(3),
+                                 (np.arange(3, dtype='int'), e)),
+                                (3, cols))
+        Gec.append(expcone)
+
+    G = sp.csc_matrix(sp.vstack([Gl, Glb, Gub] + Gsc + Gec))
     h = np.hstack((formula.const[ineq_idx],
                    -formula.lb[zlb_idx],
                    formula.ub[zub_idx],
-                   np.zeros(sum(sc_dim))))
+                   np.zeros(sum(sc_dim)), np.zeros(len(xmat)*3)))
 
-    dims = {'l': num_ineq + num_zlb + num_zub, 'q': sc_dim}
+    dims = {'l': num_ineq + num_zlb + num_zub,
+            'q': sc_dim, 'e': len(xmat)}
     if len(eq_idx) > 0:
         A = sp.csc_matrix(formula.linear[eq_idx])
         b = formula.const[eq_idx]
@@ -79,7 +89,7 @@ def solve(formula, display=True, params={}):
         print('Solution status: {0}'.format(status))
         print('Running time: {0:0.4f}s'.format(stime))
 
-    if info['exitFlag'] == 0:
+    if info['exitFlag'] in [0, 10]:
         x_vec = sol['x']
         solution = Solution(info['pcost'], x_vec, status, stime)
     else:

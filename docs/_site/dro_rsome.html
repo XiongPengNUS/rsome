@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2639ca9d477eee0219e642f7152ec7e578cb29bf">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -86,7 +86,7 @@
 &amp;c_m(\pmb{z}) := c_{ms}^0 + \sum\limits_{j\in[J]}c_{ms}^jz_j
 \end{align}\]
 
-<p>are defined similarly as in the case of <a href="ro_rsome#section2.1">RSOME for robust optimization</a> and \(\mathcal{X}_s\) is an second-order cone (SOC) representable feasible set of a decision \(\pmb{x}(s)\) in the scenario \(x\). Constraints indexed by \(m\in\mathcal{M}_1\) are satisfied under the worst-case realization, just like those introduced in <a href="ro_rsome#section2.1">RSOME for robust optimization</a>. Another set of constraints indexed by \(m\in\mathcal{M}_2\) are satisfied with regard to the worst-case expectation overall all possible distributions defined by an ambiguity set \(\mathcal{F}_m\) in the general form introduced in <a href="#ref2">Chen et al. (2020)</a>:</p>
+<p>are defined similarly as in the case of <a href="ro_rsome#section2.1">RSOME for robust optimization</a> and \(\mathcal{X}_s\) is an second-order conic (SOC) or exponential conic (EC)representable feasible set of a decision \(\pmb{x}(s)\) in the scenario \(x\). Constraints indexed by \(m\in\mathcal{M}_1\) are satisfied under the worst-case realization, just like those introduced in <a href="ro_rsome#section2.1">RSOME for robust optimization</a>. Another set of constraints indexed by \(m\in\mathcal{M}_2\) are satisfied with regard to the worst-case expectation overall all possible distributions defined by an ambiguity set \(\mathcal{F}_m\) in the general form introduced in <a href="#ref2">Chen et al. (2020)</a>:</p>
 
 \[\begin{align}
 \mathcal{F}_m = \left\{
@@ -107,9 +107,9 @@
 <p>Here for each constraint indexed by \(m\in\mathcal{M}_2\),</p>
 
 <ol>
-  <li>The conditional expectation of \(\tilde{\pmb{z}}\) over events (defined as subsets of scenarios and denoted by \(\mathcal{E}_{km}\) are known to reside in an SOC representable set \(\mathcal{Q}_{km}\);</li>
-  <li>The support of \(\tilde{\pmb{z}}\) in each scenario \(s\in[S]\) is specified to be another SOC representable set \(\mathcal{Z}_{sm}\);</li>
-  <li>Probabilities of scenarios, collectively denoted by a vector \(\pmb{p}\), are constrained by a third SOC representable subset \(\mathcal{P}_m\subseteq\left\{\pmb{p}\in \mathbb{R}_{++}^S \left| \pmb{e}^{\top}\pmb{p}=1 \right. \right\}\) in the probability simplex.</li>
+  <li>The conditional expectation of \(\tilde{\pmb{z}}\) over events (defined as subsets of scenarios and denoted by \(\mathcal{E}_{km}\) are known to reside in an SOC or EC representable set \(\mathcal{Q}_{km}\);</li>
+  <li>The support of \(\tilde{\pmb{z}}\) in each scenario \(s\in[S]\) is specified to be another SOC or EC representable set \(\mathcal{Z}_{sm}\);</li>
+  <li>Probabilities of scenarios, collectively denoted by a vector \(\pmb{p}\), are constrained by a third SOC or EC representable subset \(\mathcal{P}_m\subseteq\left\{\pmb{p}\in \mathbb{R}_{++}^S \left| \pmb{e}^{\top}\pmb{p}=1 \right. \right\}\) in the probability simplex.</li>
 </ol>
 
 <p>Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types—-the <i>event-wise static adaptation</i> denoted by \(\mathcal{A}(C)\) as well as the <i>event-wise affine adaptation</i> denoted by \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\). In particular, given a fixed number of \(S\) scenarios and a
@@ -301,7 +301,7 @@ dtype: int64
 
 <h3 id="mathcalq_km-as-the-support-of-conditional-expectations">\(\mathcal{Q}_{km}\) as the Support of Conditional Expectations</h3>
 
-<p>According to the formulation of the ambiguity set \(\mathcal{F}_m\) presented in the section <a href="#section3.1">The general formulation for distributionally robust optimization models</a>, the SOC representable set \(\mathcal{Q}_{km}\) is defined as the support of the conditional expectation of random variables under the event \(\mathcal{E}_k\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \(\mathcal{Q}_{km}\) are defined by the <code class="language-plaintext highlighter-rouge">exptset()</code> method of the ambiguity set object. The help information of the <code class="language-plaintext highlighter-rouge">exptset()</code> method is given below.</p>
+<p>According to the formulation of the ambiguity set \(\mathcal{F}_m\) presented in the section <a href="#section3.1">The general formulation for distributionally robust optimization models</a>, the SOC or EC representable set \(\mathcal{Q}_{km}\) is defined as the support of the conditional expectation of random variables under the event \(\mathcal{E}_k\), which is a collection of selected scenarios. In the RSOME package, such a collection of scenarios can be specified by the indexing or slicing of the ambiguity set object, and constraints of the \(\mathcal{Q}_{km}\) are defined by the <code class="language-plaintext highlighter-rouge">exptset()</code> method of the ambiguity set object. The help information of the <code class="language-plaintext highlighter-rouge">exptset()</code> method is given below.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exptset(*args) method of rsome.dro.Ambiguity instance
     Specify the uncertainty set of the expected values of random

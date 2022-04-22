@@ -20,9 +20,16 @@ def def_sol(formula, display=True, params={}):
 
     try:
         if formula.qmat:
-            warnings.warn('SOC constriants are ignored in the LP solver. ')
+            warnings.warn('the LP solver ignnores SOC constriants.')
     except AttributeError:
         pass
+
+    try:
+        if formula.xmat:
+            warnings.warn('The LP solver ignores exponential cone constriants.')
+    except AttributeError:
+        pass
+
     if any(np.array(formula.vtype) != 'C'):
         warnings.warn('Integrality constraints are ignored in the LP solver. ')
 
@@ -172,8 +179,12 @@ class Model:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
         if not isinstance(obj, Real):
-            if obj.size > 1:
-                raise ValueError('Incorrect function dimension.')
+            if isinstance(obj, VarSub):
+                if obj.indices.size > 1:
+                    raise ValueError('Incorrect function dimension.')
+            else:
+                if obj.size > 1:
+                    raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = 1
@@ -199,8 +210,12 @@ class Model:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
         if not isinstance(obj, Real):
-            if obj.size > 1:
-                raise ValueError('Incorrect function dimension.')
+            if isinstance(obj, VarSub):
+                if obj.indices.size > 1:
+                    raise ValueError('Incorrect function dimension.')
+            else:
+                if obj.size > 1:
+                    raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.sign = - 1
@@ -217,6 +232,17 @@ class Model:
         primal : bool, default True
             Specify whether return the primal formula of the model.
             If primal=False, the method returns the daul formula.
+
+        refresh : bool
+            Leave the argument unspecified.
+
+        obj : bool
+            Leave the argument unspecified.
+
+        Returns
+        -------
+        prog : LinProg
+            A linear programming problem.
         """
 
         if primal:
@@ -239,19 +265,22 @@ class Model:
 
             for constr in self.pws_constr + more_cvx:
                 if constr.xtype == 'A':
-                    self.aux_constr.append(constr.affine_in +
+                    affine_in = constr.affine_in * constr.multiplier
+                    self.aux_constr.append(affine_in +
                                            constr.affine_out <= 0)
-                    self.aux_constr.append(-constr.affine_in +
+                    self.aux_constr.append(-affine_in +
                                            constr.affine_out <= 0)
                 elif constr.xtype == 'M':
+                    affine_in = constr.affine_in * constr.multiplier
                     aux = self.dvar(constr.affine_in.shape, aux=True)
-                    self.aux_constr.append(constr.affine_in <= aux)
-                    self.aux_constr.append(-constr.affine_in <= aux)
+                    self.aux_constr.append(affine_in <= aux)
+                    self.aux_constr.append(-affine_in <= aux)
                     self.aux_constr.append(sum(aux) + constr.affine_out <= 0)
                 elif constr.xtype == 'I':
+                    affine_in = constr.affine_in * constr.multiplier
                     aux = self.dvar(1, aux=True)
-                    self.aux_constr.append(constr.affine_in <= aux)
-                    self.aux_constr.append(-constr.affine_in <= aux)
+                    self.aux_constr.append(affine_in <= aux)
+                    self.aux_constr.append(-affine_in <= aux)
                     self.aux_constr.append(aux + constr.affine_out <= 0)
             if obj:
                 obj = np.array(csr_matrix(([1.0], ([0], [0])),
@@ -478,8 +507,6 @@ class Vars:
     def __repr__(self):
 
         vtype = self.vtype
-        # if 'C' not in vtype and 'B' not in vtype and 'I' not in vtype:
-        #     raise ValueError('Unknown variable type.')
 
         var_name = ('' if self.name is None else
                     f'E({self.name}): ' if self.model.mtype == 'E' else
@@ -489,8 +516,6 @@ class Vars:
                     ' integer' if vtype == 'I' else
                     ' mixed-type')
         suffix = 's' if np.prod(self.shape) > 1 else ''
-
-        # string = var_name
 
         mtype = (' decision' if self.model.mtype == 'R' else
                  ' random' if self.model.mtype == 'S' else
@@ -523,10 +548,6 @@ class Vars:
 
         linear = csr_matrix((data, indices, indptr),
                             shape=(dim, self.model.last))
-        # if self.shape == ():
-        #     const = 0
-        # else:
-        #     const = np.zeros(self.shape)
         const = np.zeros(self.shape)
 
         return Affine(self.model, linear, const, self.sparray)
@@ -544,20 +565,121 @@ class Vars:
         return self.to_affine().abs()
 
     def norm(self, degree):
+        """
+        Return the first, second, or infinity norm of a 1-D array.
+
+        Refer to `rsome.norm` for full documentation
+
+        See Also
+        --------
+        rso.norm : equivalent function
+        """
 
         return self.to_affine().norm(degree)
 
     def square(self):
+        """
+        Return the element-wise square of an array.
+
+        Refer to `rsome.square` for full documentation
+
+        See Also
+        --------
+        rso.square : equivalent function
+        """
 
         return self.to_affine().square()
 
     def sumsqr(self):
+        """
+        Return the sum of squares of a 1-D array.
+
+        Refer to `rsome.sumsqr` for full documentation.
+
+        See Also
+        --------
+        rso.sumsqr : equivalent function
+        """
 
         return self.to_affine().sumsqr()
 
     def quad(self, qmat):
+        """
+        Return the quadratic expression var @ qmat @ var.
+
+        Refer to `rsome.quad` for full documentation.
+
+        See Also
+        --------
+        rso.quad : equivalent function
+        """
 
         return self.to_affine().quad(qmat)
+
+    def expcone(self, x, z):
+        """
+        Return the exponential cone constraint z*exp(x/z) <= var
+
+        Refer to `rsome.expcone` for full documentation.
+
+        See Also
+        --------
+        rso.expcone : equivalent function
+        """
+
+        return self.to_affine().expcone(x, z)
+
+    def exp(self):
+        """
+        Return the natural exponential function exp(var)
+
+        Refer to `rsome.exp` for full documentation.
+
+        See Also
+        --------
+        rso.exp : equivalent function
+        """
+
+        return self.to_affine().exp()
+
+    def log(self):
+        """
+        Return the natural logarithm function log(var)
+
+        Refer to `rsome.log` for full documentation.
+
+        See Also
+        --------
+        rso.log : equivalent function
+        """
+
+        return self.to_affine().log()
+
+    def entropy(self):
+        """
+        Return the natural exponential function -var*log(var)
+
+        Refer to `rsome.entropy` for full documentation.
+
+        See Also
+        --------
+        rso.entropy : equivalent function
+        """
+
+        return self.to_affine().entropy()
+
+    def kldiv(self, phat, r):
+        """
+        Return the KL divergence constraints sum(var*log(var/phat)) <= r
+
+        Refer to `rsome.kldiv` for full documentation.
+
+        See Also
+        --------
+        rso.kldiv : equivalent function
+        """
+
+        return self.to_affine().kldiv(phat, r)
 
     def get(self):
         """
@@ -581,7 +703,6 @@ class Vars:
 
         indices = range(self.first, self.first + self.size)
         var_sol = np.array(self.model.solution.x)[indices]
-        # if isinstance(var_sol, np.ndarray):
         if self.shape == ():
             var_sol = var_sol[0]
         else:
@@ -593,9 +714,6 @@ class Vars:
 
         item_array = index_array(self.shape)
         indices = item_array[item]
-
-        # if not isinstance(indices, np.ndarray):
-        #     indices = np.array([indices]).reshape((1, ) * self.ndim)
 
         return VarSub(self, indices)
 
@@ -912,18 +1030,11 @@ class Affine:
         """
         Return the first, second, or infinity norm of a 1-D array.
 
-        Parameters
-        ----------
-        affine : an array of variables or affine expressions.
-            Input array. The array must be 1-D.
-        degree : {1, 2, numpy.inf}, optional
-            Order of the norm function. It can only be 1, 2, or infinity. The
-            default value is 2, i.e., the Euclidean norm.
+        Refer to `rsome.norm` for full documentation
 
-        Returns
-        -------
-        n : Convex
-            The norm of the given array.
+        See Also
+        --------
+        rso.norm : equivalent function
         """
 
         if len(self.shape) != 1:
@@ -945,15 +1056,11 @@ class Affine:
         """
         Return the element-wise square of an array.
 
-        Parameters
-        ----------
-        affine : an array of variables or affine expression
-            Input array.
+        Refer to `rsome.square` for full documentation
 
-        Returns
-        -------
-        n : Convex
-            The element-wise squares of the given array
+        See Also
+        --------
+        rso.square : equivalent function
         """
 
         size = self.size
@@ -963,17 +1070,13 @@ class Affine:
 
     def sumsqr(self):
         """
-        Return the sum of squares of an array.
+        Return the sum of squares of a 1-D array.
 
-        Parameters
-        ----------
-        affine : an array of variables or affine expression
-            Input array. The array must be 1-D.
+        Refer to `rsome.sumsqr` for full documentation.
 
-        Returns
-        -------
-        n : Convex
-            The sum of squares of the given array
+        See Also
+        --------
+        rso.sumsqr : equivalent function
         """
 
         shape = self.shape
@@ -1021,6 +1124,117 @@ class Affine:
             return affine.sumsqr()
         else:
             return - affine.sumsqr()
+
+    def expcone(self, x, z):
+        """
+        Return the exponential cone constraint z*exp(x/z) <= affine
+
+        Refer to `rsome.expcone` for full documentation.
+
+        See Also
+        --------
+        rso.expcone : equivalent function
+        """
+
+        if isinstance(x, (Vars, VarSub)):
+            if x.to_affine().size > 1:
+                raise ValueError('The expression of x must be a scalar.')
+        elif isinstance(x, (Affine, np.ndarray)):
+            if x.size > 1:
+                raise ValueError('The expression of x must be a scalar')
+        if isinstance(x, (Vars, VarSub, Affine)):
+            if self.model is not x.model:
+                raise ValueError('Models mismatch.')
+
+        if isinstance(z, (Vars, VarSub)):
+            if z.to_affine().size > 1:
+                raise ValueError('The expression of z must be a scalar.')
+        elif isinstance(z, (Affine, np.ndarray)):
+            if z.size > 1:
+                raise ValueError('The expression of z must be a scalar')
+        if isinstance(z, (Vars, VarSub, Affine)):
+            if self.model is not z.model:
+                raise ValueError('Models mismatch.')
+
+        return ExpConstr(self.model, x, self, z)
+
+    def exp(self):
+        """
+        Return the natural exponential function exp(var)
+
+        Refer to `rsome.exp` for full documentation.
+
+        See Also
+        --------
+        rso.exp : equivalent function
+        """
+
+        if self.size > 1:
+            raise ValueError('The expression must be a scalar')
+
+        return Convex(self, np.float64(0), 'X', 1)
+
+    def log(self):
+        """
+        Return the natural logarithm function log(var)
+
+        Refer to `rsome.log` for full documentation.
+
+        See Also
+        --------
+        rso.log : equivalent function
+        """
+
+        if self.size > 1:
+            raise ValueError('The expression must be a scalar')
+
+        return Convex(self, np.float64(0), 'L', -1)
+
+    def entropy(self):
+        """
+        Return the natural exponential function -var*log(var)
+
+        Refer to `rsome.entropy` for full documentation.
+
+        See Also
+        --------
+        rso.entropy : equivalent function
+        """
+
+        if self.size > 1:
+            raise ValueError('The expression must be a scalar')
+
+        return Convex(self, np.float64(0), 'P', -1)
+
+    def kldiv(self, phat, r):
+        """
+        Return the KL divergence constraints sum(var*log(var/phat)) <= r
+
+        Refer to `rsome.kldiv` for full documentation.
+
+        See Also
+        --------
+        rso.kldiv : equivalent function
+        """
+
+        affine = self.to_affine().reshape((self.size, ))
+
+        if isinstance(phat, Real):
+            phat = np.array([phat]*self.size)
+        elif isinstance(phat, np.ndarray):
+            if phat.size == 1:
+                phat = np.array([phat.flatten()[0]] * self.size)
+            else:
+                phat = phat.reshape(affine.shape)
+        elif isinstance(phat, (Vars, VarSub, Affine)):
+            if affine.model is not phat.model:
+                raise ValueError('Models mismatch.')
+            if phat.size == 1:
+                phat = phat * np.ones(affine.shape)
+            else:
+                phat = phat.reshape(affine.shape)
+
+        return KLConstr(affine, phat, r)
 
     def __mul__(self, other):
 
@@ -1266,11 +1480,12 @@ class Convex:
 
     __array_priority__ = 101
 
-    def __init__(self, affine_in, affine_out, xtype, sign):
+    def __init__(self, affine_in, affine_out, xtype, sign, multiplier=1):
 
         self.model = affine_in.model
         self.affine_in = affine_in
         self.affine_out = affine_out
+        self.multiplier = multiplier
         self.size = affine_out.size
         self.xtype = xtype
         self.sign = sign
@@ -1281,9 +1496,13 @@ class Convex:
                   'E': 'Eclidean norm expression',
                   'I': 'infinity norm expression',
                   'S': 'element-wise square expression',
-                  'Q': 'sum of squares expression'}
+                  'Q': 'sum of squares expression',
+                  'X': 'natural exponential expression',
+                  'L': 'natural logarithm expression',
+                  'P': 'entropy expression',
+                  'K': 'KL divergence expression'}
         if self.affine_out.shape == ():
-            shapes = 'an' if self.xtype in 'AEIS' else 'a'
+            shapes = 'an' if self.xtype in 'AEISP' else 'a'
         else:
             shapes = 'x'.join([str(dim) for dim in self.affine_out.shape])
 
@@ -1294,7 +1513,8 @@ class Convex:
 
     def __neg__(self):
 
-        return Convex(self.affine_in, -self.affine_out, self.xtype, -self.sign)
+        return Convex(self.affine_in, -self.affine_out, self.xtype, -self.sign,
+                      self.multiplier)
 
     def __add__(self, other):
 
@@ -1312,7 +1532,8 @@ class Convex:
                           (Vars, VarSub, Affine, Real, np.ndarray)):
             raise TypeError('Incorrect data types.')
 
-        new_convex = Convex(affine_in, affine_out, self.xtype, self.sign)
+        new_convex = Convex(affine_in, affine_out,
+                            self.xtype, self.sign, self.multiplier)
 
         return new_convex
 
@@ -1333,14 +1554,15 @@ class Convex:
         if not isinstance(other, Real):
             raise TypeError('Incorrect syntax.')
 
-        if self.xtype in 'AMIE':
-            multiplier = abs(other)
+        if self.xtype in 'AMIEXLPK':
+            multiplier = self.multiplier * abs(other)
         elif self.xtype in 'SQ':
-            multiplier = abs(other) ** 0.5
+            multiplier = self.multiplier * abs(other) ** 0.5
         else:
             raise ValueError('Unknown type of convex function.')
-        return Convex(multiplier * self.affine_in, other * self.affine_out,
-                      self.xtype, np.sign(other)*self.sign)
+
+        return Convex(self.affine_in, other * self.affine_out,
+                      self.xtype, np.sign(other)*self.sign, multiplier)
 
     def __rmul__(self, other):
 
@@ -1353,7 +1575,7 @@ class Convex:
             raise ValueError('Nonconvex constraints.')
 
         return CvxConstr(left.model, left.affine_in, left.affine_out,
-                         left.xtype)
+                         left.multiplier, left.xtype)
 
     def __ge__(self, other):
 
@@ -1362,7 +1584,7 @@ class Convex:
             raise ValueError('Nonconvex constraints.')
 
         return CvxConstr(right.model, right.affine_in, right.affine_out,
-                         right.xtype)
+                         right.multiplier, right.xtype)
 
     def __eq__(self, other):
 
@@ -1598,11 +1820,12 @@ class CvxConstr:
     The CvxConstr class creates an object of convex constraints
     """
 
-    def __init__(self, model, affine_in, affine_out, xtype):
+    def __init__(self, model, affine_in, affine_out, multiplier, xtype):
 
         self.model = model
         self.affine_in = affine_in
         self.affine_out = affine_out
+        self.multiplier = multiplier
         self.xtype = xtype
 
     def __repr__(self):
@@ -1639,6 +1862,48 @@ class ConeConstr:
         self.right_var = right_var
         self.left_index = left_index
         self.right_index = right_index
+
+
+class ExpConstr:
+    """
+    The ExpConstr class creates an object of exponential cone constraints
+    """
+
+    def __init__(self, model, expr1, expr2, expr3):
+        self.model = model
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.expr3 = expr3
+
+    def __repr__(self):
+
+        if isinstance(self.expr2, Real):
+            size = 1
+        else:
+            size = self.expr2.size
+        if size == 1:
+            return '1 exponential conic constraint'
+        else:
+            return '{} exponential conic constraints'.format(size)
+
+
+class KLConstr:
+    """
+    The KLConstr class creates an object of constraint for KL divergence
+    """
+
+    def __init__(self, p, phat, r):
+        self.model = p.model
+        self.p = p
+        self.phat = phat
+        self.r = r
+
+    def __repr__(self):
+
+        ns = self.p.size
+        suffix = 's' if ns > 1 else ''
+
+        return "KL divergence constraint for {} scenario{}".format(ns, suffix)
 
 
 class RoConstr:
@@ -1744,6 +2009,13 @@ class RoConstr:
                 indices = np.array(qconstr, dtype=int) + n*size_support
                 cone_constr = ConeConstr(self.dec_model, dual_var, indices[1:],
                                          dual_var, indices[0])
+                constr_list.append(cone_constr)
+            for xconstr in support.xmat:
+                indices = xconstr
+                cone_constr = ExpConstr(self.dec_model,
+                                        dual_var[n, indices[0]],
+                                        dual_var[n, indices[1]],
+                                        dual_var[n, indices[2]])
                 constr_list.append(cone_constr)
 
         return constr_list
@@ -2269,6 +2541,15 @@ class DecAffine(Affine):
         return self.__abs__()
 
     def norm(self, degree):
+        """
+        Return the first, second, or infinity norm of a 1-D array.
+
+        Refer to `rsome.norm` for full documentation
+
+        See Also
+        --------
+        rso.norm : equivalent function
+        """
 
         if not self.fixed:
             raise ValueError('Incorrect convex expressions.')
@@ -2278,6 +2559,15 @@ class DecAffine(Affine):
         return DecConvex(expr, self.event_adapt)
 
     def square(self):
+        """
+        Return the element-wise square of an array.
+
+        Refer to `rsome.square` for full documentation
+
+        See Also
+        --------
+        rso.square : equivalent function
+        """
 
         if not self.fixed:
             raise ValueError('Incorrect convex expressions.')
@@ -2287,6 +2577,15 @@ class DecAffine(Affine):
         return DecConvex(expr, self.event_adapt)
 
     def sumsqr(self):
+        """
+        Return the sum of squares of a 1-D array.
+
+        Refer to `rsome.sumsqr` for full documentation.
+
+        See Also
+        --------
+        rso.sumsqr : equivalent function
+        """
 
         if not self.fixed:
             raise ValueError('Incorrect convex expressions.')
@@ -2300,6 +2599,89 @@ class DecAffine(Affine):
         expr = super().sum(axis)
 
         return DecAffine(self.dro_model, expr, self.event_adapt, self.fixed)
+
+    def expcone(self, x, z):
+        """
+        Return the exponential cone constraint z*exp(x/z) <= affine
+
+        Refer to `rsome.expcone` for full documentation.
+
+        See Also
+        --------
+        rso.expcone : equivalent function
+        """
+
+        event_adapt = self.event_adapt
+
+        if isinstance(x, (DecVar, DecVarSub)):
+            if x.to_affine().size > 1:
+                raise ValueError('The expression of x must be a scalar.')
+        elif isinstance(x, (DecAffine, np.ndarray)):
+            if x.size > 1:
+                raise ValueError('The expression of x must be a scalar')
+
+        if isinstance(x, (DecVar, DecVarSub, DecAffine)):
+            event_adapt = comb_set(event_adapt, x.event_adapt)
+
+        if isinstance(z, (DecVar, DecVarSub)):
+            if z.to_affine().size > 1:
+                raise ValueError('The expression of z must be a scalar.')
+        elif isinstance(z, (DecAffine, np.ndarray)):
+            if z.size > 1:
+                raise ValueError('The expression of z must be a scalar')
+
+        if isinstance(z, (DecVar, DecVarSub, DecAffine)):
+            event_adapt = comb_set(event_adapt, z.event_adapt)
+
+        return DecExpConstr(ExpConstr(self.model, x, self, z), event_adapt)
+
+    def exp(self):
+        """
+        Return the natural exponential function exp(var)
+
+        Refer to `rsome.exp` for full documentation.
+
+        See Also
+        --------
+        rso.exp : equivalent function
+        """
+
+        if self.size > 1:
+            raise ValueError('The expression must be a scalar')
+
+        return DecConvex(Convex(self, np.float64(0), 'X', 1), self.event_adapt)
+
+    def log(self):
+        """
+        Return the natural logarithm function log(var)
+
+        Refer to `rsome.log` for full documentation.
+
+        See Also
+        --------
+        rso.log : equivalent function
+        """
+
+        if self.size > 1:
+            raise ValueError('The expression must be a scalar')
+
+        return DecConvex(Convex(self, np.float64(0), 'L', -1), self.event_adapt)
+
+    def entropy(self):
+        """
+        Return the natural exponential function -var*log(var)
+
+        Refer to `rsome.entropy` for full documentation.
+
+        See Also
+        --------
+        rso.entropy : equivalent function
+        """
+
+        if self.size > 1:
+            raise ValueError('The expression must be a scalar')
+
+        return DecConvex(Convex(self, np.float64(0), 'P', -1), self.event_adapt)
 
     def __le__(self, other):
 
@@ -2349,7 +2731,7 @@ class DecConvex(Convex):
     def __init__(self, convex, event_adapt):
 
         super().__init__(convex.affine_in, convex.affine_out,
-                         convex.xtype, convex.sign)
+                         convex.xtype, convex.sign, convex.multiplier)
         self.event_adapt = event_adapt
 
     def __neg__(self):
@@ -2553,7 +2935,16 @@ class DecCvxConstr(CvxConstr):
     def __init__(self, constr, event_adapt):
 
         super().__init__(constr.model, constr.affine_in,
-                         constr.affine_out, constr.xtype)
+                         constr.affine_out, constr.multiplier, constr.xtype)
+        self.event_adapt = event_adapt
+
+
+class DecExpConstr(ExpConstr):
+
+    def __init__(self, constr, event_adapt):
+
+        super().__init__(constr.model,
+                         constr.expr1, constr.expr2, constr.expr3)
         self.event_adapt = event_adapt
 
 
@@ -2931,13 +3322,12 @@ class LinProg:
         nnz = self.linear.indptr[-1]
 
         string = '=============================================\n'
-        string += 'Number of variables:          {0}\n'.format(linear.shape[1])
-        string += 'Continuous/binaries/integers: {0}/{1}/{2}\n'.format(nc,
-                                                                       nb, ni)
+        string += 'Number of variables:           {0}\n'.format(linear.shape[1])
+        string += 'Continuous/binaries/integers:  {0}/{1}/{2}\n'.format(nc, nb, ni)
         string += '---------------------------------------------\n'
-        string += 'Number of linear constraints: {0}\n'.format(linear.shape[0])
-        string += 'Inequalities/equalities:      {0}/{1}\n'.format(nineq, neq)
-        string += 'Number of coefficients:       {0}\n'.format(nnz)
+        string += 'Number of linear constraints:  {0}\n'.format(linear.shape[0])
+        string += 'Inequalities/equalities:       {0}/{1}\n'.format(nineq, neq)
+        string += 'Number of coefficients:        {0}\n'.format(nnz)
 
         return string
 

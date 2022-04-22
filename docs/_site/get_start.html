@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2639ca9d477eee0219e642f7152ec7e578cb29bf">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -71,15 +71,20 @@
 
 <h2 id="modeling-environments-">Modeling Environments <a name="section1.1"></a></h2>
 
-<p>The current version of RSOME provides four layers of modeling environments, as illustrated by the structure diagram below.</p>
+<p>The RSOME package provides the following two modules for formulating optimization problems under uncertainty:</p>
 
-<p><img src="rsome_modules.png" width="600" /></p>
+<ul>
+  <li>
+    <p>The <code class="language-plaintext highlighter-rouge">ro</code> module is a tailored modeling framework for robust optimization problems. This module provides modelng tools designed specifically for constructing uncertainty sets and specifying affine decision rules in multi-stage decision-making applications.</p>
+  </li>
+  <li>
+    <p>The <code class="language-plaintext highlighter-rouge">dro</code> module is built upon the distributionally robust optimization framework proposed in <a href="#ref1">Chen et al.  (2020)</a>. Modeling tools are provided for constructing event-wise ambiguity sets and specifying event-wise adaptation policies.</p>
+  </li>
+</ul>
 
-<p>The lower two layers of RSOME modules provide modeling tools for deterministic linear and second-order cone (SOC) programs, which are the cornerstone for building the upper-level robust and distributionally robust optimization modules. In RSOME, all robust counterparts of upper-level robust and distributionally robust models are formulated into the lower-level deterministic problems before being sent to solvers.</p>
+<p>These two modeling frameworks follow consistent syntax in defining variables, objective functions, and constraints. The only differences are in specifying recourse adaptations and uncertainty/ambiguity sets. Notice that the <code class="language-plaintext highlighter-rouge">dro</code> module is a more general modeling framework, since a classic robust optimization problem can be treated as a special case of distributionally robust optimization, where the ambiguity set, specifying only the support information, reduces to an uncertainty set. The <code class="language-plaintext highlighter-rouge">ro</code> module is less general but the toolkit enables users to formulate uncertainty sets and decision adaptations in a more concise and intuitive manner.</p>
 
-<p>A higher layer of RSOME module could address a more general class of problems compared with lower-layer ones. The top layer <code class="language-plaintext highlighter-rouge">dro</code> module for distributionally robust optimization, associated with the event-wise ambiguity sets proposed in <a href="#ref1">Chen et al.  (2020)</a>, is the most general framework among all. For example, classic robust optimization problems can be treated as special cases of a distributionally robust optimization problem where the ambiguity set, specifying only the support information, reduces to an uncertainty set; while deterministic problems are special cases of a robust optimization problem whose uncertainty set reduces to a known singleton. The <code class="language-plaintext highlighter-rouge">ro</code> module, although less general, provides tailored modeling tools specifically for robust optimization problems, thus it models uncertainty sets and formulates the worst-case objective function and robust constraints in a more concise and intuitive manner.</p>
-
-<p>Though each layer of RSOME modules are targeting different types of optimization problems, they follow consistent syntax in defining variables, objective functions, and constraints. In this section, we will use the <code class="language-plaintext highlighter-rouge">ro</code> module as a general modeling environment for deterministic problems, and cases of robust optimization problems will be discussed in <a href="ro_rsome">RSOME for robust optimization</a>. The <code class="language-plaintext highlighter-rouge">dro</code> module is specially designed for distributionally robust optimization problems, and it is different from <code class="language-plaintext highlighter-rouge">ro</code> in specifying recourse adaptations and uncertainty/ambiguity sets. It will be introduced separately in <a href="dro_rsome">RSOME for distributionall robust optimization</a>.</p>
+<p>In this section, we will use the <code class="language-plaintext highlighter-rouge">ro</code> module as a general modeling environment for deterministic problems. Guidelines of robust and distributionally robust optimization problems are presented in <a href="ro_rsome">RSOME for robust optimization</a> and <a href="dro_rsome">RSOME for distributionall robust optimization</a>, respectively.</p>
 
 <h2 id="introduction-to-the-rsomero-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> Environment <a name="section1.2"></a></h2>
 
@@ -186,6 +191,21 @@
   <li>
     <p><code class="language-plaintext highlighter-rouge">quad()</code> for quadratic terms <code class="language-plaintext highlighter-rouge">x @ Q @ x</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a vector, and <code class="language-plaintext highlighter-rouge">Q</code> is a positive semidefinite matrix.</p>
   </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">expcone()</code> for creating an exponential cone constraint <code class="language-plaintext highlighter-rouge">z * exp(x/z) &lt;= y</code>, where <code class="language-plaintext highlighter-rouge">x</code> and <code class="language-plaintext highlighter-rouge">z</code> are scalars.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">exp()</code> for natural exponential function <code class="language-plaintext highlighter-rouge">exp(x)</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a scalar.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">log()</code> for natural logarithm function <code class="language-plaintext highlighter-rouge">log(x)</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a scalar.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">entropy()</code> for entropy expression <code class="language-plaintext highlighter-rouge">x * log(x)</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a scalar.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">kldiv()</code> for creating a KL divergence constraint <code class="language-plaintext highlighter-rouge">sum(p * log(p/phat)) &lt;= r</code>, where <code class="language-plaintext highlighter-rouge">p</code> is a vector of probability variables, <code class="language-plaintext highlighter-rouge">phat</code> is a vector of empirical probabilities, and <code class="language-plaintext highlighter-rouge">r</code> is a scalar.</p>
+  </li>
 </ul>
 
 <p>Examples of specifying convex constraints are provided below.</p>
@@ -200,6 +220,11 @@
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>     <span class="c1"># a constraint with 1-norm terms
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>      <span class="c1"># a constraint with infinity norm
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># a constraint with a quadratic term
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">expcone</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.5</span><span class="p">))</span>     <span class="c1"># an exponential cone constraint
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mf">3.5</span><span class="p">)</span>          <span class="c1"># a constriant with an exponential term
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mf">1.2</span><span class="p">)</span>          <span class="c1"># a constraint with a logarithm term
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>     <span class="c1"># a constraint with an entropy expression
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">kldiv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">0.01</span><span class="p">))</span>  <span class="c1"># a KL divergence constraint
 </span></code></pre></div></div>
 
 <p>Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as <code class="language-plaintext highlighter-rouge">abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
@@ -209,12 +234,21 @@
 <p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code class="language-plaintext highlighter-rouge">do_math()</code> method of the model object.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.do_math(primal=True)
-    Returns a SOCProg type object representing the standard form
-    as a second-order cone program. The parameter primal controls
-    the returned formula is for the primal or the dual problem.
+    Return the linear, second-order cone, or exponential cone programming problem as the standard formula or deterministic counterpart of the model.
+
+    Parameters
+    ----------
+    primal : bool, default True
+        Specify whether return the primal formula of the model.
+        If primal=False, the method returns the daul formula.
+        
+    Returns
+    -------
+    prog : GCProg
+        An exponential cone programming problem.
 </code></pre></div></div>
 
-<p>You may use the <code class="language-plaintext highlighter-rouge">do_math()</code> method together with the <code class="language-plaintext highlighter-rouge">show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear and second-order cone constraints, bounds and variable types.</p>
+<p>You may use the <code class="language-plaintext highlighter-rouge">do_math()</code> method together with the <code class="language-plaintext highlighter-rouge">show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear, second-order cone, and exponential cone constraints, bounds and variable types.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
@@ -238,31 +272,35 @@
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">primal</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Second order cone program object:
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Conic program object:
 =============================================
-Number of variables:          8
-Continuous/binaries/integers: 8/0/0
+Number of variables:           8
+Continuous/binaries/integers:  8/0/0
 ---------------------------------------------
-Number of linear constraints: 5
-Inequalities/equalities:      1/4
-Number of coefficients:       11
+Number of linear constraints:  5
+Inequalities/equalities:       2/3
+Number of coefficients:        11
 ---------------------------------------------
-Number of SOC constraints:    1
+Number of SOC constraints:     1
+---------------------------------------------
+Number of ExpCone constraints: 0
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dual</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Second order cone program object:
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Conic program object:
 =============================================
-Number of variables:          5
-Continuous/binaries/integers: 5/0/0
+Number of variables:           5
+Continuous/binaries/integers:  5/0/0
 ---------------------------------------------
-Number of linear constraints: 4
-Inequalities/equalities:      0/4
-Number of coefficients:       7
+Number of linear constraints:  4
+Inequalities/equalities:       0/4
+Number of coefficients:        7
 ---------------------------------------------
-Number of SOC constraints:    1
+Number of SOC constraints:     1
+---------------------------------------------
+Number of ExpCone constraints: 0
 </code></pre></div></div>
 
 <p>More details on the standard forms can be retrieved by the method <code class="language-plaintext highlighter-rouge">show()</code>, and the problem information is summarized in a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> data table.</p>
@@ -561,8 +599,8 @@ Solve the model with the selected solver interface.
 
     Parameters
     ----------
-        solver : {None, lpg_solver, clp_solver, ort_solver, cvx_solver,
-                  grb_solver, msk_solver, cpx_solver}
+        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                  cpx_solver, grb_solver, msk_solver}
             Solver interface used for model solution. Use default solver
             lpg_solver if solver=None.
         display : bool
@@ -572,7 +610,7 @@ Solve the model with the selected solver interface.
             So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 </code></pre></div></div>
 
-<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver <code class="language-plaintext highlighter-rouge">linprog</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package as the default solver. Warnings will be raised if integer variables or second-order cone constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.</p>
+<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver <code class="language-plaintext highlighter-rouge">linprog</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package as the default solver. Warnings will be raised if integer variables or nonlinear constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.</p>
 
 <table>
   <thead>
@@ -583,6 +621,7 @@ Solve the model with the selected solver interface.
       <th style="text-align: left">RSOME interface</th>
       <th style="text-align: left">Integer variables</th>
       <th style="text-align: left">Second-order cone constraints</th>
+      <th style="text-align: left">Exponential cone constraints</th>
     </tr>
   </thead>
   <tbody>
@@ -593,6 +632,7 @@ Solve the model with the selected solver interface.
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
@@ -600,6 +640,7 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">&gt;= 0.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
       <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
@@ -609,12 +650,14 @@ Solve the model with the selected solver interface.
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
-      <td style="text-align: left"><a href="https://www.cvxpy.org/install/index.html">CVXPY</a></td>
+      <td style="text-align: left"><a href="https://github.com/embotech/ecos-python">ECOS</a></td>
       <td style="text-align: left">Open-source</td>
-      <td style="text-align: left">&gt;= 1.1.18</td>
-      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cvx_solver</code></td>
+      <td style="text-align: left">&gt;= 2.0.10</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">eco_solver</code></td>
+      <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
     </tr>
@@ -625,12 +668,14 @@ Solve the model with the selected solver interface.
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
       <td style="text-align: left">Commercial</td>
       <td style="text-align: left">&gt;= 9.1.11</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
+      <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
     </tr>
@@ -641,13 +686,14 @@ Solve the model with the selected solver interface.
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
     </tr>
   </tbody>
 </table>
 
-<p>The model above involves second-order cone constraints, so we could use CVXPY, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.</p>
+<p>The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cvx_solver</span> <span class="k">as</span> <span class="n">cvx</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">eco_solver</span> <span class="k">as</span> <span class="n">eco</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cpx_solver</span> <span class="k">as</span> <span class="n">cpx</span>
@@ -655,11 +701,11 @@ Solve the model with the selected solver interface.
 
 <p>The interfaces can be then used to attain the solution.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cvx</span><span class="p">)</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">eco</span><span class="p">)</span>
 </code></pre></div></div>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by CVXPY...
-Solution status: optimal
-Running time: 0.0376s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by ECOS...
+Solution status: Optimal solution found
+Running time: 0.0006s
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
@@ -682,7 +728,7 @@ Running time: 0.0210s
 </code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by CPLEX...
-Solution status: optimal
+Solution status: 1
 Running time: 0.0175s
 </code></pre></div></div>
 

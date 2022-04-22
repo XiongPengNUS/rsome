@@ -52,6 +52,8 @@ class Model(LPModel):
                 super().st(constr)
             elif constr.xtype in 'ESQ':
                 self.cvx_constr.append(constr)
+            else:
+                raise ValueError('Unsupported convex constraints.')
         elif isinstance(constr, ConeConstr):
             if constr.model is not self:
                 raise ValueError('Constraints are not defined for this model.')
@@ -72,6 +74,17 @@ class Model(LPModel):
         primal : bool, default True
             Specify whether return the primal formula of the model.
             If primal=False, the method returns the daul formula.
+
+        refresh : bool
+            Leave the argument unspecified.
+
+        obj : bool
+            Leave the argument unspecified.
+
+        Returns
+        -------
+        prog : SOCProg
+            A second-order cone programming problem.
         """
 
         if primal:
@@ -95,7 +108,8 @@ class Model(LPModel):
                 if constr.xtype == 'E':
                     aux_left = self.dvar(constr.affine_in.shape, aux=True)
                     aux_right = self.dvar(1, aux=True)
-                    self.aux_constr.append(constr.affine_in - aux_left == 0)
+                    affine_in = constr.affine_in * constr.multiplier
+                    self.aux_constr.append(affine_in - aux_left == 0)
                     self.aux_constr.append(constr.affine_out + aux_right <= 0)
                     bounds = (aux_right >= 0)
                     if isinstance(bounds, Bounds):
@@ -109,9 +123,10 @@ class Model(LPModel):
                     aux1 = self.dvar(constr.affine_out.shape, aux=True)
                     aux2 = self.dvar(constr.affine_in.shape, aux=True)
                     aux3 = self.dvar(constr.affine_out.shape, aux=True)
+                    affine_in = constr.affine_in * constr.multiplier
                     self.aux_constr.append(aux1 - 0.5*(1+constr.affine_out)
                                            == 0)
-                    self.aux_constr.append(aux2 - constr.affine_in == 0)
+                    self.aux_constr.append(aux2 - affine_in == 0)
                     self.aux_constr.append(aux3 - 0.5 * (1-constr.affine_out)
                                            == 0)
                     bounds = (aux3 >= 0)
@@ -129,9 +144,10 @@ class Model(LPModel):
                     # aux3 = self.dvar(constr.affine_out.shape, aux=True)
                     aux3 = self.dvar(1, aux=True)
                     aux4 = self.dvar(1, aux=True)
+                    affine_in = constr.affine_in * constr.multiplier
                     self.aux_constr.append(aux1 - 0.5 * (1-aux4)
                                            == 0)
-                    self.aux_constr.append(aux2 - constr.affine_in == 0)
+                    self.aux_constr.append(aux2 - affine_in == 0)
                     self.aux_constr.append(aux3 - 0.5 * (1+aux4)
                                            == 0)
                     self.aux_constr.append(aux4 + constr.affine_out <= 0)
@@ -193,6 +209,7 @@ class Model(LPModel):
 
                 formula = SOCProg(linear, const, sense,
                                   vtype, ub, lb, qmat, obj)
+
             else:
                 linear = dual_lp.linear
                 num_constr = dual_lp.linear.shape[1]
@@ -247,7 +264,7 @@ class SOCProg(LinProg):
         string = 'Second order cone program object:\n'
         string += super().__repr__()
         string += '---------------------------------------------\n'
-        string += 'Number of SOC constraints:    {0}\n'.format(len(qmat))
+        string += 'Number of SOC constraints:     {0}\n'.format(len(qmat))
 
         return string
 

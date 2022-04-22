@@ -13,6 +13,12 @@ from .socp import SOCProg
 
 def solve(formula, display=True, params={}):
 
+    try:
+        if formula.xmat:
+            warnings.warn('The SOCP solver ignores exponential cone constraints. ')
+    except AttributeError:
+        pass
+
     cpx = cplex.Cplex()
 
     # obj = formula.obj.flatten()

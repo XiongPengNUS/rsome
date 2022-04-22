@@ -1,6 +1,7 @@
 import rsome as rso
 from rsome import dro
 from rsome import grb_solver as grb
+from rsome import msk_solver as msk
 from rsome import E
 import numpy as np
 import numpy.random as rd
@@ -390,6 +391,264 @@ def test_square_sum(array, const):
         rso.sumsqr(x) + y == 0
 
 
+@pytest.mark.parametrize('const1, const2', [
+    (rd.rand(2), rd.rand()),
+    (rd.rand(4), rd.rand()),
+    (rd.rand(6), rd.rand())
+])
+def test_expcone(const1, const2):
+
+    ns = len(const1)
+
+    m = dro.Model(ns)
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == const1[s])
+        x.adapt(s)
+        y.adapt(s)
+    pr = m.p
+    fset.probset(pr == 1/ns)
+
+    m.minsup(E(y), fset)
+    m.st(x == z)
+    m.st(y.expcone(2*x - 0.87, const2))
+    m.solve(msk)
+
+    target = const2 * np.exp((2*const1 - 0.87)/const2)
+
+    assert (abs(y.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+
+@pytest.mark.parametrize('array, const', [
+    (rd.rand(3), rd.rand(3)),
+    (rd.rand(5), rd.rand(5)),
+    (rd.rand(8), rd.rand(8))
+])
+def test_exp(array, const):
+
+    target = np.exp(array - const)
+    ns = target.shape[0]
+
+    m = dro.Model(ns)
+    a = m.dvar()
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    u = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = rso.exp(x - y)
+    m.minsup(E(a), fset)
+    m.st(a >= expr)
+    m.st(x == z, y == u)
+    m.solve(msk)
+
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    target = -np.exp(array + const)
+    ns = target.shape[0]
+
+    m = dro.Model(ns)
+    a = m.dvar()
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    u = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = -rso.exp(x + y)
+    m.maxinf(E(a), fset)
+    m.st(a <= expr)
+    m.st(x == z, y == u)
+    m.solve(msk)
+
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+
+@pytest.mark.parametrize('array, const', [
+    (rd.rand(3), rd.rand(3)),
+    (rd.rand(5), rd.rand(5)),
+    (rd.rand(8), rd.rand(8))
+])
+def test_log(array, const):
+
+    target = np.log(array + const)
+    ns = target.shape[0]
+
+    m = dro.Model(ns)
+    a = m.dvar()
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    u = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = - rso.log(x + y)
+    m.minsup(E(a), fset)
+    m.st(a >= expr)
+    m.st(x == z, y == u)
+    m.solve(msk)
+
+    assert (abs(a.get().values + target) < 5e-4).all()
+    assert abs(m.get() + target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    target = np.log(array - 0.5*const + 1.2)
+    ns = target.shape[0]
+
+    m = dro.Model(ns)
+    a = m.dvar()
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    u = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = -rso.log(x - 0.5*y + 1.2)
+    m.maxinf(E(a), fset)
+    m.st(a <= expr)
+    m.st(x == z, y == u)
+    m.solve(msk)
+
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+
+@pytest.mark.parametrize('array, const', [
+    (rd.rand(3), rd.rand(3)),
+    (rd.rand(5), rd.rand(5)),
+    (rd.rand(8), rd.rand(8))
+])
+def test_entropy(array, const):
+
+    target = (array + const) * np.log(array + const)
+    ns = target.shape[0]
+
+    m = dro.Model(ns)
+    a = m.dvar()
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    u = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = - rso.entropy(x + y)
+    m.minsup(E(a), fset)
+    m.st(a >= expr)
+    m.st(x == z, y == u)
+    m.solve(msk)
+
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    target = (array - 0.5*const + 1.2) * np.log(array - 0.5*const + 1.2)
+    ns = target.shape[0]
+
+    m = dro.Model(ns)
+    a = m.dvar()
+    x = m.dvar()
+    y = m.dvar()
+
+    z = m.rvar()
+    u = m.rvar()
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = rso.entropy(x - 0.5*y + 1.2)
+    m.maxinf(E(a), fset)
+    m.st(a <= expr)
+    m.st(x == z, y == u)
+    m.solve(msk)
+
+    assert (abs(a.get().values + target) < 5e-4).all()
+    assert abs(m.get() + target.mean()) < 5e-4
+    primal_obj = m.do_math().solve(msk).objval
+    dual_obj = m.do_math(primal=False).solve(msk).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+
 @pytest.mark.parametrize('array, const', [
     (rd.rand(5), rd.rand()),
     (rd.rand(3), rd.rand(2)),
@@ -475,6 +734,6 @@ def test_convex_err():
     with pytest.raises(ValueError):
         rso.quad(xx, qmat)
 
-    qmat = rd.rand(5, 5)
+    qmat = rd.rand(5, 5) + 0.01
     with pytest.raises(ValueError):
         rso.quad(x, qmat)

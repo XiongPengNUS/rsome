@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=a1f744d34b4861f316b6082194d4f91684ca0067">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2639ca9d477eee0219e642f7152ec7e578cb29bf">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -88,6 +88,7 @@
       <th style="text-align: left">RSOME interface</th>
       <th style="text-align: left">Integer variables</th>
       <th style="text-align: left">Second-order cone constraints</th>
+      <th style="text-align: left">Exponential cone constraints</th>
     </tr>
   </thead>
   <tbody>
@@ -98,6 +99,7 @@
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://github.com/coin-or/cylp">CyLP</a></td>
@@ -105,6 +107,7 @@
       <td style="text-align: left">&gt;= 0.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
       <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
@@ -114,12 +117,14 @@
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
-      <td style="text-align: left"><a href="https://www.cvxpy.org/install/index.html">CVXPY</a></td>
+      <td style="text-align: left"><a href="https://github.com/embotech/ecos-python">ECOS</a></td>
       <td style="text-align: left">Open-source</td>
-      <td style="text-align: left">&gt;= 1.1.18</td>
-      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cvx_solver</code></td>
+      <td style="text-align: left">&gt;= 2.0.10</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">eco_solver</code></td>
+      <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
     </tr>
@@ -130,12 +135,14 @@
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
       <td style="text-align: left">Commercial</td>
       <td style="text-align: left">&gt;= 9.1.11</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
+      <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
     </tr>
@@ -146,6 +153,7 @@
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
     </tr>
   </tbody>
 </table>
@@ -204,17 +212,21 @@ Objective: 22.400
 <span class="k">print</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Second order cone program object:
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Conic program object:
 =============================================
-Number of variables:          3
-Continuous/binaries/integers: 3/0/0
+Number of variables:           3
+Continuous/binaries/integers:  3/0/0
 ---------------------------------------------
-Number of linear constraints: 6
-Inequalities/equalities:      6/0
-Number of coefficients:       11
+Number of linear constraints:  6
+Inequalities/equalities:       6/0
+Number of coefficients:        11
 ---------------------------------------------
-Number of SOC constraints:    0
+Number of SOC constraints:     0
+---------------------------------------------
+Number of ExpCone constraints: 0
 </code></pre></div></div>
+
+<p>```</p>
 
 
       </section>

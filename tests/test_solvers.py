@@ -3,7 +3,7 @@ from rsome import lp
 from rsome import socp
 from rsome import ro
 from rsome import lpg_solver as lpg
-from rsome import clp_solver as clp
+# from rsome import clp_solver as clp
 from rsome import ort_solver as ort
 from rsome import cvx_solver as cvx
 from rsome import eco_solver as eco
@@ -41,11 +41,13 @@ def test_lp():
     assert abs(y.get() - 2) < 1e-6
     assert model.optimal()
 
+    """
     model.solve(clp)
     assert abs(model.get() - 22.4) < 1e-6
     assert abs(x.get() - 4.8) < 1e-6
     assert abs(y.get() - 2) < 1e-6
     assert model.optimal()
+    """
 
     model.solve(ort)
     assert abs(model.get() - 22.4) < 1e-6
@@ -75,7 +77,7 @@ def test_lp():
     gmodel = gp.read('lp_test.lp')
     gmodel.optimize()
     assert model.solution.objval == gmodel.objVal
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         model.solve(grb, params={'NotAParameter': 1})
 
     model.solve(msk, params={'optimizer_max_time': 100.0,
@@ -116,9 +118,11 @@ def test_mip():
     with pytest.warns(UserWarning):
         model.solve()
 
+    """
     model.solve(clp)
     assert (x_sol == x.get().round()).all()
     assert model.optimal()
+    """
 
     model.solve(ort)
     assert (x_sol == x.get().round()).all()
@@ -167,9 +171,11 @@ def test_socp():
         model.solve()
     assert not model.optimal()
 
+    """
     with pytest.warns(UserWarning):
         model.solve(clp)
     assert not model.optimal()
+    """
 
     with pytest.warns(UserWarning):
         model.solve(ort)
@@ -226,8 +232,10 @@ def test_mip_socp():
     with pytest.warns(UserWarning):
         model.solve()
 
+    """
     with pytest.warns(UserWarning):
         model.solve(clp)
+    """
 
     with pytest.warns(UserWarning):
         model.solve(ort)
@@ -273,8 +281,10 @@ def test_no_solution():
     with pytest.warns(UserWarning):
         model.solve()
 
+    """
     with pytest.warns(UserWarning):
         model.solve(clp)
+    """
 
     with pytest.warns(UserWarning):
         model.solve(ort)

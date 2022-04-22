@@ -281,7 +281,7 @@ for s in range(S):
     I.adapt(s)                      # I adapts to each scenario s
 
 model.minsup(E(c[0]*x1 + c[1:]@x + y.sum()), fset)
-model.st(I[0] == I0 + w - d[0])
+model.st(I[0] == I0 + x1 - d[0])
 for t in range(1, T):
     model.st(I[t] == I[t-1] + x[t-1] - d[t])
 model.st(y >= h*I, y >= -b*I)

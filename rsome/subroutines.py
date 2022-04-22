@@ -283,7 +283,7 @@ def sumsqr(affine):
 
 def quad(affine, qmat):
     """
-    Return the quadratic expression affine @ qmat affine.
+    Return the quadratic expression affine @ qmat @ affine.
 
     Parameters
     ----------
@@ -298,6 +298,105 @@ def quad(affine, qmat):
     """
 
     return affine.to_affine().quad(qmat)
+
+
+def exp(affine):
+    """
+    Return the natural exponential function exp(affine).
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be a scalar.
+
+    Returns
+    -------
+    a : Convex
+        The natural exponential function exp(affine)
+    """
+
+    return affine.exp()
+
+
+def log(affine):
+    """
+    Return the natural logarithm function log(affine).
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be a scalar.
+
+    Returns
+    -------
+    a : Convex
+        The natural logarithm function log(affine)
+    """
+
+    return affine.log()
+
+
+def entropy(affine):
+    """
+    Return the entropy expression affine*log(affine).
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be a scalar.
+
+    Returns
+    -------
+    a : Convex
+        The entropy expression affine*log(affine)
+    """
+
+    return affine.entropy()
+
+
+def expcone(y, x, z):
+    """
+    Return an exponential cone constraint z*exp(x/z) <= y.
+
+    Parameters
+    ----------
+    y : an array of variables or affine expression
+        The right-hand-side of the constraint
+    x : {Real, Vars, VarSub, Affine}
+        The x value in the constraint. It must be a scalar.
+    z : {Real, Vars, VarSub, Affine}
+        The z value in the constraint. It must be a scalar.
+
+    Returns
+    -------
+    constr : ExpConstr
+        The exponential cone constraint z*exp(x/z) <= y
+    """
+
+    return y.expcone(x, z)
+
+
+def kldiv(p, phat, r):
+    """
+    Return an KL divergence constraint sum(p*log(p/phat)) <= r.
+
+    Parameters
+    ----------
+    p : an array of variables or affine expression
+        The array of probabilities. It must be a vector.
+    phat : {Real, Vars, VarSub, Affine}
+        The array of empirical probabilities. It must a vector with
+        the same shape as p.
+    r : {Real, Vars, VarSub, Affine}
+        The ambiguity constant. It must be a scalar.
+
+    Returns
+    -------
+    constr : ExpConstr
+        The KL divergence constraint sum(p*log(p/phat)) <= r.
+    """
+
+    return p.kldiv(phat, r)
 
 
 def E(expr):
