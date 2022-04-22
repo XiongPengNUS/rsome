@@ -1,7 +1,7 @@
 import rsome as rso
 from rsome import ro
-# from rsome import grb_solver as grb
-from rsome import msk_solver as msk
+from rsome import grb_solver as grb
+from rsome import eco_solver as eco
 import numpy as np
 import numpy.random as rd
 import pytest
@@ -24,7 +24,7 @@ def test_norm_one(array, const):
     m.min(a)
     m.st(a >= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
     assert type(expr) == ro.Convex
@@ -51,7 +51,7 @@ def test_norm_one(array, const):
     m.max(a)
     m.st(a <= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
     assert type(expr) == ro.Convex
@@ -106,7 +106,7 @@ def test_norm_two(array, const):
     m.min(a)
     m.st(a >= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
     assert type(expr) == ro.Convex
@@ -127,7 +127,7 @@ def test_norm_two(array, const):
     m.max(a)
     m.st(a <= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
     assert type(expr) == ro.Convex
@@ -171,7 +171,7 @@ def test_norm_inf(array, const):
     m.min(a)
     m.st(a >= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
     assert type(expr) == ro.Convex
@@ -192,7 +192,7 @@ def test_norm_inf(array, const):
     m.max(a)
     m.st(a <= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
     assert type(expr) == ro.Convex
@@ -246,7 +246,7 @@ def test_squares(array, const):
     m.st([a >= d, d >= expr - target])
     # m.st(d >= expr - target)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get()) < 1e-4
     assert type(expr) == ro.Convex
@@ -270,7 +270,7 @@ def test_squares(array, const):
     # m.st(a <= d)
     m.st(a <= d, d <= expr - target)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get()) < 1e-4
     assert type(expr) == ro.Convex
@@ -315,7 +315,7 @@ def test_square_sum(array, const):
     m.min(a)
     m.st(a >= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
     assert type(expr) == ro.Convex
@@ -336,7 +336,7 @@ def test_square_sum(array, const):
     m.max(a)
     m.st(a <= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
     assert type(expr) == ro.Convex
@@ -377,7 +377,7 @@ def test_quad(array, const):
     m.min(a)
     m.st(a >= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
     assert type(expr) == ro.Convex
@@ -398,7 +398,7 @@ def test_quad(array, const):
     m.max(a)
     m.st(a <= expr)
     m.st(x == array)
-    m.solve(msk)
+    m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
     assert type(expr) == ro.Convex
@@ -435,7 +435,7 @@ def test_expcone(xvalue, zvalue):
     m.st(z == zvalue)
     m.st(rso.expcone(y, x, z))
 
-    m.solve(msk)
+    m.solve(eco)
     target = zvalue*np.exp(xvalue/zvalue)
 
     assert abs(m.get() - target.min()) < 1e-4
@@ -448,7 +448,7 @@ def test_expcone(xvalue, zvalue):
     m.st(z == zvalue)
     m.st(rso.expcone(y, 3*xvalue + 2, 2.5*z + 1.2))
 
-    m.solve(msk)
+    m.solve(eco)
     target = (2.5*zvalue+1.2) * np.exp((3*xvalue+2)/(2.5*zvalue+1.2))
 
     assert abs(m.get() - target.min()) < 1e-4
@@ -463,12 +463,12 @@ def test_expcone(xvalue, zvalue):
     m.st(z == zvalue)
     m.st(rso.expcone(y, 3*xvalue + 2, 2.5*z + 1.2))
 
-    m.solve(msk)
+    m.solve(eco)
     target = 3*(2.5*zvalue+1.2) * np.exp((3*xvalue+2)/(2.5*zvalue+1.2))
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     with pytest.raises(ValueError):
@@ -495,12 +495,12 @@ def test_exp(xvalue):
     m.st(x == xvalue)
     m.st(3*y + 2.3 >= rso.exp(2.1*x + 1.5))
 
-    m.solve(msk)
+    m.solve(eco)
     target = (np.exp(2.1*xvalue + 1.5) - 2.3) / 3
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     m = ro.Model()
@@ -511,12 +511,12 @@ def test_exp(xvalue):
     m.st(x == xvalue)
     m.st(y >= rso.exp(2.1*x + 1.5))
 
-    m.solve(msk)
+    m.solve(eco)
     target = 3 * np.exp(2.1*xvalue + 1.5)
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     with pytest.raises(ValueError):
@@ -539,12 +539,12 @@ def test_log(xvalue):
     m.max(rso.log(2.1*x + 1.5))
     m.st(x == xvalue)
 
-    m.solve(msk)
+    m.solve(eco)
     target = np.log(2.1*xvalue + 1.5)
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     m = ro.Model()
@@ -555,12 +555,12 @@ def test_log(xvalue):
     m.st(x == xvalue)
     m.st(y <= rso.log(2.1*x + 1.5))
 
-    m.solve(msk)
+    m.solve(eco)
     target = 3 * np.log(2.1*xvalue + 1.5)
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     with pytest.raises(ValueError):
@@ -583,12 +583,12 @@ def test_entropy(xvalue):
     m.max(3.5 * rso.entropy(2.1*x + 1.5))
     m.st(x == xvalue)
 
-    m.solve(msk)
+    m.solve(eco)
     target = - 3.5 * (2.1*xvalue + 1.5) * np.log(2.1*xvalue + 1.5)
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     m = ro.Model()
@@ -599,12 +599,12 @@ def test_entropy(xvalue):
     m.st(x == xvalue)
     m.st(y <= rso.entropy(2.1*x + 1.5))
 
-    m.solve(msk)
+    m.solve(eco)
     target = - 3 * (2.1*xvalue + 1.5) * np.log(2.1*xvalue + 1.5)
 
     assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     with pytest.raises(ValueError):
@@ -631,15 +631,15 @@ def test_kl_divergence(array, r):
     m.max(c @ p)
     m.st(p.kldiv(phat, r))
     m.st(p >= 0, p.sum() == 1)
-    m.solve(msk)
+    m.solve(eco)
 
     ps = p.get()
 
     div = (ps * np.log(ps/phat)).sum()
 
     assert abs(r - div) <= 1e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 

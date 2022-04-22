@@ -33,12 +33,12 @@ def test_model():
 
     primal = model.do_math()
     string = '=============================================\n'
-    string += 'Number of variables:          5\n'
-    string += 'Continuous/binaries/integers: 4/0/1\n'
+    string += 'Number of variables:           5\n'
+    string += 'Continuous/binaries/integers:  4/0/1\n'
     string += '---------------------------------------------\n'
-    string += 'Number of linear constraints: 6\n'
-    string += 'Inequalities/equalities:      6/0\n'
-    string += 'Number of coefficients:       11\n'
+    string += 'Number of linear constraints:  6\n'
+    string += 'Inequalities/equalities:       6/0\n'
+    string += 'Number of coefficients:        11\n'
     assert primal.__repr__() == string
 
     df = primal.show()

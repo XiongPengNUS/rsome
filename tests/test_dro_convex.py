@@ -1,7 +1,7 @@
 import rsome as rso
 from rsome import dro
 from rsome import grb_solver as grb
-from rsome import msk_solver as msk
+from rsome import eco_solver as eco
 from rsome import E
 import numpy as np
 import numpy.random as rd
@@ -416,21 +416,21 @@ def test_expcone(const1, const2):
     m.minsup(E(y), fset)
     m.st(x == z)
     m.st(y.expcone(2*x - 0.87, const2))
-    m.solve(msk)
+    m.solve(eco)
 
     target = const2 * np.exp((2*const1 - 0.87)/const2)
 
     assert (abs(y.get().values - target) < 5e-4).all()
     assert abs(m.get() - target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 
 @pytest.mark.parametrize('array, const', [
     (rd.rand(3), rd.rand(3)),
-    (rd.rand(5), rd.rand(5)),
-    (rd.rand(8), rd.rand(8))
+    (rd.rand(4), rd.rand(4)),
+    (rd.rand(6), rd.rand(6))
 ])
 def test_exp(array, const):
 
@@ -459,12 +459,12 @@ def test_exp(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z, y == u)
-    m.solve(msk)
+    m.solve(eco)
 
     assert (abs(a.get().values - target) < 5e-4).all()
     assert abs(m.get() - target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     target = -np.exp(array + const)
@@ -492,19 +492,19 @@ def test_exp(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
-    m.solve(msk)
+    m.solve(eco)
 
     assert (abs(a.get().values - target) < 5e-4).all()
     assert abs(m.get() - target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 
 @pytest.mark.parametrize('array, const', [
     (rd.rand(3), rd.rand(3)),
-    (rd.rand(5), rd.rand(5)),
-    (rd.rand(8), rd.rand(8))
+    (rd.rand(4), rd.rand(4)),
+    (rd.rand(6), rd.rand(6))
 ])
 def test_log(array, const):
 
@@ -533,12 +533,12 @@ def test_log(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z, y == u)
-    m.solve(msk)
+    m.solve(eco)
 
     assert (abs(a.get().values + target) < 5e-4).all()
     assert abs(m.get() + target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     target = np.log(array - 0.5*const + 1.2)
@@ -566,19 +566,19 @@ def test_log(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
-    m.solve(msk)
+    m.solve(eco)
 
     assert (abs(a.get().values - target) < 5e-4).all()
     assert abs(m.get() - target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 
 @pytest.mark.parametrize('array, const', [
     (rd.rand(3), rd.rand(3)),
-    (rd.rand(5), rd.rand(5)),
-    (rd.rand(8), rd.rand(8))
+    (rd.rand(4), rd.rand(4)),
+    (rd.rand(6), rd.rand(6))
 ])
 def test_entropy(array, const):
 
@@ -607,12 +607,12 @@ def test_entropy(array, const):
     m.minsup(E(a), fset)
     m.st(a >= expr)
     m.st(x == z, y == u)
-    m.solve(msk)
+    m.solve(eco)
 
     assert (abs(a.get().values - target) < 5e-4).all()
     assert abs(m.get() - target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     target = (array - 0.5*const + 1.2) * np.log(array - 0.5*const + 1.2)
@@ -640,12 +640,12 @@ def test_entropy(array, const):
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
-    m.solve(msk)
+    m.solve(eco)
 
     assert (abs(a.get().values + target) < 5e-4).all()
     assert abs(m.get() + target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(msk).objval
-    dual_obj = m.do_math(primal=False).solve(msk).objval
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 
