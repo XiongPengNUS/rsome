@@ -90,6 +90,7 @@ formula = model.do_math()
 print(formula)
 ```
 
+```
     Conic program object:
     =============================================
     Number of variables:           3
