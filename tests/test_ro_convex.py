@@ -461,10 +461,10 @@ def test_expcone(xvalue, zvalue):
     m.min(y.sum())
     m.st(x == xvalue)
     m.st(z == zvalue)
-    m.st(rso.expcone(y, 3*xvalue + 2, 2.5*z + 1.2))
+    m.st(rso.expcone(y, 1.2*xvalue + 2, 1.5*z + 1.2))
 
     m.solve(eco)
-    target = 3*(2.5*zvalue+1.2) * np.exp((3*xvalue+2)/(2.5*zvalue+1.2))
+    target = 3*(1.5*zvalue+1.2) * np.exp((1.2*xvalue+2)/(1.5*zvalue+1.2))
 
     assert abs(m.get() - target.min()) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
