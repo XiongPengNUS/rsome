@@ -641,6 +641,20 @@ class Vars:
         """
 
         return self.to_affine().exp()
+    
+    def pexp(self, scale):
+        """
+        Return the perspective natural exponential function 
+        scale * exp(var/scale)
+
+        Refer to `rsome.pexp` for full documentation.
+
+        See Also
+        --------
+        rso.pexp : equivalent function
+        """
+
+        return self.to_affine().pexp(scale)
 
     def log(self):
         """
@@ -654,10 +668,24 @@ class Vars:
         """
 
         return self.to_affine().log()
+    
+    def plog(self, scale):
+        """
+        Return the perspective of natural logarithm function 
+        scale * log(var/scale)
+
+        Refer to `rsome.plog` for full documentation.
+
+        See Also
+        --------
+        rso.plog : equivalent function
+        """
+
+        return self.to_affine().plog(scale)
 
     def entropy(self):
         """
-        Return the natural exponential function -var*log(var)
+        Return the natural exponential function -sum(var*log(var))
 
         Refer to `rsome.entropy` for full documentation.
 
@@ -935,18 +963,11 @@ class Affine:
     def __getitem__(self, item):
 
         if self.sparray is None:
-            # self.sparray = sparse_array(self.shape)
             self.sparray = self.sv_array()
 
         indices = self.sparray[item]
-        # if not isinstance(indices, np.ndarray):
-        #     indices = np.array([indices]).reshape((1, ))
-
-        # linear = array_to_sparse(indices) @ self.linear
         linear = sv_to_csr(indices) @ self.linear
         const = self.const[item]
-        # if not isinstance(const, np.ndarray):
-        #     const = np.array([const])
 
         return Affine(self.model, linear, const)
 
@@ -1160,7 +1181,7 @@ class Affine:
 
     def exp(self):
         """
-        Return the natural exponential function exp(var)
+        Return the natural exponential function exp(affine)
 
         Refer to `rsome.exp` for full documentation.
 
@@ -1169,14 +1190,25 @@ class Affine:
         rso.exp : equivalent function
         """
 
-        if self.size > 1:
-            raise ValueError('The expression must be a scalar')
+        return Convex(self, np.zeros(self.shape), 'X', 1)
+    
+    def pexp(self, scale):
+        """
+        Return the perspective natural exponential function 
+        scale * exp(affine/scale)
 
-        return Convex(self, np.float64(0), 'X', 1)
+        Refer to `rsome.pexp` for full documentation.
+
+        See Also
+        --------
+        rso.pexp : equivalent function
+        """
+
+        return PerspConvex(self, scale, np.zeros(self.shape), 'X', 1)
 
     def log(self):
         """
-        Return the natural logarithm function log(var)
+        Return the natural logarithm function log(affine)
 
         Refer to `rsome.log` for full documentation.
 
@@ -1185,14 +1217,25 @@ class Affine:
         rso.log : equivalent function
         """
 
-        if self.size > 1:
-            raise ValueError('The expression must be a scalar')
+        return Convex(self, np.zeros(self.shape), 'L', -1)
+    
+    def plog(self, scale):
+        """
+        Return the perspective of natural logarithm function 
+        scale * log(affine/scale)
 
-        return Convex(self, np.float64(0), 'L', -1)
+        Refer to `rsome.plog` for full documentation.
+
+        See Also
+        --------
+        rso.plog : equivalent function
+        """
+
+        return PerspConvex(self, scale, np.zeros(self.shape), 'L', -1)
 
     def entropy(self):
         """
-        Return the natural exponential function -var*log(var)
+        Return the natural exponential function -sum(affine*log(affine))
 
         Refer to `rsome.entropy` for full documentation.
 
@@ -1201,8 +1244,9 @@ class Affine:
         rso.entropy : equivalent function
         """
 
-        if self.size > 1:
-            raise ValueError('The expression must be a scalar')
+        if self.shape != ():
+            if self.size != max(self.shape):
+                raise ValueError('The expression must be a vector.')
 
         return Convex(self, np.float64(0), 'P', -1)
 
@@ -1480,12 +1524,14 @@ class Convex:
 
     __array_priority__ = 101
 
-    def __init__(self, affine_in, affine_out, xtype, sign, multiplier=1):
+    def __init__(self, affine_in, affine_out, xtype, sign,
+                 multiplier=1, sum_axis=False):
 
         self.model = affine_in.model
         self.affine_in = affine_in
         self.affine_out = affine_out
         self.multiplier = multiplier
+        self.sum_axis = sum_axis
         self.size = affine_out.size
         self.xtype = xtype
         self.sign = sign
@@ -1589,6 +1635,84 @@ class Convex:
     def __eq__(self, other):
 
         raise TypeError('Convex expressions are not applied to equality constraints')
+    
+    def sum(self, axis=None):
+
+        if self.xtype not in 'XL':
+            raise ValueError('The convex function does not support the sum() method.')
+
+        return Convex(self.affine_in, self.affine_out.sum(axis=axis),
+                      self.xtype, self.sign, self.multiplier, axis)
+
+
+class PerspConvex(Convex):
+
+    def __init__(self, affine_in, affine_scale, affine_out, xtype, sign, multiplier=1):
+
+        super().__init__(affine_in, affine_out, xtype, sign, multiplier)
+        self.affine_scale = affine_scale
+    
+    def __repr__(self):
+
+        xtypes = {'X': 'natural exponential',
+                  'L': 'natural logarithm'}
+
+        if self.affine_out.shape == ():
+            shapes = 'an' if self.xtype in 'AEISP' else 'a'
+        else:
+            shapes = 'x'.join([str(dim) for dim in self.affine_out.shape])
+
+        suffix = 's' if self.size > 1 else ''
+        # string = shapes + ' ' + 'perspective' + suffix  xtypes[self.xtype] + suffix
+        string = f"{shapes} perspective expression{suffix} of the {xtypes[self.xtype]}"
+        return string
+    
+    def __neg__(self):
+
+        return PerspConvex(self.affine_in, self.affine_scale, -self.affine_out,
+                           self.xtype, -self.sign, self.multiplier)
+
+    def __add__(self, other):
+
+        convex = super().__add__(other)
+        
+        return PerspConvex(convex.affine_in, self.affine_scale, convex.affine_out,
+                           convex.xtype, convex.sign, convex.multiplier)
+    
+    def __radd__(self, other):
+
+        return self.__add__(other)
+    
+    def __mul__(self, other):
+
+        convex = super().__mul__(other)
+        
+        return PerspConvex(convex.affine_in, self.affine_scale, convex.affine_out,
+                           convex.xtype, convex.sign, convex.multiplier)
+    
+    def __rmul__(self, other):
+
+        return self.__mul__(other)
+    
+    def __le__(self, other):
+
+        left = self - other
+        if left.sign == -1:
+            raise ValueError('Nonconvex constraints.')
+
+        return PCvxConstr(left.model, 
+                          left.affine_in, left.affine_scale, left.affine_out,
+                          left.multiplier, left.xtype)
+    
+    def __ge__(self, other):
+
+        right = other - self
+        if right.sign == -1:
+            raise ValueError('Nonconvex constraints.')
+
+        return PCvxConstr(right.model, 
+                          right.affine_in, right.affine_scale, right.affine_out,
+                          right.multiplier, right.xtype)
 
 
 class RoAffine:
@@ -1835,6 +1959,15 @@ class CvxConstr:
             return '1 convex constraint'
         else:
             return '{} convex constraints'.format(size)
+
+
+class PCvxConstr(CvxConstr):
+
+    def __init__(self, model, affine_in, affine_scale, affine_out, 
+                 multiplier, xtype):
+        
+        super().__init__(model, affine_in, affine_out, multiplier, xtype)
+        self.affine_scale = affine_scale
 
 
 class Bounds:
@@ -2491,8 +2624,9 @@ class DecAffine(Affine):
                          ctype=self.ctype, fixed=self.fixed)
 
     def __add__(self, other):
-
+        
         expr = super().__add__(other)
+        
         if isinstance(other, (DecAffine, DecVar, DecVarSub)):
             other = other.to_affine()
             self_is_fixed = self.fixed and len(self.event_adapt) == 1
@@ -2637,7 +2771,7 @@ class DecAffine(Affine):
 
     def exp(self):
         """
-        Return the natural exponential function exp(var)
+        Return the natural exponential function exp(affine)
 
         Refer to `rsome.exp` for full documentation.
 
@@ -2646,14 +2780,33 @@ class DecAffine(Affine):
         rso.exp : equivalent function
         """
 
-        if self.size > 1:
-            raise ValueError('The expression must be a scalar')
+        # if self.size > 1:
+        #     raise ValueError('The expression must be a scalar')
 
-        return DecConvex(Convex(self, np.float64(0), 'X', 1), self.event_adapt)
+        return DecConvex(Convex(self, np.zeros(self.shape), 'X', 1), 
+                         self.event_adapt)
+    
+    def pexp(self, scale):
+        """
+        Return the perspective of natural exponential function 
+        scale * exp(affine/scale)
+
+        Refer to `rsome.pexp` for full documentation.
+
+        See Also
+        --------
+        rso.pexp : equivalent function
+        """
+
+        # if self.size > 1:
+        #     raise ValueError('The expression must be a scalar')
+
+        return DecPerspConvex(PerspConvex(self, scale, np.zeros(self.shape), 'X', 1), 
+                              self.event_adapt)
 
     def log(self):
         """
-        Return the natural logarithm function log(var)
+        Return the natural logarithm function log(affine)
 
         Refer to `rsome.log` for full documentation.
 
@@ -2662,14 +2815,33 @@ class DecAffine(Affine):
         rso.log : equivalent function
         """
 
-        if self.size > 1:
-            raise ValueError('The expression must be a scalar')
+        # if self.size > 1:
+        #     raise ValueError('The expression must be a scalar')
 
-        return DecConvex(Convex(self, np.float64(0), 'L', -1), self.event_adapt)
+        return DecConvex(Convex(self, np.zeros(self.shape), 'L', -1), 
+                         self.event_adapt)
+    
+    def plog(self, scale):
+        """
+        Return the perspective of natural logarithm function
+        scale * log(affine/scale)
+
+        Refer to `rsome.plog` for full documentation.
+
+        See Also
+        --------
+        rso.plog : equivalent function
+        """
+
+        # if self.size > 1:
+        #     raise ValueError('The expression must be a scalar')
+
+        return DecPerspConvex(PerspConvex(self, scale, np.zeros(self.shape), 'L', -1),
+                              self.event_adapt)
 
     def entropy(self):
         """
-        Return the natural exponential function -var*log(var)
+        Return the natural exponential function -sum(affine*log(affine))
 
         Refer to `rsome.entropy` for full documentation.
 
@@ -2678,8 +2850,11 @@ class DecAffine(Affine):
         rso.entropy : equivalent function
         """
 
-        if self.size > 1:
-            raise ValueError('The expression must be a scalar')
+        # if self.size > 1:
+        #     raise ValueError('The expression must be a scalar')
+        if self.shape != ():
+            if self.size != max(self.shape):
+                raise ValueError('The expression must be a vector.')
 
         return DecConvex(Convex(self, np.float64(0), 'P', -1), self.event_adapt)
 
@@ -2694,7 +2869,16 @@ class DecAffine(Affine):
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 0, left.event_adapt, left.ctype)
         elif isinstance(left, DecConvex):
+            if left.sign == -1:
+                raise ValueError('Nonconvex constraints.')
             return DecCvxConstr(left, left.event_adapt)
+        elif isinstance(left, DecPerspConvex):
+            if left.sign == -1:
+                raise ValueError('Nonconvex constraints.')
+            constr = PCvxConstr(left.model, 
+                                left.affine_in, left.affine_scale, left.affine_out,
+                                left.multiplier, left.xtype)
+            return DecPCvxConstr(constr, left.event_adapt)
 
     def __ge__(self, other):
 
@@ -2707,7 +2891,16 @@ class DecAffine(Affine):
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 0, left.event_adapt, left.ctype)
         elif isinstance(left, DecConvex):
+            if left.sign == -1:
+                raise ValueError('Nonconvex constraints.')
             return DecCvxConstr(left, left.event_adapt)
+        elif isinstance(left, DecPerspConvex):
+            if left.sign == -1:
+                raise ValueError('Nonconvex constraints.')
+            constr = PCvxConstr(left.model, 
+                                left.affine_in, left.affine_scale, left.affine_out,
+                                left.multiplier, left.xtype)
+            return DecPCvxConstr(constr, left.event_adapt)
 
     def __eq__(self, other):
 
@@ -2773,6 +2966,55 @@ class DecConvex(Convex):
         constr = super().__ge__(other)
 
         return DecCvxConstr(constr, self.event_adapt)
+
+
+class DecPerspConvex(PerspConvex):
+
+    def __init__(self, convex, event_adapt):
+
+        super().__init__(convex.affine_in, convex.affine_scale, convex.affine_out,
+                         convex.xtype, convex.sign, convex.multiplier)
+        self.event_adapt = event_adapt
+    
+    def __neg__(self):
+
+        expr = super().__neg__()
+        return DecPerspConvex(expr, self.event_adapt)
+
+    def __add__(self, other):
+
+        expr = super().__add__(other)
+
+        if isinstance(other, (Real, np.ndarray)) or sp.issparse(other):
+            event_adapt = self.event_adapt
+        else:
+            event_adapt = comb_set(self.event_adapt, other.event_adapt)
+
+        return DecPerspConvex(expr, event_adapt)
+
+    def __mul__(self, other):
+
+        expr = super().__mul__(other)
+
+        return DecPerspConvex(expr, self.event_adapt)
+
+    def __rmul__(self, other):
+
+        expr = super().__rmul__(other)
+
+        return DecPerspConvex(expr, self.event_adapt)
+
+    def __le__(self, other):
+
+        constr = super().__le__(other)
+
+        return DecPCvxConstr(constr, self.event_adapt)
+
+    def __ge__(self, other):
+
+        constr = super().__ge__(other)
+
+        return DecPCvxConstr(constr, self.event_adapt)
 
 
 class DecRoAffine(RoAffine):
@@ -2935,6 +3177,14 @@ class DecCvxConstr(CvxConstr):
     def __init__(self, constr, event_adapt):
 
         super().__init__(constr.model, constr.affine_in,
+                         constr.affine_out, constr.multiplier, constr.xtype)
+        self.event_adapt = event_adapt
+
+class DecPCvxConstr(PCvxConstr):
+
+    def __init__(self, constr, event_adapt):
+
+        super().__init__(constr.model, constr.affine_in, constr.affine_scale,
                          constr.affine_out, constr.multiplier, constr.xtype)
         self.event_adapt = event_adapt
 

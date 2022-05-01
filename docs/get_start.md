@@ -130,11 +130,15 @@ The RSOME package also supports several convex functions for specifying convex c
 
 - `expcone()` for creating an exponential cone constraint `z * exp(x/z) <= y`, where `x` and `z` are scalars. 
 
-- `exp()` for natural exponential function `exp(x)`, where `x` is a scalar.
+- `exp()` for element-wise natural exponential function `exp(x)`.
 
-- `log()` for natural logarithm function `log(x)`, where `x` is a scalar.
+- `pexp()` for element-wise perspective of natural exponential `y * exp(x/y)`.
 
-- `entropy()` for entropy expression `x * log(x)`, where `x` is a scalar.
+- `log()` for element-wise natural logarithm function `log(x)`.
+
+- `plog()` for element-wise perspective of natural logarithm `y * log(x/y)`.
+
+- `entropy()` for entropy expression `-sum(x * log(x))`, where `x` is a vector.
 
 - `kldiv()` for creating a KL divergence constraint `sum(p * log(p/phat)) <= r`, where `p` is a vector of probability variables, `phat` is a vector of empirical probabilities, and `r` is a scalar.
 
@@ -153,9 +157,9 @@ model.st(rso.norm(x, 1) <= y[0, 0])     # a constraint with 1-norm terms
 model.st(rso.norm(x, inf) <= x[0])      # a constraint with infinity norm
 model.st(rso.quad(x, Q) + x[1] <= x[0]) # a constraint with a quadratic term
 model.st(rso.expcone(x, x[0], 1.5))     # an exponential cone constraint
-model.st(rso.exp(x[1]) <= 3.5)          # a constriant with an exponential term
-model.st(rso.log(x[0]) >= 1.2)          # a constraint with a logarithm term
-model.st(rso.entropy(x[0]) >= x[1])     # a constraint with an entropy expression
+model.st(rso.exp(x) <= 3.5)             # constraints with exponential terms
+model.st(rso.log(x) >= 1.2)             # constraints with logarithm terms
+model.st(rso.entropy(x) >= x[1])        # constraints with entropy expressions
 model.st(rso.kldiv(x, 1/len(x), 0.01))  # a KL divergence constraint
 ```
 
@@ -167,7 +171,9 @@ All RSOME models are transformed into their standard forms, which are then solve
 
 ```
 Model.do_math(primal=True)
-    Return the linear, second-order cone, or exponential cone programming problem as the standard formula or deterministic counterpart of the model.
+    Return the linear, second-order cone, or exponential cone 
+    programming problem as the standard formula or deterministic 
+    counterpart of the model.
 
     Parameters
     ----------
@@ -645,6 +651,7 @@ Once the solution completes, you may use the command `model.get()` to retrieve t
 ### [Mean-Variance Portfolio](example_mv_portfolio)
 ### [Integer Programming for Sudoku](example_sudoku)
 ### [Optimal DC Power Flow](example_opf)
+### [Box with the Maximum Volume](example_max_volume_box)
 
 ## Reference
 

@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=2639ca9d477eee0219e642f7152ec7e578cb29bf">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=4f5084660e7980d59d9eecc1553ce81d57f5b0f4">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -195,13 +195,19 @@
     <p><code class="language-plaintext highlighter-rouge">expcone()</code> for creating an exponential cone constraint <code class="language-plaintext highlighter-rouge">z * exp(x/z) &lt;= y</code>, where <code class="language-plaintext highlighter-rouge">x</code> and <code class="language-plaintext highlighter-rouge">z</code> are scalars.</p>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">exp()</code> for natural exponential function <code class="language-plaintext highlighter-rouge">exp(x)</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a scalar.</p>
+    <p><code class="language-plaintext highlighter-rouge">exp()</code> for element-wise natural exponential function <code class="language-plaintext highlighter-rouge">exp(x)</code>.</p>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">log()</code> for natural logarithm function <code class="language-plaintext highlighter-rouge">log(x)</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a scalar.</p>
+    <p><code class="language-plaintext highlighter-rouge">pexp()</code> for element-wise perspective of natural exponential <code class="language-plaintext highlighter-rouge">y * exp(x/y)</code>.</p>
   </li>
   <li>
-    <p><code class="language-plaintext highlighter-rouge">entropy()</code> for entropy expression <code class="language-plaintext highlighter-rouge">x * log(x)</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a scalar.</p>
+    <p><code class="language-plaintext highlighter-rouge">log()</code> for element-wise natural logarithm function <code class="language-plaintext highlighter-rouge">log(x)</code>.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">plog()</code> for element-wise perspective of natural logarithm <code class="language-plaintext highlighter-rouge">y * log(x/y)</code>.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">entropy()</code> for entropy expression <code class="language-plaintext highlighter-rouge">-sum(x * log(x))</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a vector.</p>
   </li>
   <li>
     <p><code class="language-plaintext highlighter-rouge">kldiv()</code> for creating a KL divergence constraint <code class="language-plaintext highlighter-rouge">sum(p * log(p/phat)) &lt;= r</code>, where <code class="language-plaintext highlighter-rouge">p</code> is a vector of probability variables, <code class="language-plaintext highlighter-rouge">phat</code> is a vector of empirical probabilities, and <code class="language-plaintext highlighter-rouge">r</code> is a scalar.</p>
@@ -221,9 +227,9 @@
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>      <span class="c1"># a constraint with infinity norm
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># a constraint with a quadratic term
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">expcone</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.5</span><span class="p">))</span>     <span class="c1"># an exponential cone constraint
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mf">3.5</span><span class="p">)</span>          <span class="c1"># a constriant with an exponential term
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mf">1.2</span><span class="p">)</span>          <span class="c1"># a constraint with a logarithm term
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>     <span class="c1"># a constraint with an entropy expression
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">3.5</span><span class="p">)</span>             <span class="c1"># constraints with exponential terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">1.2</span><span class="p">)</span>             <span class="c1"># constraints with logarithm terms
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>        <span class="c1"># constraints with entropy expressions
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">kldiv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">0.01</span><span class="p">))</span>  <span class="c1"># a KL divergence constraint
 </span></code></pre></div></div>
 
@@ -234,7 +240,9 @@
 <p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code class="language-plaintext highlighter-rouge">do_math()</code> method of the model object.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.do_math(primal=True)
-    Return the linear, second-order cone, or exponential cone programming problem as the standard formula or deterministic counterpart of the model.
+    Return the linear, second-order cone, or exponential cone 
+    programming problem as the standard formula or deterministic 
+    counterpart of the model.
 
     Parameters
     ----------
@@ -755,6 +763,7 @@ Running time: 0.0175s
 <h3 id="mean-variance-portfolio"><a href="example_mv_portfolio">Mean-Variance Portfolio</a></h3>
 <h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer Programming for Sudoku</a></h3>
 <h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC Power Flow</a></h3>
+<h3 id="box-with-the-maximum-volume"><a href="example_max_volume_box">Box with the Maximum Volume</a></h3>
 
 <h2 id="reference">Reference</h2>
 

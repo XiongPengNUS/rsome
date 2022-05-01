@@ -5,6 +5,8 @@ from .subroutines import quad
 from .subroutines import expcone
 from .subroutines import exp
 from .subroutines import log
+from .subroutines import pexp
+from .subroutines import plog
 from .subroutines import entropy
 from .subroutines import kldiv
 from .subroutines import E

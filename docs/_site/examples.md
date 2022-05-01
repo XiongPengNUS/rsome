@@ -9,6 +9,7 @@
   <li> <a href="example_mv_portfolio">Mean-Variance Portfolio</a> </li>
   <li> <a href="example_sudoku">Integer Programming for Sudoku</a> </li>
   <li> <a href="example_opf">Optimal DC Power Flow</a> </li>
+  <li> <a href="example_max_volume_box">Box with the Maximum Volume</a> </li>
 </ul>
 </toc></th>
 

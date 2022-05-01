@@ -180,6 +180,22 @@ def check_numeric(array):
     return array
 
 
+def rso_broadcast(*args):
+    
+    arrays = [np.array(arg) if isinstance(arg, Real) else arg
+              for arg in args]
+    
+    indices = [np.arange(array.size).reshape(array.shape) for 
+               array in arrays]
+    
+    arrays = [array.reshape(array.size) for array in arrays]
+    
+    bdc = np.broadcast(*indices)
+    outputs = [[item[i] for item, i in zip(arrays, index)] for index in bdc]
+    
+    return outputs
+
+
 def add_linear(left, right):
 
     if left.shape[1] > right.shape[1]:
@@ -302,12 +318,13 @@ def quad(affine, qmat):
 
 def exp(affine):
     """
-    Return the natural exponential function exp(affine).
+    Return the element-wise natural exponential function
+    exp(affine).
 
     Parameters
     ----------
     affine : an array of variables or affine expression
-        Input array. The array must be a scalar.
+        Input array.
 
     Returns
     -------
@@ -320,12 +337,13 @@ def exp(affine):
 
 def log(affine):
     """
-    Return the natural logarithm function log(affine).
+    Return the element-wise natural logarithm function
+    log(affine).
 
     Parameters
     ----------
     affine : an array of variables or affine expression
-        Input array. The array must be a scalar.
+        Input array.
 
     Returns
     -------
@@ -336,19 +354,59 @@ def log(affine):
     return affine.log()
 
 
-def entropy(affine):
+def pexp(affine, scale):
     """
-    Return the entropy expression affine*log(affine).
+    Return the element-wise perspective of natural exponential 
+    function scale * exp(affine/scale).
 
     Parameters
     ----------
     affine : an array of variables or affine expression
-        Input array. The array must be a scalar.
+        Input array.
+
+    Returns
+    -------
+    a : PerspConvex
+        The perspective of natural exponential function 
+        scale * exp(affine/scale)
+    """
+
+    return affine.pexp(scale)
+
+
+def plog(affine, scale):
+    """
+    Return the element-wise perspective of natural logarithm 
+    function scale * log(affine/scale).
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array.
+
+    Returns
+    -------
+    a : PerspConvex
+        The perspective of natural logarithm function
+        scale * log(affine/scale)
+    """
+
+    return affine.plog(scale)
+
+
+def entropy(affine):
+    """
+    Return the entropy expression sum(affine*log(affine)).
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. It must be a vector.
 
     Returns
     -------
     a : Convex
-        The entropy expression affine*log(affine)
+        The entropy expression sum(affine*log(affine))
     """
 
     return affine.entropy()

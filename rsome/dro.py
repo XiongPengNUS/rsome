@@ -1,9 +1,10 @@
 from .gcp import Model as GCPModel
 from .ro import Model as ROModel
-from .lp import DecBounds, DecExpConstr, LinConstr, ConeConstr, CvxConstr, ExpConstr
+from .lp import DecBounds, DecExpConstr, LinConstr
+from .lp import ConeConstr, PCvxConstr, CvxConstr, ExpConstr
 from .lp import Vars, Affine
 from .lp import RoAffine, RoConstr
-from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr
+from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr, DecPCvxConstr
 from .lp import DecRoConstr
 from .lp import Scen
 from .lp import Solution, def_sol
@@ -363,7 +364,8 @@ class Model:
                     self.st(item)
             else:
                 if isinstance(constr, (DecLinConstr, DecBounds,
-                                       DecCvxConstr, DecExpConstr)):
+                                       DecCvxConstr, DecPCvxConstr,
+                                       DecExpConstr)):
                     if constr.model is not self.vt_model:
                         raise ValueError('Models mismatch.')
                 elif isinstance(constr, DecRoConstr):
@@ -426,7 +428,7 @@ class Model:
 
         # Event-wise Constraints
         for constr in self.all_constr:
-            if isinstance(constr, (DecCvxConstr, DecExpConstr)):
+            if isinstance(constr, (DecCvxConstr, DecPCvxConstr, DecExpConstr)):
                 ro_constr_list = self.ro_to_roc(constr)
             elif constr.ctype == 'R':
                 ro_constr_list = self.ro_to_roc(constr)
@@ -537,6 +539,36 @@ class Model:
                                           -roaffine.const, constr.sense)
                 else:
                     raise TypeError('Unknown type.')
+            elif isinstance(constr, DecPCvxConstr):
+                linear_in = constr.affine_in.linear
+                const_in = constr.affine_in.const
+                aff_in = linear_in@drule + const_in.reshape(const_in.size)
+                aff_in = aff_in.reshape(constr.affine_in.shape)
+
+                if isinstance(constr.affine_scale, (Real, np.ndarray)):
+                    aff_scale = constr.affine_scale
+                else:
+                    scale = constr.affine_scale.to_affine()
+                    linear_sc = scale.linear
+                    const_sc = scale.const
+                    aff_scale = linear_sc@drule + const_sc.reshape(const_sc.size)
+                aff_scale = aff_scale.reshape(constr.affine_scale.shape)
+
+                if isinstance(aff_in, RoAffine):
+                    aff_in = aff_in.affine
+                if isinstance(constr.affine_out, (np.ndarray, Real)):
+                    linear_out = np.zeros((constr.affine_out.size, drule.shape[0]))
+                    const_out = constr.affine_out
+                else:
+                    linear_out = constr.affine_out.linear
+                    const_out = constr.affine_out.const
+                aff_out = linear_out@drule + const_out.reshape(const_out.size)
+                if isinstance(aff_out, RoAffine):
+                    aff_out = aff_out.affine
+                aff_out = aff_out.reshape(constr.affine_out.shape)
+
+                ew_constr = PCvxConstr(aff_in.model, aff_in, aff_scale, aff_out,
+                                       constr.multiplier, constr.xtype)
             elif isinstance(constr, DecCvxConstr):
                 linear_in = constr.affine_in.linear
                 const_in = constr.affine_in.const
@@ -600,7 +632,6 @@ class Model:
                             support = constr.ambset.sup_constr[s]
                         elif isinstance(ambset, Iterable):
                             support = ambset
-                        # support = constr.ambset.sup_constr[s]
                     ew_constr = ew_constr.forall(support)
                 else:
                     ew_constr = LinConstr(ew_constr.affine.model,

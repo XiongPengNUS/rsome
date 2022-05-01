@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=4f5084660e7980d59d9eecc1553ce81d57f5b0f4">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="box-with-the-maximum-volume">Box with the Maximum Volume</h3>
+
+<p>Here, we attempt to optimize the shape of a box, in terms of its width \(w\), height \(h\), and depth \(d\), so that its volume is maximized, subject to a number of constraints. The model can be written as</p>
+
+\[\begin{align}
+\max~&amp; whd \\
+\text{s.t.}~&amp;2(wh + dh) \leq A_{\text{wall}} \\
+&amp;wd \leq A_{\text{floor}} \\
+&amp;\alpha \leq h/w \leq \beta, \gamma \leq d/w \leq \delta, 
+\end{align}\]
+
+<p>where model parameters:</p>
+<ul>
+  <li>Limits on wall area \(A_{\text{wall}} = 200\),</li>
+  <li>Limits on floor area \(A_{\text{floor}} = 150\),</li>
+  <li>Limits on height-width raito: \(\alpha=0.8\), and \(\beta=1.5\),</li>
+  <li>Limits on depth-width raito: \(\gamma=0.8\), and \(\delta=1.5\).</li>
+</ul>
+
+<p>The geometric program above is reformulated as decision variables are replaced by their logarithm transformations: \(x = \log(w)\), \(y = \log(h)\), and \(z = \log(d)\), then we have</p>
+
+\[\begin{align}
+\max~&amp; x + y + z \\
+\text{s.t.}~&amp;2(\exp(x + y) + \exp(z + y)) \leq A_{\text{wall}} \\
+&amp;\exp(x + z) \leq A_{\text{floor}} \\
+&amp;\exp(x - y) \leq \alpha, \exp(y - x) \leq \beta \\
+&amp;\exp(x - z) \leq \gamma, \exp(z - x) \leq \delta. \\
+\end{align}\]
+
+<p>Such an exponential cone program can be implemented by the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">eco_solver</span> <span class="k">as</span> <span class="n">eco</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">A_wall</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">A_floor</span> <span class="o">=</span> <span class="mi">150</span>
+<span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.5</span>
+<span class="n">gamma</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.5</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">A_wall</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">A_floor</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">beta</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">delta</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">eco</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by ECOS...
+Solution status: Optimal solution found
+Running time: 0.0011s
+</code></pre></div></div>
+
+<p>The optimal solution is presented in the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">z</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div></div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(1.7329, 1.956, 2.1383)
+</code></pre></div></div>
+
+<p>Hence the optimal width, height, and depth are 5.6569, 7.0711, and 8.4853, respectively.</p>
+
+<p>Please note that RSOME does not support the summation of two or more exponential functions, such as the exponential function <code class="language-plaintext highlighter-rouge">rso.exp()</code>. This is why we introduced intermediate variables <code class="language-plaintext highlighter-rouge">a</code> and <code class="language-plaintext highlighter-rouge">b</code> to represent the epigraph of <code class="language-plaintext highlighter-rouge">rso.exp(x + y)</code> and <code class="language-plaintext highlighter-rouge">rso.exp(z + y)</code>, so that their summation can be formulated in constraints.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

@@ -1,11 +1,11 @@
-from .lp import CvxConstr, ExpConstr, KLConstr
+from .lp import CvxConstr, PCvxConstr, ExpConstr, KLConstr
 from .socp import Model as SOCModel
 from .socp import SOCProg
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 from collections.abc import Iterable
-from .subroutines import flat
+from .subroutines import flat, rso_broadcast
 
 
 class Model(SOCModel):
@@ -36,23 +36,14 @@ class Model(SOCModel):
         elif isinstance(constr, ExpConstr):
             self.exp_constr.append(constr)
         elif isinstance(constr, CvxConstr):
-            if constr.xtype == 'X':
-                affine_out = constr.affine_out * (1/constr.multiplier)
-                exp_cone_constr = ExpConstr(constr.model, constr.affine_in,
-                                            -affine_out, 1)
-                self.exp_constr.append(exp_cone_constr)
-            elif constr.xtype == 'L':
-                affine_out = constr.affine_out * (1/constr.multiplier)
-                exp_cone_constr = ExpConstr(constr.model,
-                                            affine_out,
-                                            constr.affine_in, 1)
-                self.exp_constr.append(exp_cone_constr)
-            elif constr.xtype == 'P':
-                affine_out = constr.affine_out * (1/constr.multiplier)
-                exp_cone_constr = ExpConstr(constr.model,
-                                            affine_out,
-                                            1, constr.affine_in)
-                self.exp_constr.append(exp_cone_constr)
+            if constr.xtype in 'XLP':
+                self.other_constr.append(constr)
+                # affine_out = constr.affine_out * (1/constr.multiplier)
+                # exprs_list = rso_broadcast(constr.affine_in, affine_out)
+                # for exprs in exprs_list:
+                #     exp_cone_constr = ExpConstr(constr.model,
+                #                                 exprs[1], 1, exprs[0])
+                #     self.exp_constr.append(exp_cone_constr)
             else:
                 super().st(constr)
         elif isinstance(constr, KLConstr):
@@ -99,10 +90,12 @@ class Model(SOCModel):
                 obj_constr = (self.vars[0] - self.sign * self.obj >= 0)
                 if isinstance(obj_constr, CvxConstr):
                     constr = obj_constr
+                    """
                     if constr.xtype == 'X':
                         affine_out = constr.affine_out * (1/constr.multiplier)
-                        exp_cone_constr = ExpConstr(constr.model, constr.affine_in,
-                                                    -affine_out, 1)
+                        exp_cone_constr = ExpConstr(constr.model, 
+                                                    constr.affine_in, 
+                                                    -constr.affine_out, 1)
                         more_exp.append(exp_cone_constr)
                     elif constr.xtype == 'L':
                         affine_out = constr.affine_out * (1/constr.multiplier)
@@ -110,12 +103,10 @@ class Model(SOCModel):
                                                     affine_out,
                                                     constr.affine_in, 1)
                         more_exp.append(exp_cone_constr)
-                    elif constr.xtype == 'P':
-                        affine_out = constr.affine_out * (1/constr.multiplier)
-                        exp_cone_constr = ExpConstr(constr.model,
-                                                    affine_out,
-                                                    1, constr.affine_in)
-                        more_exp.append(exp_cone_constr)
+                    """
+                    if constr.xtype in 'XLP':
+                        self.other_constr.append(constr)
+            
 
             for constr in self.other_constr:
                 if isinstance(constr, KLConstr):
@@ -132,6 +123,52 @@ class Model(SOCModel):
                                                1, entro_constr.affine_in)
 
                         more_exp.append(exp_constr)
+                elif isinstance(constr, PCvxConstr):
+                    if constr.xtype == 'X':
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        exprs_list = rso_broadcast(constr.affine_in,
+                                                   constr.affine_scale,
+                                                   affine_out)
+                        for exprs in exprs_list:
+                            exp_cone_constr = ExpConstr(constr.model,
+                                                        exprs[0], -exprs[2], exprs[1])
+                            self.exp_constr.append(exp_cone_constr)
+                    elif constr.xtype == 'L':
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        exprs_list = rso_broadcast(constr.affine_in,
+                                                   constr.affine_scale,
+                                                   affine_out)
+                        for exprs in exprs_list:
+                            exp_cone_constr = ExpConstr(constr.model, 
+                                                        exprs[2], exprs[0], exprs[1])
+                            self.exp_constr.append(exp_cone_constr)
+                elif isinstance(constr, CvxConstr):
+                    if constr.xtype == 'P':
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        aux_var = self.dvar(constr.affine_in.shape)
+                        self.aux_constr.append(aux_var.sum() >= affine_out)
+                        ns = constr.affine_in.size
+                        affine_in = constr.affine_in.reshape(ns)
+                        affine_aux = aux_var.to_affine().reshape(ns)
+                        for s in range(ns):
+                            exp_cone_constr = ExpConstr(constr.model, 
+                                                        affine_aux[s], 
+                                                        1, affine_in[s])
+                            more_exp.append(exp_cone_constr)
+                    elif constr.xtype == 'X':
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        exprs_list = rso_broadcast(constr.affine_in, affine_out)
+                        for exprs in exprs_list:
+                            exp_cone_constr = ExpConstr(constr.model, 
+                                                        exprs[0], -exprs[1], 1)
+                            self.exp_constr.append(exp_cone_constr)
+                    elif constr.xtype == 'L':
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        exprs_list = rso_broadcast(constr.affine_in, affine_out)
+                        for exprs in exprs_list:
+                            exp_cone_constr = ExpConstr(constr.model, 
+                                                        exprs[1], exprs[0], 1)
+                            self.exp_constr.append(exp_cone_constr)
 
             xmat = []
             for constr in self.exp_constr + more_exp:

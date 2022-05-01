@@ -418,7 +418,7 @@ def test_quad(array, const):
     with pytest.raises(TypeError):
         rso.quad(x, qmat) + const == 0
 
-
+rd.seed(1)
 @pytest.mark.parametrize('xvalue, zvalue', [
     (rd.rand(), rd.rand()),
     (rd.rand(), rd.rand())
@@ -481,137 +481,179 @@ def test_expcone(xvalue, zvalue):
         rso.expcone(y, z, x)
 
 
+rd.seed(1)
 @pytest.mark.parametrize('xvalue', [
-    rd.rand(),
-    rd.rand()
+    rd.rand(3, 5),
+    rd.rand(2, 3, 2)
 ])
 def test_exp(xvalue):
 
+    shape = xvalue.shape
     m = ro.Model()
-    x = m.dvar()
-    y = m.dvar()
+    x = m.dvar(shape)
+    y = m.dvar(shape)
 
-    m.min(y)
+    m.min(y.sum())
     m.st(x == xvalue)
     m.st(3*y + 2.3 >= rso.exp(2.1*x + 1.5))
 
     m.solve(eco)
-    target = (np.exp(2.1*xvalue + 1.5) - 2.3) / 3
+    target = ((np.exp(2.1*xvalue + 1.5) - 2.3) / 3).sum()
 
-    assert abs(m.get() - target.min()) < 1e-4
+    assert abs(m.get() - target) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     m = ro.Model()
-    x = m.dvar()
-    y = m.dvar(3)
+    x = m.dvar(shape)
+    y = m.dvar(shape)
 
     m.min(y.sum())
     m.st(x == xvalue)
     m.st(y >= rso.exp(2.1*x + 1.5))
 
     m.solve(eco)
-    target = 3 * np.exp(2.1*xvalue + 1.5)
+    target = np.exp(2.1*xvalue + 1.5).sum()
 
-    assert abs(m.get() - target.min()) < 1e-4
+    assert abs(m.get() - target) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
-
-    with pytest.raises(ValueError):
-        rso.exp(y) <= x
 
     with pytest.raises(ValueError):
         rso.exp(x) >= y
 
 
+rd.seed(2)
+@pytest.mark.parametrize('xvalue, scales', [
+    (rd.rand(3, 5), np.maximum(0.2, rd.rand(3, 5))),
+    (rd.rand(2, 3, 2), rd.rand(3, 2))
+])
+def test_pexp(xvalue, scales):
+
+    shape1 = xvalue.shape
+    targets = ((scales*np.exp(2.1*xvalue/scales) - 2.3) / 3)
+    shape = targets.shape
+
+    m = ro.Model()
+    x = m.dvar(shape1)
+    y = m.dvar(shape)
+
+    m.min(y.sum())
+    m.st(3*y + 2.3 >= rso.pexp(2.1*x, scales))
+    m.st(x == xvalue)
+    m.solve(eco)
+    
+    assert abs(m.get() - targets.sum()) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    with pytest.raises(ValueError):
+        rso.pexp(x, 2.5) >= y
+
+
+rd.seed(1)
 @pytest.mark.parametrize('xvalue', [
-    rd.rand(),
-    rd.rand()
+    rd.rand(3, 5),
+    rd.rand(2, 3, 2)
 ])
 def test_log(xvalue):
 
+    shape = xvalue.shape
     m = ro.Model()
-    x = m.dvar()
-    y = m.dvar()
+    x = m.dvar(shape)
+    y = m.dvar(shape)
 
-    m.max(rso.log(2.1*x + 1.5))
+    m.max(y.sum())
+    m.st(y <= rso.log(2.1*x + 1.5))
     m.st(x == xvalue)
 
     m.solve(eco)
-    target = np.log(2.1*xvalue + 1.5)
+    target = np.log(2.1*xvalue + 1.5).sum()
 
-    assert abs(m.get() - target.min()) < 1e-4
+    assert abs(m.get() - target) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
     m = ro.Model()
-    x = m.dvar()
-    y = m.dvar(3)
+    x = m.dvar(shape)
+    y = m.dvar(shape)
 
     m.max(y.sum())
     m.st(x == xvalue)
     m.st(y <= rso.log(2.1*x + 1.5))
 
     m.solve(eco)
-    target = 3 * np.log(2.1*xvalue + 1.5)
+    target = np.log(2.1*xvalue + 1.5).sum()
 
-    assert abs(m.get() - target.min()) < 1e-4
+    assert abs(m.get() - target) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
-
-    with pytest.raises(ValueError):
-        rso.log(y) >= x
 
     with pytest.raises(ValueError):
         rso.log(x) <= y
 
 
+rd.seed(2)
+@pytest.mark.parametrize('xvalue, scales', [
+    (rd.rand(3, 5), np.maximum(0.2, rd.rand(3, 5))),
+    (rd.rand(2, 3, 2), rd.rand(3, 2))
+])
+def test_plog(xvalue, scales):
+
+    shape1 = xvalue.shape
+    targets = ((scales*np.log(2.1*xvalue/scales) - 2.3) / 3)
+    shape = targets.shape
+
+    m = ro.Model()
+    x = m.dvar(shape1)
+    y = m.dvar(shape)
+
+    m.max(y.sum())
+    m.st(3*y + 2.3 <= rso.plog(2.1*x, scales))
+    m.st(x == xvalue)
+    m.solve(eco)
+    
+    assert abs(m.get() - targets.sum()) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    with pytest.raises(ValueError):
+        rso.plog(x, 1.5) <= y
+
+
 @pytest.mark.parametrize('xvalue', [
-    rd.rand(),
-    rd.rand()
+    rd.rand(3),
+    rd.rand(6)
 ])
 def test_entropy(xvalue):
 
+    shape = xvalue.shape
     m = ro.Model()
-    x = m.dvar()
-    y = m.dvar()
+    x = m.dvar(shape)
+    y = m.dvar(shape + (2,))
 
-    m.max(3.5 * rso.entropy(2.1*x + 1.5))
+    m.max(3.5 * rso.entropy(0.5*x + 0.6))
     m.st(x == xvalue)
 
     m.solve(eco)
-    target = - 3.5 * (2.1*xvalue + 1.5) * np.log(2.1*xvalue + 1.5)
+    target = - 3.5 * ((0.5*xvalue + 0.6) * np.log(0.5*xvalue + 0.6)).sum()
 
-    assert abs(m.get() - target.min()) < 1e-4
+    assert abs(m.get() - target) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
-
-    m = ro.Model()
-    x = m.dvar()
-    y = m.dvar(3)
-
-    m.max(y.sum())
-    m.st(x == xvalue)
-    m.st(y <= rso.entropy(2.1*x + 1.5))
-
-    m.solve(eco)
-    target = - 3 * (2.1*xvalue + 1.5) * np.log(2.1*xvalue + 1.5)
-
-    assert abs(m.get() - target.min()) < 1e-4
-    primal_obj = m.do_math().solve(eco).objval
-    dual_obj = m.do_math(primal=False).solve(eco).objval
-    assert abs(primal_obj + dual_obj) < 1e-4
-
-    with pytest.raises(ValueError):
-        rso.entropy(y) >= x
 
     with pytest.raises(ValueError):
         rso.entropy(x) <= y
+
+    with pytest.raises(ValueError):
+        rso.entropy(y) >= x[0]
 
 
 @pytest.mark.parametrize('array, r', [
@@ -667,6 +709,7 @@ def test_convex_err():
     with pytest.raises(TypeError):
         rso.square(x) * rd.rand(5)
 
+    """
     with pytest.raises(ValueError):
         rso.expcone(x, x, xx[0, 0])
 
@@ -678,6 +721,7 @@ def test_convex_err():
 
     with pytest.raises(ValueError):
         rso.kldiv(x, xx[0], 0.05)
+    """
 
     vec = rd.rand(7)
     qmat = vec.reshape((vec.size, 1)) @ vec.reshape((1, vec.size))
@@ -692,6 +736,7 @@ def test_convex_err():
     y = m2.dvar()
     yy = m2.dvar(5)
 
+    """
     with pytest.raises(ValueError):
         rso.expcone(x, y, xx[0, 0])
 
@@ -700,3 +745,4 @@ def test_convex_err():
 
     with pytest.raises(ValueError):
         rso.kldiv(yy, x[0], 0.01)
+    """

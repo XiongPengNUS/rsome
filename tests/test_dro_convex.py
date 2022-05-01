@@ -315,6 +315,7 @@ def test_squares(array, const):
         rso.square(x) + y == 0
 
 
+rd.seed(1)
 @pytest.mark.parametrize('array, const', [
     (rd.rand(2, 3), rd.rand(2)),
     (rd.rand(5, 1), rd.rand(5))
@@ -391,6 +392,7 @@ def test_square_sum(array, const):
         rso.sumsqr(x) + y == 0
 
 
+rd.seed(2)
 @pytest.mark.parametrize('const1, const2', [
     (rd.rand(2), rd.rand()),
     (rd.rand(4), rd.rand()),
@@ -426,24 +428,31 @@ def test_expcone(const1, const2):
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
-
+rd.seed(1)
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3), rd.rand(3)),
-    (rd.rand(4), rd.rand(4)),
-    (rd.rand(6), rd.rand(6))
+    (rd.rand(3, 2), rd.rand(3, 2)),
+    (rd.rand(3, 2, 3), rd.rand(3, 3)),
+    (rd.rand(4), rd.rand(4))
 ])
 def test_exp(array, const):
 
-    target = np.exp(array - const)
-    ns = target.shape[0]
+    rd.seed(5)
+    ns = array.shape[0]
+
+    target = []
+    for s in range(ns):
+        target.append(np.exp(array[s] - const[s]))
+    shape1 = array.shape[1:]
+    shape2 = const.shape[1:]
+    shape = target[0].shape
 
     m = dro.Model(ns)
-    a = m.dvar()
-    x = m.dvar()
-    y = m.dvar()
+    a = m.dvar(shape)
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
 
-    z = m.rvar()
-    u = m.rvar()
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
     fset = m.ambiguity()
     for s in range(ns):
         fset[s].suppset(z == array[s], u == const[s])
@@ -456,27 +465,31 @@ def test_exp(array, const):
         y.adapt(s)
 
     expr = rso.exp(x - y)
-    m.minsup(E(a), fset)
+    m.minsup(E(a.sum()), fset)
     m.st(a >= expr)
     m.st(x == z, y == u)
     m.solve(eco)
 
-    assert (abs(a.get().values - target) < 5e-4).all()
-    assert abs(m.get() - target.mean()) < 5e-4
+    assert (abs(np.array(list(a.get())) - np.array(target)) < 5e-4).all()
+    assert abs(m.get() - np.array(target).mean(axis=0).sum()) < 5e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
-    target = -np.exp(array + const)
-    ns = target.shape[0]
+    target = []
+    for s in range(ns):
+        target.append( - np.exp(array[s] + const[s]))
+    shape1 = array.shape[1:]
+    shape2 = const.shape[1:]
+    shape = target[0].shape
 
     m = dro.Model(ns)
-    a = m.dvar()
-    x = m.dvar()
-    y = m.dvar()
+    a = m.dvar(shape)
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
 
-    z = m.rvar()
-    u = m.rvar()
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
     fset = m.ambiguity()
     for s in range(ns):
         fset[s].suppset(z == array[s], u == const[s])
@@ -488,36 +501,138 @@ def test_exp(array, const):
         x.adapt(s)
         y.adapt(s)
 
-    expr = -rso.exp(x + y)
-    m.maxinf(E(a), fset)
+    expr = - rso.exp(x + y)
+    m.maxinf(E(a.sum()), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
     m.solve(eco)
 
-    assert (abs(a.get().values - target) < 5e-4).all()
-    assert abs(m.get() - target.mean()) < 5e-4
+    assert (abs(np.array(list(a.get())) - np.array(target)) < 5e-4).all()
+    assert abs(m.get() - np.array(target).mean(axis=0).sum()) < 5e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+rd.seed(1)
+@pytest.mark.parametrize('array, scales', [
+    (rd.rand(3, 2), np.maximum(0.2, rd.rand(3, 2))),
+    (rd.rand(3, 2, 3), np.maximum(0.2, rd.rand(3, 3))),
+    (rd.rand(4), np.maximum(0.2, rd.rand(4)))
+])
+def test_pexp(array, scales):
+
+    ns = array.shape[0]
+
+    target = []
+    for s in range(ns):
+        target.append(scales[s]*np.exp(array[s]/scales[s]))
+    shape1 = array.shape[1:]
+    shape2 = scales.shape[1:]
+    shape = target[0].shape
+
+    m = dro.Model(ns)
+    a = m.dvar(shape)
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
+
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == scales[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = rso.pexp(x, y)
+    m.minsup(E(a.sum()), fset)
+    m.st(a >= expr)
+    m.st(x == z, y == u)
+    m.solve(eco)
+
+    assert (abs(np.array(list(a.get())) - np.array(target)) < 5e-4).all()
+    assert abs(m.get() - np.array(target).mean(axis=0).sum()) < 5e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+
+rd.seed(1)
+@pytest.mark.parametrize('array, scales', [
+    (rd.rand(3, 2), np.maximum(0.2, rd.rand(3, 2))),
+    (rd.rand(3, 2, 3), np.maximum(0.2, rd.rand(3, 3))),
+    (rd.rand(4), np.maximum(0.2, rd.rand(4)))
+])
+def test_plog(array, scales):
+
+    ns = array.shape[0]
+
+    target = []
+    for s in range(ns):
+        target.append(scales[s]*np.log(array[s]/scales[s]))
+    shape1 = array.shape[1:]
+    shape2 = scales.shape[1:]
+    shape = target[0].shape
+
+    m = dro.Model(ns)
+    a = m.dvar(shape)
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
+
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == scales[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = rso.plog(x, y)
+    m.maxinf(E(a.sum()), fset)
+    m.st(a <= expr)
+    m.st(x == z, y == u)
+    m.solve(eco)
+
+    assert (abs(np.array(list(a.get())) - np.array(target)) < 5e-4).all()
+    assert abs(m.get() - np.array(target).mean(axis=0).sum()) < 5e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3), rd.rand(3)),
-    (rd.rand(4), rd.rand(4)),
-    (rd.rand(6), rd.rand(6))
+    (rd.rand(3, 2), rd.rand(3, 2)),
+    (rd.rand(3, 2, 3), rd.rand(3, 3)),
+    (rd.rand(4), rd.rand(4))
 ])
 def test_log(array, const):
 
-    target = np.log(array + const)
-    ns = target.shape[0]
+    rd.seed(5)
+    ns = array.shape[0]
+
+    target = []
+    for s in range(ns):
+        target.append(2*np.log(array[s] + const[s]) - 1.23)
+    shape1 = array.shape[1:]
+    shape2 = const.shape[1:]
+    shape = target[0].shape
 
     m = dro.Model(ns)
-    a = m.dvar()
-    x = m.dvar()
-    y = m.dvar()
+    a = m.dvar(shape)
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
 
-    z = m.rvar()
-    u = m.rvar()
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
     fset = m.ambiguity()
     for s in range(ns):
         fset[s].suppset(z == array[s], u == const[s])
@@ -529,69 +644,75 @@ def test_log(array, const):
         x.adapt(s)
         y.adapt(s)
 
-    expr = - rso.log(x + y)
-    m.minsup(E(a), fset)
-    m.st(a >= expr)
-    m.st(x == z, y == u)
-    m.solve(eco)
-
-    assert (abs(a.get().values + target) < 5e-4).all()
-    assert abs(m.get() + target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(eco).objval
-    dual_obj = m.do_math(primal=False).solve(eco).objval
-    assert abs(primal_obj + dual_obj) < 1e-4
-
-    target = np.log(array - 0.5*const + 1.2)
-    ns = target.shape[0]
-
-    m = dro.Model(ns)
-    a = m.dvar()
-    x = m.dvar()
-    y = m.dvar()
-
-    z = m.rvar()
-    u = m.rvar()
-    fset = m.ambiguity()
-    for s in range(ns):
-        fset[s].suppset(z == array[s], u == const[s])
-    p = m.p
-    fset.probset(p == 1/ns)
-
-    for s in range(ns):
-        a.adapt(s)
-        x.adapt(s)
-        y.adapt(s)
-
-    expr = -rso.log(x - 0.5*y + 1.2)
-    m.maxinf(E(a), fset)
+    expr = 2*rso.log(x + y) - 1.23
+    m.maxinf(E(a.sum()), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
     m.solve(eco)
 
-    assert (abs(a.get().values - target) < 5e-4).all()
-    assert abs(m.get() - target.mean()) < 5e-4
+    assert (abs(np.array(list(a.get())) - np.array(target)) < 5e-4).all()
+    assert abs(m.get() - np.array(target).mean(axis=0).sum()) < 5e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    target = []
+    for s in range(ns):
+        target.append(- np.log(array[s] - const[s] + 1.23))
+    shape1 = array.shape[1:]
+    shape2 = const.shape[1:]
+    shape = target[0].shape
+
+    m = dro.Model(ns)
+    a = m.dvar(shape)
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
+
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
+    fset = m.ambiguity()
+    for s in range(ns):
+        fset[s].suppset(z == array[s], u == const[s])
+    p = m.p
+    fset.probset(p == 1/ns)
+
+    for s in range(ns):
+        a.adapt(s)
+        x.adapt(s)
+        y.adapt(s)
+
+    expr = - rso.log(x - y + 1.23)
+    m.minsup(E(a.sum()), fset)
+    m.st(a >= expr)
+    m.st(x == z, y == u)
+    m.solve(eco)
+
+    assert (abs(np.array(list(a.get())) - np.array(target)) < 5e-4).all()
+    assert abs(m.get() - np.array(target).mean(axis=0).sum()) < 5e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
 
 @pytest.mark.parametrize('array, const', [
-    (rd.rand(3), rd.rand(3)),
-    (rd.rand(4), rd.rand(4)),
-    (rd.rand(6), rd.rand(6))
+    (rd.rand(3, 4), rd.rand(3, 4)),
+    (rd.rand(4, 3), rd.rand(4, 1)),
+    (rd.rand(5, 2), rd.rand(5, 2))
 ])
 def test_entropy(array, const):
 
-    target = (array + const) * np.log(array + const)
+    target = - ((array + const) * np.log(array + const)).sum(axis=1)
     ns = target.shape[0]
+    shape1 = array.shape[1:]
+    shape2 = const.shape[1:]
 
     m = dro.Model(ns)
     a = m.dvar()
-    x = m.dvar()
-    y = m.dvar()
+    x = m.dvar(shape1)
+    y = m.dvar(shape2)
 
-    z = m.rvar()
-    u = m.rvar()
+    z = m.rvar(shape1)
+    u = m.rvar(shape2)
     fset = m.ambiguity()
     for s in range(ns):
         fset[s].suppset(z == array[s], u == const[s])
@@ -603,47 +724,14 @@ def test_entropy(array, const):
         x.adapt(s)
         y.adapt(s)
 
-    expr = - rso.entropy(x + y)
-    m.minsup(E(a), fset)
-    m.st(a >= expr)
-    m.st(x == z, y == u)
-    m.solve(eco)
-
-    assert (abs(a.get().values - target) < 5e-4).all()
-    assert abs(m.get() - target.mean()) < 5e-4
-    primal_obj = m.do_math().solve(eco).objval
-    dual_obj = m.do_math(primal=False).solve(eco).objval
-    assert abs(primal_obj + dual_obj) < 1e-4
-
-    target = (array - 0.5*const + 1.2) * np.log(array - 0.5*const + 1.2)
-    ns = target.shape[0]
-
-    m = dro.Model(ns)
-    a = m.dvar()
-    x = m.dvar()
-    y = m.dvar()
-
-    z = m.rvar()
-    u = m.rvar()
-    fset = m.ambiguity()
-    for s in range(ns):
-        fset[s].suppset(z == array[s], u == const[s])
-    p = m.p
-    fset.probset(p == 1/ns)
-
-    for s in range(ns):
-        a.adapt(s)
-        x.adapt(s)
-        y.adapt(s)
-
-    expr = rso.entropy(x - 0.5*y + 1.2)
+    expr = rso.entropy(x + y)
     m.maxinf(E(a), fset)
     m.st(a <= expr)
     m.st(x == z, y == u)
     m.solve(eco)
 
-    assert (abs(a.get().values + target) < 5e-4).all()
-    assert abs(m.get() + target.mean()) < 5e-4
+    assert (abs(a.get().values - target) < 5e-4).all()
+    assert abs(m.get() - target.mean()) < 5e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
