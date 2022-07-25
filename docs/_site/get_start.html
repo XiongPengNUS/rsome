@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=4f5084660e7980d59d9eecc1553ce81d57f5b0f4">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=3c43d41fec63698323ec2e6f7a6a97cc5739c728">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -696,6 +696,15 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">No</td>
     </tr>
+    <tr>
+      <td style="text-align: left"><a href="https://www.shanshu.ai/copt">COPT</a></td>
+      <td style="text-align: left">Commercial</td>
+      <td style="text-align: left">&gt;= 5.0</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpt_solver</code></td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
+    </tr>
   </tbody>
 </table>
 
@@ -742,7 +751,7 @@ Running time: 0.0175s
 
 <p>It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument <code class="language-plaintext highlighter-rouge">display</code> to be <code class="language-plaintext highlighter-rouge">False</code>.</p>
 
-<p>The third argument <code class="language-plaintext highlighter-rouge">params</code> is used to tune solver parameters. The current RSOME package enables users to adjust parameters for commercials solvers, <i>i.e.</i>, Gurobi, MOSEK, and CPLEX. The <code class="language-plaintext highlighter-rouge">params</code> argument is a <code class="language-plaintext highlighter-rouge">dict</code> type object in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;, ..., &lt;paramk&gt;: &lt;valuek&gt;}</code>. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
+<p>The third argument <code class="language-plaintext highlighter-rouge">params</code> is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The <code class="language-plaintext highlighter-rouge">params</code> argument is a <code class="language-plaintext highlighter-rouge">dict</code> type object in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;, ..., &lt;paramk&gt;: &lt;valuek&gt;}</code>. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
 <ul>
   <li>Gurobi parameters: <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">https://www.gurobi.com/documentation/9.1/refman/parameters.html</a></li>
   <li>MOSEK parameters: <a href="https://docs.mosek.com/latest/pythonapi/parameters.html">https://docs.mosek.com/latest/pythonapi/parameters.html</a></li>

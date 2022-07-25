@@ -1,6 +1,6 @@
 """
-This module is used as an interface to call the CVXPY solver for solving
-(mixed-integer) linear or second-order cone programs.
+This module is used as an interface to call the ECOS solver for solving
+(mixed-integer) linear, second-order cone, or exponential cone programs.
 """
 
 import ecos
