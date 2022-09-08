@@ -93,8 +93,8 @@ class Model(SOCModel):
                     """
                     if constr.xtype == 'X':
                         affine_out = constr.affine_out * (1/constr.multiplier)
-                        exp_cone_constr = ExpConstr(constr.model, 
-                                                    constr.affine_in, 
+                        exp_cone_constr = ExpConstr(constr.model,
+                                                    constr.affine_in,
                                                     -constr.affine_out, 1)
                         more_exp.append(exp_cone_constr)
                     elif constr.xtype == 'L':
@@ -106,7 +106,6 @@ class Model(SOCModel):
                     """
                     if constr.xtype in 'XLP':
                         self.other_constr.append(constr)
-            
 
             for constr in self.other_constr:
                 if isinstance(constr, KLConstr):
@@ -131,7 +130,8 @@ class Model(SOCModel):
                                                    affine_out)
                         for exprs in exprs_list:
                             exp_cone_constr = ExpConstr(constr.model,
-                                                        exprs[0], -exprs[2], exprs[1])
+                                                        exprs[0],
+                                                        -exprs[2], exprs[1])
                             self.exp_constr.append(exp_cone_constr)
                     elif constr.xtype == 'L':
                         affine_out = constr.affine_out * (1/constr.multiplier)
@@ -139,7 +139,7 @@ class Model(SOCModel):
                                                    constr.affine_scale,
                                                    affine_out)
                         for exprs in exprs_list:
-                            exp_cone_constr = ExpConstr(constr.model, 
+                            exp_cone_constr = ExpConstr(constr.model,
                                                         exprs[2], exprs[0], exprs[1])
                             self.exp_constr.append(exp_cone_constr)
                 elif isinstance(constr, CvxConstr):
@@ -151,22 +151,22 @@ class Model(SOCModel):
                         affine_in = constr.affine_in.reshape(ns)
                         affine_aux = aux_var.to_affine().reshape(ns)
                         for s in range(ns):
-                            exp_cone_constr = ExpConstr(constr.model, 
-                                                        affine_aux[s], 
+                            exp_cone_constr = ExpConstr(constr.model,
+                                                        affine_aux[s],
                                                         1, affine_in[s])
                             more_exp.append(exp_cone_constr)
                     elif constr.xtype == 'X':
                         affine_out = constr.affine_out * (1/constr.multiplier)
                         exprs_list = rso_broadcast(constr.affine_in, affine_out)
                         for exprs in exprs_list:
-                            exp_cone_constr = ExpConstr(constr.model, 
+                            exp_cone_constr = ExpConstr(constr.model,
                                                         exprs[0], -exprs[1], 1)
                             self.exp_constr.append(exp_cone_constr)
                     elif constr.xtype == 'L':
                         affine_out = constr.affine_out * (1/constr.multiplier)
                         exprs_list = rso_broadcast(constr.affine_in, affine_out)
                         for exprs in exprs_list:
-                            exp_cone_constr = ExpConstr(constr.model, 
+                            exp_cone_constr = ExpConstr(constr.model,
                                                         exprs[1], exprs[0], 1)
                             self.exp_constr.append(exp_cone_constr)
 

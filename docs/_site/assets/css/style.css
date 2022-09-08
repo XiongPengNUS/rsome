@@ -168,27 +168,29 @@ th { color: #444; }
 
 img { max-width: 100%; }
 
+kbd { background-color: #fafbfc; border: 1px solid #c6cbd1; border-bottom-color: #959da5; border-radius: 3px; box-shadow: inset 0 -1px 0 #959da5; color: #444d56; display: inline-block; font-size: 11px; line-height: 10px; padding: 3px 5px; vertical-align: middle; }
+
 header { width: 270px; float: left; position: fixed; -webkit-font-smoothing: subpixel-antialiased; }
 
-header ul { list-style: none; height: 40px; padding: 0; background: #f4f4f4; border-radius: 5px; border: 1px solid #e0e0e0; width: 270px; }
+ul.downloads { list-style: none; height: 40px; padding: 0; background: #f4f4f4; border-radius: 5px; border: 1px solid #e0e0e0; width: 270px; }
 
-header li { width: 89px; float: left; border-right: 1px solid #e0e0e0; height: 40px; }
+.downloads li { width: 89px; float: left; border-right: 1px solid #e0e0e0; height: 40px; }
 
-header li:first-child a { border-radius: 5px 0 0 5px; }
+.downloads li:first-child a { border-radius: 5px 0 0 5px; }
 
-header li:last-child a { border-radius: 0 5px 5px 0; }
+.downloads li:last-child a { border-radius: 0 5px 5px 0; }
 
-header ul a { line-height: 1; font-size: 11px; color: #676767; display: block; text-align: center; padding-top: 6px; height: 34px; }
+.downloads a { line-height: 1; font-size: 11px; color: #676767; display: block; text-align: center; padding-top: 6px; height: 34px; }
 
-header ul a:hover, header ul a:focus { color: #675C5C; font-weight: bold; }
+.downloads a:hover, .downloads a:focus { color: #675C5C; font-weight: bold; }
 
-header ul a:active { background-color: #f0f0f0; }
+.downloads ul a:active { background-color: #f0f0f0; }
 
 strong { color: #222; font-weight: 700; }
 
-header ul li + li + li { border-right: none; width: 89px; }
+.downloads li + li + li { border-right: none; width: 89px; }
 
-header ul a strong { font-size: 14px; display: block; color: #222; }
+.downloads a strong { font-size: 14px; display: block; color: #222; }
 
 section { width: 500px; float: right; padding-bottom: 50px; }
 
@@ -209,6 +211,6 @@ footer { width: 270px; float: left; position: fixed; bottom: 50px; -webkit-font-
   header ul, header p.view { position: static; }
   pre, code { word-wrap: normal; } }
 @media print, screen and (max-width: 480px) { body { padding: 15px; }
-  header ul { width: 99%; }
-  header li, header ul li + li + li { width: 33%; } }
+  .downloads { width: 99%; }
+  .downloads li, .downloads li + li + li { width: 33%; } }
 @media print { body { padding: 0.4in; font-size: 12pt; color: #444; } }

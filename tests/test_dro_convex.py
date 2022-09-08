@@ -316,6 +316,8 @@ def test_squares(array, const):
 
 
 rd.seed(1)
+
+
 @pytest.mark.parametrize('array, const', [
     (rd.rand(2, 3), rd.rand(2)),
     (rd.rand(5, 1), rd.rand(5))
@@ -393,6 +395,8 @@ def test_square_sum(array, const):
 
 
 rd.seed(2)
+
+
 @pytest.mark.parametrize('const1, const2', [
     (rd.rand(2), rd.rand()),
     (rd.rand(4), rd.rand()),
@@ -428,7 +432,10 @@ def test_expcone(const1, const2):
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
+
 rd.seed(1)
+
+
 @pytest.mark.parametrize('array, const', [
     (rd.rand(3, 2), rd.rand(3, 2)),
     (rd.rand(3, 2, 3), rd.rand(3, 3)),
@@ -478,7 +485,7 @@ def test_exp(array, const):
 
     target = []
     for s in range(ns):
-        target.append( - np.exp(array[s] + const[s]))
+        target.append(-np.exp(array[s] + const[s]))
     shape1 = array.shape[1:]
     shape2 = const.shape[1:]
     shape = target[0].shape
@@ -513,7 +520,10 @@ def test_exp(array, const):
     dual_obj = m.do_math(primal=False).solve(eco).objval
     assert abs(primal_obj + dual_obj) < 1e-4
 
+
 rd.seed(1)
+
+
 @pytest.mark.parametrize('array, scales', [
     (rd.rand(3, 2), np.maximum(0.2, rd.rand(3, 2))),
     (rd.rand(3, 2, 3), np.maximum(0.2, rd.rand(3, 3))),
@@ -562,6 +572,8 @@ def test_pexp(array, scales):
 
 
 rd.seed(1)
+
+
 @pytest.mark.parametrize('array, scales', [
     (rd.rand(3, 2), np.maximum(0.2, rd.rand(3, 2))),
     (rd.rand(3, 2, 3), np.maximum(0.2, rd.rand(3, 3))),

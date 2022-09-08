@@ -1,0 +1,465 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="the-unit-commitment-problem">The Unit Commitment Problem</h3>
+
+<p>In this example, we attempt to solve a <a href="http://ibmdecisionoptimization.github.io/docplex-doc/mp/ucp_pandas.html">unit commitment (UC) problem</a> described in the tutorial of IBM Decision Optimization CPLEX for Python (DOcplex). The electricity demand data and parameters of all generators are read from the data file <a href="uc_data.xlsx">uc_data.xlsx</a>, by code segments below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">demand</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'uc_data.xlsx'</span><span class="p">,</span> <span class="s">'Demand'</span><span class="p">)</span>     <span class="c1"># Electricity demand 
+</span><span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">demand</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">demand</span><span class="p">[</span><span class="s">'load'</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Time (hour)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Demand (MWh)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">units</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s">'uc_data.xlsx'</span><span class="p">,</span> <span class="s">'Units'</span><span class="p">)</span>       <span class="c1"># Parameters of generators
+</span><span class="n">units</span>
+</code></pre></div></div>
+
+<p><img src="uc_demand.png" alt="" /></p>
+
+<div>
+<table border="1" class="dataframe mystyle">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>energy</th>
+      <th>initial</th>
+      <th>min_gen</th>
+      <th>...</th>
+      <th>start_cost</th>
+      <th>fixed_cost</th>
+      <th>variable_cost</th>
+      <th>co2_cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>coal1</td>
+      <td>coal</td>
+      <td>400</td>
+      <td>100.00</td>
+      <td>...</td>
+      <td>5000</td>
+      <td>208.610</td>
+      <td>22.536</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>coal2</td>
+      <td>coal</td>
+      <td>350</td>
+      <td>140.00</td>
+      <td>...</td>
+      <td>4550</td>
+      <td>117.370</td>
+      <td>31.985</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>gas1</td>
+      <td>gas</td>
+      <td>205</td>
+      <td>78.00</td>
+      <td>...</td>
+      <td>1320</td>
+      <td>174.120</td>
+      <td>70.500</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>gas2</td>
+      <td>gas</td>
+      <td>52</td>
+      <td>52.00</td>
+      <td>...</td>
+      <td>1291</td>
+      <td>172.750</td>
+      <td>69.000</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>gas3</td>
+      <td>gas</td>
+      <td>155</td>
+      <td>54.25</td>
+      <td>...</td>
+      <td>1280</td>
+      <td>95.353</td>
+      <td>32.146</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>gas4</td>
+      <td>gas</td>
+      <td>150</td>
+      <td>39.00</td>
+      <td>...</td>
+      <td>1105</td>
+      <td>144.520</td>
+      <td>54.840</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>diesel1</td>
+      <td>diesel</td>
+      <td>78</td>
+      <td>17.40</td>
+      <td>...</td>
+      <td>560</td>
+      <td>54.417</td>
+      <td>40.222</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>diesel2</td>
+      <td>diesel</td>
+      <td>76</td>
+      <td>15.20</td>
+      <td>...</td>
+      <td>554</td>
+      <td>54.551</td>
+      <td>40.522</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>diesel3</td>
+      <td>diesel</td>
+      <td>0</td>
+      <td>4.00</td>
+      <td>...</td>
+      <td>300</td>
+      <td>79.638</td>
+      <td>116.330</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>diesel4</td>
+      <td>diesel</td>
+      <td>0</td>
+      <td>2.40</td>
+      <td>...</td>
+      <td>250</td>
+      <td>16.259</td>
+      <td>76.642</td>
+      <td>15</td>
+    </tr>
+  </tbody>
+</table>
+<p>10 rows × 14 columns</p>
+</div>
+
+<p>Parameters of the UC model are specified by the code segment below,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_init</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'initial'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">u_init</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_init</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">).</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">g_min</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'min_gen'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">g_max</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'max_gen'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">h_up</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'min_uptime'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">h_down</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'min_downtime'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">r_up</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'ramp_up'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">r_down</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'ramp_down'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'fixed_cost'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'variable_cost'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'start_cost'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">demand</span><span class="p">[</span><span class="s">'load'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="s">'co2_cost'</span><span class="p">].</span><span class="n">values</span>
+</code></pre></div></div>
+
+<p>and detailed information on these parameters is provided in the following table.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Notation</th>
+      <th style="text-align: left">Interpretation</th>
+      <th style="text-align: left">Array Expression</th>
+      <th>Python Variable</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">\(g_n^{\text{init}}\)</td>
+      <td style="text-align: left">The initial output of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['initial'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">g_init</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(u_n^{\text{init}}\)</td>
+      <td style="text-align: left">The initial on/off status of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">(g_init &gt; 0).astype(int)</code></td>
+      <td><code class="language-plaintext highlighter-rouge">u_init</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(g_n^{\text{min}}\)</td>
+      <td style="text-align: left">The minimum capacity of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['min_gen'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">g_min</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(g_n^{\text{max}}\)</td>
+      <td style="text-align: left">The maximum capacity of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['max_gen'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">g_max</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(h_n^{\text{up}}\)</td>
+      <td style="text-align: left">The minimum up time of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['min_uptime'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">h_up</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(h_n^{\text{down}}\)</td>
+      <td style="text-align: left">The minimum down time of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['min_downtime'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">h_down</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(r_n^{\text{up}}\)</td>
+      <td style="text-align: left">The ramp-up rate limit of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['ramp_up'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">r_up</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(r_n^{\text{down}}\)</td>
+      <td style="text-align: left">The ramp-down rate limit of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['ramp_down'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">r_down</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(a_n\)</td>
+      <td style="text-align: left">The fixed cost of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['fixed_cost'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">a</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(b_n\)</td>
+      <td style="text-align: left">The variable cost of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['variable_cost'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">b</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(c_n\)</td>
+      <td style="text-align: left">The start-up cost of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['start_cost'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">c</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(d_t\)</td>
+      <td style="text-align: left">The demand at time step \(t\)</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">demand['load'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">d</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(e_t\)</td>
+      <td style="text-align: left">The CO2 emission cost  of the \(n\)th generator</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">units['co2_cost'].values</code></td>
+      <td><code class="language-plaintext highlighter-rouge">e</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The UC model that determines the on/off statues of generators and their outputs in supplying the electricity demand can be written as the following mixed-integer linear programming problem.</p>
+
+\[\begin{align}
+\min~&amp;\sum\limits_{t=1}^T\sum\limits_{n=1}^N\left(a_nu_{tn} + b_ng_{tn} + c_nv_{tn} + e_ng_{tn}\right) \hspace{-1in}&amp; \\
+\text{s.t.}~&amp;v_{1n} \geq u_{1n} - u_n^{\text{init}}, v_{1n} \geq 0 &amp;\forall n= 1, ..., N \\
+&amp;v_{tn} \geq u_{tn} - u_{(t-1)u}, v_{tn} \geq 0 &amp; \forall t = 2, ..., T, \forall n = 1, ..., N \\
+&amp;w_{1n} \geq u_n^{\text{init}} - u_{1n}, w_{1n} \geq 0 &amp;\forall n= 1, ..., N \\
+&amp;w_{tn} \geq u_{(t-1)u} - u_{tn}, w_{tn} \geq 0 &amp; \forall t = 2, ..., T, \forall n = 1, ..., N \\
+&amp;\sum\limits_{k=t-h_n^{\text{up}}+1}^tv_{tn} \leq u_{tn} &amp; \forall t=h_n^{\text{up}}, ..., T, \forall n = 1, ..., N \\
+&amp;\sum\limits_{k=t-h_n^{\text{down}}+1}^tw_{tn} \leq 1 - u_{tn} &amp; \forall t=h_n^{\text{down}}, ..., T, \forall n = 1, ..., N \\
+&amp;\sum\limits_{n=1}^Tg_{tn} = d_{t} &amp;\forall t=1, ..., T \\
+&amp;u_{tn}g_n^{\text{min}} \leq g_{tn} \leq u_{tn}g_n^{\text{max}} &amp;\forall t=1, ..., T, \forall n = 1, ..., N \\
+&amp;g_{1n} - g_n^{\text{init}} \leq r_n^{\text{up}} &amp;\forall n = 1, ..., N \\
+&amp;g_{tn} - g_{(t-1)n} \leq r_n^{\text{up}} &amp;\forall t=2, ..., T, \forall n=1, ..., N \\
+&amp;g_n^{\text{init}} - g_{1n} \leq r_n^{\text{down}} &amp;\forall n = 1, ..., N \\
+&amp;g_{(t-1)n} - g_{tn} \leq r_n^{\text{down}} &amp;\forall t=2, ..., T, \forall n=1, ..., N
+\end{align}\]
+
+<p>where \(T\) is the number of time steps, and \(N\) is the number of generator units. The decision variables are explained in the following table.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Notation</th>
+      <th style="text-align: left">Interpretation</th>
+      <th style="text-align: left">Python Variable</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">\(u_{tn}\)</td>
+      <td style="text-align: left">Binary variable indicating the status of the \(n\)th  <br />generator at time \(t\)</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">u</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(v_{tn}\)</td>
+      <td style="text-align: left">Binary variable indicating if the \(n\)th generator  <br />is switched on at time \(t\)</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">v</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(w_{tn}\)</td>
+      <td style="text-align: left">Binary variable indicating if the \(n\)th generator  <br />is switched off at time \(t\)</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">w</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left">\(g_{tn}\)</td>
+      <td style="text-align: left">Continuous variable representing the output of  <br />the \(n\)th generator at time \(t\)</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">g</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The UC model above can be implemented by the following Python code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="s">'UC'</span><span class="p">)</span>                           <span class="c1"># Create a model named 'UC'
+</span>
+<span class="n">N</span> <span class="o">=</span> <span class="n">units</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                               <span class="c1"># Number of units
+</span><span class="n">T</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>                                       <span class="c1"># Number of time steps
+</span><span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>                      <span class="c1"># Unit commitment statuses
+</span><span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>                      <span class="c1"># Switch-on statuses of units
+</span><span class="n">w</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="s">'B'</span><span class="p">)</span>                      <span class="c1"># Switch-off statuses of units
+</span><span class="n">g</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>                           <span class="c1"># Generation outputs
+</span>
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">((</span><span class="n">a</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">g</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">v</span> <span class="o">+</span> <span class="n">e</span><span class="o">*</span><span class="n">g</span><span class="p">).</span><span class="nb">sum</span><span class="p">())</span>         <span class="c1"># Minimize the total cost
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">u_init</span><span class="p">,</span> 
+         <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&gt;=</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+         <span class="n">v</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                 <span class="c1"># Switch-on statuses
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span>  <span class="n">u_init</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+         <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&gt;=</span> <span class="n">u</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+         <span class="n">w</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>                                 <span class="c1"># Switch-off statuses                
+</span><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="n">h_up</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">n</span><span class="p">]</span> 
+             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">h_up</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">T</span><span class="p">))</span>         <span class="c1"># Minimum up time constraints
+</span>    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="n">h_down</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">n</span><span class="p">]</span>
+             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">h_down</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">T</span><span class="p">))</span>       <span class="c1"># Minimum down time constraints
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">g</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">d</span><span class="p">)</span>                     <span class="c1"># Power balance equation
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">g</span> <span class="o">&gt;=</span> <span class="n">u</span><span class="o">*</span><span class="n">g_min</span><span class="p">,</span>                           <span class="c1"># Minimum capacities of units
+</span>         <span class="n">g</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="o">*</span><span class="n">g_max</span><span class="p">)</span>                           <span class="c1"># Maximum capacities of units
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">g</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">r_up</span><span class="p">,</span>
+         <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">g_init</span> <span class="o">&lt;=</span> <span class="n">r_up</span><span class="p">,</span>                  <span class="c1"># Ramp-up rate limits
+</span>         <span class="n">g</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;=</span> <span class="n">r_down</span><span class="p">,</span>
+         <span class="n">g_init</span> <span class="o">-</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">r_down</span><span class="p">)</span>                <span class="c1"># Ramp-down rate limits
+</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>                                    <span class="c1"># Solve the model
+</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="se">\n</span><span class="s">Minimum cost: </span><span class="si">{</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">():.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default MILP solver...
+Solution status: 0
+Running time: 1.4817s
+
+Minimum cost: 14213082.0639
+</code></pre></div></div>
+
+<p>Please note that here we are using the default solver imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> to solve the mixed-integer linear programming problem. The default solver is able to address integer variables only if the version of the installed SciPy package is 1.9.0 or above. For SciPy 1.8.1 or older version, the default solver is unable to include integrality constraints, so the problem can only be solved by the updated SciPy solver or other solvers.</p>
+
+<p>Similar to the case study discussed in the <a href="http://ibmdecisionoptimization.github.io/docplex-doc/mp/ucp_pandas.html">unit commitment (UC) problem</a>, each component of the operating cost is calculated and listed below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Total fixed cost:    </span><span class="si">{</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">u</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="nb">sum</span><span class="p">():.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Total variable cost: </span><span class="si">{</span><span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="nb">sum</span><span class="p">():.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Total start-up cost: </span><span class="si">{</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">v</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="nb">sum</span><span class="p">():.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Total economic cost: </span><span class="si">{</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">u</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">v</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="nb">sum</span><span class="p">():.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Total CO2 cost:      </span><span class="si">{</span><span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="nb">sum</span><span class="p">():.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Total fixed cost:    161025.131
+Total variable cost: 8865900.433
+Total start-up cost: 2832.000
+Total economic cost: 9029757.564
+Total CO2 cost:      5183324.500
+</code></pre></div></div>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

@@ -569,27 +569,28 @@ Solve the model with the selected solver interface.
             So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 ```
 
-The `solve()` method calls for external solvers to solve the optimization problem. The first argument `solver` is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver `linprog` imported from the `scipy.optimize` package as the default solver. Warnings will be raised if integer variables or nonlinear constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.  
+The `solve()` method calls for external solvers to solve the optimization problem. The first argument `solver` is used to specify the selected solver interface. If the solver is unspecified, the default solver imported from the the `scipy.optimize` is used to solve the RSOME model. If SciPy is upgraded to 1.9.0 or above, the default solver is the `milp()` function, which is capable of solving mixed-integer linear programs. If the installed SciPy package is 1.8.1 or below, the default solver is `linprog()` and it is only capable of solving linear programming problems with continuous decision variables. Other open-source and commercial solvers can also be used in RSOME. Details of the interfaces for calling these external solvers are presented in the table below.  
 
-| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints| Exponential cone constraints
+| Solver | License  type | Required version | RSOME interface |Integrality constraints| Second-order cone constraints| Exponential cone constraints
 |:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|:--------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No | No |
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | Yes for 1.9.0 or above | No | No |
 |[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No | No |
 |[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No | No |
 |[ECOS](https://github.com/embotech/ecos-python) | Open-source | >= 2.0.10 | `eco_solver` | Yes | Yes | Yes |
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes | No |
 |[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes | Yes |
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 5.0 | `cpt_solver` | Yes | Yes | No |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 5.0.1 | `cpt_solver` | Yes | Yes | No |
 
 
-The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.
+The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, CPLEX, or COPT to solve it. The interfaces for these solvers are imported by the following commands.
 
 ```python
 from rsome import eco_solver as eco
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
 from rsome import cpx_solver as cpx
+from rsome import cpt_solver as cpt
 ```
 
 The interfaces can be then used to attain the solution.
@@ -629,6 +630,17 @@ model.solve(cpx)
     Running time: 0.0175s
 
 
+```python
+model.solve(cpt)
+```
+
+    Cardinal Optimizer v5.0.1. Build date Jun 20 2022
+    Copyright Cardinal Operations 2022. All Rights Reserved
+
+    Being solved by COPT...
+    Solution status: 1
+    Running time: 0.0035s
+
 It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument `display` to be `False`.
 
 The third argument `params` is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The `params` argument is a `dict` type object in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>, ..., <paramk>: <valuek>}`. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
@@ -652,6 +664,7 @@ Once the solution completes, you may use the command `model.get()` to retrieve t
 ### [Mean-Variance Portfolio](example_mv_portfolio)
 ### [Integer Programming for Sudoku](example_sudoku)
 ### [Optimal DC Power Flow](example_opf)
+### [The Unit Commitment Problem](example_ucp)
 ### [Box with the Maximum Volume](example_max_volume_box)
 
 ## Reference

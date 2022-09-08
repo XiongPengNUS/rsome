@@ -16,13 +16,13 @@ def solve(formula, display=True, params={}):
 
     try:
         if formula.qmat:
-            warnings.warn('the LP solver ignnores SOC constriants.')
+            warnings.warn('the LP solver ignores SOC constriants.')
     except AttributeError:
         pass
 
     try:
         if formula.xmat:
-            warnings.warn('The LP solver ignores exponential cone constriants.')
+            warnings.warn('The LP solver ignores exponential cone constraints.')
     except AttributeError:
         pass
 

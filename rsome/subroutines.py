@@ -181,18 +181,18 @@ def check_numeric(array):
 
 
 def rso_broadcast(*args):
-    
+
     arrays = [np.array(arg) if isinstance(arg, Real) else arg
               for arg in args]
-    
-    indices = [np.arange(array.size).reshape(array.shape) for 
+
+    indices = [np.arange(array.size).reshape(array.shape) for
                array in arrays]
-    
+
     arrays = [array.reshape(array.size) for array in arrays]
-    
+
     bdc = np.broadcast(*indices)
     outputs = [[item[i] for item, i in zip(arrays, index)] for index in bdc]
-    
+
     return outputs
 
 
@@ -356,7 +356,7 @@ def log(affine):
 
 def pexp(affine, scale):
     """
-    Return the element-wise perspective of natural exponential 
+    Return the element-wise perspective of natural exponential
     function scale * exp(affine/scale).
 
     Parameters
@@ -367,7 +367,7 @@ def pexp(affine, scale):
     Returns
     -------
     a : PerspConvex
-        The perspective of natural exponential function 
+        The perspective of natural exponential function
         scale * exp(affine/scale)
     """
 
@@ -376,7 +376,7 @@ def pexp(affine, scale):
 
 def plog(affine, scale):
     """
-    Return the element-wise perspective of natural logarithm 
+    Return the element-wise perspective of natural logarithm
     function scale * log(affine/scale).
 
     Parameters

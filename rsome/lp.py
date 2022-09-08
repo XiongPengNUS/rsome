@@ -17,58 +17,108 @@ from typing import List
 
 
 def def_sol(formula, display=True, params={}):
+    """
+    This is the default solver of RSOME
+    """
 
     try:
         if formula.qmat:
-            warnings.warn('the LP solver ignnores SOC constriants.')
+            warnings.warn('the LP solver ignores SOC constraints.')
     except AttributeError:
         pass
 
     try:
         if formula.xmat:
-            warnings.warn('The LP solver ignores exponential cone constriants.')
+            warnings.warn('The LP solver ignores exponential cone constraints.')
     except AttributeError:
         pass
 
-    if any(np.array(formula.vtype) != 'C'):
-        warnings.warn('Integrality constraints are ignored in the LP solver. ')
+    ########
+    if hasattr(opt, 'milp'):
 
-    indices_eq = (formula.sense == 1)
-    indices_ineq = (formula.sense == 0)
-    linear_eq = formula.linear[indices_eq, :] if len(indices_eq) else None
-    linear_ineq = formula.linear[indices_ineq, :] if len(indices_ineq) else None
-    const_eq = formula.const[indices_eq] if len(indices_eq) else None
-    const_ineq = formula.const[indices_ineq] if len(indices_ineq) else None
+        A = formula.linear
+        sense = formula.sense
+        vtype = formula.vtype
 
-    bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
+        b_u = formula.const
+        b_l = np.ones(A.shape[0]) * (-np.inf)
+        bool_eq = (sense == 1)
+        b_l[bool_eq] = b_u[bool_eq]
 
-    default = {'maxiter': 1000000000,
-               'sparse': True}
+        bool_bin = (vtype == 'B')
+        lb = formula.lb
+        ub = formula.ub
+        lb[bool_bin] = 0
+        ub[bool_bin] = 1
 
-    if display:
-        print('Being solved by the default LP solver...', flush=True)
-        time.sleep(0.2)
-    t0 = time.time()
-    res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
-                      A_eq=linear_eq, b_eq=const_eq,
-                      bounds=bounds, options=default)
-    stime = time.time() - t0
-    if display:
-        print('Solution status: {0}'.format(res.status))
-        print('Running time: {0:0.4f}s'.format(stime))
+        integrality = np.zeros(A.shape[1])
+        integrality[vtype != 'C'] = 1
 
-    if res.status == 0:
-        return Solution(res.x[0], res.x, res.status, stime)
-    else:
-        status = res.status
-        msg = 'The optimal solution can not be found, '
-        reasons = ('iteration limit is reached.' if status == 1 else
-                   'the problem appears to be infeasible.' if status == 2 else
-                   'the problem appears to be unbounded.' if status == 3 else
-                   'numerical difficulties encountered.')
-        msg += 'because {}'.format(reasons)
-        warnings.warn(msg)
+        if display:
+            if all(vtype == 'C'):
+                print('Being solved by the default LP solver...', flush=True)
+            else:
+                print('Being solved by the default MILP solver...', flush=True)
+            time.sleep(0.2)
+        t0 = time.time()
+        res = opt.milp(formula.obj.squeeze(),
+                       constraints=opt.LinearConstraint(A, b_l, b_u),
+                       bounds=opt.Bounds(lb, ub),
+                       integrality=integrality)
+        stime = time.time() - t0
+        if display:
+            print('Solution status: {0}'.format(res.status))
+            print('Running time: {0:0.4f}s'.format(stime))
+
+        if res.status == 0:
+            return Solution(res.x[0], res.x, res.status, stime)
+        else:
+            status = res.status
+            msg = 'Fail to find the optimal solution.'
+            warnings.warn(msg)
         return None
+
+    else:
+
+        if any(np.array(formula.vtype) != 'C'):
+            warnings.warn('Integrality constraints are ignored in the LP solver. ')
+
+        indices_eq = (formula.sense == 1)
+        indices_ineq = (formula.sense == 0)
+        linear_eq = formula.linear[indices_eq, :] if len(indices_eq) else None
+        linear_ineq = formula.linear[indices_ineq, :] if len(indices_ineq) else None
+        const_eq = formula.const[indices_eq] if len(indices_eq) else None
+        const_ineq = formula.const[indices_ineq] if len(indices_ineq) else None
+
+        bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
+
+        default = {'maxiter': 1000000000,
+                   'sparse': True}
+
+        if display:
+            print('Being solved by the default LP solver...', flush=True)
+            time.sleep(0.2)
+        t0 = time.time()
+        res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
+                          A_eq=linear_eq, b_eq=const_eq,
+                          bounds=bounds, options=default)
+        stime = time.time() - t0
+        if display:
+            print('Solution status: {0}'.format(res.status))
+            print('Running time: {0:0.4f}s'.format(stime))
+
+        if res.status == 0:
+            return Solution(res.x[0], res.x, res.status, stime)
+        else:
+            status = res.status
+            msg = 'The optimal solution can not be found, '
+            reasons = ('iteration limit is reached.' if status == 1 else
+                       'the problem appears to be infeasible.' if status == 2 else
+                       'the problem appears to be unbounded.' if status == 3 else
+                       'numerical difficulties encountered.')
+            msg += 'because {}'.format(reasons)
+            warnings.warn(msg)
+            return None
 
 
 class Model:
@@ -231,7 +281,7 @@ class Model:
         ----------
         primal : bool, default True
             Specify whether return the primal formula of the model.
-            If primal=False, the method returns the daul formula.
+            If primal=False, the method returns the dual formula.
 
         refresh : bool
             Leave the argument unspecified.
@@ -352,7 +402,7 @@ class Model:
             primal = self.do_math(obj=obj)
             if 'B' in primal.vtype or 'I' in primal.vtype:
                 string = '\nIntegers detected.'
-                string += '\nDual of the continuous relaxtion is returned'
+                string += '\nDual of the continuous relaxation is returned'
                 warnings.warn(string)
 
             primal_linear = primal.linear
@@ -641,10 +691,10 @@ class Vars:
         """
 
         return self.to_affine().exp()
-    
+
     def pexp(self, scale):
         """
-        Return the perspective natural exponential function 
+        Return the perspective natural exponential function
         scale * exp(var/scale)
 
         Refer to `rsome.pexp` for full documentation.
@@ -668,10 +718,10 @@ class Vars:
         """
 
         return self.to_affine().log()
-    
+
     def plog(self, scale):
         """
-        Return the perspective of natural logarithm function 
+        Return the perspective of natural logarithm function
         scale * log(var/scale)
 
         Refer to `rsome.plog` for full documentation.
@@ -1191,10 +1241,10 @@ class Affine:
         """
 
         return Convex(self, np.zeros(self.shape), 'X', 1)
-    
+
     def pexp(self, scale):
         """
-        Return the perspective natural exponential function 
+        Return the perspective natural exponential function
         scale * exp(affine/scale)
 
         Refer to `rsome.pexp` for full documentation.
@@ -1218,10 +1268,10 @@ class Affine:
         """
 
         return Convex(self, np.zeros(self.shape), 'L', -1)
-    
+
     def plog(self, scale):
         """
-        Return the perspective of natural logarithm function 
+        Return the perspective of natural logarithm function
         scale * log(affine/scale)
 
         Refer to `rsome.plog` for full documentation.
@@ -1635,11 +1685,11 @@ class Convex:
     def __eq__(self, other):
 
         raise TypeError('Convex expressions are not applied to equality constraints')
-    
+
     def sum(self, axis=None):
 
         if self.xtype not in 'XL':
-            raise ValueError('The convex function does not support the sum() method.')
+            raise ValueError('Convex functions do not support the sum() method.')
 
         return Convex(self.affine_in, self.affine_out.sum(axis=axis),
                       self.xtype, self.sign, self.multiplier, axis)
@@ -1647,11 +1697,12 @@ class Convex:
 
 class PerspConvex(Convex):
 
-    def __init__(self, affine_in, affine_scale, affine_out, xtype, sign, multiplier=1):
+    def __init__(self, affine_in, affine_scale, affine_out, xtype, sign,
+                 multiplier=1):
 
         super().__init__(affine_in, affine_out, xtype, sign, multiplier)
         self.affine_scale = affine_scale
-    
+
     def __repr__(self):
 
         xtypes = {'X': 'natural exponential',
@@ -1664,9 +1715,10 @@ class PerspConvex(Convex):
 
         suffix = 's' if self.size > 1 else ''
         # string = shapes + ' ' + 'perspective' + suffix  xtypes[self.xtype] + suffix
-        string = f"{shapes} perspective expression{suffix} of the {xtypes[self.xtype]}"
+        xtype = xtypes[self.xtype]
+        string = f"{shapes} perspective expression{suffix} of the {xtype}"
         return string
-    
+
     def __neg__(self):
 
         return PerspConvex(self.affine_in, self.affine_scale, -self.affine_out,
@@ -1675,42 +1727,42 @@ class PerspConvex(Convex):
     def __add__(self, other):
 
         convex = super().__add__(other)
-        
+
         return PerspConvex(convex.affine_in, self.affine_scale, convex.affine_out,
                            convex.xtype, convex.sign, convex.multiplier)
-    
+
     def __radd__(self, other):
 
         return self.__add__(other)
-    
+
     def __mul__(self, other):
 
         convex = super().__mul__(other)
-        
+
         return PerspConvex(convex.affine_in, self.affine_scale, convex.affine_out,
                            convex.xtype, convex.sign, convex.multiplier)
-    
+
     def __rmul__(self, other):
 
         return self.__mul__(other)
-    
+
     def __le__(self, other):
 
         left = self - other
         if left.sign == -1:
             raise ValueError('Nonconvex constraints.')
 
-        return PCvxConstr(left.model, 
+        return PCvxConstr(left.model,
                           left.affine_in, left.affine_scale, left.affine_out,
                           left.multiplier, left.xtype)
-    
+
     def __ge__(self, other):
 
         right = other - self
         if right.sign == -1:
             raise ValueError('Nonconvex constraints.')
 
-        return PCvxConstr(right.model, 
+        return PCvxConstr(right.model,
                           right.affine_in, right.affine_scale, right.affine_out,
                           right.multiplier, right.xtype)
 
@@ -1963,9 +2015,9 @@ class CvxConstr:
 
 class PCvxConstr(CvxConstr):
 
-    def __init__(self, model, affine_in, affine_scale, affine_out, 
+    def __init__(self, model, affine_in, affine_scale, affine_out,
                  multiplier, xtype):
-        
+
         super().__init__(model, affine_in, affine_out, multiplier, xtype)
         self.affine_scale = affine_scale
 
@@ -2624,9 +2676,9 @@ class DecAffine(Affine):
                          ctype=self.ctype, fixed=self.fixed)
 
     def __add__(self, other):
-        
+
         expr = super().__add__(other)
-        
+
         if isinstance(other, (DecAffine, DecVar, DecVarSub)):
             other = other.to_affine()
             self_is_fixed = self.fixed and len(self.event_adapt) == 1
@@ -2780,15 +2832,12 @@ class DecAffine(Affine):
         rso.exp : equivalent function
         """
 
-        # if self.size > 1:
-        #     raise ValueError('The expression must be a scalar')
-
-        return DecConvex(Convex(self, np.zeros(self.shape), 'X', 1), 
+        return DecConvex(Convex(self, np.zeros(self.shape), 'X', 1),
                          self.event_adapt)
-    
+
     def pexp(self, scale):
         """
-        Return the perspective of natural exponential function 
+        Return the perspective of natural exponential function
         scale * exp(affine/scale)
 
         Refer to `rsome.pexp` for full documentation.
@@ -2798,10 +2847,8 @@ class DecAffine(Affine):
         rso.pexp : equivalent function
         """
 
-        # if self.size > 1:
-        #     raise ValueError('The expression must be a scalar')
-
-        return DecPerspConvex(PerspConvex(self, scale, np.zeros(self.shape), 'X', 1), 
+        return DecPerspConvex(PerspConvex(self, scale,
+                                          np.zeros(self.shape), 'X', 1),
                               self.event_adapt)
 
     def log(self):
@@ -2815,12 +2862,9 @@ class DecAffine(Affine):
         rso.log : equivalent function
         """
 
-        # if self.size > 1:
-        #     raise ValueError('The expression must be a scalar')
-
-        return DecConvex(Convex(self, np.zeros(self.shape), 'L', -1), 
+        return DecConvex(Convex(self, np.zeros(self.shape), 'L', -1),
                          self.event_adapt)
-    
+
     def plog(self, scale):
         """
         Return the perspective of natural logarithm function
@@ -2833,10 +2877,8 @@ class DecAffine(Affine):
         rso.plog : equivalent function
         """
 
-        # if self.size > 1:
-        #     raise ValueError('The expression must be a scalar')
-
-        return DecPerspConvex(PerspConvex(self, scale, np.zeros(self.shape), 'L', -1),
+        return DecPerspConvex(PerspConvex(self, scale,
+                                          np.zeros(self.shape), 'L', -1),
                               self.event_adapt)
 
     def entropy(self):
@@ -2875,7 +2917,7 @@ class DecAffine(Affine):
         elif isinstance(left, DecPerspConvex):
             if left.sign == -1:
                 raise ValueError('Nonconvex constraints.')
-            constr = PCvxConstr(left.model, 
+            constr = PCvxConstr(left.model,
                                 left.affine_in, left.affine_scale, left.affine_out,
                                 left.multiplier, left.xtype)
             return DecPCvxConstr(constr, left.event_adapt)
@@ -2897,7 +2939,7 @@ class DecAffine(Affine):
         elif isinstance(left, DecPerspConvex):
             if left.sign == -1:
                 raise ValueError('Nonconvex constraints.')
-            constr = PCvxConstr(left.model, 
+            constr = PCvxConstr(left.model,
                                 left.affine_in, left.affine_scale, left.affine_out,
                                 left.multiplier, left.xtype)
             return DecPCvxConstr(constr, left.event_adapt)
@@ -2975,7 +3017,7 @@ class DecPerspConvex(PerspConvex):
         super().__init__(convex.affine_in, convex.affine_scale, convex.affine_out,
                          convex.xtype, convex.sign, convex.multiplier)
         self.event_adapt = event_adapt
-    
+
     def __neg__(self):
 
         expr = super().__neg__()
@@ -3179,6 +3221,7 @@ class DecCvxConstr(CvxConstr):
         super().__init__(constr.model, constr.affine_in,
                          constr.affine_out, constr.multiplier, constr.xtype)
         self.event_adapt = event_adapt
+
 
 class DecPCvxConstr(PCvxConstr):
 

@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=3c43d41fec63698323ec2e6f7a6a97cc5739c728">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -77,7 +77,7 @@
 
 <hr />
 
-<p>The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver <code class="language-plaintext highlighter-rouge">linprog()</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.</p>
+<p>The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, RSOME relies on open-source solvers imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package to solve linear programming problems. If SciPy 1.9.0 or above is installed, the default solver <code class="language-plaintext highlighter-rouge">milp()</code> is capable of solving problems with integer variables. However, if the installed SciPy package is 1.8.1 or below, the default solver is <code class="language-plaintext highlighter-rouge">linprog()</code> and it is only able to address continuous variables. Besides the default solver, RSOME also provides interfaces for other open-source and commercial solvers. Detailed information of these solver interfaces is presented in the following table.</p>
 
 <table>
   <thead>
@@ -86,7 +86,7 @@
       <th style="text-align: left">License  type</th>
       <th style="text-align: left">Required version</th>
       <th style="text-align: left">RSOME interface</th>
-      <th style="text-align: left">Integer variables</th>
+      <th style="text-align: left">Integrality constraints</th>
       <th style="text-align: left">Second-order cone constraints</th>
       <th style="text-align: left">Exponential cone constraints</th>
     </tr>
@@ -97,7 +97,7 @@
       <td style="text-align: left">Open-source</td>
       <td style="text-align: left">&gt;= 1.2.1</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
-      <td style="text-align: left">No</td>
+      <td style="text-align: left">Yes for 1.9.0 or above</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -158,7 +158,7 @@
     <tr>
       <td style="text-align: left"><a href="https://www.shanshu.ai/copt">COPT</a></td>
       <td style="text-align: left">Commercial</td>
-      <td style="text-align: left">&gt;= 5.0</td>
+      <td style="text-align: left">&gt;= 5.0.1</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpt_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>

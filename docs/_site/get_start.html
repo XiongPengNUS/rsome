@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=3c43d41fec63698323ec2e6f7a6a97cc5739c728">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -618,7 +618,7 @@ Solve the model with the selected solver interface.
             So far the argument only applies to Gurobi, CPLEX, and MOSEK.
 </code></pre></div></div>
 
-<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. The current version of RSOME uses the linear programing solver <code class="language-plaintext highlighter-rouge">linprog</code> imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package as the default solver. Warnings will be raised if integer variables or nonlinear constraints appearing in the model. Other available solvers and information on their interfaces are presented in the table below.</p>
+<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. If the solver is unspecified, the default solver imported from the the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> is used to solve the RSOME model. If SciPy is upgraded to 1.9.0 or above, the default solver is the <code class="language-plaintext highlighter-rouge">milp()</code> function, which is capable of solving mixed-integer linear programs. If the installed SciPy package is 1.8.1 or below, the default solver is <code class="language-plaintext highlighter-rouge">linprog()</code> and it is only capable of solving linear programming problems with continuous decision variables. Other open-source and commercial solvers can also be used in RSOME. Details of the interfaces for calling these external solvers are presented in the table below.</p>
 
 <table>
   <thead>
@@ -627,7 +627,7 @@ Solve the model with the selected solver interface.
       <th style="text-align: left">License  type</th>
       <th style="text-align: left">Required version</th>
       <th style="text-align: left">RSOME interface</th>
-      <th style="text-align: left">Integer variables</th>
+      <th style="text-align: left">Integrality constraints</th>
       <th style="text-align: left">Second-order cone constraints</th>
       <th style="text-align: left">Exponential cone constraints</th>
     </tr>
@@ -638,7 +638,7 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">Open-source</td>
       <td style="text-align: left">&gt;= 1.2.1</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
-      <td style="text-align: left">No</td>
+      <td style="text-align: left">Yes for 1.9.0 or above</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -699,7 +699,7 @@ Solve the model with the selected solver interface.
     <tr>
       <td style="text-align: left"><a href="https://www.shanshu.ai/copt">COPT</a></td>
       <td style="text-align: left">Commercial</td>
-      <td style="text-align: left">&gt;= 5.0</td>
+      <td style="text-align: left">&gt;= 5.0.1</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpt_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -708,12 +708,13 @@ Solve the model with the selected solver interface.
   </tbody>
 </table>
 
-<p>The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, or CPLEX to solve it. The interfaces for these solvers are imported by the following commands.</p>
+<p>The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, CPLEX, or COPT to solve it. The interfaces for these solvers are imported by the following commands.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">eco_solver</span> <span class="k">as</span> <span class="n">eco</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
 <span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cpx_solver</span> <span class="k">as</span> <span class="n">cpx</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cpt_solver</span> <span class="k">as</span> <span class="n">cpt</span>
 </code></pre></div></div>
 
 <p>The interfaces can be then used to attain the solution.</p>
@@ -749,6 +750,17 @@ Solution status: 1
 Running time: 0.0175s
 </code></pre></div></div>
 
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cardinal Optimizer v5.0.1. Build date Jun 20 2022
+Copyright Cardinal Operations 2022. All Rights Reserved
+
+Being solved by COPT...
+Solution status: 1
+Running time: 0.0035s
+</code></pre></div></div>
+
 <p>It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument <code class="language-plaintext highlighter-rouge">display</code> to be <code class="language-plaintext highlighter-rouge">False</code>.</p>
 
 <p>The third argument <code class="language-plaintext highlighter-rouge">params</code> is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The <code class="language-plaintext highlighter-rouge">params</code> argument is a <code class="language-plaintext highlighter-rouge">dict</code> type object in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;, ..., &lt;paramk&gt;: &lt;valuek&gt;}</code>. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
@@ -772,6 +784,7 @@ Running time: 0.0175s
 <h3 id="mean-variance-portfolio"><a href="example_mv_portfolio">Mean-Variance Portfolio</a></h3>
 <h3 id="integer-programming-for-sudoku"><a href="example_sudoku">Integer Programming for Sudoku</a></h3>
 <h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC Power Flow</a></h3>
+<h3 id="the-unit-commitment-problem"><a href="example_ucp">The Unit Commitment Problem</a></h3>
 <h3 id="box-with-the-maximum-volume"><a href="example_max_volume_box">Box with the Maximum Volume</a></h3>
 
 <h2 id="reference">Reference</h2>

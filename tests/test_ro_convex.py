@@ -418,7 +418,10 @@ def test_quad(array, const):
     with pytest.raises(TypeError):
         rso.quad(x, qmat) + const == 0
 
+
 rd.seed(1)
+
+
 @pytest.mark.parametrize('xvalue, zvalue', [
     (rd.rand(), rd.rand()),
     (rd.rand(), rd.rand())
@@ -482,6 +485,8 @@ def test_expcone(xvalue, zvalue):
 
 
 rd.seed(1)
+
+
 @pytest.mark.parametrize('xvalue', [
     rd.rand(3, 5),
     rd.rand(2, 3, 2)
@@ -526,6 +531,8 @@ def test_exp(xvalue):
 
 
 rd.seed(2)
+
+
 @pytest.mark.parametrize('xvalue, scales', [
     (rd.rand(3, 5), np.maximum(0.2, rd.rand(3, 5))),
     (rd.rand(2, 3, 2), rd.rand(3, 2))
@@ -544,7 +551,7 @@ def test_pexp(xvalue, scales):
     m.st(3*y + 2.3 >= rso.pexp(2.1*x, scales))
     m.st(x == xvalue)
     m.solve(eco)
-    
+
     assert abs(m.get() - targets.sum()) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
@@ -555,6 +562,8 @@ def test_pexp(xvalue, scales):
 
 
 rd.seed(1)
+
+
 @pytest.mark.parametrize('xvalue', [
     rd.rand(3, 5),
     rd.rand(2, 3, 2)
@@ -599,6 +608,8 @@ def test_log(xvalue):
 
 
 rd.seed(2)
+
+
 @pytest.mark.parametrize('xvalue, scales', [
     (rd.rand(3, 5), np.maximum(0.2, rd.rand(3, 5))),
     (rd.rand(2, 3, 2), rd.rand(3, 2))
@@ -617,7 +628,7 @@ def test_plog(xvalue, scales):
     m.st(3*y + 2.3 <= rso.plog(2.1*x, scales))
     m.st(x == xvalue)
     m.solve(eco)
-    
+
     assert abs(m.get() - targets.sum()) < 1e-4
     primal_obj = m.do_math().solve(eco).objval
     dual_obj = m.do_math(primal=False).solve(eco).objval
@@ -731,18 +742,3 @@ def test_convex_err():
     qmat = rd.rand(5, 5)
     with pytest.raises(ValueError):
         rso.quad(x, qmat)
-
-    m2 = ro.Model()
-    y = m2.dvar()
-    yy = m2.dvar(5)
-
-    """
-    with pytest.raises(ValueError):
-        rso.expcone(x, y, xx[0, 0])
-
-    with pytest.raises(ValueError):
-        rso.expcone(yy, y, x[0])
-
-    with pytest.raises(ValueError):
-        rso.kldiv(yy, x[0], 0.01)
-    """

@@ -135,9 +135,6 @@ def solve(form, display=True, params={}):
             xx = [0.] * numvar
             task.getxx(stype, xx)
 
-            # if export:
-            #     task.writedata("out.mps")
-
             if solsta in [mosek.solsta.optimal, mosek.solsta.integer_optimal]:
                 solution = Solution(xx @ form.obj.flatten(), xx, solsta, stime)
             else:

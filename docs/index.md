@@ -15,18 +15,18 @@ The RSOME package can be installed with the `pip` command:
 
 ***
 
-The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, linear programming problems are solved by the open-source solver `linprog()` imported from the `scipy.optimize` package. Details of this solver interface, together with interfaces of other open-source and commercial solvers are presented in the following table.
+The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, RSOME relies on open-source solvers imported from the `scipy.optimize` package to solve linear programming problems. If SciPy 1.9.0 or above is installed, the default solver `milp()` is capable of solving problems with integer variables. However, if the installed SciPy package is 1.8.1 or below, the default solver is `linprog()` and it is only able to address continuous variables. Besides the default solver, RSOME also provides interfaces for other open-source and commercial solvers. Detailed information of these solver interfaces is presented in the following table. 
 
-| Solver | License  type | Required version | RSOME interface |Integer variables| Second-order cone constraints| Exponential cone constraints
+| Solver | License  type | Required version | RSOME interface |Integrality constraints| Second-order cone constraints| Exponential cone constraints
 |:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|:--------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | No | No | No |
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | Yes for 1.9.0 or above | No | No |
 |[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No | No |
 |[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No | No |
 |[ECOS](https://github.com/embotech/ecos-python) | Open-source | >= 2.0.10 | `eco_solver` | Yes | Yes | Yes |
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes | No |
 |[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes | Yes |
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 5.0 | `cpt_solver` | Yes | Yes | No |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 5.0.1 | `cpt_solver` | Yes | Yes | No |
 
 
 ## A Linear Programming Example

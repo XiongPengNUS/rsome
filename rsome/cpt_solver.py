@@ -24,7 +24,6 @@ def solve(formula, display=True, params={}):
     m = env.createModel()
     m.setParam(cp.COPT.Param.Logging, False)
     m.setParam(cp.COPT.Param.LogToConsole, False)
-    
 
     c = formula.obj[0]
     A = formula.linear
@@ -36,32 +35,32 @@ def solve(formula, display=True, params={}):
 
     lb = formula.lb
     ub = formula.ub
-    lb[vtype=='B'] = 0
-    ub[vtype=='B'] = 1
+    lb[vtype == 'B'] = 0
+    ub[vtype == 'B'] = 1
 
     m.loadMatrix(c, csc_matrix(A), lhs, rhs, lb, ub, vtype)
 
     if isinstance(formula, SOCProg):
         sc_dim = []
-        sc_indices = []    
+        sc_indices = []
         for q in formula.qmat:
             sc_dim.append(len(q))
             sc_indices.extend(q)
-        
+
         ncone = len(formula.qmat)
         if ncone > 0:
             m.loadCone(ncone, None, sc_dim, sc_indices)
 
     if display:
-        print('Being solved by COPT...', flush=True)
+        print('', 'Being solved by COPT...', sep='', flush=True)
         time.sleep(0.2)
     m.solve()
+    stime = m.getAttr(cp.COPT.attr.SolvingTime)
+    if all(vtype == 'C'):
+        status = m.getAttr(cp.COPT.attr.LpStatus)
+    else:
+        status = m.getAttr(cp.COPT.attr.MipStatus)
     if display:
-        stime = m.getAttr(cp.COPT.attr.SolvingTime)
-        if all(vtype == 'C'):
-            status = m.getAttr(cp.COPT.attr.LpStatus)
-        else:
-            status = m.getAttr(cp.COPT.attr.MipStatus)
         print('Solution status: {0}'.format(status))
         print('Running time: {0:0.4f}s'.format(stime))
 
