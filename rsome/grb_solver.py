@@ -69,7 +69,8 @@ def solve(formula, display=True, params={}):
     #     grb.write("out.lp")
 
     try:
-        solution = Solution(grb.ObjVal, grb.getAttr('X'), grb.Status, grb.Runtime)
+        solution = Solution(grb.ObjVal, np.array(grb.getAttr('X')),
+                            grb.Status, grb.Runtime)
     except AttributeError:
         warnings.warn('Fail to find the optimal solution.')
         solution = None

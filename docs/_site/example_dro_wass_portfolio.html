@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="mean-risk-portfolio-optimization-with-a-wasserstein-ambiguity-set">Mean-Risk Portfolio Optimization with a Wasserstein Ambiguity Set</h3>
+
+<p>In this example, we consider the mean-risk portfolio optimization problem discussed in the paper <a href="#ref1">Mohajerin Esfahani and Kuhn (2018)</a>. Assume that in a capital market consisting of \(m\) assets whose yearly returns are captured by the random vector \(\pmb{z} = (z_1, …, z_m)\), the investor is making a decision \(\pmb{x} = (x_1, … x_m)\), where each \(x_i\) indicates the percentage of the available capital invested in the \(i\)th asset. The portfolio optimization problem is formulated as the following distributionally robust model,</p>
+
+\[\begin{align}
+\min~&amp;\sup\limits_{\mathbb{P}\in\mathcal{F}(\epsilon)} \mathbb{E}_{\mathbb{P}} \left[-\pmb{z}^{\top}\pmb{x} + \rho\left(\tau + \frac{1}{\alpha}\max\left\{-\pmb{z}^{\top}\pmb{x} - \tau, 0\right\}\right)\right] \\
+\text{s.t.} ~&amp;\pmb{1}^{\top}\pmb{x} = 1 \\
+&amp;\pmb{x}\in\mathbb{R}_+^m,
+\end{align}\]
+
+<p>where the objective is to a weighted summation of the mean and the conditional value at risk (CVaR) of the portfolio loss \(-\pmb{z}^{\top}\pmb{x}\). The constant \(\alpha \in (0, 1]\) is referred to as the confidence level of the CVaR, and \(\rho \in \mathbb{R}_{+}\) quantifies the investor’s risk-aversion. The objective function can be replaced by the equivalent expression introduced in <a href="#ref2">Rockafellar and Uryasev (2000)</a>, so the model above can be rewritten as follows,</p>
+
+\[\begin{align}
+\min~&amp;\sup\limits_{\mathbb{P}\in\mathcal{F}(\epsilon)} \mathbb{E}_{\mathbb{P}} \left[\max\limits_{k\leq K} \left\{a_k \pmb{z}^{\top} \pmb{x} + b_k \tau\right\}\right] \\
+\text{s.t.} ~&amp;\pmb{1}^{\top}\pmb{x} = 1 \\
+&amp;\pmb{x}\in\mathbb{R}_+^m,
+\end{align}\]
+
+<p>where \(K=2\), and coefficients \(a_k\) and \(b_k\) of the piecewise linear function are given below.</p>
+
+\[\begin{cases}
+a_1 = -1,~&amp; b_1 = \rho \\
+a_2 = -1 - \frac{\rho}{\alpha}, ~&amp; b_2 = \rho(1-\frac{1}{\alpha}).
+\end{cases}\]
+
+<p>Lastly, the set \(\mathcal{F}(\epsilon)\) of distributions is a Wasserstein ambiguity set with the radius to be \(\epsilon\). According to <a href="#ref3">Chen et al. (2020)</a>, such an ambiguity set can be written as the following expression,</p>
+
+\[\begin{align}
+\mathcal{F}(\epsilon) = \left\{
+\mathbb{P} \in \mathcal{P}_0\left(\mathbb{R}^m\times\mathbb{R}\times [n]\right)~ \left|
+~\begin{array}{ll}
+(\tilde{\pmb{z}}, \tilde{u}, \tilde{j}) \in \mathbb{P} &amp;\\
+\mathbb{E}_{\mathbb{P}}\left[\tilde{u}\right] \leq \epsilon &amp; \\
+\mathbb{P}\left[\left.(\pmb{z}, u)\in\mathcal{Z}_{j} ~\right| \tilde{j} = j\right] = 1 &amp; \forall j \in [n] \\
+\mathbb{P}\left[\tilde{j} = j\right] = \frac{1}{n} &amp;
+\end{array}
+\right.
+\right\},
+\end{align}\]
+
+<p>where \(n\) is the number of records in the historical data of the yearly return \(\pmb{z}\), and the support \(\mathcal{Z}_j = \left\{(\pmb{z}, u):~|\pmb{z} - \hat{\pmb{z}}_j |_1 \leq u, ~ \pmb{z} \geq -\pmb{1} \right\}\) captures the one-norm centered at the historical record \(\hat{\pmb{z}}_j\).</p>
+
+<p>Following the paper <a href="#ref1">Mohajerin Esfahani and Kuhn (2018)</a>, model parameters are summarized as below:</p>
+
+<ul>
+  <li>Sample size of the empirical dataset \(n=30\);</li>
+  <li>Number of assets \(m=10\);</li>
+  <li>The empirical dataset \(\hat{\pmb{z}}\) used to represent the distribution of the random return \(z_i = \varphi + \zeta_i\), where \(\varphi \sim \mathcal{N}(0, 2\%)\) and \(\zeta_i \sim \mathcal{N}(i\times 3\%, i\times 2.5\%)\);</li>
+  <li>The risk-aversion coefficient \(\rho=10\);</li>
+  <li>The confidence level \(1-\alpha=80\%\);</li>
+  <li>Wasserstein ball radius \(\epsilon=0.01\);</li>
+</ul>
+
+<p>and these parameters are defined by the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phi</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+<span class="n">zeta</span> <span class="o">=</span> <span class="mf">0.03</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.025</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+<span class="n">zhat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">phi</span> <span class="o">+</span> <span class="n">zeta</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>         <span class="c1"># historical data of yearly return
+</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">1e-2</span>                            <span class="c1"># radius of the Wasserstein ball
+</span><span class="n">rho</span> <span class="o">=</span> <span class="mi">10</span>                                  <span class="c1"># risk-aversion coefficient
+</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.2</span>                               <span class="c1"># confidence level
+</span>
+<span class="n">a1</span><span class="p">,</span> <span class="n">b1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">rho</span>                          <span class="c1"># coefficients of the piecewise expression
+</span><span class="n">a2</span><span class="p">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rho</span><span class="o">/</span><span class="n">alpha</span><span class="p">,</span> <span class="n">rho</span> <span class="o">-</span> <span class="n">rho</span><span class="o">/</span><span class="n">alpha</span>  <span class="c1"># coefficients of the piecewise expression
+</span></code></pre></div></div>
+
+<h3 id="deterministic-equivalent-problem">Deterministic Equivalent Problem</h3>
+
+<p>According to <b>Corollary 5.1</b> of <a href="#ref1">Mohajerin Esfahani and Kuhn (2018)</a>, the distributionally robust model above is equivalent to deterministic problem,</p>
+
+\[\begin{align}
+\min ~&amp;\lambda \epsilon + \frac{1}{n}\sum\limits_{i=1}^n s_i \\
+\text{s.t.} ~&amp;\sum\limits_{i=1}^m x_i = 1 &amp; \\
+&amp;x_i \geq 0, &amp;\forall i \in [m] \\
+&amp;b_k \tau + a_k \hat{\pmb{z}}_j^{\top}\pmb{x} + \pmb{\gamma}_{jk}^{\top}(\pmb{d} - \pmb{C}\hat{\pmb{z}}_j) \leq s_j &amp;\forall j \in [n], \forall k \in [K] \\
+&amp;\|\pmb{C}^{\top}\pmb{\gamma}_{jk} - a_k\pmb{x}\|_{\infty} \leq \lambda \\
+&amp;\pmb{\gamma}_{jk} \in \mathbb{R}_{+}^{m} &amp; \forall j \in [n], \forall k \in [K]
+\end{align}\]
+
+<p>where the matrix \(\pmb{C} = -\pmb{I}\), and the vector \(\pmb{d} = \pmb{1}\), as a result of the support constraint \(\pmb{z} \geq -\pmb{1}\). The deterministic problem is solved using the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">C</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="p">.</span><span class="n">eye</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">lamb</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">gamma</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">lamb</span><span class="o">*</span><span class="n">epsilon</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">b1</span><span class="o">*</span><span class="n">tau</span> <span class="o">+</span> <span class="n">a1</span><span class="o">*</span><span class="p">(</span><span class="n">zhat</span><span class="o">@</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">gamma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">zhat</span><span class="p">)).</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">s</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">b2</span><span class="o">*</span><span class="n">tau</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span><span class="p">(</span><span class="n">zhat</span><span class="o">@</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">gamma</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">zhat</span><span class="p">)).</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">s</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="o">-</span><span class="n">gamma</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">a1</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="s">'inf'</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">lamb</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="o">-</span><span class="n">gamma</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">a2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="s">'inf'</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">lamb</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">gamma</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.0247s
+</code></pre></div></div>
+
+<p>The optimal decision in terms of asset allocation and the objective value are shown below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">bar</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">()</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Assets'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Percentage'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+</code></pre></div></div>
+
+<p><img src="/wass_portfolio_sol.png" alt="png" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-1.1362073575769465
+</code></pre></div></div>
+
+<h3 id="distributionally-robust-model">Distributionally Robust Model</h3>
+
+<p>We can also directly implement the distributionally robust model in a more concise and readable manner using the <code class="language-plaintext highlighter-rouge">rsome.dro</code> environment, see the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">zhat</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">,</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">x</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">maxof</span><span class="p">(</span><span class="n">a1</span><span class="o">*</span><span class="n">r</span> <span class="o">+</span> <span class="n">b1</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> 
+                         <span class="n">a2</span><span class="o">*</span><span class="n">r</span> <span class="o">+</span> <span class="n">b2</span><span class="o">*</span><span class="n">tau</span><span class="p">)),</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.0814s
+</code></pre></div></div>
+
+<p>Here, we are using the <code class="language-plaintext highlighter-rouge">rso.maxof()</code> function to define a piecewise expression of the maximum of two given terms <code class="language-plaintext highlighter-rouge">a1*r + b1*tau</code> and <code class="language-plaintext highlighter-rouge">a2*r + b2*tau</code>. Solution of this model is exactly the same as the deterministic equivalent problem.</p>
+
+<p><br /></p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Mohajerin Esfahani, Peyman, and Daniel Kuhn. 2018. <a href="https://link.springer.com/article/10.1007/s10107-017-1172-1">Data-driven distributionally robust optimization using the Wasserstein metric: Performance guarantees and tractable reformulations</a>. <i>Mathematical Programming</i> <b>171</b> 115-166.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Rockafellar, R. Tyrrell, and Stanislav Uryasev. 2000. <a href="https://citeseerx.ist.psu.edu/document?repid=rep1&amp;type=pdf&amp;doi=0df3ccfb652189488337202933d4151fc20ac31d">Optimization of conditional value-at-risk</a>. <i>Journal of risk</i> <b>2</b> 21-42.</p>
+
+<p><a id="ref3"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>. <i>Management Science</i> <b>66</b>(8) 3329–3339.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

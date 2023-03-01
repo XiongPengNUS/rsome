@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -86,9 +86,12 @@
   <li>The initial level of inventory: \(v_0=500\).</li>
 </ul>
 
-<p>These parameters are defined by the following code segment.</p>
+<p>The code segment below imports RSOME and defines parameters mentioned above.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">T</span> <span class="o">=</span> <span class="mi">24</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="mi">24</span>
 <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">d0</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">12</span><span class="p">))</span>
 <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]).</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -124,12 +127,12 @@
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span> <span class="o">+</span> <span class="n">p</span><span class="p">[:,</span> <span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">d</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">vmin</span><span class="p">)</span>
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span> <span class="o">+</span> <span class="n">p</span><span class="p">[:,</span> <span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">d</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">vmax</span><span class="p">)</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.1531s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 1.0346s
 </code></pre></div></div>
 
 <p>The worst-case total cost is represented by the variable <code class="language-plaintext highlighter-rouge">wc_cost</code>, as shown below.</p>
@@ -138,8 +141,23 @@ Running time: 0.1531s
 <span class="n">wc_cost</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>44272.82749311939
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>44272.827493119396
 </code></pre></div></div>
+
+<p>We may further investigate the decision rule \(p_{it}(\pmb{d})\) under given values of the random demand \(\pmb{d}\). For example, the code below visualizes the values of product orders under the nominal demand \(\pmb{d}_0\).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">p_nomial</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">d</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">d0</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">p_nomial</span><span class="p">.</span><span class="n">T</span><span class="p">,</span> 
+         <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s">'$p_1$'</span><span class="p">,</span> <span class="sa">r</span><span class="s">'$p_2$'</span><span class="p">,</span> <span class="sa">r</span><span class="s">'$p_3$'</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Period'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Product Order'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/inv_product_sol_aly.png" alt="png" /></p>
 
 <p>It is demonstrated in <a href="#ref2">de Ruiter et al. (2016)</a> that there could be multiple optimal solutions for this robust production-inventory problem. All of these optimal robust solutions have the same worst-case objective value, but the affine decision rule \(\pmb{p}(\pmb{d})\) could be greatly vary, leading to very different performance under non worst-case realizations. For example, if different solvers are used to solve the robust model above, solutions for \(\pmb{p}(\pmb{d})\) could be quite different.</p>
 
@@ -164,12 +182,12 @@ Running time: 0.1531s
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">v</span> <span class="o">+</span> <span class="n">p</span><span class="p">[:,</span> <span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">d</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">vmin</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">uset</span><span class="p">))</span>
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">v</span> <span class="o">+</span> <span class="n">p</span><span class="p">[:,</span> <span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">d</span><span class="p">[:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">vmax</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">uset</span><span class="p">))</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
-Solution status: 2
-Running time: 0.1531s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.3694s
 </code></pre></div></div>
 <p>The objective value is the total production cost under the nominal demand trajectory.</p>
 
@@ -177,12 +195,13 @@ Running time: 0.1531s
 <span class="n">nom_cost</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>35076.73675839575
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>35076.73675839579
 </code></pre></div></div>
 
 <p>Please refer to Table 1 of <a href="#ref2">de Ruiter et al. (2016)</a> to verify the worst-case and nominal production costs.</p>
 
 <p><br /></p>
+
 <h4 id="reference">Reference</h4>
 
 <p><a id="ref1"></a></p>

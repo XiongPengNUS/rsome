@@ -25,12 +25,12 @@ $$
 \mathcal{F} =
 \left\{
 \mathbb{P}\in\mathcal{P}(\mathbb{R}^N\times\mathbb{R}^{N+1})
-\left|
-\begin{array}
-~(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
+~\left|~
+\begin{array}{ll}
+(\tilde{\pmb{z}}, \tilde{\pmb{u}}) \sim \mathbb{P} \\
 \mathbb{P}[\pmb{z}\in\mathcal{Z}] = 1 \\
 \mathbb{E}_{\mathbb{P}}[\tilde{\pmb{z}}] = \pmb{\mu} & \\
-\mathbb{E}_{\mathbb{P}}[\tilde{u}_j] \leq \sigma_j^2, & \forall j \in [N] \\
+\mathbb{E}_{\mathbb{P}}[\tilde{u}_j] \leq \sigma_j^2 & \forall j \in [N] \\
 \mathbb{E}_{\mathbb{P}}[\tilde{u}_{N+1}] \leq \pmb{e}^{\top}\pmb{\Sigma}\pmb{e}
 \end{array}
 \right.

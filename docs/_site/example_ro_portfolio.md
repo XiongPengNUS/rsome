@@ -73,21 +73,21 @@ import matplotlib.pyplot as plt
 obj_val = model.get()                   # the optimal objective value
 x_sol = x.get()                         # the optimal investment decision
 
-plt.plot(range(1, n+1), x_sol,
-         linewidth=2, color='b')
+plt.plot(range(1, n+1), x_sol, linewidth=2, color='b')
 plt.xlabel('Stocks')
 plt.ylabel('Fraction of investment')
 plt.show()
 print('Objective value: {0:0.4f}'.format(obj_val))
 ```
 
-
 ![png](example_ro.png)
 
 
     Objective value: 1.1709
 
+
 <br>
+
 #### Reference
 
 <a id="ref1"></a>

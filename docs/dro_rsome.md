@@ -33,9 +33,9 @@ $$
 \begin{align}
 \mathcal{F}_m = \left\{
 \mathbb{P}\in\mathcal{P}_0\left(\mathbb{R}^{J}\times[S]\right)
-\left|
-\begin{array}
-~\left(\tilde{\pmb{z}}, \tilde{s}\right) \sim \mathbb{P} & \\
+~\left|~
+\begin{array}{ll}
+\left(\tilde{\pmb{z}}, \tilde{s}\right) \sim \mathbb{P} & \\
 \mathbb{E}_{\mathbb{P}}[\tilde{\pmb{z}}|\tilde{s}\in\mathcal{E}_{km}] \in \mathcal{Q}_{km} & \forall k \in [K] \\
 \mathbb{P}[\tilde{\pmb{z}}\in \mathcal{Z}_{sm}| \tilde{s}=s]=1 & \forall s \in [S] \\
 \mathbb{P}[\tilde{s}=s] = p_s & \forall s \in [S] \\
@@ -53,26 +53,26 @@ Here for each constraint indexed by \\(m\in\mathcal{M}\_2\\),
 2. The support of \\(\tilde{\pmb{z}}\\) in each scenario \\(s\in[S]\\) is specified to be another SOC or EC representable set \\(\mathcal{Z}\_{sm}\\);
 3. Probabilities of scenarios, collectively denoted by a vector \\(\pmb{p}\\), are constrained by a third SOC or EC representable subset \\(\mathcal{P}_m\subseteq\left\\{\pmb{p}\in \mathbb{R}\_{+\+}^S \left\| \pmb{e}^{\top}\pmb{p}=1 \right\. \right\\}\\) in the probability simplex.
 
-Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types—-the <i>event-wise static adaptation</i> denoted by \\(\mathcal{A}(C)\\) as well as the <i>event-wise affine adaptation</i> denoted by \\(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\\). In particular, given a fixed number of \\(S\\) scenarios and a
+Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types--the <i>event-wise static adaptation</i> denoted by \\(\mathcal{A}(C)\\) as well as the <i>event-wise affine adaptation</i> denoted by \\(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\\). In particular, given a fixed number of \\(S\\) scenarios and a
 partition \\(\mathcal{C}\\) of these scenarios (<i>i.e.</i>, a collection of mutually exclusive and collectively exhaustive
 events), the event-wise recourse adaptation is formally defined as follows:
 
 $$
 \begin{align}
 &\mathcal{A}\left(\mathcal{C}\right) = \left\{
-x: [S] \mapsto \mathbb{R} \left|
-\begin{array}
-~x(s)=x^{\mathcal{E}}, \mathcal{E}=\mathcal{H}_{\mathcal{C}}(s) \\
+x: [S] \mapsto \mathbb{R} ~\left|~
+\begin{array}{l}
+x(s)=x^{\mathcal{E}}, \mathcal{E}=\mathcal{H}_{\mathcal{C}}(s) \\
 \text{for some } x^{\mathcal{E}} \in \mathbb{R}
 \end{array}
 \right.
 \right\}, \\
 &\overline{\mathcal{A}}\left(\mathcal{C}, \mathcal{J}\right) = \left\{
 y: [S]\times\mathbb{R}^{J} \mapsto \mathbb{R}
-\left|
-\begin{array}
-~y(s, \pmb{z}) = y^0(s) + \sum\limits_{j\in\mathcal{J}}y^j(s)z_j \\
-\text{for some }y^0(s), y^j(s) \in \mathcal{A}\left(\mathcal{C}\right), j\in\mathcal{J}
+~\left|~
+\begin{array}{ll}
+y(s, \pmb{z}) = y^0(s) + \sum\limits_{j\in\mathcal{J}}y^j(s)z_j & \\
+\text{for some }y^0(s), y^j(s) \in \mathcal{A}\left(\mathcal{C}\right) & j\in\mathcal{J}
 \end{array}
 \right.
 \right\}
@@ -288,8 +288,8 @@ Take the supports of conditional expectations below, for example,
 $$
 \begin{align}
 &\mathbb{E}\left[\tilde{\pmb{z}}|s\in\mathcal{E}_{1}\right] \in \left\{\pmb{z}: \mathbb{R}^3 \left|
-\begin{array}
-~|\pmb{z}| \leq 1 \\
+\begin{array}{l}
+|\pmb{z}| \leq 1 \\
 \|\pmb{z}\|_1 \leq 1.5
 \end{array}
 \right.
@@ -348,9 +348,9 @@ $$
 \begin{align}
 &\mathbb{P}\left[\tilde{\pmb{z}}\in \left\{
   \left.
-  \pmb{z}: \mathbb{R}^3 \left|
-  \begin{array}
-  ~|\pmb{z}| \leq 1 \\
+  \pmb{z}: \mathbb{R}^3 ~\left|
+  \begin{array}{l}
+  |\pmb{z}| \leq 1 \\
   \|\pmb{z}\| \leq 1.5
   \end{array}
   \right.
@@ -569,6 +569,8 @@ model.st(2x >= z)               # worst-case over the support of fset
 ## Application Examples <a name="section3.6"></a>
 ### [Distributionally Robust Portfolio](example_dro_portfolio)
 ### [Distributionally Robust Medical Appointment](example_dro_mas)
+### [Mean-Risk Portfolio Optimization with a Wasserstein Ambiguity Set](example_dro_wass_portfolio)
+### [Robust Satisficing for Portfolio Optimization](example_dro_rs_portfolio)
 ### [Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets](example_dro_nv)
 ### [Adaptive Distributionally Robust Lot-Sizing](example_dro_ls)
 ### [Distributionally Robust Vehicle Pre-Allocation](example_dro_vehicle)

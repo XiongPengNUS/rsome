@@ -79,11 +79,10 @@ Alternatively, the SAA method could be implemented by defining a scenario-wise a
 $$
 \begin{align}
 \mathbb{F} = \left\{
-\mathbb{P} \in \mathcal{P}(\mathbb{R}^n\times [N])\left|
-\begin{array}
-
-~(\tilde{\pmb{d}}, s) \sim \mathbb{P} & \\
-\mathbb{P}[\tilde{\pmb{d}} = \hat{\pmb{d}}_s|\tilde{s}=1]=1,  &\forall s\in [N] \\
+\mathbb{P} \in \mathcal{P}(\mathbb{R}^n\times [N]) ~\left|~
+\begin{array}{ll}
+(\tilde{\pmb{d}}, s) \sim \mathbb{P} & \\
+\mathbb{P}[\tilde{\pmb{d}} = \hat{\pmb{d}}_s|\tilde{s}=1]=1  &\forall s\in [N] \\
 \mathbb{P}[\tilde{s}=s] = 1, &\forall s \in [N] \\
 \text{for some }\pmb{p} \in \mathcal{P} &
 \end{array}
@@ -136,11 +135,10 @@ The second data-driven approach is referred to as sample robust optimization, wh
 $$
 \begin{align}
 \mathbb{F} = \left\{
-\mathbb{P} \in \mathcal{P}(\mathbb{R}^n\times [N])\left|
-\begin{array}
-
-~(\tilde{\pmb{d}}, s) \sim \mathbb{P} & \\
-\mathbb{P}[\|\tilde{\pmb{d}} - \hat{\pmb{d}}_s\|\leq \epsilon|\tilde{s}=1]=1,  &\forall s\in [N] \\
+\mathbb{P} \in \mathcal{P}(\mathbb{R}^n\times [N]) ~\left|~
+\begin{array}{ll}
+(\tilde{\pmb{d}}, s) \sim \mathbb{P} & \\
+\mathbb{P}[\|\tilde{\pmb{d}} - \hat{\pmb{d}}_s\|\leq \epsilon|\tilde{s}=1]=1  &\forall s\in [N] \\
 \mathbb{P}[\tilde{s}=s] = 1, &\forall s \in [N] \\
 \text{for some }\pmb{p} \in \mathcal{P} &
 \end{array}

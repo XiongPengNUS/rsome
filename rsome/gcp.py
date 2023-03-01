@@ -38,12 +38,6 @@ class Model(SOCModel):
         elif isinstance(constr, CvxConstr):
             if constr.xtype in 'XLP':
                 self.other_constr.append(constr)
-                # affine_out = constr.affine_out * (1/constr.multiplier)
-                # exprs_list = rso_broadcast(constr.affine_in, affine_out)
-                # for exprs in exprs_list:
-                #     exp_cone_constr = ExpConstr(constr.model,
-                #                                 exprs[1], 1, exprs[0])
-                #     self.exp_constr.append(exp_cone_constr)
             else:
                 super().st(constr)
         elif isinstance(constr, KLConstr):

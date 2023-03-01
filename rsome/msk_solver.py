@@ -68,13 +68,13 @@ def solve(form, display=True, params={}):
 
             if ind_int.size:
                 task.putvartypelist(ind_int,
-                                    [mosek.variabletype.type_int]
-                                    * len(ind_int))
+                                    [mosek.variabletype.type_int] *
+                                    len(ind_int))
 
             if ind_bin.size:
                 task.putvartypelist(ind_bin,
-                                    [mosek.variabletype.type_int]
-                                    * len(ind_bin))
+                                    [mosek.variabletype.type_int] *
+                                    len(ind_bin))
 
             task.putcslice(0, numvar, form.obj.flatten())
             task.putobjsense(mosek.objsense.minimize)

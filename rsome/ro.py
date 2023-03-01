@@ -1,14 +1,14 @@
-# from .socp import Model as SOCModel
 from .gcp import Model as GCPModel
 from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr
 from .lp import Vars, VarSub, Affine, Convex
-from .lp import DecRule
+from .lp import DecRule, DecRuleSub
 from .lp import RoAffine, RoConstr
+from .lp import PiecewiseConvex, PWConstr
 from .lp import Solution, def_sol
 import numpy as np
 from numbers import Real
 from collections.abc import Iterable
-# from .lpg_solver import solve as def_sol
+from .subroutines import *
 
 
 class Model:
@@ -132,7 +132,7 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if not isinstance(obj, Real):
+        if not isinstance(obj, (Real, PiecewiseConvex)):
             if isinstance(obj, VarSub):
                 if obj.indices.size > 1:
                     raise ValueError('Incorrect function dimension.')
@@ -163,7 +163,7 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if not isinstance(obj, Real):
+        if not isinstance(obj, (Real, PiecewiseConvex)):
             if isinstance(obj, VarSub):
                 if obj.indices.size > 1:
                     raise ValueError('Incorrect function dimension.')
@@ -198,8 +198,9 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if np.prod(obj.shape) > 1:
-            raise ValueError('Incorrect function dimension.')
+        if not isinstance(obj, (Real, PiecewiseConvex)):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         constraints = []
         for items in args:
@@ -243,8 +244,9 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if np.prod(obj.shape) > 1:
-            raise ValueError('Incorrect function dimension.')
+        if not isinstance(obj, (Real, PiecewiseConvex)):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         constraints = []
         for items in args:
@@ -286,7 +288,9 @@ class Model:
             if isinstance(constr, Iterable):
                 for item in constr:
                     self.st(item)
-
+            elif isinstance(constr, PWConstr):
+                for piece in constr.pieces:
+                    self.st(piece)
             elif isinstance(constr, (LinConstr, Bounds, CvxConstr,
                                      ConeConstr, ExpConstr, KLConstr)):
                 if (constr.model is not self.rc_model) or \
@@ -356,6 +360,10 @@ class Model:
             obj_constr = (self.rc_model.vars[0] >= self.sign * self.obj)
             obj_constr.support = self.obj_support
             more_roc = [obj_constr]
+        elif isinstance(self.obj, PiecewiseConvex):
+            more_roc = []
+            pw_constr = self.rc_model.vars[0] >= self.sign * self.obj
+            more_roc = pw_constr.pieces
         else:
             raise TypeError('Incorrect type for the objective function.')
 

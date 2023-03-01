@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -91,9 +91,9 @@
 \[\begin{align}
 \mathcal{F}_m = \left\{
 \mathbb{P}\in\mathcal{P}_0\left(\mathbb{R}^{J}\times[S]\right)
-\left|
-\begin{array}
-~\left(\tilde{\pmb{z}}, \tilde{s}\right) \sim \mathbb{P} &amp; \\
+~\left|~
+\begin{array}{ll}
+\left(\tilde{\pmb{z}}, \tilde{s}\right) \sim \mathbb{P} &amp; \\
 \mathbb{E}_{\mathbb{P}}[\tilde{\pmb{z}}|\tilde{s}\in\mathcal{E}_{km}] \in \mathcal{Q}_{km} &amp; \forall k \in [K] \\
 \mathbb{P}[\tilde{\pmb{z}}\in \mathcal{Z}_{sm}| \tilde{s}=s]=1 &amp; \forall s \in [S] \\
 \mathbb{P}[\tilde{s}=s] = p_s &amp; \forall s \in [S] \\
@@ -112,25 +112,25 @@
   <li>Probabilities of scenarios, collectively denoted by a vector \(\pmb{p}\), are constrained by a third SOC or EC representable subset \(\mathcal{P}_m\subseteq\left\{\pmb{p}\in \mathbb{R}_{++}^S \left| \pmb{e}^{\top}\pmb{p}=1 \right. \right\}\) in the probability simplex.</li>
 </ol>
 
-<p>Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types—-the <i>event-wise static adaptation</i> denoted by \(\mathcal{A}(C)\) as well as the <i>event-wise affine adaptation</i> denoted by \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\). In particular, given a fixed number of \(S\) scenarios and a
+<p>Dynamics of decision-making is captured by the event-wise recourse adaptation for wait-and-see decisions of two types–the <i>event-wise static adaptation</i> denoted by \(\mathcal{A}(C)\) as well as the <i>event-wise affine adaptation</i> denoted by \(\overline{\mathcal{A}}(\mathcal{C}, \mathcal{J})\). In particular, given a fixed number of \(S\) scenarios and a
 partition \(\mathcal{C}\) of these scenarios (<i>i.e.</i>, a collection of mutually exclusive and collectively exhaustive
 events), the event-wise recourse adaptation is formally defined as follows:</p>
 
 \[\begin{align}
 &amp;\mathcal{A}\left(\mathcal{C}\right) = \left\{
-x: [S] \mapsto \mathbb{R} \left|
-\begin{array}
-~x(s)=x^{\mathcal{E}}, \mathcal{E}=\mathcal{H}_{\mathcal{C}}(s) \\
+x: [S] \mapsto \mathbb{R} ~\left|~
+\begin{array}{l}
+x(s)=x^{\mathcal{E}}, \mathcal{E}=\mathcal{H}_{\mathcal{C}}(s) \\
 \text{for some } x^{\mathcal{E}} \in \mathbb{R}
 \end{array}
 \right.
 \right\}, \\
 &amp;\overline{\mathcal{A}}\left(\mathcal{C}, \mathcal{J}\right) = \left\{
 y: [S]\times\mathbb{R}^{J} \mapsto \mathbb{R}
-\left|
-\begin{array}
-~y(s, \pmb{z}) = y^0(s) + \sum\limits_{j\in\mathcal{J}}y^j(s)z_j \\
-\text{for some }y^0(s), y^j(s) \in \mathcal{A}\left(\mathcal{C}\right), j\in\mathcal{J}
+~\left|~
+\begin{array}{ll}
+y(s, \pmb{z}) = y^0(s) + \sum\limits_{j\in\mathcal{J}}y^j(s)z_j &amp; \\
+\text{for some }y^0(s), y^j(s) \in \mathcal{A}\left(\mathcal{C}\right) &amp; j\in\mathcal{J}
 \end{array}
 \right.
 \right\}
@@ -324,8 +324,8 @@ dtype: int64
 
 \[\begin{align}
 &amp;\mathbb{E}\left[\tilde{\pmb{z}}|s\in\mathcal{E}_{1}\right] \in \left\{\pmb{z}: \mathbb{R}^3 \left|
-\begin{array}
-~|\pmb{z}| \leq 1 \\
+\begin{array}{l}
+|\pmb{z}| \leq 1 \\
 \|\pmb{z}\|_1 \leq 1.5
 \end{array}
 \right.
@@ -380,9 +380,9 @@ dtype: int64
 \[\begin{align}
 &amp;\mathbb{P}\left[\tilde{\pmb{z}}\in \left\{
   \left.
-  \pmb{z}: \mathbb{R}^3 \left|
-  \begin{array}
-  ~|\pmb{z}| \leq 1 \\
+  \pmb{z}: \mathbb{R}^3 ~\left|
+  \begin{array}{l}
+  |\pmb{z}| \leq 1 \\
   \|\pmb{z}\| \leq 1.5
   \end{array}
   \right.
@@ -593,6 +593,8 @@ dtype: int64
 <h2 id="application-examples-">Application Examples <a name="section3.6"></a></h2>
 <h3 id="distributionally-robust-portfolio"><a href="example_dro_portfolio">Distributionally Robust Portfolio</a></h3>
 <h3 id="distributionally-robust-medical-appointment"><a href="example_dro_mas">Distributionally Robust Medical Appointment</a></h3>
+<h3 id="mean-risk-portfolio-optimization-with-a-wasserstein-ambiguity-set"><a href="example_dro_wass_portfolio">Mean-Risk Portfolio Optimization with a Wasserstein Ambiguity Set</a></h3>
+<h3 id="robust-satisficing-for-portfolio-optimization"><a href="example_dro_rs_portfolio">Robust Satisficing for Portfolio Optimization</a></h3>
 <h3 id="multi-item-newsvendor-problem-with-wasserstein-ambiguity-sets"><a href="example_dro_nv">Multi-Item Newsvendor Problem with Wasserstein Ambiguity Sets</a></h3>
 <h3 id="adaptive-distributionally-robust-lot-sizing"><a href="example_dro_ls">Adaptive Distributionally Robust Lot-Sizing</a></h3>
 <h3 id="distributionally-robust-vehicle-pre-allocation"><a href="example_dro_vehicle">Distributionally Robust Vehicle Pre-Allocation</a></h3>

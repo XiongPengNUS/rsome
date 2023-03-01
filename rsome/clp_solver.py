@@ -16,13 +16,13 @@ def solve(formula, display=True, params={}):
 
     try:
         if formula.qmat:
-            warnings.warn('the LP solver ignnores SOC constriants.')
+            warnings.warn('the LP solver ignores SOC constraints.')
     except AttributeError:
         pass
 
     try:
         if formula.xmat:
-            warnings.warn('The LP solver ignores exponential cone constriants.')
+            warnings.warn('The LP solver ignores exponential cone constraints.')
     except AttributeError:
         pass
 
@@ -89,7 +89,6 @@ def solve(formula, display=True, params={}):
             left += ineq_linear[:, is_bin] * bv
 
         s += (left <= ineq_const)
-        # print(ineq_linear[:, is_bin].toarray())
 
     cbcModel = s.getCbcModel()
     s.writeLp('blah.lp')

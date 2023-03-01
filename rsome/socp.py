@@ -124,11 +124,9 @@ class Model(LPModel):
                     aux2 = self.dvar(constr.affine_in.shape, aux=True)
                     aux3 = self.dvar(constr.affine_out.shape, aux=True)
                     affine_in = constr.affine_in * constr.multiplier
-                    self.aux_constr.append(aux1 - 0.5*(1+constr.affine_out)
-                                           == 0)
+                    self.aux_constr.append(aux1 - 0.5*(1+constr.affine_out) == 0)
                     self.aux_constr.append(aux2 - affine_in == 0)
-                    self.aux_constr.append(aux3 - 0.5 * (1-constr.affine_out)
-                                           == 0)
+                    self.aux_constr.append(aux3 - 0.5 * (1-constr.affine_out) == 0)
                     bounds = (aux3 >= 0)
                     if isinstance(bounds, Bounds):
                         self.aux_bounds.append(bounds)
@@ -145,11 +143,9 @@ class Model(LPModel):
                     aux3 = self.dvar(1, aux=True)
                     aux4 = self.dvar(1, aux=True)
                     affine_in = constr.affine_in * constr.multiplier
-                    self.aux_constr.append(aux1 - 0.5 * (1-aux4)
-                                           == 0)
+                    self.aux_constr.append(aux1 - 0.5 * (1-aux4) == 0)
                     self.aux_constr.append(aux2 - affine_in == 0)
-                    self.aux_constr.append(aux3 - 0.5 * (1+aux4)
-                                           == 0)
+                    self.aux_constr.append(aux3 - 0.5 * (1+aux4) == 0)
                     self.aux_constr.append(aux4 + constr.affine_out <= 0)
                     bounds = (aux3 >= 0)
                     if isinstance(bounds, Bounds):

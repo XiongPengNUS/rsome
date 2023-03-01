@@ -66,7 +66,8 @@ def solve(formula, display=True, params={}):
 
     try:
         x_sol = np.array(m.getValues())
-        solution = Solution(x_sol[0], x_sol, status, stime)
+        objval = formula.obj[0] @ x_sol
+        solution = Solution(objval, x_sol, status, stime)
     except cp.CoptError:
         warnings.warn('Fail to find the optimal solution.')
         solution = None

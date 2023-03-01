@@ -18,7 +18,8 @@
   <li> <a href="ro_rsome#section2.2">Random Variables and Uncertainty Sets </a></li>
   <li> <a href='ro_rsome#section2.3'>The Worst-Case Objective and Constraints </a></li>
   <li> <a href="ro_rsome#section2.4">Linear Decision Rules for Adaptive Decision-Making </a></li>
-  <li> <a href="ro_rsome#section2.5">Application Examples </a></li>
+  <li> <a href="ro_rsome#section2.5">Solution Analysis </a></li>
+  <li> <a href="ro_rsome#section2.6">Application Examples </a></li>
 </ul>
 </toc></th></tr>
 

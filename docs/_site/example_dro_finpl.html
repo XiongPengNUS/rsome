@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -72,11 +72,11 @@
 <p>Besides the deterministic equivalent of the stochastic model, the financial planning problem can also be formulated as a distributionally robust optimization problem where the decision tree is represented by the following ambiguity set,</p>
 
 \[\mathcal{F} = \left\{
-\mathbb{P}\in\mathcal{P}_0(\mathbb{R}^{3\times2}\times[S]) \left|
-\begin{array}
-~&amp;(\tilde{\pmb{z}}, \tilde{s}) \in \mathbb{P} &amp;&amp;\\
-&amp;\mathbb{P}[\tilde{\pmb{z}} \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1, &amp;&amp;\forall s\in[S]\\
-&amp;\mathbb{P}[\tilde{s}=s] = 1/S
+\mathbb{P}\in\mathcal{P}_0(\mathbb{R}^{3\times2}\times[S]) ~ \left| ~
+\begin{array}{ll}
+(\tilde{\pmb{z}}, \tilde{s}) \in \mathbb{P} &amp;\\
+\mathbb{P}[\tilde{\pmb{z}} \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1 &amp;\forall s\in[S]\\
+\mathbb{P}[\tilde{s}=s] = 1/S &amp;
 \end{array}
 \right.
 \right\},\]

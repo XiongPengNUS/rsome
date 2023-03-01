@@ -23,9 +23,12 @@ with random variable \\(d_t\\) representing the uncertain product demand during 
 - The maximum storage capacity of the warehouse: \\(v_{\max}=2000\\)
 - The initial level of inventory: \\(v_0=500\\).
 
-These parameters are defined by the following code segment.
+The code segment below imports RSOME and defines parameters mentioned above.
 
 ```python
+from rsome import ro
+import numpy as np
+
 T = 24
 t = np.arange(1, T+1)
 d0 = 1000 * (1 + 0.5*np.sin(np.pi*(t-1)/12))
@@ -65,13 +68,13 @@ for t in range(T):
     model.st(v + p[:, :t+1].sum() - d[:t+1].sum() >= vmin)
     model.st(v + p[:, :t+1].sum() - d[:t+1].sum() <= vmax)
 
-model.solve(grb)
+model.solve()
 ```
 
 ```
-Being solved by Gurobi...
-Solution status: 2
-Running time: 0.1531s
+Being solved by the default LP solver...
+Solution status: 0
+Running time: 1.0346s
 ```
 
 The worst-case total cost is represented by the variable `wc_cost`, as shown below.
@@ -82,8 +85,25 @@ wc_cost
 ```
 
 ```
-44272.82749311939
+44272.827493119396
 ```
+
+We may further investigate the decision rule \\(p_{it}(\pmb{d})\\) under given values of the random demand \\(\pmb{d}\\). For example, the code below visualizes the values of product orders under the nominal demand \\(\pmb{d}_0\\). 
+
+```python
+import matplotlib.pyplot as plt
+
+p_nomial = p(d.assign(d0))
+plt.plot(np.arange(1, T+1), p_nomial.T, 
+         marker='o', label=[r'$p_1$', r'$p_2$', r'$p_3$'])
+plt.legend(fontsize=12)
+plt.xlabel('Period', fontsize=14)
+plt.ylabel('Product Order', fontsize=14)
+plt.show()
+```
+
+![png](inv_product_sol_aly.png)
+
 
 It is demonstrated in [de Ruiter et al. (2016)](#ref2) that there could be multiple optimal solutions for this robust production-inventory problem. All of these optimal robust solutions have the same worst-case objective value, but the affine decision rule \\(\pmb{p}(\pmb{d})\\) could be greatly vary, leading to very different performance under non worst-case realizations. For example, if different solvers are used to solve the robust model above, solutions for \\(\pmb{p}(\pmb{d})\\) could be quite different.
 
@@ -109,13 +129,13 @@ for t in range(T):
     model.st((v + p[:, :t+1].sum() - d[:t+1].sum() >= vmin).forall(uset))
     model.st((v + p[:, :t+1].sum() - d[:t+1].sum() <= vmax).forall(uset))
 
-model.solve(grb)
+model.solve()
 ```
 
 ```
-Being solved by Gurobi...
-Solution status: 2
-Running time: 0.1531s
+Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.3694s
 ```
 The objective value is the total production cost under the nominal demand trajectory.
 
@@ -125,12 +145,13 @@ nom_cost
 ```
 
 ```
-35076.73675839575
+35076.73675839579
 ```
 
 Please refer to Table 1 of [de Ruiter et al. (2016)](#ref2) to verify the worst-case and nominal production costs.
 
 <br>
+
 #### Reference
 
 <a id="ref1"></a>

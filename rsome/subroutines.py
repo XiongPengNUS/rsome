@@ -45,10 +45,8 @@ def sp_matmul(ndarray, affine, shape):
         elif len(ndarray.shape) == 1:
             ndarray = ndarray.reshape((1, ndarray.size))
             row, col = 1, shape[-1]
-            # outer = shape[:-1]
         else:
             row, col = shape[-2], shape[-1]
-            # outer = shape[:-2]
 
         inner = ndarray.shape[-1]
 
@@ -227,8 +225,8 @@ def comb_set(s1, s2):
     dc = {item: str(d1[item]) + '-' + str(d2[item])
           for item in range(len(d1))}
 
-    values: List[str] = []
-    output: List[List[int]] = []
+    values = []
+    output = []
     for key in dc:
         if dc[key] in values:
             index = values.index(dc[key])
@@ -238,223 +236,6 @@ def comb_set(s1, s2):
             values.append(dc[key])
 
     return output
-
-
-def norm(affine, degree=2):
-    """
-    Return the first, second, or infinity norm of a 1-D array.
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expressions.
-        Input array. The array must be 1-D.
-    degree : {1, 2, numpy.inf}, optional
-        Order of the norm function. It can only be 1, 2, or infinity. The
-        default value is 2, i.e., the Euclidean norm.
-
-    Returns
-    -------
-    n : Convex
-        The norm of the given array.
-    """
-
-    return affine.norm(degree)
-
-
-def square(affine):
-    """
-    Return the element-wise square of an array.
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array.
-
-    Returns
-    -------
-    n : Convex
-        The element-wise squares of the given array
-    """
-
-    return affine.to_affine().square()
-
-
-def sumsqr(affine):
-    """
-    Return the sum of squares of an array.
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array. The array must be 1-D.
-
-    Returns
-    -------
-    n : Convex
-        The sum of squares of the given array
-    """
-
-    return affine.to_affine().sumsqr()
-
-
-def quad(affine, qmat):
-    """
-    Return the quadratic expression affine @ qmat @ affine.
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array. The array must be 1-D.
-    qmat : a positive or negative semidefinite matrix.
-
-    Returns
-    -------
-    q : Convex
-        The quadratic expression affine @ qmat affine
-    """
-
-    return affine.to_affine().quad(qmat)
-
-
-def exp(affine):
-    """
-    Return the element-wise natural exponential function
-    exp(affine).
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array.
-
-    Returns
-    -------
-    a : Convex
-        The natural exponential function exp(affine)
-    """
-
-    return affine.exp()
-
-
-def log(affine):
-    """
-    Return the element-wise natural logarithm function
-    log(affine).
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array.
-
-    Returns
-    -------
-    a : Convex
-        The natural logarithm function log(affine)
-    """
-
-    return affine.log()
-
-
-def pexp(affine, scale):
-    """
-    Return the element-wise perspective of natural exponential
-    function scale * exp(affine/scale).
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array.
-
-    Returns
-    -------
-    a : PerspConvex
-        The perspective of natural exponential function
-        scale * exp(affine/scale)
-    """
-
-    return affine.pexp(scale)
-
-
-def plog(affine, scale):
-    """
-    Return the element-wise perspective of natural logarithm
-    function scale * log(affine/scale).
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array.
-
-    Returns
-    -------
-    a : PerspConvex
-        The perspective of natural logarithm function
-        scale * log(affine/scale)
-    """
-
-    return affine.plog(scale)
-
-
-def entropy(affine):
-    """
-    Return the entropy expression sum(affine*log(affine)).
-
-    Parameters
-    ----------
-    affine : an array of variables or affine expression
-        Input array. It must be a vector.
-
-    Returns
-    -------
-    a : Convex
-        The entropy expression sum(affine*log(affine))
-    """
-
-    return affine.entropy()
-
-
-def expcone(y, x, z):
-    """
-    Return an exponential cone constraint z*exp(x/z) <= y.
-
-    Parameters
-    ----------
-    y : an array of variables or affine expression
-        The right-hand-side of the constraint
-    x : {Real, Vars, VarSub, Affine}
-        The x value in the constraint. It must be a scalar.
-    z : {Real, Vars, VarSub, Affine}
-        The z value in the constraint. It must be a scalar.
-
-    Returns
-    -------
-    constr : ExpConstr
-        The exponential cone constraint z*exp(x/z) <= y
-    """
-
-    return y.expcone(x, z)
-
-
-def kldiv(p, phat, r):
-    """
-    Return an KL divergence constraint sum(p*log(p/phat)) <= r.
-
-    Parameters
-    ----------
-    p : an array of variables or affine expression
-        The array of probabilities. It must be a vector.
-    phat : {Real, Vars, VarSub, Affine}
-        The array of empirical probabilities. It must a vector with
-        the same shape as p.
-    r : {Real, Vars, VarSub, Affine}
-        The ambiguity constant. It must be a scalar.
-
-    Returns
-    -------
-    constr : ExpConstr
-        The KL divergence constraint sum(p*log(p/phat)) <= r.
-    """
-
-    return p.kldiv(phat, r)
 
 
 def E(expr):
@@ -467,7 +248,7 @@ def E(expr):
     This function is used to denote
     1. the expected value of an random variable when specifying the
     uncertainty set of expectations.
-    2. the worst-case expected value of an affine function involving random
+    2. the worst-case expected value of an RSOME expression involving random
     variables.
     """
 

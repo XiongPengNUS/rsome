@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=0b7ad186309d19f917c9b7c0f9e78b0cce5128b9">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -328,13 +328,14 @@ y_t, \; I_t \in \overline{\mathcal{A}}(\{\{1\},\cdots,\{S\}\}, \mathcal{J}_t) &a
 <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="n">I</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">h</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">I</span><span class="p">)</span>
-<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">w</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xbar</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 
 <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>                    <span class="c1"># solve the model by Gurobi
 </span></code></pre></div></div>
 
 <p>In this example, the scenario partition \(\mathcal{C}=\{\{1\},\cdots,\{S\}\}\) is defined by a loop where in each iteration, the <code class="language-plaintext highlighter-rouge">adapt()</code> method is used to indicate that the given decision variable adapts to the scenario <code class="language-plaintext highlighter-rouge">s</code>.</p>
+
+<p>After the model is successfully solved, we may further evaluate values of the scenario-wise decisions (and their expressions) under different realizations of random variables. For example, the expression <code class="language-plaintext highlighter-rouge">y(v.assign(vhat[0])</code> returns a series of arrays, and each array is the value of \(\pmb{y}(s, \pmb{v})\) in the \(s\)th scenario and \(\pmb{v} = \hat{\pmb{v}}_1\). In this function call of <code class="language-plaintext highlighter-rouge">y()</code>, the decision rules in different scenarios are evaluated under the same value of \(\pmb{v}\), which is the first historical record <code class="language-plaintext highlighter-rouge">vhat[0]</code>. We may also use the expression <code class="language-plaintext highlighter-rouge">y(v.assign(vhat, sw=True))</code> to enforce scenario-wise evaluation (keyword argument <code class="language-plaintext highlighter-rouge">sw=True</code>) of the decision rule, where the realizations of random variables are assumed to be <code class="language-plaintext highlighter-rouge">vhat[0]</code>, <code class="language-plaintext highlighter-rouge">vhat[1]</code>, …, <code class="language-plaintext highlighter-rouge">vhat[S-1]</code>, respectively, for these \(S\) scenarios.</p>
 
 <h4 id="reference">Reference</h4>
 

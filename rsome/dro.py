@@ -6,6 +6,7 @@ from .lp import Vars, Affine
 from .lp import RoAffine, RoConstr
 from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr, DecPCvxConstr
 from .lp import DecRoConstr
+from .lp import PiecewiseConvex, ExpPiecewiseConvex, PWConstr, ExpPWConstr
 from .lp import Scen
 from .lp import Solution, def_sol
 from .subroutines import event_dict
@@ -170,8 +171,8 @@ class Model:
             for dvar in self.dec_vars:
                 edict = event_dict(dvar.event_adapt)
                 size = dvar.size
-                index.extend(list(start + size * edict[s]
-                                  + np.arange(size, dtype=int)))
+                index.extend(list(start + size * edict[s] +
+                                  np.arange(size, dtype=int)))
 
                 start += size * len(dvar.event_adapt)
                 total_size += size
@@ -205,8 +206,8 @@ class Model:
                         if num == 0:
                             continue
                         edict = event_dict(dvar.event_adapt)
-                        index.extend(list(start + num * edict[s]
-                                     + np.arange(num, dtype=int)))
+                        index.extend(list(start + num * edict[s] +
+                                          np.arange(num, dtype=int)))
                         start += num * scen
                         total_var += num
 
@@ -245,7 +246,7 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if not isinstance(obj, Real):
+        if not isinstance(obj, (Real, PiecewiseConvex)):
             if obj.size > 1:
                 raise ValueError('Incorrect function dimension.')
 
@@ -272,7 +273,7 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if not isinstance(obj, Real):
+        if not isinstance(obj, (Real, PiecewiseConvex)):
             if obj.size > 1:
                 raise ValueError('Incorrect function dimension.')
 
@@ -302,8 +303,9 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if np.prod(obj.shape) > 1:
-            raise ValueError('Incorrect function dimension.')
+        if not isinstance(obj, (Real, PiecewiseConvex)):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.obj_ambiguity = ambset
@@ -333,8 +335,9 @@ class Model:
         if self.obj is not None:
             raise SyntaxError('Redefinition of the objective is not allowed.')
 
-        if np.prod(obj.shape) > 1:
-            raise ValueError('Incorrect function dimension.')
+        if not isinstance(obj, (Real, PiecewiseConvex)):
+            if obj.size > 1:
+                raise ValueError('Incorrect function dimension.')
 
         self.obj = obj
         self.obj_ambiguity = ambset
@@ -372,9 +375,18 @@ class Model:
                     if constr.dec_model is not self.vt_model or \
                        constr.rand_model is not self.sup_model:
                         raise ValueError('Models mismatch.')
+                elif isinstance(constr, (PWConstr, ExpPWConstr)):
+                    if constr.model is not self:
+                        raise ValueError('Models mismatch.')
                 else:
                     raise TypeError('Unsupported constraints.')
-                self.all_constr.append(constr)
+
+                if isinstance(constr, ExpPWConstr):
+                    self.all_constr.append(constr)
+                elif isinstance(constr, PWConstr):
+                    self.all_constr.extend(constr.pieces)
+                else:
+                    self.all_constr.append(constr)
 
         self.pupdate = True
         self.dupdate = True
@@ -415,27 +427,35 @@ class Model:
         self.ro_model.min(self.ro_model.rc_model.vars[1][0].to_affine())
         sign = self.sign
         constr = (self.dec_vars[0] >= self.obj * sign)
-        if isinstance(constr, DecCvxConstr):
+        if isinstance(constr, ExpPWConstr):
+            ro_constr_list = self.dro_to_roc(constr)
+        elif isinstance(constr, PWConstr):
+            ro_constr_list = []
+            for piece in constr.pieces:
+                ro_constr_list.extend(self.ro_to_roc(piece))
+        elif isinstance(constr, DecCvxConstr):
             ro_constr_list = self.ro_to_roc(constr)
         elif constr.ctype == 'R':
             ro_constr_list = self.ro_to_roc(constr)
         elif constr.ctype == 'E':
             ro_constr_list = self.dro_to_roc(constr)
         else:
-            raise SyntaxError('Syntax error.')
+            raise TypeError('Unsupported objective function.')
 
         self.ro_model.st(ro_constr_list)
 
         # Event-wise Constraints
         for constr in self.all_constr:
-            if isinstance(constr, (DecCvxConstr, DecPCvxConstr, DecExpConstr)):
+            if isinstance(constr, ExpPWConstr):
+                ro_constr_list = self.dro_to_roc(constr)
+            elif isinstance(constr, (DecCvxConstr, DecPCvxConstr, DecExpConstr)):
                 ro_constr_list = self.ro_to_roc(constr)
             elif constr.ctype == 'R':
                 ro_constr_list = self.ro_to_roc(constr)
             elif constr.ctype == 'E':
                 ro_constr_list = self.dro_to_roc(constr)
             else:
-                raise SyntaxError('Syntax error')
+                raise ValueError('Unknown constraints.')
             self.ro_model.st(ro_constr_list)
 
         formula = self.ro_model.do_math(primal)
@@ -484,8 +504,8 @@ class Model:
                             raise SyntaxError('Incorrect affine expressions.')
 
                     raffine = raf_linear @ drule.affine
-                    raffine = (raffine.reshape(constr.raffine.shape)
-                               + constr.raffine.const)
+                    raffine = (raffine.reshape(constr.raffine.shape) +
+                               constr.raffine.const)
                     roaffine = RoAffine(raffine, np.zeros(aff_linear.shape[0]),
                                         self.sup_model)
                     this_const = constr.affine.const
@@ -495,8 +515,8 @@ class Model:
 
                 elif isinstance(drule, Affine):
                     raffine = raf_linear @ drule
-                    raffine = (raffine.reshape(constr.raffine.shape)
-                               + constr.raffine.const)
+                    raffine = (raffine.reshape(constr.raffine.shape) +
+                               constr.raffine.const)
                     this_const = constr.affine.const
                     this_const = this_const.flatten()
                     roaffine = RoAffine(raffine, aff_linear@drule + this_const,
@@ -659,23 +679,34 @@ class Model:
         var_exp_list = ambset.mix_model.vars[1:]
         num_event = len(ambset.exp_constr)
 
-        # Constraint components
-        if isinstance(constr, DecLinConstr):
-            linear = constr.linear
-            const = constr.const
-            const = const.reshape((const.size, 1))
-            raffine = None
+        if isinstance(constr, ExpPWConstr):
+            linears = []
+            consts = []
+            raffines = []
+            for piece in constr.pieces:
+                if isinstance(piece, DecLinConstr):
+                    linears.append(piece.linear)
+                    const = - piece.const
+                    consts.append(const.reshape((const.size, 1)))
+                    raffines.append(None)
+                else:
+                    linears.append(piece.affine.linear)
+                    const = piece.affine.const
+                    consts.append(const.reshape((const.size, 1)))
+                    raffines.append(piece.raffine)
+        elif isinstance(constr, DecLinConstr):
+            linears = [constr.linear]
+            const = - constr.const
+            consts = [const.reshape((const.size, 1))]
+            raffines = [None]
         else:
-            linear = constr.affine.linear
+            linears = [constr.affine.linear]
             const = constr.affine.const
-            const = const.reshape([const.size, 1])
-            raffine = constr.raffine
-        if const.ndim == 0:
-            const = np.array([const])
+            consts = [const.reshape([const.size, 1])]
+            raffines = [constr.raffine]
 
-        # Standardize constraints
         ro_constr = []
-        for i in range(linear.shape[0]):
+        for i in range(linears[0].shape[0]):
             alpha = self.ro_model.dvar(num_scen)
             if num_event:
                 beta = self.ro_model.dvar((num_rand, num_event))
@@ -690,36 +721,37 @@ class Model:
             z = Vars(self.sup_model, 0, (num_rand,), 'C', None)
             for s in range(num_scen):
                 drule = drule_list[s]
-                left = linear[i, :num_var] @ drule + const[i]
-                if raffine:
-                    if isinstance(drule, RoAffine):
-                        extra = left.raffine
-                        temp = drule.affine
-                        left = left.affine.reshape(left.shape)
-                    elif isinstance(drule, Affine):
-                        extra = 0
-                        temp = drule
+                for linear, raffine, const in zip(linears, raffines, consts):
+                    left = linear[i, :num_var] @ drule + const[i]
+                    if raffine is not None:
+                        if isinstance(drule, RoAffine):
+                            extra = left.raffine
+                            temp = drule.affine
+                            left = left.affine.reshape(left.shape)
+                        elif isinstance(drule, Affine):
+                            extra = 0
+                            temp = drule
+                        else:
+                            raise TypeError('Incorrect data type.')
+                        row_ind = i*num_rand + np.arange(num_rand, dtype=int)
+                        new_raffine = raffine.linear[row_ind] @ temp
+                        new_raffine = new_raffine.reshape((1, new_raffine.size))
+                        new_raffine += raffine.const[i, :num_rand] + extra
+                        left = RoAffine(new_raffine, left, self.sup_model)
+
+                    event_indices = [k for k in range(num_event)
+                                     if s in ambset.exp_constr_indices[k]]
+                    if len(event_indices) > 0:
+                        right = alpha[s] + (z @ beta[:, event_indices]).sum()
+                    else:
+                        right = alpha[s]
+                    inequality = (left <= right)
+                    if isinstance(inequality, RoConstr):
+                        ro_constr.append(inequality.forall(ambset.sup_constr[s]))
+                    elif isinstance(inequality, LinConstr):
+                        ro_constr.append(inequality)
                     else:
                         raise TypeError('Incorrect data type.')
-                    row_ind = i*num_rand + np.arange(num_rand, dtype=int)
-                    new_raffine = raffine.linear[row_ind] @ temp
-                    new_raffine = new_raffine.reshape((1, new_raffine.size))
-                    new_raffine += raffine.const[i, :num_rand] + extra
-                    left = RoAffine(new_raffine, left, constr.rand_model)  # ##
-
-                event_indices = [k for k in range(num_event)
-                                 if s in ambset.exp_constr_indices[k]]
-                if len(event_indices) > 0:
-                    right = alpha[s] + (z @ beta[:, event_indices]).sum()
-                else:
-                    right = alpha[s]
-                inequality = (left <= right)
-                if isinstance(inequality, RoConstr):
-                    ro_constr.append(inequality.forall(ambset.sup_constr[s]))
-                elif isinstance(inequality, LinConstr):
-                    ro_constr.append(inequality)
-                else:
-                    raise TypeError('Incorrect data type.')
 
         return ro_constr
 
@@ -934,8 +966,8 @@ class Ambiguity:
             self.model.exp_model.st(econstr)
             exp_support = self.model.exp_model.do_math(obj=False)
             exp_var = self.mix_model.dvar(exp_support.linear.shape[1])
-            affine = (exp_support.linear @ exp_var
-                      - p[indices].sum() * exp_support.const)
+            affine = (exp_support.linear @ exp_var -
+                      p[indices].sum() * exp_support.const)
             constr = LinConstr(affine.model, affine.linear, affine.const,
                                exp_support.sense)
             self.mix_model.st(constr)

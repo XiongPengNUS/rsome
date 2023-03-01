@@ -10,11 +10,11 @@ Besides the deterministic equivalent of the stochastic model, the financial plan
 
 $$
 \mathcal{F} = \left\{
-\mathbb{P}\in\mathcal{P}_0(\mathbb{R}^{3\times2}\times[S]) \left|
-\begin{array}
-~&(\tilde{\pmb{z}}, \tilde{s}) \in \mathbb{P} &&\\
-&\mathbb{P}[\tilde{\pmb{z}} \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1, &&\forall s\in[S]\\
-&\mathbb{P}[\tilde{s}=s] = 1/S
+\mathbb{P}\in\mathcal{P}_0(\mathbb{R}^{3\times2}\times[S]) ~ \left| ~
+\begin{array}{ll}
+(\tilde{\pmb{z}}, \tilde{s}) \in \mathbb{P} &\\
+\mathbb{P}[\tilde{\pmb{z}} \in \mathcal{Z}_{\tilde{s}}|\tilde{s}=s]=1 &\forall s\in[S]\\
+\mathbb{P}[\tilde{s}=s] = 1/S &
 \end{array}
 \right.
 \right\},

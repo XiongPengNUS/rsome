@@ -1,0 +1,296 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="robust-satisficing-for-portfolio-optimization">Robust Satisficing for Portfolio Optimization</h3>
+
+<p>In this example, we consider the portfolio optimization problem introduced in <a href="#ref1">Long et al. (2022)</a>, where the decision-maker invests in \(N\) risky assets and the portfolio risk is evaluated using the empirical distribution \(\hat{\mathbb{P}}\) constructed from historical data \((\hat{z}_1,…,\hat{z}_S)\). Here, the problem is solved as a robust satisficing model</p>
+
+\[\begin{align}
+\min ~&amp; k_0 + wk_1 \\
+\text{s.t.}~&amp; \mathbb{E}_{\mathbb{P}}\left[\pmb{x}^{\top}\tilde{\pmb{z}}\right] \geq \tau - k_0 \Delta_W(\mathbb{P}, \hat{\mathbb{P}}) &amp;\forall \mathbb{P} \in \mathcal{P}_0 (\mathcal{Z}) \\
+&amp;\alpha + \frac{1}{\epsilon}\mathbb{E}_{\mathbb{P}} \left[(-\pmb{x}^{\top}\tilde{\pmb{z}} - \alpha)^+\right] \leq \beta + k_1 \Delta_W(\mathbb{P}, \hat{\mathbb{P}}) &amp;\forall \mathbb{P} \in \mathcal{P}_0 (\mathcal{Z}) \\
+&amp; \pmb{1}^{\top} \pmb{x} = 1 \\
+&amp; \pmb{x} \in \mathbb{R}_+^N, \alpha \in \mathbb{R},
+\end{align}\]
+
+<p>for some target \(\tau\) of the expected return, and some target \(\beta\) of the \(1-\epsilon\) conditional value at risk (CVaR). Here, the distribution of the random return \(\tilde{\pmb{z}}\) is denoted by \(\mathbb{P}\), and the Wasserstein distance with one-norm between \(\mathbb{P}\) and the empirical distribution \(\hat{\mathbb{P}}\) is denoted by \(\Delta_W(\mathbb{P}, \hat{\mathbb{P}})\). Detailed information on model parameters are provided below</p>
+
+<ul>
+  <li>The sample size of the empirical dataset \(S=300\);</li>
+  <li>The number of assets \(n=10\);</li>
+  <li>The penalty parameter \(w=10\);</li>
+  <li>The confidence level \(1-\epsilon=95\%\);</li>
+  <li>The target of the expected return \(\tau=0.125\);</li>
+  <li>The target of the CVaR \(\beta = 0.10\);</li>
+  <li>The empirical dataset \(\hat{\pmb{z}}\) used to represent the distribution of the random return \(z_i = \varphi + \zeta_i\), where \(\varphi \sim \mathcal{N}(0, 5\%)\) and \(\zeta_i \sim \mathcal{N}(i\times 2\%, i\times 3\%)\);</li>
+</ul>
+
+<p>and these parameters are defined by the following code segment.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">w</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.10</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mf">0.125</span>
+
+<span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phi</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">zeta</span> <span class="o">=</span> <span class="mf">0.02</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.03</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">zhat</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">+</span> <span class="n">zeta</span>
+</code></pre></div></div>
+
+<h4 id="deterministic-equivalent-problem">Deterministic Equivalent Problem</h4>
+
+<p>According to <b>Theorem 9</b> of <a href="#ref1">Long et al. (2022)</a>, the robust satsificing model can be reformulated as the deterministic optimization problem below:</p>
+
+\[\begin{align}
+\min ~&amp;\|\pmb{x}\|_{\infty} \\
+\text{s.t.}~&amp;\frac{1}{S}\sum\limits_{s\in[S]}y_{1s} \geq \tau \\
+&amp;y_{1s} \leq \pmb{x}^{\top}\hat{\pmb{z}}_s &amp; \forall s\in [S] \\
+&amp;\alpha + \frac{1}{\epsilon S}\sum\limits_{s\in[S]} y_{2s} \leq \beta \\
+&amp;y_{2s} \geq -\pmb{x}^{\top}\hat{\pmb{z}}_s - \alpha &amp; \forall s\in [S] \\
+&amp;y_{2s} \geq 0 &amp;\forall s \in [S] \\
+&amp;\pmb{1}^{\top}\pmb{x} = 1 \\
+&amp;\pmb{x}\in\mathbb{R}_+^{N}, \alpha \in \mathbb{R}.
+\end{align}\]
+
+<p>Such a deterministic optimization can be implemented using the following code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">'inf'</span><span class="p">))</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">y1</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="o">/</span><span class="n">epsilon</span><span class="p">)</span><span class="o">*</span><span class="n">y2</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">beta</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y2</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="o">@</span><span class="n">zhat</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">y2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">x</span><span class="o">@</span><span class="n">zhat</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.0203s
+</code></pre></div></div>
+
+<p>The optimal solution of <code class="language-plaintext highlighter-rouge">x</code> as the allocation of capital is shown below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[0.         0.08771868 0.11403517 0.11403517 0.11403517 0.11403517
+ 0.11403517 0.11403517 0.11403517 0.11403517]
+</code></pre></div></div>
+
+<h4 id="scenario-wise-robust-optimization-problem">Scenario-wise Robust Optimization Problem</h4>
+
+<p>The robust satisficing model above is also equivalent to the following scenario-wise robust optimization problem:</p>
+
+\[\begin{align}
+\min ~&amp; k_0 + wk_1 \\
+\text{s.t.}~&amp; \frac{1}{S}\sum\limits_{s\in[S]}v_{1s} \geq \tau \\
+&amp;\alpha + \frac{1}{S}\sum\limits_{s\in[S]}v_{2s} \leq \beta  \\
+&amp;v_{1s} \leq \pmb{z}^{\top}\pmb{x} + k_0u &amp; \forall (\pmb{z}, u)\in\mathcal{Z}_s \\
+&amp;v_{2s} \geq \frac{1}{\epsilon}(-\pmb{z}^{\top}\pmb{x}-\alpha) - k_1u &amp; \forall (\pmb{z}, u)\in\mathcal{Z}_s \\
+&amp;v_{2s} \geq - k_1u &amp; \forall (\pmb{z}, u)\in\mathcal{Z}_s \\
+&amp;\pmb{1}^{\top} \pmb{x} = 1 \\
+&amp;\pmb{x} \in \mathbb{R}_+^N, \alpha \in \mathbb{R}, \pmb{v} \in \mathbb{R}^{2\times S},
+\end{align}\]
+
+<p>with the scenario-wise support \(\mathcal{Z}_s = \left\{(\pmb{z}, u): ~|\pmb{z} - \hat{\pmb{z}}_s|_1 \leq u \right\}\). The robust model can be implemented by the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">k0</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">k1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">v1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">x</span>
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">k0</span> <span class="o">+</span> <span class="n">w</span><span class="o">*</span><span class="n">k1</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v1</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="n">v2</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">beta</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">uset</span> <span class="o">=</span> <span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">zhat</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">v1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">r</span> <span class="o">+</span> <span class="n">k0</span><span class="o">*</span><span class="n">u</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">uset</span><span class="p">))</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">v2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">epsilon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">r</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span> <span class="o">-</span> <span class="n">k1</span><span class="o">*</span><span class="n">u</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">uset</span><span class="p">))</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">((</span><span class="n">v2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">k1</span><span class="o">*</span><span class="n">u</span><span class="p">).</span><span class="n">forall</span><span class="p">(</span><span class="n">uset</span><span class="p">))</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by the default LP solver...
+Solution status: 0
+Running time: 0.6255s
+</code></pre></div></div>
+
+<p>The optimal solution of the robust model is the same as the deterministic problem.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[-0.          0.08771868  0.11403517  0.11403517  0.11403517  0.11403517
+  0.11403517  0.11403517  0.11403517  0.11403517]
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>22.921068194932346
+</code></pre></div></div>
+
+<h4 id="distributionally-robust-model">Distributionally Robust Model</h4>
+
+<p>The robust satisficing model can be implemented directly using the <code class="language-plaintext highlighter-rouge">rsome.dro</code> modeling environment, see the code below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">k0</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">k1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+    
+<span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">()</span>
+<span class="n">fset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">fset</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">suppset</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">zhat</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">u</span><span class="p">)</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">p</span>
+<span class="n">fset</span><span class="p">.</span><span class="n">probset</span><span class="p">(</span><span class="n">pr</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="p">)</span>
+    
+<span class="n">r</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">x</span>
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">k0</span> <span class="o">+</span> <span class="n">w</span><span class="o">*</span><span class="n">k1</span><span class="p">,</span> <span class="n">fset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">tau</span> <span class="o">-</span> <span class="n">E</span><span class="p">(</span><span class="n">k0</span><span class="o">*</span><span class="n">u</span><span class="p">))</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">epsilon</span><span class="p">)</span><span class="o">*</span><span class="n">E</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">maxof</span><span class="p">(</span><span class="o">-</span><span class="n">r</span><span class="o">-</span><span class="n">alpha</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">E</span><span class="p">(</span><span class="n">k1</span><span class="o">*</span><span class="n">u</span><span class="p">))</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+    
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Here, we use the scenario-wise ambiguity set proposed in <a href="#ref2">Chen et al. (2020)</a> to capture the Wasserstein ball, the same optimal solution can be obtained.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[-0.          0.08771868  0.11403517  0.11403517  0.11403517  0.11403517
+  0.11403517  0.11403517  0.11403517  0.11403517]
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>22.92106819493208
+</code></pre></div></div>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Long, Daniel Zhuoyu, Melvyn Sim, and Minglong Zhou. 2022. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.2021.2238">Robust Satisficing</a>. <i>Operations Research</i> <b>71</b>(1):61-82.</p>
+
+<p><a id="ref2"></a></p>
+
+<p>Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Robust stochastic optimization made easy with RSOME</a>. <i>Management Science</i> <b>66</b>(8) 3329–3339.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

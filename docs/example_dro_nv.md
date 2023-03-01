@@ -19,9 +19,9 @@ with \\(s\\) the scenario index, and \\(u\\) the auxiliary random variable. The 
 $$
 \begin{align}
 \mathcal{F}(\theta) = \left\{
-\mathbb{P} \in \mathcal{P}_0\left(\mathbb{R}^I\times\mathbb{R}\times [S]\right) \left|
-\begin{array}
-~(\tilde{\pmb{z}}, \tilde{u}, \tilde{s}) \in \mathbb{P} &\\
+\mathbb{P} \in \mathcal{P}_0\left(\mathbb{R}^I\times\mathbb{R}\times [S]\right) ~\left|~
+\begin{array}{ll}
+(\tilde{\pmb{z}}, \tilde{u}, \tilde{s}) \in \mathbb{P} &\\
 \mathbb{E}_{\mathbb{P}}\left[\tilde{u} | \tilde{s} \in [S]\right] \leq \theta & \\
 \mathbb{P}\left[\left.(\pmb{z}, u)\in\mathcal{Z}_s ~\right| \tilde{s} = s\right] = 1, & \forall s \in [S] \\
 \mathbb{P}\left[\tilde{s} = s\right] = \frac{1}{S} &

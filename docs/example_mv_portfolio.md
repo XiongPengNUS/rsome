@@ -25,10 +25,10 @@ The quadratic program can be implemented by the following code segment.
 
 
 ```python
-import rsome as rso
-import numpy as np
 from rsome import ro
 from rsome import grb_solver as grb
+import rsome as rso
+import numpy as np
 
 n = 150                                     # number of stocks
 i = np.arange(1, n+1)                       # indices of stocks
@@ -54,7 +54,6 @@ model.solve(grb)
 
 
 The optimal investment and the optimal objective value are shown below.
-
 
 ```python
 import matplotlib.pyplot as plt

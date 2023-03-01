@@ -31,6 +31,8 @@
 <ul class="a">
   <li> <a href="example_dro_portfolio">Distributionally Robust Portfolio </a></li>
   <li> <a href="example_dro_mas">Distributionally Robust Medical Appointment </a></li>
+  <li> <a href="example_dro_wass_portfolio">Mean-Risk Portfolio Optimization with a Wasserstein Ambiguity Set</a></li>
+  <li><a href="example_dro_rs_portfolio">Robust Satisficing for Portfolio Optimization </a></li>
   <li> <a href="example_dro_nv">Multi-Item Newsvendor Problem with the Wasserstein Ambiguity Sets </a></li>
   <li> <a href="example_dro_ls">Adaptive Distributionally Robust Lot-Sizing </a></li>
   <li> <a href="example_dro_vehicle">Distributionally Robust Vehicle Pre-Allocation</a></li>

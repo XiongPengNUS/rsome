@@ -18,7 +18,7 @@ from typing import List
 
 def def_sol(formula, display=True, params={}):
     """
-    This is the default solver of RSOME
+    This is the default solver of RSOME.
     """
 
     try:
@@ -33,7 +33,6 @@ def def_sol(formula, display=True, params={}):
     except AttributeError:
         pass
 
-    ########
     if hasattr(opt, 'milp'):
 
         A = formula.linear
@@ -71,7 +70,8 @@ def def_sol(formula, display=True, params={}):
             print('Running time: {0:0.4f}s'.format(stime))
 
         if res.status == 0:
-            return Solution(res.x[0], res.x, res.status, stime)
+            objval = formula.obj[0] @ res.x
+            return Solution(objval, res.x, res.status, stime)
         else:
             status = res.status
             msg = 'Fail to find the optimal solution.'
@@ -108,7 +108,8 @@ def def_sol(formula, display=True, params={}):
             print('Running time: {0:0.4f}s'.format(stime))
 
         if res.status == 0:
-            return Solution(res.x[0], res.x, res.status, stime)
+            objval = formula.obj[0] @ res.x
+            return Solution(objval, res.x, res.status, stime)
         else:
             status = res.status
             msg = 'The optimal solution can not be found, '
@@ -123,7 +124,7 @@ def def_sol(formula, display=True, params={}):
 
 class Model:
     """
-    The Model class creates an LP model object
+    The Model class creates an LP model object.
     """
 
     def __init__(self, nobj=False, mtype='R', name=None, top=None):
@@ -364,8 +365,7 @@ class Model:
                     sense_list = [item.sense
                                   if isinstance(item.sense, np.ndarray) else
                                   np.array([item.sense])
-                                  for item in self.lin_constr
-                                  + self.aux_constr]
+                                  for item in self.lin_constr + self.aux_constr]
 
                 const = np.concatenate(tuple(const_list))
                 sense = np.concatenate(tuple(sense_list))
@@ -618,7 +618,7 @@ class Vars:
         """
         Return the first, second, or infinity norm of a 1-D array.
 
-        Refer to `rsome.norm` for full documentation
+        Refer to `rsome.norm` for full documentation.
 
         See Also
         --------
@@ -668,7 +668,7 @@ class Vars:
 
     def expcone(self, x, z):
         """
-        Return the exponential cone constraint z*exp(x/z) <= var
+        Return the exponential cone constraint z*exp(x/z) <= var.
 
         Refer to `rsome.expcone` for full documentation.
 
@@ -681,7 +681,7 @@ class Vars:
 
     def exp(self):
         """
-        Return the natural exponential function exp(var)
+        Return the natural exponential function exp(var).
 
         Refer to `rsome.exp` for full documentation.
 
@@ -695,7 +695,7 @@ class Vars:
     def pexp(self, scale):
         """
         Return the perspective natural exponential function
-        scale * exp(var/scale)
+        scale * exp(var/scale).
 
         Refer to `rsome.pexp` for full documentation.
 
@@ -708,7 +708,7 @@ class Vars:
 
     def log(self):
         """
-        Return the natural logarithm function log(var)
+        Return the natural logarithm function log(var).
 
         Refer to `rsome.log` for full documentation.
 
@@ -722,7 +722,7 @@ class Vars:
     def plog(self, scale):
         """
         Return the perspective of natural logarithm function
-        scale * log(var/scale)
+        scale * log(var/scale).
 
         Refer to `rsome.plog` for full documentation.
 
@@ -735,7 +735,7 @@ class Vars:
 
     def entropy(self):
         """
-        Return the natural exponential function -sum(var*log(var))
+        Return the natural exponential function -sum(var*log(var)).
 
         Refer to `rsome.entropy` for full documentation.
 
@@ -748,7 +748,7 @@ class Vars:
 
     def kldiv(self, phat, r):
         """
-        Return the KL divergence constraints sum(var*log(var/phat)) <= r
+        Return the KL divergence constraints sum(var*log(var/phat)) <= r.
 
         Refer to `rsome.kldiv` for full documentation.
 
@@ -847,8 +847,9 @@ class Vars:
 
     def __le__(self, other):
 
-        if ((isinstance(other, (Real, np.ndarray)) or sp.issparse(other))
-                and self.model.mtype not in 'EP'):
+        cond1 = isinstance(other, (Real, np.ndarray)) or sp.issparse(other)
+        cond2 = self.model.mtype not in 'EP'
+        if cond1 and cond2:
             upper = other + np.zeros(self.shape)
             upper = upper.reshape((upper.size, ))
             indices = np.arange(self.first, self.first + self.size,
@@ -859,8 +860,9 @@ class Vars:
 
     def __ge__(self, other):
 
-        if ((isinstance(other, (Real, np.ndarray)) or sp.issparse(other))
-                and self.model.mtype not in 'EP'):
+        cond1 = isinstance(other, (Real, np.ndarray)) or sp.issparse(other)
+        cond2 = self.model.mtype not in 'EP'
+        if cond1 and cond2:
             lower = other + np.zeros(self.shape)
             lower = lower.reshape((lower.size, ))
             indices = np.arange(self.first, self.first + self.size,
@@ -873,10 +875,26 @@ class Vars:
 
         return self.to_affine() == other
 
+    def assign(self, values):
+
+        if self.model.mtype != 'S':
+            raise ValueError('Unsupported variables.')
+        else:
+            if not isinstance(values, (np.ndarray, Real)):
+                raise TypeError('The second argument must be numerical values.')
+
+            values = np.array(values, dtype=float) + np.zeros(self.shape, dtype=float)
+
+            return RandVal(self, values.reshape(self.shape))
+
+    def __call__(self):
+
+        return self.to_affine()()
+
 
 class VarSub(Vars):
     """
-    The VarSub class creates a variable array with subscript indices
+    The VarSub class creates a variable array with subscript indices.
     """
 
     def __init__(self, var, indices):
@@ -980,10 +998,14 @@ class VarSub(Vars):
         else:
             return self.to_affine().__ge__(other)
 
+    def __call__(self):
+
+        return self.to_affine()()
+
 
 class Affine:
     """
-    The Affine class creates an array of affine expressions
+    The Affine class creates an array of affine expressions.
     """
 
     __array_priority__ = 100
@@ -1043,9 +1065,7 @@ class Affine:
     def sv_array(self, index=False):
 
         shape = self.shape
-        # shape = shape if isinstance(shape, tuple) else (int(shape), )
         size = self.size
-        # print(shape)
 
         if index:
             elements = [SparseVec([i], [1], size) for i in range(size)]
@@ -1074,18 +1094,12 @@ class Affine:
     def sum(self, axis=None):
 
         if self.sparray is None:
-            # self.sparray = sparse_array(self.shape)
             self.sparray = self.sv_array()
 
         indices = self.sparray.sum(axis=axis)
-        # if not isinstance(indices, np.ndarray):
-        #     indices = np.array([indices])
 
-        # linear = array_to_sparse(indices) @ self.linear
         linear = sv_to_csr(indices) @ self.linear
         const = self.const.sum(axis=axis)
-        # if not isinstance(const, np.ndarray):
-        #     const = np.array([const])
 
         return Affine(self.model, linear, const)
 
@@ -1198,7 +1212,7 @@ class Affine:
 
     def expcone(self, x, z):
         """
-        Return the exponential cone constraint z*exp(x/z) <= affine
+        Return the exponential cone constraint z*exp(x/z) <= affine.
 
         Refer to `rsome.expcone` for full documentation.
 
@@ -1231,7 +1245,7 @@ class Affine:
 
     def exp(self):
         """
-        Return the natural exponential function exp(affine)
+        Return the natural exponential function exp(affine).
 
         Refer to `rsome.exp` for full documentation.
 
@@ -1245,7 +1259,7 @@ class Affine:
     def pexp(self, scale):
         """
         Return the perspective natural exponential function
-        scale * exp(affine/scale)
+        scale * exp(affine/scale).
 
         Refer to `rsome.pexp` for full documentation.
 
@@ -1258,7 +1272,7 @@ class Affine:
 
     def log(self):
         """
-        Return the natural logarithm function log(affine)
+        Return the natural logarithm function log(affine).
 
         Refer to `rsome.log` for full documentation.
 
@@ -1272,7 +1286,7 @@ class Affine:
     def plog(self, scale):
         """
         Return the perspective of natural logarithm function
-        scale * log(affine/scale)
+        scale * log(affine/scale).
 
         Refer to `rsome.plog` for full documentation.
 
@@ -1285,7 +1299,7 @@ class Affine:
 
     def entropy(self):
         """
-        Return the natural exponential function -sum(affine*log(affine))
+        Return the natural exponential function -sum(affine*log(affine)).
 
         Refer to `rsome.entropy` for full documentation.
 
@@ -1302,7 +1316,7 @@ class Affine:
 
     def kldiv(self, phat, r):
         """
-        Return the KL divergence constraints sum(var*log(var/phat)) <= r
+        Return the KL divergence constraints sum(var*log(var/phat)) <= r.
 
         Refer to `rsome.kldiv` for full documentation.
 
@@ -1530,11 +1544,11 @@ class Affine:
 
     def __sub__(self, other):
 
-        return self + (-other)
+        return self.__add__(-other)
 
     def __rsub__(self, other):
 
-        return (-self) + other
+        return (-self).__add__(other)
 
     def __le__(self, other):
 
@@ -1566,10 +1580,31 @@ class Affine:
         else:
             return left.__eq__(0)
 
+    def __call__(self):
+
+        if self.model.mtype != 'R':
+            raise ValueError('Unsupported affine expression.')
+
+        if self.model.solution is None:
+            raise SyntaxError('No available solution!')
+        else:
+            linear = self.linear
+            const = self.const
+            nvar = linear.shape[1]
+
+            x = self.model.solution.x[:nvar]
+            output = (linear @ x).reshape(self.shape)
+            output += const.reshape(self.shape)
+
+            if output.ndim == 0:
+                output = output.item()
+
+            return output
+
 
 class Convex:
     """
-    The Convex class creates an object of convex functions
+    The Convex class creates an object of convex functions.
     """
 
     __array_priority__ = 101
@@ -1596,7 +1631,8 @@ class Convex:
                   'X': 'natural exponential expression',
                   'L': 'natural logarithm expression',
                   'P': 'entropy expression',
-                  'K': 'KL divergence expression'}
+                  'K': 'KL divergence expression',
+                  'W': 'piecewise linear expression'}
         if self.affine_out.shape == ():
             shapes = 'an' if self.xtype in 'AEISP' else 'a'
         else:
@@ -1694,8 +1730,142 @@ class Convex:
         return Convex(self.affine_in, self.affine_out.sum(axis=axis),
                       self.xtype, self.sign, self.multiplier, axis)
 
+    def __call__(self):
+
+        if self.model.mtype != 'R':
+            raise ValueError('Unsupported affine expression.')
+
+        if self.model.solution is None:
+            raise SyntaxError('No available solution!')
+        else:
+            value_in = self.affine_in()
+            if isinstance(self.affine_out, Affine):
+                value_out = self.affine_out()
+            else:
+                value_out = self.affine_out
+
+            if self.xtype == 'A':
+                output = self.multiplier*self.sign*abs(value_in) + value_out
+            elif self.xtype == 'M':
+                output = self.multiplier*self.sign*abs(value_in).sum() + value_out
+            elif self.xtype == 'E':
+                output = self.multiplier*self.sign*((value_in**2).sum())**0.5 + value_out
+            elif self.xtype == 'I':
+                output = self.multiplier*self.sign*abs(value_in).max() + value_out
+            elif self.xtype == 'S':
+                output = self.multiplier**2*self.sign*(value_in**2) + value_out
+            elif self.xtype == 'Q':
+                output = self.multiplier**2*self.sign*(value_in**2).sum() + value_out
+            elif self.xtype == 'X':
+                output = self.multiplier*self.sign*np.exp(value_in) + value_out
+            elif self.xtype == 'L':
+                output = - self.multiplier*self.sign*np.log(value_in) + value_out
+            elif self.xtype == 'P':
+                output = self.multiplier*self.sign*(value_in * np.log(1/value_in)).sum()
+                output += value_out
+            else:
+                raise ValueError('Unsupported convex/concave expression.')
+
+            return output
+
+
+class PiecewiseConvex:
+    """
+    The PiecewiseConvex class creates an object of piecewise functions.
+    """
+
+    def __init__(self, model, pieces, sign=1, add_sign=1):
+
+        self.model = model
+        self.pieces = pieces
+        self.sign = sign
+        self.add_sign = add_sign
+
+    def __repr__(self):
+
+        num_pieces = len(self.pieces)
+        cvx = 'convex' if self.sign > 0 else 'concave'
+
+        return f'a {cvx} piecewise function with {num_pieces} pieces'
+
+    def __neg__(self):
+
+        return PiecewiseConvex(self.model, self.pieces, -self.sign, self.add_sign)
+
+    def __add__(self, other):
+
+        if isinstance(other, (np.ndarray, Vars, VarSub, Affine, RoAffine)):
+            if other.size != 1:
+                raise ValueError('Expressions in piecewise functions must be scalars.')
+        elif isinstance(other, (DecRule, DecRuleSub)):
+            other = other.to_affine()
+            if other.size != 1:
+                raise ValueError('Expressions in piecewise functions must be scalars.')
+        elif not isinstance(other, Real):
+            raise TypeError('Unsupported expressions.')
+
+        pieces = [piece + other*self.sign for piece in self.pieces]
+
+        return PiecewiseConvex(self.model, pieces, self.sign, self.add_sign)
+
+    def __radd__(self, other):
+
+        return self.__add__(other)
+
+    def __sub__(self, other):
+
+        return self.__add__(-other)
+
+    def __rsub__(self, other):
+
+        return (-self).__add__(other)
+
+    def __mul__(self, other):
+
+        if not isinstance(other, Real):
+            raise TypeError('Incorrect syntax.')
+
+        other_sign = np.sign(other)
+        other_abs = abs(other)
+
+        pieces = [piece*other_abs for piece in self.pieces]
+
+        return PiecewiseConvex(self.model, pieces, self.sign*other_sign, self.add_sign)
+
+    def __rmul__(self, other):
+
+        return self.__mul__(other)
+
+    def __le__(self, other):
+
+        left = self - other
+        if left.sign == -1:
+            raise ValueError('Nonconvex constraints.')
+
+        pieces = [piece <= 0 for piece in left.pieces]
+
+        return PWConstr(left.model, pieces)
+
+    def __ge__(self, other):
+
+        right = other - self
+        if right.sign == -1:
+            raise ValueError('Nonconvex constraints.')
+
+        pieces = [piece <= 0 for piece in right.pieces]
+
+        return PWConstr(right.model, pieces)
+
+    @property
+    def E(self):
+
+        return ExpPiecewiseConvex(self.model, self.pieces, self.sign, self.add_sign)
+
 
 class PerspConvex(Convex):
+    """
+    The PerspConvex object creates an object of a perspective convex function.
+    """
 
     def __init__(self, affine_in, affine_scale, affine_out, xtype, sign,
                  multiplier=1):
@@ -1769,7 +1939,7 @@ class PerspConvex(Convex):
 
 class RoAffine:
     """
-    The Roaffine class creats an object of uncertain affine functions
+    The Roaffine class creats an object of uncertain affine functions.
     """
 
     __array_priority__ = 101
@@ -1875,8 +2045,8 @@ class RoAffine:
             if other.shape == self.shape:
                 raffine = self.raffine
             else:
-                sparray = (np.arange(self.size).reshape(self.shape)
-                           + np.zeros(other.shape))
+                sparray = (np.arange(self.size).reshape(self.shape) +
+                           np.zeros(other.shape))
                 index = sparray.flatten()
                 size = sparray.size
                 sparse = csr_matrix(([1]*size, index, np.arange(size+1)),
@@ -1968,6 +2138,25 @@ class RoAffine:
         left = self - other
         return RoConstr(left, sense=1)
 
+    def __call__(self, *args):
+
+        nrand = self.rand_model.last
+        rvec = np.zeros(nrand)
+        for arg in args:
+            if not isinstance(arg, RandVal):
+                raise TypeError('Unsupported type for defining random variable values.')
+
+            index = range(arg.rvar.first, arg.rvar.last)
+            rvec[index] = arg.values.ravel()
+
+        raffine_value = self.raffine()
+        affine_value = self.affine()
+
+        nrand = raffine_value.shape[1]
+        output = (raffine_value@rvec[:nrand]).reshape(self.shape) + affine_value
+
+        return output
+
 
 class LinConstr:
     """
@@ -1993,7 +2182,7 @@ class LinConstr:
 
 class CvxConstr:
     """
-    The CvxConstr class creates an object of convex constraints
+    The CvxConstr class creates an object of convex constraints.
     """
 
     def __init__(self, model, affine_in, affine_out, multiplier, xtype):
@@ -2013,6 +2202,29 @@ class CvxConstr:
             return '{} convex constraints'.format(size)
 
 
+class PWConstr:
+    """
+    The PWConstr class creates an object of piecewise convex constraints.
+    """
+
+    def __init__(self, model, pieces, supp_set=None):
+
+        self.model = model
+        self.pieces = pieces
+        self.supp_set = supp_set
+
+    def forall(self, *args):
+
+        pieces = []
+        for piece in self.pieces:
+            if isinstance(piece, (DecLinConstr, DecBounds, RoConstr)):
+                pieces.append(piece.forall(*args))
+            else:
+                pieces.append(piece)
+
+        return PWConstr(self.model, pieces, args)
+
+
 class PCvxConstr(CvxConstr):
 
     def __init__(self, model, affine_in, affine_scale, affine_out,
@@ -2024,7 +2236,7 @@ class PCvxConstr(CvxConstr):
 
 class Bounds:
     """
-    The Bounds class creates an object for upper or lower bounds
+    The Bounds class creates an object for upper or lower bounds.
     """
 
     def __init__(self, model, indices, values, btype):
@@ -2037,7 +2249,7 @@ class Bounds:
 
 class ConeConstr:
     """
-    The ConeConstr class creates an object of second-order cone constraints
+    The ConeConstr class creates an object of second-order cone constraints.
     """
 
     def __init__(self, model, left_var, left_index, right_var, right_index):
@@ -2051,7 +2263,7 @@ class ConeConstr:
 
 class ExpConstr:
     """
-    The ExpConstr class creates an object of exponential cone constraints
+    The ExpConstr class creates an object of exponential cone constraints.
     """
 
     def __init__(self, model, expr1, expr2, expr3):
@@ -2074,7 +2286,7 @@ class ExpConstr:
 
 class KLConstr:
     """
-    The KLConstr class creates an object of constraint for KL divergence
+    The KLConstr class creates an object of constraint for KL divergence.
     """
 
     def __init__(self, p, phat, r):
@@ -2093,7 +2305,7 @@ class KLConstr:
 
 class RoConstr:
     """
-    The Roaffine class creats an object of uncertain affine functions
+    The Roaffine class creats an object of uncertain affine functions.
     """
 
     def __init__(self, roaffine, sense):
@@ -2166,7 +2378,7 @@ class RoConstr:
                             -left.const.reshape(num_rc_constr),
                             sense2)
 
-        bounds: List[LinConstr] = []
+        bounds = []
         index_pos = (support.ub == 0)
         if any(index_pos):
             bounds.append(dual_var[:, index_pos] <= 0)
@@ -2177,8 +2389,6 @@ class RoConstr:
         if num_rand == support.linear.shape[0]:
             constr_list = [constr1, constr2]
             constr_list += [] if bounds is None else bounds
-            # constr_list = ((constr1, constr2) if bounds is None else
-            #                     (constr1, constr2, bounds))
         else:
             left = dual_var @ support.linear[num_rand:].T
             sense3 = np.tile(support.sense[num_rand:], num_constr)
@@ -2209,7 +2419,7 @@ class RoConstr:
 class DecVar(Vars):
     """
     The DecVar class creates an object of generic variable array
-    (here-and-now or wait-and-see) for adaptive DRO models
+    (here-and-now or wait-and-see) for adaptive DRO models.
     """
 
     def __init__(self, dro_model, dvars, fixed=True, name=None):
@@ -2217,7 +2427,7 @@ class DecVar(Vars):
         super().__init__(dvars.model, dvars.first, dvars.shape,
                          dvars.vtype, dvars.name)
         self.dro_model = dro_model
-        self.event_adapt: List[List[int]] = [list(range(dro_model.num_scen))]
+        self.event_adapt = [list(range(dro_model.num_scen))]
         self.rand_adapt = None
         self.ro_first = - 1
         self.fixed = fixed
@@ -2245,8 +2455,6 @@ class DecVar(Vars):
 
         item_array = index_array(self.shape)
         indices = item_array[item]
-        # if not isinstance(indices, np.ndarray):
-        #     indices = np.array([indices]).reshape((1, ) * self.ndim)
 
         return DecVarSub(self.dro_model, self, indices, fixed=self.fixed)
 
@@ -2347,13 +2555,12 @@ class DecVar(Vars):
             raise RuntimeError('The model is unsolved or infeasible')
 
         var_sol = dro_model.ro_model.rc_model.vars[1].get()
-        # num_scen = dro_model.num_scen
         edict = event_dict(self.event_adapt)
         if rvar is None:
             outputs = []
             for eindex in range(len(self.event_adapt)):
-                indices = (self.ro_first + eindex*self.size
-                           + np.arange(self.size, dtype=int))
+                indices = (self.ro_first + eindex*self.size +
+                           np.arange(self.size, dtype=int))
                 result = var_sol[indices]
                 if self.shape == ():
                     result = result[0]
@@ -2382,13 +2589,9 @@ class DecVar(Vars):
                 sol_vec = np.array(dro_model.solution.x)[sp.col]
                 sol_indices = sp.row
 
-                # coeff = np.ones(sp.shape[0]) * np.NaN
                 coeff = np.array([np.NaN] * sp.shape[0])
                 coeff[sol_indices] = sol_vec
 
-                # if rvar.to_affine().size == 1:
-                #     outputs.append(coeff.reshape(self.shape))
-                # else:
                 rv_shape = rvar.to_affine().shape
                 outputs.append(coeff.reshape(self.shape + rv_shape))
 
@@ -2404,6 +2607,10 @@ class DecVar(Vars):
 
         return DecAffine(self.dro_model, self.to_affine(),
                          fixed=self.fixed, ctype='E')
+
+    def __call__(self, *args):
+
+        return self.to_affine()(*args)
 
 
 class DecVarSub(VarSub):
@@ -2496,10 +2703,14 @@ class DecVarSub(VarSub):
         return DecAffine(self.dro_model, self.to_affine(),
                          fixed=self.fixed, ctype='E')
 
+    def __call__(self, *args):
+
+        return self.to_affine()(*args)
+
 
 class RandVar(Vars):
     """
-    The RandVar class creates an object of random variable array
+    The RandVar class creates an object of random variable array.
     """
 
     def __init__(self, svars, evars):
@@ -2543,6 +2754,27 @@ class RandVar(Vars):
     def __rmatmul__(self, other):
 
         return super().__rmatmul__(other)
+
+    def assign(self, values, sw=False):
+
+        if not isinstance(values, (np.ndarray, Real)):
+            raise TypeError('The second argument does not provide numerical values.')
+
+        if not sw:
+            values = np.array(values, dtype=float) + np.zeros(self.shape, dtype=float)
+            values = values.reshape(self.shape)
+        else:
+            if isinstance(values, pd.Series):
+                values = values.values
+
+            value_list = []
+            for i in range(self.model.top.num_scen):
+                value = np.array(values[i], dtype=float)
+                value += np.zeros(self.shape, dtype=float)
+                value_list.append(value)
+            values = pd.Series(value_list, index=self.model.top.series_scen.index)
+
+        return RandVal(self, values, sw)
 
 
 class RandVarSub(VarSub):
@@ -2730,7 +2962,7 @@ class DecAffine(Affine):
         """
         Return the first, second, or infinity norm of a 1-D array.
 
-        Refer to `rsome.norm` for full documentation
+        Refer to `rsome.norm` for full documentation.
 
         See Also
         --------
@@ -2748,7 +2980,7 @@ class DecAffine(Affine):
         """
         Return the element-wise square of an array.
 
-        Refer to `rsome.square` for full documentation
+        Refer to `rsome.square` for full documentation.
 
         See Also
         --------
@@ -2788,7 +3020,7 @@ class DecAffine(Affine):
 
     def expcone(self, x, z):
         """
-        Return the exponential cone constraint z*exp(x/z) <= affine
+        Return the exponential cone constraint z*exp(x/z) <= affine.
 
         Refer to `rsome.expcone` for full documentation.
 
@@ -2823,7 +3055,7 @@ class DecAffine(Affine):
 
     def exp(self):
         """
-        Return the natural exponential function exp(affine)
+        Return the natural exponential function exp(affine).
 
         Refer to `rsome.exp` for full documentation.
 
@@ -2838,7 +3070,7 @@ class DecAffine(Affine):
     def pexp(self, scale):
         """
         Return the perspective of natural exponential function
-        scale * exp(affine/scale)
+        scale * exp(affine/scale).
 
         Refer to `rsome.pexp` for full documentation.
 
@@ -2853,7 +3085,7 @@ class DecAffine(Affine):
 
     def log(self):
         """
-        Return the natural logarithm function log(affine)
+        Return the natural logarithm function log(affine).
 
         Refer to `rsome.log` for full documentation.
 
@@ -2868,7 +3100,7 @@ class DecAffine(Affine):
     def plog(self, scale):
         """
         Return the perspective of natural logarithm function
-        scale * log(affine/scale)
+        scale * log(affine/scale).
 
         Refer to `rsome.plog` for full documentation.
 
@@ -2883,7 +3115,7 @@ class DecAffine(Affine):
 
     def entropy(self):
         """
-        Return the natural exponential function -sum(affine*log(affine))
+        Return the natural exponential function -sum(affine*log(affine)).
 
         Refer to `rsome.entropy` for full documentation.
 
@@ -2921,6 +3153,12 @@ class DecAffine(Affine):
                                 left.affine_in, left.affine_scale, left.affine_out,
                                 left.multiplier, left.xtype)
             return DecPCvxConstr(constr, left.event_adapt)
+        elif isinstance(left, ExpPiecewiseConvex):
+            pieces = [piece <= 0 for piece in left.pieces]
+            return ExpPWConstr(left.model, pieces)
+        elif isinstance(left, PiecewiseConvex):
+            pieces = [piece <= 0 for piece in left.pieces]
+            return PWConstr(left.model, pieces)
 
     def __ge__(self, other):
 
@@ -2943,6 +3181,12 @@ class DecAffine(Affine):
                                 left.affine_in, left.affine_scale, left.affine_out,
                                 left.multiplier, left.xtype)
             return DecPCvxConstr(constr, left.event_adapt)
+        elif isinstance(left, ExpPiecewiseConvex):
+            pieces = [piece <= 0 for piece in left.pieces]
+            return ExpPWConstr(left.model, pieces)
+        elif isinstance(left, PiecewiseConvex):
+            pieces = [piece <= 0 for piece in left.pieces]
+            return PWConstr(left.model, pieces)
 
     def __eq__(self, other):
 
@@ -2960,8 +3204,45 @@ class DecAffine(Affine):
         affine = Affine(self.model, self.linear, self.const)
         return DecAffine(self.dro_model, affine, fixed=self.fixed, ctype='E')
 
+    def __call__(self, *args):
+
+        if self.model.mtype != 'V':
+            raise ValueError('Unsupported affine expression.')
+
+        if self.dro_model.solution is None:
+            raise SyntaxError('No available solution!')
+        else:
+            decs = self.dro_model.rule_var()
+            ns = len(decs)
+            values = []
+            for i, dec in zip(self.dro_model.series_scen.index, decs):
+                if isinstance(dec, Affine):
+                    xs = dec()
+                elif isinstance(dec, RoAffine):
+                    args_sw = [RandVal(arg.rvar, arg.values.loc[i]) if arg.sw else arg
+                               for arg in args]
+                    xs = dec(*args_sw)
+
+                nvar = self.linear.shape[1]
+                output = (self.linear @ xs[:nvar]).reshape(self.shape)
+                output += self.const.reshape(self.shape)
+
+                if output.ndim == 0:
+                    output = output.item()
+
+                values.append(output)
+
+            if ns > 1 and len(self.event_adapt) > 1:
+                return pd.Series(values, index=self.dro_model.series_scen.index)
+            else:
+                return values[0]
+
 
 class DecConvex(Convex):
+    """
+    The DecConvex class creates an object of convex functions
+    of decision variables.
+    """
 
     def __init__(self, convex, event_adapt):
 
@@ -3008,6 +3289,150 @@ class DecConvex(Convex):
         constr = super().__ge__(other)
 
         return DecCvxConstr(constr, self.event_adapt)
+
+    def __call__(self):
+
+        if self.model.mtype != 'V':
+            raise ValueError('Unsupported affine expression.')
+
+        if self.model.top.solution is None:
+            raise SyntaxError('No available solution!')
+        else:
+            values_in = self.affine_in()
+            if isinstance(self.affine_out, Affine):
+                values_out = self.affine_out()
+            else:
+                values_out = self.affine_out
+            if not isinstance(values_in, pd.Series):
+                values_in = pd.Series([values_in])
+            if not isinstance(values_out, pd.Series):
+                values_out = pd.Series([values_out] * len(values_in))
+
+            output = []
+            for value_in, value_out in zip(values_in, values_out):
+                if self.xtype == 'A':
+                    output.append(self.multiplier*self.sign*abs(value_in) + value_out)
+                elif self.xtype == 'M':
+                    item = self.multiplier*self.sign*abs(value_in).sum()
+                    item += value_out
+                    output.append(item)
+                elif self.xtype == 'E':
+                    item = self.multiplier*self.sign*((value_in**2).sum())**0.5
+                    item += value_out
+                    output.append(item)
+                elif self.xtype == 'I':
+                    item = self.multiplier*self.sign*abs(value_in).max()
+                    item += value_out
+                    output.append(item)
+                elif self.xtype == 'S':
+                    output.append(self.multiplier**2*self.sign*(value_in**2) + value_out)
+                elif self.xtype == 'Q':
+                    item = self.multiplier**2*self.sign*(value_in**2).sum()
+                    item += value_out
+                    output.append(item)
+                elif self.xtype == 'X':
+                    output.append(self.multiplier*self.sign*np.exp(value_in) + value_out)
+                elif self.xtype == 'L':
+                    item = -self.multiplier*self.sign*np.log(value_in)
+                    item += value_out
+                    output.append(item)
+                elif self.xtype == 'P':
+                    item = self.multiplier*self.sign*(value_in*np.log(1/value_in)).sum()
+                    item += value_out
+                    output.append(item)
+                else:
+                    raise ValueError('Unsupported convex/concave expression.')
+
+            if len(output) > 1 and len(self.event_adapt) > 1:
+                output = pd.Series(output, index=values_in.index)
+            else:
+                output = output[0]
+
+            return output
+
+
+class ExpPiecewiseConvex(PiecewiseConvex):
+    """
+    The ExpPiecewiseConvex class creates an object of the expectation
+    of a piecewise function.
+    """
+
+    def __init__(self, model, pieces, sign=1, add_sign=1):
+
+        expect_pieces = []
+        for piece in pieces:
+            if isinstance(piece, (DecVar, DecVarSub)):
+                piece = piece.to_affine()
+            if isinstance(piece, (RandVar, RandVarSub)):
+                piece = piece.rand_to_roaffine(model.vt_model)
+            if isinstance(piece, (DecAffine, DecRoAffine)):
+                piece.ctype = 'E'
+
+            expect_pieces.append(piece)
+
+        super().__init__(model, expect_pieces, sign, add_sign)
+
+    def __add__(self, other):
+
+        if isinstance(other, (DecVar, DecVarSub)):
+            other = other.to_affine()
+
+        if isinstance(other, DecAffine):
+            if not other.fixed and other.ctype != 'E':
+                raise ValueError('Incorrect expectation expressions.')
+        elif isinstance(other, DecRoAffine):
+            if other.ctype != 'E':
+                raise ValueError('Incorrect expectation expressions.')
+        elif not isinstance(other, (Real, np.ndarray)):
+            raise TypeError('Unsupported expectation expressions.')
+
+        piecewise = super().__add__(other)
+
+        return ExpPiecewiseConvex(piecewise.model, piecewise.pieces,
+                                  piecewise.sign, piecewise.add_sign)
+
+    def __neg__(self):
+
+        return ExpPiecewiseConvex(self.model, self.pieces, -self.sign, self.add_sign)
+
+    def __sub__(self, other):
+
+        return self.__add__(-other)
+
+    def __rsub__(self, other):
+
+        return (-self).__add__(other)
+
+    def __radd__(self, other):
+
+        return self.__add__(other)
+
+    def __mul__(self, other):
+
+        piecewise = super().__mul__(other)
+
+        return ExpPiecewiseConvex(piecewise.model, piecewise.pieces,
+                                  piecewise.sign, piecewise.add_sign)
+
+    def __rmul__(self, other):
+
+        return self.__mul__(other)
+
+    def __le__(self, other):
+
+        if isinstance(other, (np.ndarray, Real)):
+            constr = super().__le__(other)
+        else:
+            left = self - other
+            constr = left.__le__(0)
+
+        return ExpPWConstr(constr.model, constr.pieces)
+
+    def __ge__(self, other):
+
+        right = other - self
+
+        return right.__le__(0)
 
 
 class DecPerspConvex(PerspConvex):
@@ -3060,6 +3485,10 @@ class DecPerspConvex(PerspConvex):
 
 
 class DecRoAffine(RoAffine):
+    """
+    The DecRoaffine class creats an object of uncertain affine functions
+    for scenario-wise DRO models.
+    """
 
     def __init__(self, roaffine, event_adapt, ctype):
 
@@ -3102,15 +3531,16 @@ class DecRoAffine(RoAffine):
             else:
                 other = other.to_affine()
                 if self.ctype != other.ctype:
-                    if ((self.ctype == 'E'
-                         and (not other.fixed or len(other.event_adapt) > 1))
-                            or other.ctype == 'E'):
+                    cond1 = self.ctype == 'E'
+                    cond2 = not other.fixed or len(other.event_adapt) > 1
+                    cond3 = other.ctype == 'E'
+                    if (cond1 and cond2) or cond3:
                         raise TypeError('Incorrect expectation expressions.')
                 other = other.to_affine()
             event_adapt = comb_set(self.event_adapt, other.event_adapt)
             ctype = 'E' if 'E' in self.ctype + other.ctype else 'R'
-        elif (isinstance(other, (Real, np.ndarray, RoAffine))
-              or sp.issparse(other)):
+        elif (isinstance(other, (Real, np.ndarray, RoAffine)) or
+              sp.issparse(other)):
             event_adapt = self.event_adapt
             ctype = self.ctype
         elif isinstance(other, (Vars, VarSub, Affine)):
@@ -3178,8 +3608,58 @@ class DecRoAffine(RoAffine):
         roaffine = RoAffine(self.raffine, self.affine, self.rand_model)
         return DecRoAffine(roaffine, self.event_adapt, ctype='E')
 
+    def __call__(self, *args):
+
+        nrand = self.rand_model.last
+        nscen = self.dec_model.top.num_scen
+        # rvec = np.zeros(nrand)
+        rvecs = pd.DataFrame(np.zeros((nscen, nrand)),
+                             index=self.dec_model.top.series_scen.index)
+        sw = False
+        for arg in args:
+            if not isinstance(arg, RandVal):
+                raise TypeError('Unsupported type for defining random variable values.')
+
+            index = range(arg.rvar.first, arg.rvar.last)
+            # rvec[index] = arg.values.ravel()
+            if not arg.sw:
+                rvecs.loc[:, index] = arg.values.ravel()
+            else:
+                sw = True
+                for i in arg.values.index:
+                    rvecs.loc[i, index] = arg.values.loc[i].ravel()
+
+        raffine_values = self.raffine()
+        affine_values = self.affine()
+
+        if isinstance(raffine_values, pd.Series) or sw:
+            output = []
+            for i in rvecs.index:
+                if isinstance(raffine_values, pd.Series):
+                    raffine_value = raffine_values.loc[i]
+                    affine_value = affine_values.loc[i]
+                else:
+                    raffine_value = raffine_values
+                    affine_value = affine_values
+                nrand = raffine_value.shape[1]
+
+                item = (raffine_value@rvecs.loc[i].values[:nrand]).reshape(self.shape)
+                item += affine_value
+                output.append(item)
+            output = pd.Series(output, index=rvecs.index)
+        else:
+            nrand = raffine_values.shape[1]
+            output = (raffine_values@rvecs.iloc[0].values[:nrand]).reshape(self.shape)
+            output += affine_values
+
+        return output
+
 
 class DecLinConstr(LinConstr):
+    """
+    The DecLinConstr class creats an object of linear constraints of
+    generic decision variables.
+    """
 
     def __init__(self, model, linear, const, sense,
                  event_adapt=None, fixed=True, ctype='R'):
@@ -3221,6 +3701,18 @@ class DecCvxConstr(CvxConstr):
         super().__init__(constr.model, constr.affine_in,
                          constr.affine_out, constr.multiplier, constr.xtype)
         self.event_adapt = event_adapt
+
+
+class ExpPWConstr(PWConstr):
+
+    def __init__(self, model, pieces, ambset=None):
+
+        super().__init__(model, pieces)
+        self.ambset = ambset
+
+    def forall(self, ambset):
+
+        return ExpPWConstr(self.model, self.pieces, ambset)
 
 
 class DecPCvxConstr(PCvxConstr):
@@ -3283,6 +3775,9 @@ class DecRoConstr(RoConstr):
 
 
 class DecRule:
+    """
+    The DecRule class creats an object of decision rules for RO models.
+    """
 
     __array_priority__ = 102
 
@@ -3494,8 +3989,16 @@ class DecRule:
             rv_shape = rvar.to_affine().shape
             return ldr_coeff[:, rand_ind].reshape(self.shape + rv_shape)
 
+    def __call__(self, *args):
+
+        return self.to_affine()(*args)
+
 
 class DecRuleSub:
+    """
+    The DecRuleSub class creats an object of a subset of decision rule
+    for RO models.
+    """
 
     __array_priority__ = 105
 
@@ -3589,10 +4092,14 @@ class DecRuleSub:
 
         return (self - other).__eq__(0)
 
+    def __call__(self, *args):
+
+        return self.to_affine()(*args)
+
 
 class LinProg:
     """
-    The LinProg class creates an object of linear program
+    The LinProg class creates an object of linear program.
     """
 
     def __init__(self, linear, const, sense, vtype, ub, lb, obj=None):
@@ -3722,16 +4229,24 @@ class LinProg:
 
 
 class Solution:
+    """
+    The Solution class creats an object summarizing solution information.
+    """
 
-    def __init__(self, objval, x, status, time):
+    def __init__(self, objval, x, status, time, xs=None):
 
         self.objval = objval
         self.x = x
+        self.xs = xs
         self.status = status
         self.time = time
 
 
 class Scen:
+    """
+    The Scen class creats an object of scenarios for the ambiguity set and
+    scenario-wise decision adaptive rules.
+    """
 
     def __init__(self, ambset, series, pr):
 
@@ -3822,7 +4337,6 @@ class Scen:
                                  'expectation sets.')
 
         self.ambset.exp_constr.append(tuple(args))
-        indices: Iterable[int]
         if not isinstance(self.series, Iterable):
             indices = [self.series]
         else:
@@ -3856,3 +4370,16 @@ class ScenILoc:
         indices_s = self.scens.series.iloc[indices]
 
         return Scen(self.scens.ambset, indices_s, self.scens.p[indices_s])
+
+
+class RandVal:
+    """
+    The RandVal class creats an object that pairs the random variable and its
+    observed value.
+    """
+
+    def __init__(self, rvar, values, sw=False):
+
+        self.rvar = rvar
+        self.values = values
+        self.sw = sw

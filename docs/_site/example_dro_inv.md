@@ -285,13 +285,15 @@ model.st(I[0] == I0 + x1 - d[0])
 for t in range(1, T):
     model.st(I[t] == I[t-1] + x[t-1] - d[t])
 model.st(y >= h*I, y >= -b*I)
-model.st(w >= 0, w <= xbar[0])
 model.st(x >= 0, x <= xbar[1:])
 
 model.solve(grb)                    # solve the model by Gurobi
 ```
 
 In this example, the scenario partition \\(\mathcal{C}=\\{\\{1\\},\cdots,\\{S\\}\\}\\) is defined by a loop where in each iteration, the `adapt()` method is used to indicate that the given decision variable adapts to the scenario `s`.
+
+After the model is successfully solved, we may further evaluate values of the scenario-wise decisions (and their expressions) under different realizations of random variables. For example, the expression `y(v.assign(vhat[0])` returns a series of arrays, and each array is the value of \\(\pmb{y}(s, \pmb{v})\\) in the \\(s\\)th scenario and \\(\pmb{v} = \hat{\pmb{v}}_1\\). In this function call of `y()`, the decision rules in different scenarios are evaluated under the same value of \\(\pmb{v}\\), which is the first historical record `vhat[0]`. We may also use the expression `y(v.assign(vhat, sw=True))` to enforce scenario-wise evaluation (keyword argument `sw=True`) of the decision rule, where the realizations of random variables are assumed to be `vhat[0]`, `vhat[1]`, ..., `vhat[S-1]`, respectively, for these \\(S\\) scenarios. 
+
 
 #### Reference
 
