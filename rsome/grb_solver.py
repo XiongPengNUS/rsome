@@ -71,7 +71,7 @@ def solve(formula, display=True, params={}):
     try:
         solution = Solution(grb.ObjVal, np.array(grb.getAttr('X')),
                             grb.Status, grb.Runtime)
-    except AttributeError:
+    except (AttributeError, gp.GurobiError):
         warnings.warn('Fail to find the optimal solution.')
         solution = None
 
