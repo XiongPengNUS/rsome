@@ -173,12 +173,6 @@ def test_socp():
         model.solve(ort)
     assert not model.optimal()
 
-    with pytest.warns(FutureWarning):
-        model.solve(cvx)
-    assert abs(model.get() - objval) < 1e-6
-    assert (abs(x_sol - x.get()) < 1e-3).all()
-    assert model.optimal()
-
     model.solve(eco)
     assert abs(model.get() - objval) < 1e-6
     assert (abs(x_sol - x.get()) < 1e-3).all()
@@ -232,12 +226,6 @@ def test_mip_socp():
     with pytest.warns(UserWarning):
         model.solve(ort)
 
-    with pytest.warns(FutureWarning):
-        model.solve(cvx)
-    if model.solution.status == 'optimal':
-        assert abs(model.get() - objval) < 1e-3
-        assert (abs(x_sol - x.get()) < 1e-3).all()
-
     model.solve(eco)
     assert abs(model.get() - objval) < 1e-3
     assert (abs(x_sol - x.get()) < 1e-3).all()
@@ -280,9 +268,6 @@ def test_no_solution():
 
     with pytest.warns(UserWarning):
         model.solve(ort)
-
-    with pytest.warns(FutureWarning):
-        model.solve(cvx)
 
     with pytest.warns(UserWarning):
         model.solve(eco)
