@@ -3,7 +3,9 @@ requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "--ignore=tests/test_solvers.py,tests/test_sdp_dro.py,tests/test_sdp_ro.py"
+addopts = "--ignore=tests/test_solvers.py"
+addopts = "--ignore=tests/test_sdp_dro.py"
+addopts = "--ignore=tests/test_sdp_ro.py
 testpaths = [
     "tests",
 ]
