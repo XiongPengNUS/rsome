@@ -19,7 +19,7 @@ def test_log_det_dro():
     v = m.dvar(n)
 
     m.max(v.sum())
-    m.st(rso.rstack([X, Z], 
+    m.st(rso.rstack([X, Z],
                     [Z.T, rso.diag(Z, fill=True)]) >> 0)
     m.st(v <= rso.log(rso.diag(Z)))
     m.st(X == A)
@@ -60,14 +60,14 @@ def test_sw_log_det_dro():
         v.adapt(j)
 
     m.maxinf(E(v.sum()), fset)
-    m.st(rso.rstack([X, Y], 
+    m.st(rso.rstack([X, Y],
                     [Y.T, rso.diag(Y, fill=True)]) >> 0)
     m.st(v <= rso.log(rso.diag(Y)))
     m.st(X == Z)
 
     m.solve(msk)
 
-    assert all(abs(np.exp(v.sum()()) - 
+    assert all(abs(np.exp(v.sum()()) -
                    pd.Series([np.linalg.det(A) for A in As])) < 1e-6)
 
     objval = np.log(np.array([np.linalg.det(A) for A in As])).mean()

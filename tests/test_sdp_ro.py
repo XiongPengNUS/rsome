@@ -17,7 +17,7 @@ def test_log_det_ro():
     v = m.dvar(n)
 
     m.max(v.sum())
-    m.st(rso.rstack([X, Z], 
+    m.st(rso.rstack([X, Z],
                     [Z.T, rso.diag(Z, fill=True)]) >> 0)
     m.st(v <= rso.log(rso.diag(Z)))
     m.st(X == A)

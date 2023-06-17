@@ -51,7 +51,7 @@ def test_multiple_dro():
     uset = (rso.norm(z) <= u,
             u <= rso.entropy(v),
             v == pr)
-    
+
     x = m.dvar(ns)
     m.min(x.sum())
     m.st((x >= array@z).forall(uset))
@@ -69,12 +69,12 @@ def test_sw_cone():
     array = np.random.rand(n)
     pr = np.random.rand(s)
     ctr = np.random.rand(s, n)
-    
+
     m = dro.Model(s)
     z = m.rvar(n)
     u = m.rvar()
     v = m.rvar()
-    
+
     fset = m.ambiguity()
     for j in range(s):
         fset[j].suppset(rso.norm(z - ctr[j]) <= u,
@@ -83,7 +83,7 @@ def test_sw_cone():
 
     p = m.p
     fset.probset(p == 1/s)
-    
+
     x = m.dvar(n)
     y = m.dvar()
     for j in range(s):
@@ -94,6 +94,6 @@ def test_sw_cone():
     m.solve(eco)
 
     uvalues = -pr*np.log(pr)
-    objval = ctr@array -((array**2).sum()**0.5) * uvalues
+    objval = ctr@array - ((array**2).sum()**0.5) * uvalues
 
     assert abs(objval.mean() - m.get()) < 1e-4
