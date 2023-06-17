@@ -15,6 +15,12 @@ from .lp import Solution
 
 def solve(formula, display=True, params={}):
 
+    try:
+        if formula.lmi:
+            warnings.warn('The solver ignores semidefinite cone constraints. ')
+    except AttributeError:
+        pass
+
     bool_idx = [i for i in range(len(formula.vtype)) if formula.vtype[i] == 'B']
     int_idx = [i for i in range(len(formula.vtype)) if formula.vtype[i] == 'I']
 
@@ -23,7 +29,7 @@ def solve(formula, display=True, params={}):
     ineq_idx = np.argwhere(formula.sense == 0).flatten()
     num_ineq = len(ineq_idx)
 
-    c = formula.obj.flatten()
+    c = formula.obj
 
     Gl = formula.linear[ineq_idx]
 
@@ -77,10 +83,24 @@ def solve(formula, display=True, params={}):
 
     if len(bool_idx) + len(int_idx) == 0:
         sol = ecos.solve(c, G, h, dims, A, b)
+
+        num_constr, num_var = formula.linear.shape
+        pi = np.ones(num_constr) * np.nan
+        upi = np.zeros(num_var)
+        lpi = np.zeros(num_var)
+
+        pi[eq_idx] = - sol['y']
+        pi[ineq_idx] = - sol['z'][:num_ineq]
+        lpi[zlb_idx] = sol['z'][num_ineq + np.arange(num_zlb)]
+        upi[zub_idx] = - sol['z'][num_ineq + num_zlb + np.arange(num_zub)]
+
+        y = {'pi': pi, 'upi': upi, 'lpi': lpi}
     else:
         sol = ecos.solve(c, G, h, dims, A, b,
                          bool_vars_idx=bool_idx, int_vars_idx=int_idx,
                          mi_max_iters=100000000)
+        y = None
+
     info = sol['info']
     stime = info['timing']['runtime']
     status = info['infostring']
@@ -91,9 +111,10 @@ def solve(formula, display=True, params={}):
 
     if info['exitFlag'] in [0, 10]:
         x_vec = sol['x']
-        solution = Solution(info['pcost'], x_vec, status, stime)
+        solution = Solution('ECOS', info['pcost'], x_vec, status, stime, y=y)
     else:
         warnings.warn('Fail to find the optimal solution.')
-        solution = None
+        # solution = None
+        solution = Solution('ECOS', np.nan, None, status, stime)
 
     return solution

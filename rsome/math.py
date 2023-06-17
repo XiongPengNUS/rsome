@@ -16,12 +16,12 @@ def norm(affine, degree=2):
     affine : an array of variables or affine expressions.
         Input array. The array must be 1-D.
     degree : {1, 2, numpy.inf}, optional
-        Order of the norm function. It can only be 1, 2, or infinity. The
-        default value is 2, i.e., the Euclidean norm.
+        Order of the norm function. It can only be 1, 2, or infinity.
+        The default value is 2, i.e., the Euclidean norm.
 
     Returns
     -------
-    n : Convex
+    out : Convex
         The norm of the given array.
     """
 
@@ -39,7 +39,7 @@ def square(affine):
 
     Returns
     -------
-    n : Convex
+    out : Convex
         The element-wise squares of the given array
     """
 
@@ -48,7 +48,7 @@ def square(affine):
 
 def sumsqr(affine):
     """
-    Return the sum of squares of an array.
+    Return the sum of squares of a 1-D array.
 
     Parameters
     ----------
@@ -57,30 +57,52 @@ def sumsqr(affine):
 
     Returns
     -------
-    n : Convex
+    out : Convex
         The sum of squares of the given array
     """
 
     return affine.to_affine().sumsqr()
 
 
-def quad(affine, qmat):
+def quad(x, qmat):
     """
-    Return the quadratic expression affine @ qmat @ affine.
+    Return the quadratic expression x @ qmat @ x.
 
     Parameters
     ----------
-    affine : an array of variables or affine expression
+    x : an array of variables or affine expressions
         Input array. The array must be 1-D.
     qmat : a positive or negative semidefinite matrix.
 
     Returns
     -------
-    q : Convex
+    out : Convex
         The quadratic expression affine @ qmat affine
     """
 
-    return affine.to_affine().quad(qmat)
+    return x.to_affine().quad(qmat)
+
+
+def rsocone(x, y, z):
+    """
+    Return a rotated cone constraint sumsqr(x) <= y*z.
+
+    Parameters
+    ----------
+    x : an array of variables or affine expressions
+        Input array. The array must be a vector.
+    y : {Real, Vars, VarSub, Affine}
+        The y value in the constraint. It must be a scalar.
+    z : {Real, Vars, VarSub, Affine}
+        The z value in the constraint. It must be a scalar.
+
+    Returns
+    -------
+    output : CvxConstr
+        The rotated cone constraint
+    """
+
+    return x.to_affine().rsocone(y, z)
 
 
 def exp(affine):
@@ -95,7 +117,7 @@ def exp(affine):
 
     Returns
     -------
-    a : Convex
+    out : Convex
         The natural exponential function exp(affine)
     """
 
@@ -114,7 +136,7 @@ def log(affine):
 
     Returns
     -------
-    a : Convex
+    out : Convex
         The natural logarithm function log(affine)
     """
 
@@ -131,9 +153,13 @@ def pexp(affine, scale):
     affine : an array of variables or affine expression
         Input array.
 
+    scale : {Real, Vars, VarSub, Affine}
+        The scale value in the perspective function. It must be a
+        scalar.
+
     Returns
     -------
-    a : PerspConvex
+    out : PerspConvex
         The perspective of natural exponential function
         scale * exp(affine/scale)
     """
@@ -151,9 +177,13 @@ def plog(affine, scale):
     affine : an array of variables or affine expression
         Input array.
 
+    scale : {Real, Vars, VarSub, Affine}
+        The scale value in the perspective function. It must be a
+        scalar.
+
     Returns
     -------
-    a : PerspConvex
+    out : PerspConvex
         The perspective of natural logarithm function
         scale * log(affine/scale)
     """
@@ -172,7 +202,7 @@ def entropy(affine):
 
     Returns
     -------
-    a : Convex
+    out : Convex
         The entropy expression sum(affine*log(affine))
     """
 
@@ -201,7 +231,7 @@ def expcone(y, x, z):
     return y.expcone(x, z)
 
 
-def kldiv(p, phat, r):
+def kldiv(p, q, r):
     """
     Return an KL divergence constraint sum(p*log(p/phat)) <= r.
 
@@ -209,7 +239,7 @@ def kldiv(p, phat, r):
     ----------
     p : an array of variables or affine expression
         The array of probabilities. It must be a vector.
-    phat : {Real, Vars, VarSub, Affine}
+    q : {Real, Vars, VarSub, Affine}
         The array of empirical probabilities. It must a vector with
         the same shape as p.
     r : {Real, Vars, VarSub, Affine}
@@ -218,10 +248,28 @@ def kldiv(p, phat, r):
     Returns
     -------
     constr : ExpConstr
-        The KL divergence constraint sum(p*log(p/phat)) <= r.
+        The KL divergence constraint sum(p*log(p/q)) <= r.
     """
 
-    return p.kldiv(phat, r)
+    return p.kldiv(q, r)
+
+
+def trace(affine):
+    """
+    Return the trace of a 2-D array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. It must be a 2-D array.
+
+    Returns
+    -------
+    out : Affine
+        Output array as the trace of the 2-D array.
+    """
+
+    return affine.trace()
 
 
 def maxof(*args):
@@ -229,17 +277,17 @@ def maxof(*args):
     Return a piecewise function of the maximum of a number of
     expressions.
 
-        Parameters
-        ----------
-        *args : RSOME affine or bi-affine expressions, real numbers
-            Expressions or numerical values used to define the piecewise
-            function.
+    Parameters
+    ----------
+    *args : RSOME affine or bi-affine expressions, real numbers
+        Expressions or numerical values used to define the piecewise
+        function.
 
-        Returns
-        -------
-        piecewise : PiecewiseConvex
-            The piecewise function defined to be the maximum of a number
-            of given expressions or numerical values.
+    Returns
+    -------
+    piecewise : PiecewiseConvex
+        The piecewise function defined to be the maximum of a number
+        of given expressions or numerical values.
     """
 
     pieces = flat(args)
@@ -277,17 +325,17 @@ def minof(*args):
     Return a piecewise function of the minimum of a number of
     expressions.
 
-        Parameters
-        ----------
-        *args : RSOME affine or bi-affine expressions, real numbers
-            Expressions or numerical values used to define the piecewise
-            function.
+    Parameters
+    ----------
+    *args : RSOME affine or bi-affine expressions, real numbers
+        Expressions or numerical values used to define the piecewise
+        function.
 
-        Returns
-        -------
-        piecewise : PiecewiseConvex
-            The piecewise function defined to be the minimum of a number
-            of given expressions or numerical values.
+    Returns
+    -------
+    piecewise : PiecewiseConvex
+        The piecewise function defined to be the minimum of a number
+        of given expressions or numerical values.
     """
 
     piecewise = maxof(*args)
@@ -297,3 +345,78 @@ def minof(*args):
     piecewise.add_sign = -1
 
     return piecewise
+
+
+def diag(affine, k=0, fill=False):
+    """
+    Return the diagonal elements of a 2-D array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. It must be a 2-D array.
+
+    k : int, optional
+        Diagonal in question. The default is 0. Use `k>0` for diagonals
+        above the main diagonal, and `k<0` for diagonals below the main
+        diagonal.
+
+    fill : bool
+        If True, return a 2-D array where the non-diagonal elements are
+        filled with zeros. Otherwise, return the diagonal elements as a
+        1-D array
+
+        Returns
+        -------
+        out : Affine
+            The diagonal elements of a given 2-D array.
+    """
+
+    return affine.diag(k, fill)
+
+
+def tril(affine, k=0):
+    """
+    Return the lower triangular elements of a 2-D array. The remaining
+    elements are filled with zeros.
+
+        Parameters
+        ----------
+        affine : an array of variables or affine expressions.
+            Input array. It must be a 2-D array.
+
+        k : int, optional
+            Diagonal above which to zero elements.  `k = 0` (the
+            default) is the main diagonal, `k < 0` is below it and
+            `k > 0` is above.
+
+        Returns
+        -------
+        out : Affine
+            The lower triangular elements of the given 2-D array.
+    """
+
+    return affine.tril(k)
+
+
+def triu(affine, k):
+    """
+    Return the upper triangular elements of a 2-D array. The remaining
+    elements are filled with zeros.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. It must be a 2-D array.
+
+    k : int, optional
+        Diagonal above which to zero elements.  `k = 0` (the default)
+        is the main diagonal, `k < 0` is below it and `k > 0` is above.
+
+    Returns
+    -------
+        out : Affine
+        The upper triangular elements of the given 2-D array.
+    """
+
+    return affine.triu(k)

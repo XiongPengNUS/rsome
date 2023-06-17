@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -77,7 +77,7 @@
 
 <hr />
 
-<p>The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, RSOME relies on open-source solvers imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package to solve linear programming problems. If SciPy 1.9.0 or above is installed, the default solver <code class="language-plaintext highlighter-rouge">milp()</code> is capable of solving problems with integer variables. However, if the installed SciPy package is 1.8.1 or below, the default solver is <code class="language-plaintext highlighter-rouge">linprog()</code> and it is only able to address continuous variables. Besides the default solver, RSOME also provides interfaces for other open-source and commercial solvers. Detailed information of these solver interfaces is presented in the following table.</p>
+<p>The current version of RSOME supports deterministic, robust optimization and distributionally robust optimization problems. In the default configuration, RSOME relies on open-source solvers imported from the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> package to solve linear programming (<code class="language-plaintext highlighter-rouge">linprog()</code>) and mixed-integer linear programming (<code class="language-plaintext highlighter-rouge">milp</code>) problems. Besides the default solver, RSOME also provides interfaces for other open-source and commercial solvers. Detailed information of these solver interfaces is presented in the following table.</p>
 
 <table>
   <thead>
@@ -86,18 +86,18 @@
       <th style="text-align: left">License  type</th>
       <th style="text-align: left">Required version</th>
       <th style="text-align: left">RSOME interface</th>
-      <th style="text-align: left">Integrality constraints</th>
       <th style="text-align: left">Second-order cone constraints</th>
       <th style="text-align: left">Exponential cone constraints</th>
+      <th style="text-align: left">Semidefiniteness constraints</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
       <td style="text-align: left">Open-source</td>
-      <td style="text-align: left">&gt;= 1.2.1</td>
+      <td style="text-align: left">&gt;= 1.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
-      <td style="text-align: left">Yes for 1.9.0 or above</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -106,7 +106,7 @@
       <td style="text-align: left">Open-source</td>
       <td style="text-align: left">&gt;= 0.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -115,7 +115,7 @@
       <td style="text-align: left">Open-source</td>
       <td style="text-align: left">&gt;= 7.5.7466</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -126,7 +126,7 @@
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">eco_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Gurobi</a></td>
@@ -134,13 +134,13 @@
       <td style="text-align: left">&gt;= 9.1.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
-      <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
+      <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">Mosek</a></td>
       <td style="text-align: left">Commercial</td>
-      <td style="text-align: left">&gt;= 9.1.11</td>
+      <td style="text-align: left">&gt;= 10.0.44</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -152,16 +152,16 @@
       <td style="text-align: left">&gt;= 12.9.0.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://www.shanshu.ai/copt">COPT</a></td>
       <td style="text-align: left">Commercial</td>
-      <td style="text-align: left">&gt;= 5.0.1</td>
+      <td style="text-align: left">&gt;= 6.5.3</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpt_solver</code></td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
   </tbody>
@@ -233,7 +233,8 @@ Objective: 22.400
     Number of SOC constraints:     0
     ---------------------------------------------
     Number of ExpCone constraints: 0
-    
+    ---------------------------------------------
+    Number of PSCone constraints:  0
 </code></pre></div></div>
 
 

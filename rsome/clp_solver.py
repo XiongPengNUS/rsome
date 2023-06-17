@@ -26,6 +26,12 @@ def solve(formula, display=True, params={}):
     except AttributeError:
         pass
 
+    try:
+        if formula.lmi:
+            warnings.warn('The LP solver ignores semidefinite cone constraints.')
+    except AttributeError:
+        pass
+
     obj = formula.obj.flatten()
     linear = formula.linear
     sense = formula.sense
@@ -91,7 +97,7 @@ def solve(formula, display=True, params={}):
         s += (left <= ineq_const)
 
     cbcModel = s.getCbcModel()
-    s.writeLp('blah.lp')
+    # s.writeLp('blah.lp')
 
     if display:
         print('Being solved by CyLP...', flush=True)
@@ -114,10 +120,10 @@ def solve(formula, display=True, params={}):
         if nbv:
             x_sol[is_bin] = cbcModel.primalVariableSolution['bv']
 
-        solution = Solution(cbcModel.objectiveValue, x_sol, status, stime)
-
+        solution = Solution('CyLP', cbcModel.objectiveValue, x_sol, status, stime)
     else:
         warnings.warn('Fail to find the optimal solution.')
-        solution = None
+        # solution = None
+        solution = Solution('CyLP', np.nan, None, status, stime)
 
     return solution

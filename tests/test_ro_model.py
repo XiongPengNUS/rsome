@@ -49,6 +49,8 @@ def test_model():
     string += 'Number of SOC constraints:     1\n'
     string += '---------------------------------------------\n'
     string += 'Number of ExpCone constraints: 0\n'
+    string += '---------------------------------------------\n'
+    string += 'Number of PSCone constraints:  0\n'
     assert primal.__repr__() == string
 
     df = primal.show()
@@ -94,6 +96,8 @@ def test_model():
     string += 'Number of SOC constraints:     1\n'
     string += '---------------------------------------------\n'
     string += 'Number of ExpCone constraints: 0\n'
+    string += '---------------------------------------------\n'
+    string += 'Number of PSCone constraints:  0\n'
     assert dual.__repr__() == string
 
     df = dual.show()

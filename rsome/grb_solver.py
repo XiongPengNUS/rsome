@@ -3,6 +3,7 @@ This module is used as an interface to call the Gurobi solver for solving
 (mixed-integer) linear or second-order cone programs.
 """
 
+from gurobipy import GurobiError
 import gurobipy as gp
 import numpy as np
 import warnings
@@ -16,6 +17,8 @@ def solve(formula, display=True, params={}):
     try:
         if formula.xmat:
             warnings.warn('The SOCP solver ignores exponential cone constraints. ')
+        if formula.lmi:
+            warnings.warn('The SOCP solver ignores semidefinite cone constraints. ')
     except AttributeError:
         pass
 
@@ -32,10 +35,10 @@ def solve(formula, display=True, params={}):
     const_eq = formula.const[indices_eq]
     const_ineq = formula.const[indices_ineq]
     if len(indices_eq) > 0:
-        grb.addMConstr(linear_eq, x, '=', const_eq)
+        c_eq = grb.addMConstr(linear_eq, x, '=', const_eq)
         # grb.addMConstrs(linear_eq, x, '=', const_eq)
     if len(indices_ineq) > 0:
-        grb.addMConstr(linear_ineq, x, '<', const_ineq)
+        c_ineq = grb.addMConstr(linear_ineq, x, '<', const_ineq)
         # grb.addMConstrs(linear_ineq, x, '<', const_ineq)
 
     if isinstance(formula, SOCProg):
@@ -65,14 +68,25 @@ def solve(formula, display=True, params={}):
         print('Solution status: {0}'.format(grb.Status))
         print('Running time: {0:0.4f}s'.format(grb.Runtime))
 
-    # if export:
-    #     grb.write("out.lp")
+    try:
+        pi = np.ones(formula.linear.shape[0]) * np.nan
+        upi = np.zeros(nv)
+        lpi = np.zeros(nv)
+        pi[indices_eq] = c_eq.pi
+        pi[indices_ineq] = c_ineq.pi
+        rc = x.rc
+        upi[rc < 0] = rc[rc < 0]
+        lpi[rc > 0] = rc[rc > 0]
+        y = {'pi': pi, 'upi': upi, 'lpi': lpi}
+    except GurobiError:
+        y = None
 
     try:
-        solution = Solution(grb.ObjVal, np.array(grb.getAttr('X')),
-                            grb.Status, grb.Runtime)
+        solution = Solution('Gurobi', grb.ObjVal, np.array(grb.getAttr('X')),
+                            grb.Status, grb.Runtime, y=y)
     except AttributeError:
         warnings.warn('Fail to find the optimal solution.')
-        solution = None
+        # solution = None
+        solution = Solution('Gurobi', np.nan, None, grb.Status, grb.Runtime)
 
     return solution

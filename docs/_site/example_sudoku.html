@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -113,7 +113,7 @@
 <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">vtype</span><span class="o">=</span><span class="s">'B'</span><span class="p">)</span>
 
 <span class="c1"># objective is set to be zero
-</span><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>
+</span><span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># constraints 1 to 3
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
@@ -138,9 +138,9 @@ Solution status: 2
 Running time: 0.0017s
 </code></pre></div></div>
 
-<p>The binary variable \(x_{ijk}\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.</p>
+<p>The binary variable \(x_{ijk}\) is defined to be a three-dimensional array <code class="language-plaintext highlighter-rouge">x</code> with the shape to be <code class="language-plaintext highlighter-rouge">(9, 9, 9)</code>. Based on the decision variable <code class="language-plaintext highlighter-rouge">x</code>, each set of constraints can be formulated as the array form by using the <code class="language-plaintext highlighter-rouge">sum()</code> method. The method <code class="language-plaintext highlighter-rouge">sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code class="language-plaintext highlighter-rouge">axis</code> argument to specify along which axis the sum is performed.</p>
 
-<p>The Sudoku problem and the its solution are presented below.</p>
+<p>The Sudoku puzzle and the its solution are presented below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span><span class="n">puzzle</span><span class="p">)</span>                   <span class="c1"># display the Sudoku puzzle
 </span></code></pre></div></div>

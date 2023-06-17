@@ -63,8 +63,8 @@ $$
 Such a deterministic optimization can be implemented using the following code. 
 
 ```python
-from rsome.rsome import ro
-import rsome.rsome as rso
+from rsome import ro
+import rsome as rso
 
 model = ro.Model()
 
@@ -122,8 +122,8 @@ $$
 with the scenario-wise support \\(\mathcal{Z}_s = \left\\{(\pmb{z}, u): ~\|\pmb{z} - \hat{\pmb{z}}_s\|_1 \leq u \right\\}\\). The robust model can be implemented by the code segment below.
 
 ```python
-from rsome.rsome import ro
-import rsome.rsome as rso
+from rsome import ro
+import rsome as rso
 
 model = ro.Model()
 
@@ -180,9 +180,9 @@ model.get()
 The robust satisficing model can be implemented directly using the `rsome.dro` modeling environment, see the code below.
 
 ```python
-from rsome.rsome import dro
-from rsome.rsome import E
-import rsome.rsome as rso
+from rsome import dro
+from rsome import E
+import rsome as rso
 
 model = dro.Model(s)
     

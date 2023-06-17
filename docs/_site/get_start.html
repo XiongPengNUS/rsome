@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -75,16 +75,16 @@
 
 <ul>
   <li>
-    <p>The <code class="language-plaintext highlighter-rouge">ro</code> module is a tailored modeling framework for robust optimization problems. This module provides modelng tools designed specifically for constructing uncertainty sets and specifying affine decision rules in multi-stage decision-making applications.</p>
+    <p>The <code class="language-plaintext highlighter-rouge">ro</code> module is a tailored modeling framework for robust optimization problems. This module provides modeling tools designed specifically for constructing uncertainty sets and specifying affine decision rules in multi-stage decision-making applications.</p>
   </li>
   <li>
-    <p>The <code class="language-plaintext highlighter-rouge">dro</code> module is built upon the distributionally robust optimization framework proposed in <a href="#ref1">Chen et al.  (2020)</a>. Modeling tools are provided for constructing event-wise ambiguity sets and specifying event-wise adaptation policies.</p>
+    <p>The <code class="language-plaintext highlighter-rouge">dro</code> module is built upon the distributionally robust optimization framework proposed in <a href="#ref1">Chen et al. (2020)</a>. Modeling tools are provided for constructing event-wise ambiguity sets and specifying event-wise adaptation policies.</p>
   </li>
 </ul>
 
 <p>These two modeling frameworks follow consistent syntax in defining variables, objective functions, and constraints. The only differences are in specifying recourse adaptations and uncertainty/ambiguity sets. Notice that the <code class="language-plaintext highlighter-rouge">dro</code> module is a more general modeling framework, since a classic robust optimization problem can be treated as a special case of distributionally robust optimization, where the ambiguity set, specifying only the support information, reduces to an uncertainty set. The <code class="language-plaintext highlighter-rouge">ro</code> module is less general but the toolkit enables users to formulate uncertainty sets and decision adaptations in a more concise and intuitive manner.</p>
 
-<p>In this section, we will use the <code class="language-plaintext highlighter-rouge">ro</code> module as a general modeling environment for deterministic problems. Guidelines of robust and distributionally robust optimization problems are presented in <a href="ro_rsome">RSOME for robust optimization</a> and <a href="dro_rsome">RSOME for distributionall robust optimization</a>, respectively.</p>
+<p>In this section, we will use the <code class="language-plaintext highlighter-rouge">ro</code> module as a general modeling environment for deterministic problems. Guidelines of robust and distributionally robust optimization problems are presented in <a href="ro_rsome">RSOME for robust optimization</a> and <a href="dro_rsome">RSOME for distributionally robust optimization</a>, respectively.</p>
 
 <h2 id="introduction-to-the-rsomero-environment-">Introduction to the <code class="language-plaintext highlighter-rouge">rsome.ro</code> Environment <a name="section1.2"></a></h2>
 
@@ -102,21 +102,22 @@
 <h3 id="decision-variables-and-linear-constraints">Decision Variables and Linear Constraints</h3>
 
 <p>Decision variables of a model can be defined by the method <code class="language-plaintext highlighter-rouge">dvar()</code>.</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(shape=(1,), vtype='C', name=None, aux=False) method of rsome.ro.Model instance
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dvar(self, shape=(), vtype='C', name=None, aux=False)
     Returns an array of decision variables with the given shape
     and variable type.
-
+    
     Parameters
     ----------
     shape : int or tuple
-        Shape of the variable array.
+        Shape of the variable array. The variable is a scalar if
+        the shape is unspecified.
     vtype : {'C', 'B', 'I'}
         Type of the decision variables. 'C' means continuous; 'B'
         means binary, and 'I" means integer.
     name : str
         Name of the variable array
     aux : leave it unspecified.
-
+    
     Returns
     -------
     new_var : rsome.lp.Vars
@@ -171,54 +172,110 @@
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># define constraints by a loop
 </span></code></pre></div></div>
 
-<h3 id="convex-functions-and-convex-constraints">Convex Functions and Convex Constraints</h3>
+<h3 id="convex-expressions-and-convex-constraints">Convex Expressions and Convex Constraints</h3>
 
-<p>The RSOME package also supports several convex functions for specifying convex constraints. The definition and syntax of these functions are also consistent with the NumPy package.</p>
+<p>The RSOME package also supports several functions for specifying convex expressions and constraints. The definition and syntax of these functions are also similar to the NumPy package, see the tables below.</p>
 
-<ul>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">abs()</code> for absolute values: the function <code class="language-plaintext highlighter-rouge">abs()</code> returns the element-wise absolute value of an array of variables or affine expressions.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">square()</code> for squared values: the function <code class="language-plaintext highlighter-rouge">square()</code> returns the element-wise squared values of an array of variables or affine expressions.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">sumsqr()</code> for sum of squares**: the function <code class="language-plaintext highlighter-rouge">sumsqr()</code> returns the sum of squares of a vector, which is a one-dimensional array, or an array with its <code class="language-plaintext highlighter-rouge">size</code> to be the same as maximum <code class="language-plaintext highlighter-rouge">shape</code> value.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">norm()</code> for norms of vectors: the function <code class="language-plaintext highlighter-rouge">norm()</code> returns the first, second, or infinity norm of a vector. Users may use the second argument <code class="language-plaintext highlighter-rouge">degree</code> to specify the degree of the norm function. The default value of the <code class="language-plaintext highlighter-rouge">degree</code> argument is 2.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">quad()</code> for quadratic terms <code class="language-plaintext highlighter-rouge">x @ Q @ x</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a vector, and <code class="language-plaintext highlighter-rouge">Q</code> is a positive semidefinite matrix.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">expcone()</code> for creating an exponential cone constraint <code class="language-plaintext highlighter-rouge">z * exp(x/z) &lt;= y</code>, where <code class="language-plaintext highlighter-rouge">x</code> and <code class="language-plaintext highlighter-rouge">z</code> are scalars.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">exp()</code> for element-wise natural exponential function <code class="language-plaintext highlighter-rouge">exp(x)</code>.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">pexp()</code> for element-wise perspective of natural exponential <code class="language-plaintext highlighter-rouge">y * exp(x/y)</code>.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">log()</code> for element-wise natural logarithm function <code class="language-plaintext highlighter-rouge">log(x)</code>.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">plog()</code> for element-wise perspective of natural logarithm <code class="language-plaintext highlighter-rouge">y * log(x/y)</code>.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">entropy()</code> for entropy expression <code class="language-plaintext highlighter-rouge">-sum(x * log(x))</code>, where <code class="language-plaintext highlighter-rouge">x</code> is a vector.</p>
-  </li>
-  <li>
-    <p><code class="language-plaintext highlighter-rouge">kldiv()</code> for creating a KL divergence constraint <code class="language-plaintext highlighter-rouge">sum(p * log(p/phat)) &lt;= r</code>, where <code class="language-plaintext highlighter-rouge">p</code> is a vector of probability variables, <code class="language-plaintext highlighter-rouge">phat</code> is a vector of empirical probabilities, and <code class="language-plaintext highlighter-rouge">r</code> is a scalar.</p>
-  </li>
-</ul>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Convex Function</th>
+      <th style="text-align: left">Output                                      </th>
+      <th style="text-align: left">Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">abs(x)</code></td>
+      <td style="text-align: left">The element-wise absolute values of <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">entropy(x)</code></td>
+      <td style="text-align: left">The entropic expression <code class="language-plaintext highlighter-rouge">-sum(x * log(x))</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a vector.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">exp(x)</code></td>
+      <td style="text-align: left">The element-wise natural exponential of <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">log(x)</code></td>
+      <td style="text-align: left">The element-wise natural logarithm of <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">norm(x, degree)</code></td>
+      <td style="text-align: left">The norm of the <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a vector. <code class="language-plaintext highlighter-rouge">degree</code> can be 1, 2, or <code class="language-plaintext highlighter-rouge">numpy.inf</code>. The default value is <code class="language-plaintext highlighter-rouge">degree=2</code>, indicating an Euclidean norm.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">pexp(x, y)</code></td>
+      <td style="text-align: left">The element-wise perspective natural exponential <code class="language-plaintext highlighter-rouge">y * exp(x/y)</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">plog(x, y)</code></td>
+      <td style="text-align: left">The element-wise perspective natural logarithm <code class="language-plaintext highlighter-rouge">y * log(x/y)</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">quad(x, Q)</code></td>
+      <td style="text-align: left">The quadratic term <code class="language-plaintext highlighter-rouge">x @ Q @ x</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a 1-D array, and <code class="language-plaintext highlighter-rouge">Q</code> must be a positive semidefinite matrix (2-D array).</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">square(x)</code></td>
+      <td style="text-align: left">The element-wise squared values of <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">sumsqr(x)</code></td>
+      <td style="text-align: left">The sum of squares of <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a vector.</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Convex Constraints</th>
+      <th style="text-align: left">Output</th>
+      <th style="text-align: left">Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">expcone(x, y, z)</code></td>
+      <td style="text-align: left">The exponential cone constraint <code class="language-plaintext highlighter-rouge">z * exp(x/z) &lt;= y</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> and <code class="language-plaintext highlighter-rouge">z</code> must be scalars.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">kldiv(p, q, r)</code></td>
+      <td style="text-align: left">The KL divergence constraint <code class="language-plaintext highlighter-rouge">sum(p*log(p/q)) &lt;= r</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">p</code> and <code class="language-plaintext highlighter-rouge">q</code> are vectors,<br />and <code class="language-plaintext highlighter-rouge">r</code> is a scalar.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">rsocone(x, y, z)</code></td>
+      <td style="text-align: left">The rotated conic constraint <code class="language-plaintext highlighter-rouge">sumsqr(x) &lt;= y*z</code>.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a vector.</td>
+    </tr>
+  </tbody>
+</table>
 
 <p>Examples of specifying convex constraints are provided below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
 
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>                       <span class="c1"># define x as a 1D array of I variables
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">J</span><span class="p">,</span> <span class="n">I</span><span class="p">))</span>                  <span class="c1"># define y as a 2D array of JxI variables
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>                        <span class="c1"># define z as a scalar variable
+</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span>                   <span class="c1"># constraints with absolute terms
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">sumsqr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>           <span class="c1"># a constraint with sum of squares
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>            <span class="c1"># constraints with squared terms
@@ -226,44 +283,136 @@
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>     <span class="c1"># a constraint with 1-norm terms
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>      <span class="c1"># a constraint with infinity norm
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># a constraint with a quadratic term
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">rsocone</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">z</span><span class="p">))</span>    <span class="c1"># a constraint with a rotated second-order cone
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">expcone</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.5</span><span class="p">))</span>     <span class="c1"># an exponential cone constraint
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">3.5</span><span class="p">)</span>             <span class="c1"># constraints with exponential terms
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">1.2</span><span class="p">)</span>             <span class="c1"># constraints with logarithm terms
 </span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>        <span class="c1"># constraints with entropy expressions
-</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">kldiv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">0.01</span><span class="p">))</span>  <span class="c1"># a KL divergence constraint
+</span><span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">kldiv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">I</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">))</span>       <span class="c1"># a KL divergence constraint
 </span></code></pre></div></div>
 
-<p>Note that all functions above can only be used in convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as <code class="language-plaintext highlighter-rouge">abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
+<p>Note that all functions above can only be used in constructing convex constraints, so convex functions cannot be applied in equality constraints, and they cannot be used for concave inequalities, such as <code class="language-plaintext highlighter-rouge">abs(x) &gt;= 2</code> is invalid and gives an error message.</p>
+
+<h3 id="matrix-operation-functions">Matrix Operation Functions</h3>
+
+<p>In dealing with matrices (2-D arrays), RSOME supports basic operations like calculating the trace, retrieving the diagonal and upper/lower triangular elements, and concatenating arrays.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Matrix Operations </th>
+      <th style="text-align: left">Output</th>
+      <th style="text-align: left">Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">concat(arrays, axis)</code></td>
+      <td style="text-align: left">Concatenated arrays</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">arrays</code> is a collection of arrays to be conca-<br />tenated, and <code class="language-plaintext highlighter-rouge">axis</code> specifies the axis along<br />which the arrays will be joined.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cstack(c1, ..., cn)</code></td>
+      <td style="text-align: left">An array formed by stacking the<br />given arrays along axis 1.</td>
+      <td style="text-align: left">If a given argument <code class="language-plaintext highlighter-rouge">c1, ..., cn</code> is a list of<br />arrays, they will be stacked first along axis 0.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">diag(x, k, fill)</code></td>
+      <td style="text-align: left">The diagonal elements of a 2-D<br />array <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left">The integer <code class="language-plaintext highlighter-rouge">k</code> (<code class="language-plaintext highlighter-rouge">k=0</code> by default) specifies the<br />shifts of the taken diagonal elements. The<br />boolean value <code class="language-plaintext highlighter-rouge">fill</code> (<code class="language-plaintext highlighter-rouge">fill=False</code> by default)<br />specifies if the non-diagonal elements are<br />filled with zeros.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">rstack(r1, ..., rn)</code></td>
+      <td style="text-align: left">An array formed by stacking the<br />given arrays along axis 0.</td>
+      <td style="text-align: left">If a given argument <code class="language-plaintext highlighter-rouge">r1, ..., rn</code> is a list of<br />arrays, they will be stacked first along axis 1.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">trace(x)</code></td>
+      <td style="text-align: left">The trace of a 2-D array <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">tril(x, k)</code></td>
+      <td style="text-align: left">The lower triangular elements of a<br />2-D array <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left">The integer <code class="language-plaintext highlighter-rouge">k</code> (<code class="language-plaintext highlighter-rouge">k=0</code> by default) specifies the<br />shifts of the taken triangular elements.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">triu(x, k)</code></td>
+      <td style="text-align: left">The upper triangular elements of a<br />2-D array <code class="language-plaintext highlighter-rouge">x</code>.</td>
+      <td style="text-align: left">The integer <code class="language-plaintext highlighter-rouge">k</code> (<code class="language-plaintext highlighter-rouge">k=0</code> by default) specifies the<br />shifts of the taken triangular elements.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>RSOME also supports defining semidefiniteness constraints that enforce an array <code class="language-plaintext highlighter-rouge">X</code> to be positive semidefinite (<code class="language-plaintext highlighter-rouge">X &gt;&gt; 0</code>) or negative semidefinite (<code class="language-plaintext highlighter-rouge">X &lt;&lt; 0</code>). For instance, the constraint</p>
+
+\[\left(
+\begin{array}{cc}
+A &amp; Z \\
+Z^{\top} &amp; \text{diag}(Z)
+\end{array}
+\right) \succeq 0\]
+
+<p>with \(A\in\mathbb{R}^{n\times n}\) and \(Z\) being a lower triangular matrix, can be written as the following Python code,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">rso</span><span class="p">.</span><span class="n">tril</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">rstack</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">Z</span><span class="p">],</span> 
+                    <span class="p">[</span><span class="n">Z</span><span class="p">.</span><span class="n">T</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="bp">True</span><span class="p">)])</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>or equivalently,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">rso</span><span class="p">.</span><span class="n">tril</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">cstack</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">Z</span><span class="p">.</span><span class="n">T</span><span class="p">],</span> 
+                    <span class="p">[</span><span class="n">Z</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="bp">True</span><span class="p">)])</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>In this example, the <code class="language-plaintext highlighter-rouge">T</code> attribute of an RSOME array is consistent with the transpose operations of NumPy arrays. Functions <code class="language-plaintext highlighter-rouge">rstack()</code> and <code class="language-plaintext highlighter-rouge">cstack()</code> are used to create new arrays by stacking rows (along axis 0) or columns (along axis 1) together, respectively.</p>
 
 <h2 id="standard-forms-and-solutions-">Standard Forms and Solutions <a name="section1.3"></a></h2>
 
 <p>All RSOME models are transformed into their standard forms, which are then solved via the solver interface. The standard form can be retrieved by the <code class="language-plaintext highlighter-rouge">do_math()</code> method of the model object.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model.do_math(primal=True)
-    Return the linear, second-order cone, or exponential cone 
-    programming problem as the standard formula or deterministic 
-    counterpart of the model.
-
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>do_math(self, primal=True)
+    Return the linear, or conic programming problem as the standard
+    formula or deterministic counterpart of the model.
+    
     Parameters
     ----------
     primal : bool, default True
         Specify whether return the primal formula of the model.
-        If primal=False, the method returns the daul formula.
-        
+        If primal=False, the method returns the dual formula.
+    
     Returns
     -------
     prog : GCProg
-        An exponential cone programming problem.
+        A conic programming problem.
 </code></pre></div></div>
 
-<p>You may use the <code class="language-plaintext highlighter-rouge">do_math()</code> method together with the <code class="language-plaintext highlighter-rouge">show()</code> method to display important information on the standard form, <i>i.e.</i>, the objective function, linear, second-order cone, and exponential cone constraints, bounds and variable types.</p>
+<p>You may use the <code class="language-plaintext highlighter-rouge">do_math()</code> method together with the <code class="language-plaintext highlighter-rouge">show()</code> method to display important information on the standard form, <i>i.e.</i>, the coefficients of the objective function and constraints, variable bounds and types.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
-<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="n">rd</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
 
 <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">rd</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
@@ -292,6 +441,8 @@ Number of coefficients:        11
 Number of SOC constraints:     1
 ---------------------------------------------
 Number of ExpCone constraints: 0
+---------------------------------------------
+Number of PSCone constraints:  0
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dual</span>
@@ -309,6 +460,8 @@ Number of coefficients:        7
 Number of SOC constraints:     1
 ---------------------------------------------
 Number of ExpCone constraints: 0
+---------------------------------------------
+Number of PSCone constraints:  0
 </code></pre></div></div>
 
 <p>More details on the standard forms can be retrieved by the method <code class="language-plaintext highlighter-rouge">show()</code>, and the problem information is summarized in a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> data table.</p>
@@ -402,9 +555,9 @@ Number of ExpCone constraints: 0
     <tr>
       <th>LC5</th>
       <td>-1</td>
-      <td>0.585058</td>
-      <td>0.0693541</td>
-      <td>-0.7489</td>
+      <td>-1.624345</td>
+      <td>0.611756</td>
+      <td>0.528172</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -512,7 +665,7 @@ Number of ExpCone constraints: 0
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>0.585058</td>
+      <td>-1.624345</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -522,7 +675,7 @@ Number of ExpCone constraints: 0
       <td>1</td>
       <td>0</td>
       <td>0</td>
-      <td>0.0693541</td>
+      <td>0.611756</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -532,7 +685,7 @@ Number of ExpCone constraints: 0
       <td>0</td>
       <td>1</td>
       <td>0</td>
-      <td>-0.7489</td>
+      <td>0.528172</td>
       <td>==</td>
       <td>1</td>
     </tr>
@@ -580,14 +733,14 @@ Number of ExpCone constraints: 0
 </table>
 </div>
 
-<p>Besides returned as a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> data table, the standard form can also be saved as a <code class="language-plaintext highlighter-rouge">.lp</code> file using the <code class="language-plaintext highlighter-rouge">to_lp()</code> method.</p>
+<p>Besides being returned as a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code> data table, the standard form can also be saved as a <code class="language-plaintext highlighter-rouge">.lp</code> file using the <code class="language-plaintext highlighter-rouge">to_lp()</code> method.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>to_lp(name='out') method of rsome.socp.SOCProg instance
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>to_lp(name='out')
 Export the standard form of the optimization model as a .lp file.
 
     Parameters
     ----------
-        name : file name of the .lp file
+    name : file name of the .lp file
 
     Notes
     -----
@@ -602,23 +755,23 @@ Export the standard form of the optimization model as a .lp file.
 
 <p>The standard form of a model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(solver=None, display=True, params={}) method of rsome.ro.Model instance
-Solve the model with the selected solver interface.
-
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(self, solver=None, display=True, params={})
+    Solve the model with the selected solver interface.
+    
     Parameters
     ----------
-        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
-                  cpx_solver, grb_solver, msk_solver}
-            Solver interface used for model solution. Use default solver
-            lpg_solver if solver=None.
-        display : bool
-            Display option of the solver interface.
-        params : dict
-            A dictionary that specifies parameters of the selected solver.
-            So far the argument only applies to Gurobi, CPLEX, and MOSEK.
+    solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+              cpx_solver, grb_solver, msk_solver, cpt_solver}
+        Solver interface used for model solution. Use the default
+        solver if solver=None.
+    display : bool
+        Display option of the solver interface.
+    params : dict
+        A dictionary that specifies parameters of the selected solver.
+        So far the argument only applies to Gurobi, CPLEX, and Mosek.
 </code></pre></div></div>
 
-<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. If the solver is unspecified, the default solver imported from the the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> is used to solve the RSOME model. If SciPy is upgraded to 1.9.0 or above, the default solver is the <code class="language-plaintext highlighter-rouge">milp()</code> function, which is capable of solving mixed-integer linear programs. If the installed SciPy package is 1.8.1 or below, the default solver is <code class="language-plaintext highlighter-rouge">linprog()</code> and it is only capable of solving linear programming problems with continuous decision variables. Other open-source and commercial solvers can also be used in RSOME. Details of the interfaces for calling these external solvers are presented in the table below.</p>
+<p>The <code class="language-plaintext highlighter-rouge">solve()</code> method calls for external solvers to solve the optimization problem. The first argument <code class="language-plaintext highlighter-rouge">solver</code> is used to specify the selected solver interface. If the solver is unspecified, the default solver imported from the the <code class="language-plaintext highlighter-rouge">scipy.optimize</code> is used to solve the RSOME model. Other open-source and commercial solvers can also be used in RSOME. Details of the interfaces for calling these external solvers are presented in the table below.</p>
 
 <table>
   <thead>
@@ -627,18 +780,18 @@ Solve the model with the selected solver interface.
       <th style="text-align: left">License  type</th>
       <th style="text-align: left">Required version</th>
       <th style="text-align: left">RSOME interface</th>
-      <th style="text-align: left">Integrality constraints</th>
       <th style="text-align: left">Second-order cone constraints</th>
       <th style="text-align: left">Exponential cone constraints</th>
+      <th style="text-align: left">Semidefiniteness constraints</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style="text-align: left"><a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a></td>
       <td style="text-align: left">Open-source</td>
-      <td style="text-align: left">&gt;= 1.2.1</td>
+      <td style="text-align: left">&gt;= 1.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">lpg_solver</code></td>
-      <td style="text-align: left">Yes for 1.9.0 or above</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -647,7 +800,7 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">Open-source</td>
       <td style="text-align: left">&gt;= 0.9.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">clp_solver</code></td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -656,7 +809,7 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">Open-source</td>
       <td style="text-align: left">&gt;= 7.5.7466</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">ort_solver</code></td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
@@ -667,7 +820,7 @@ Solve the model with the selected solver interface.
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">eco_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html">Gurobi</a></td>
@@ -675,13 +828,13 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">&gt;= 9.1.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">grb_solver</code></td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
-      <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">MOSEK</a></td>
+      <td style="text-align: left"><a href="https://docs.mosek.com/9.2/pythonapi/install-interface.html">Mosek</a></td>
       <td style="text-align: left">Commercial</td>
-      <td style="text-align: left">&gt;= 9.1.11</td>
+      <td style="text-align: left">&gt;= 10.0.44</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">msk_solver</code></td>
       <td style="text-align: left">Yes</td>
       <td style="text-align: left">Yes</td>
@@ -693,16 +846,16 @@ Solve the model with the selected solver interface.
       <td style="text-align: left">&gt;= 12.9.0.0</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpx_solver</code></td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
     <tr>
       <td style="text-align: left"><a href="https://www.shanshu.ai/copt">COPT</a></td>
       <td style="text-align: left">Commercial</td>
-      <td style="text-align: left">&gt;= 5.0.1</td>
+      <td style="text-align: left">&gt;= 6.5.3</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">cpt_solver</code></td>
       <td style="text-align: left">Yes</td>
-      <td style="text-align: left">Yes</td>
+      <td style="text-align: left">No</td>
       <td style="text-align: left">No</td>
     </tr>
   </tbody>
@@ -723,7 +876,7 @@ Solve the model with the selected solver interface.
 </code></pre></div></div>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by ECOS...
 Solution status: Optimal solution found
-Running time: 0.0006s
+Running time: 0.0003s
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
@@ -738,27 +891,27 @@ Running time: 0.0009s
 </code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
-Solution status: optimal
-Running time: 0.0210s
+Solution status: Optimal
+Running time: 0.0230s
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpx</span><span class="p">)</span>
 </code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by CPLEX...
-Solution status: 1
-Running time: 0.0175s
+Solution status: optimal
+Running time: 0.0135s
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cardinal Optimizer v5.0.1. Build date Jun 20 2022
-Copyright Cardinal Operations 2022. All Rights Reserved
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cardinal Optimizer v6.5.3. Build date Apr 28 2023
+Copyright Cardinal Operations 2023. All Rights Reserved
 
 Being solved by COPT...
 Solution status: 1
-Running time: 0.0035s
+Running time: 0.0028s
 </code></pre></div></div>
 
 <p>It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument <code class="language-plaintext highlighter-rouge">display</code> to be <code class="language-plaintext highlighter-rouge">False</code>.</p>
@@ -770,14 +923,14 @@ Running time: 0.0035s
   <li>CPLEX parameters: <a href="https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters">https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters</a></li>
 </ul>
 
-<p>For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be <code class="language-plaintext highlighter-rouge">1e-2</code>.</p>
+<p>For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be <code class="language-plaintext highlighter-rouge">1e-3</code>.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'MIPGap'</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">})</span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mio_rel_gap_const'</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">})</span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpx</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mip.tolerances.mipgap'</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">})</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'MIPGap'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mio_rel_gap_const'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpx</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mip.tolerances.mipgap'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
 </code></pre></div></div>
 
-<p>Once the solution completes, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. The <code class="language-plaintext highlighter-rouge">get()</code> method raises an error message if no optimal solution is available if the problem is unsolved or the model is infeasible, unbounded, or encounters numeric issues.</p>
+<p>Once the optimization problem is solved, you may use the command <code class="language-plaintext highlighter-rouge">model.get()</code> to retrieve the optimal objective value. The optimal solution of the variable <code class="language-plaintext highlighter-rouge">x</code> can be attained as an array by calling <code class="language-plaintext highlighter-rouge">x.get()</code>. The <code class="language-plaintext highlighter-rouge">get()</code> method raises an error message if the optimization problem is unsolved, or the optimal solution cannot be found due to infeasibility, unboundedness, or numerical issues.</p>
 
 <h2 id="application-examples-">Application Examples <a name="section1.4"></a></h2>
 
@@ -786,6 +939,7 @@ Running time: 0.0035s
 <h3 id="optimal-dc-power-flow"><a href="example_opf">Optimal DC Power Flow</a></h3>
 <h3 id="the-unit-commitment-problem"><a href="example_ucp">The Unit Commitment Problem</a></h3>
 <h3 id="box-with-the-maximum-volume"><a href="example_max_volume_box">Box with the Maximum Volume</a></h3>
+<h3 id="minimal-enclosing-ellipsoid"><a href="example_min_ellipsoid">Minimal Enclosing Ellipsoid</a></h3>
 
 <h2 id="reference">Reference</h2>
 

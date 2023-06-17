@@ -9,11 +9,10 @@ import warnings
 import time
 import scipy.optimize as opt
 from numbers import Real
-from scipy.sparse import csr_matrix
-from scipy.sparse import coo_matrix
+from scipy.sparse import csr_matrix, coo_matrix, lil_matrix
 from scipy.linalg import sqrtm, eigh
 from collections.abc import Iterable, Sized
-from typing import List
+# from typing import List
 
 
 def def_sol(formula, display=True, params={}):
@@ -30,15 +29,61 @@ def def_sol(formula, display=True, params={}):
     try:
         if formula.xmat:
             warnings.warn('The LP solver ignores exponential cone constraints.')
+        if formula.lmi:
+            warnings.warn('The LP solver ignores semidefinite cone constraints.')
     except AttributeError:
         pass
 
-    if hasattr(opt, 'milp'):
+    A = formula.linear
+    sense = formula.sense
+    vtype = formula.vtype
+    num_constr = A.shape[0]
 
-        A = formula.linear
-        sense = formula.sense
-        vtype = formula.vtype
+    if all(vtype == 'C'):
+        indices_eq = (formula.sense == 1)
+        indices_ineq = (formula.sense == 0)
+        linear_eq = formula.linear[indices_eq, :] if len(indices_eq) else None
+        linear_ineq = formula.linear[indices_ineq, :] if len(indices_ineq) else None
+        const_eq = formula.const[indices_eq] if len(indices_eq) else None
+        const_ineq = formula.const[indices_ineq] if len(indices_ineq) else None
 
+        bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
+
+        default = {'maxiter': 1000000000}
+
+        if display:
+            print('Being solved by the default LP solver...', flush=True)
+            time.sleep(0.2)
+        t0 = time.time()
+        res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
+                          A_eq=linear_eq, b_eq=const_eq,
+                          bounds=bounds, options=default)
+        stime = time.time() - t0
+        if display:
+            print('Solution status: {0}'.format(res.status))
+            print('Running time: {0:0.4f}s'.format(stime))
+
+        if res.status == 0:
+            objval = formula.obj @ res.x
+
+            pi = np.ones(num_constr) * np.nan
+            upi = res['upper']['marginals']
+            lpi = res['lower']['marginals']
+            pi[indices_eq] = res['eqlin']['marginals']
+            pi[indices_ineq] = res['ineqlin']['marginals']
+            y = {'pi': pi, 'upi': upi, 'lpi': lpi}
+
+            return Solution('SciPy', objval, res.x, res.status, stime, y=y)
+        else:
+            status = res.status
+            msg = 'The optimal solution can not be found, '
+            reasons = ('iteration limit is reached.' if status == 1 else
+                       'the problem appears to be infeasible.' if status == 2 else
+                       'the problem appears to be unbounded.' if status == 3 else
+                       'numerical difficulties encountered.')
+            msg += 'because {}'.format(reasons)
+            return Solution('Scipy', np.nan, None, status, stime)
+    else:
         b_u = formula.const
         b_l = np.ones(A.shape[0]) * (-np.inf)
         bool_eq = (sense == 1)
@@ -54,72 +99,177 @@ def def_sol(formula, display=True, params={}):
         integrality[vtype != 'C'] = 1
 
         if display:
-            if all(vtype == 'C'):
-                print('Being solved by the default LP solver...', flush=True)
-            else:
-                print('Being solved by the default MILP solver...', flush=True)
+            print('Being solved by the default MILP solver...', flush=True)
             time.sleep(0.2)
         t0 = time.time()
-        res = opt.milp(formula.obj.squeeze(),
-                       constraints=opt.LinearConstraint(A, b_l, b_u),
-                       bounds=opt.Bounds(lb, ub),
-                       integrality=integrality)
+        if all(vtype == 'C'):
+            linear_ineq = A[sense == 0]
+            const_ineq = formula.const[sense == 0]
+            linear_eq = A[sense == 1]
+            const_eq = formula.const[sense == 1]
+            bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
+            default = {'maxiter': 1000000000}
+            res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
+                              A_eq=linear_eq, b_eq=const_eq,
+                              bounds=bounds, options=default)
+        else:
+            res = opt.milp(formula.obj,
+                           constraints=opt.LinearConstraint(A, b_l, b_u),
+                           bounds=opt.Bounds(lb, ub),
+                           integrality=integrality)
         stime = time.time() - t0
         if display:
             print('Solution status: {0}'.format(res.status))
             print('Running time: {0:0.4f}s'.format(stime))
 
         if res.status == 0:
-            objval = formula.obj[0] @ res.x
-            return Solution(objval, res.x, res.status, stime)
+            objval = formula.obj @ res.x
+            return Solution('SciPy', objval, res.x, res.status, stime)
         else:
             status = res.status
-            msg = 'Fail to find the optimal solution.'
-            warnings.warn(msg)
-        return None
+            # msg = 'Fail to find the optimal solution.'
+            # warnings.warn(msg)
+            return Solution('Scipy', np.nan, None, status, stime)
 
+
+def concat(iters, axis=0):
+    """
+    Join a sequence of arrays of affine expressions along an existing axis.
+
+        Parameters
+        ----------
+        iters : array_like.
+            A sequence of RSOME variables or affine expressions. The arrays must
+            have the same shape, except in the dimension corresponding to `axis`
+            (the first, by default).
+
+        axis : int, optional
+            The axis along which the arrays will be joined.  Default is 0.
+
+        Returns
+        -------
+        out : Affine
+            The concatenated array of affine expressions.
+    """
+
+    linear_each = []
+    const_each = []
+    idx_each = []
+    count = 0
+    model = None
+    event_adapt = None
+    fixed = True
+    ctype = None
+    for item in iters:
+        if not isinstance(item, Affine):
+            item = item.to_affine()
+        if isinstance(item, DecAffine):
+            if event_adapt is None:
+                event_adapt = [list(range(item.model.top.num_scen))]
+            if ctype is None:
+                ctype = item.ctype
+            if ctype != item.ctype:
+                raise ValueError('Cannot concatenate different types of expressions.')
+            event_adapt = comb_set(event_adapt, item.event_adapt)
+            fixed = fixed and item.fixed
+        if model is None:
+            model = item.model
+            num_var = model.last
+        else:
+            if model != item.model:
+                raise ValueError('Model mismatch.')
+
+        if item.linear.shape[1] < num_var:
+            item.linear.resize(item.linear.shape[0], num_var)
+        linear_each.append(item.linear)
+        const_each.append(item.const)
+        idx_each.append(np.arange(count, count+item.size).reshape(item.shape))
+
+        count += item.size
+
+    ndim = max([i.ndim for i in idx_each])
+    idx_each = [i.reshape([1] * ndim) if i.shape == () else i
+                for i in idx_each]
+    const_each = [const.reshape([1] * ndim) if const.shape == () else const
+                  for const in const_each]
+
+    idx_all = np.concatenate(idx_each, axis=axis).flatten()
+    linear_all = sp.vstack(linear_each)[idx_all]
+    const_all = np.concatenate(const_each, axis=axis)
+
+    affine = Affine(item.model, linear_all, const_all)
+    if event_adapt is None:
+        return affine
     else:
+        return DecAffine(item.model.top, affine, event_adapt, fixed, ctype)
 
-        if any(np.array(formula.vtype) != 'C'):
-            warnings.warn('Integrality constraints are ignored in the LP solver. ')
 
-        indices_eq = (formula.sense == 1)
-        indices_ineq = (formula.sense == 0)
-        linear_eq = formula.linear[indices_eq, :] if len(indices_eq) else None
-        linear_ineq = formula.linear[indices_ineq, :] if len(indices_ineq) else None
-        const_eq = formula.const[indices_eq] if len(indices_eq) else None
-        const_ineq = formula.const[indices_ineq] if len(indices_ineq) else None
+def rstack(*args):
+    """
+    Stack a sequence of rows of affine expressions vertically (row wise).
 
-        bounds = [(lb, ub) for lb, ub in zip(formula.lb, formula.ub)]
+        Parameters
+        ----------
+        arg : {list, Affine}.
+            Each arg represents an array of affine expressions. If arg is a list
+            of affine expressions, they will be concatenated horizontally (column
+            wise) first.
 
-        default = {'maxiter': 1000000000,
-                   'sparse': True}
+        Returns
+        -------
+        out : Affine
+            The vertically stacked array of affine expressions.
 
-        if display:
-            print('Being solved by the default LP solver...', flush=True)
-            time.sleep(0.2)
-        t0 = time.time()
-        res = opt.linprog(formula.obj, A_ub=linear_ineq, b_ub=const_ineq,
-                          A_eq=linear_eq, b_eq=const_eq,
-                          bounds=bounds, options=default)
-        stime = time.time() - t0
-        if display:
-            print('Solution status: {0}'.format(res.status))
-            print('Running time: {0:0.4f}s'.format(stime))
+        Notes
+        -----
+        The rstack function is different from the vstack function from the numpy
+        package in 1) the arrays to be stacked together are presented as separate
+        arguments, instead of elements in an array-like sequence; and 2) a list of
+        arrays can be stacked horizontally first before being vertically stacked.
+    """
 
-        if res.status == 0:
-            objval = formula.obj[0] @ res.x
-            return Solution(objval, res.x, res.status, stime)
+    rows = []
+    for arg in args:
+        if isinstance(arg, Iterable):
+            rows.append(concat(arg, axis=1))
         else:
-            status = res.status
-            msg = 'The optimal solution can not be found, '
-            reasons = ('iteration limit is reached.' if status == 1 else
-                       'the problem appears to be infeasible.' if status == 2 else
-                       'the problem appears to be unbounded.' if status == 3 else
-                       'numerical difficulties encountered.')
-            msg += 'because {}'.format(reasons)
-            warnings.warn(msg)
-            return None
+            rows.append(arg)
+
+    return concat(rows, axis=0)
+
+
+def cstack(*args):
+    """
+    Stack a sequence of rows of affine expressions horizontally (column wise).
+
+        Parameters
+        ----------
+        arg : {list, Affine}.
+            Each arg represents an array of affine expressions. If arg is a list
+            of affine expressions, they will be concatenated vertically (row wise)
+            first.
+
+        Returns
+        -------
+        out : Affine
+            The horizontally stacked array of affine expressions.
+
+        Notes
+        -----
+        The cstack function is different from the hstack function from the numpy
+        package in 1) the arrays to be stacked together are presented as separate
+        arguments, instead of elements in an array-like sequence; and 2) a list of
+        arrays can be stacked vertically first before being horizontally stacked.
+    """
+
+    cols = []
+    for arg in args:
+        if isinstance(arg, Iterable):
+            cols.append(concat(arg, axis=0))
+        else:
+            cols.append(arg)
+
+    return concat(cols, axis=1)
 
 
 class Model:
@@ -137,6 +287,8 @@ class Model:
         self.vars = []
         self.auxs = []
         self.last = 0
+        self.constr_idx = 0
+        self.ciarray = None
         self.lin_constr = []
         self.pws_constr = []
         self.bounds = []
@@ -199,6 +351,8 @@ class Model:
             if constr.model is not self:
                 raise ValueError('Constraints are not defined for this model.')
             if isinstance(constr, LinConstr):
+                constr.index = self.constr_idx
+                self.constr_idx += 1
                 self.lin_constr.append(constr)
             elif isinstance(constr, CvxConstr):
                 if constr.xtype in 'AMI':
@@ -206,10 +360,14 @@ class Model:
                 else:
                     raise TypeError('Incorrect constraint type.')
             elif isinstance(constr, Bounds):
+                # onstr.index = self.constr_idx
+                # self.constr_idx += 1
                 self.bounds.append(constr)
 
         self.pupdate = True
         self.dupdate = True
+
+        return constr
 
     def min(self, obj):
         """
@@ -336,8 +494,10 @@ class Model:
             if obj:
                 obj = np.array(csr_matrix(([1.0], ([0], [0])),
                                           (1, self.last)).todense())
+                obj = obj.reshape(obj.size)
             else:
-                obj = np.ones((1, self.last))
+                # obj = np.ones((1, self.last))
+                obj = np.ones(self.last)
 
             data_list = []
             indices_list = []
@@ -348,6 +508,8 @@ class Model:
                           for item in self.lin_constr + self.aux_constr]
             indices_list += [item.linear.indices
                              for item in self.lin_constr + self.aux_constr]
+            constr_idx_list = [np.array([item.index] * item.linear.shape[0])
+                               for item in self.lin_constr + self.aux_constr]
 
             if data_list:
                 data = np.concatenate(tuple(data_list))
@@ -392,6 +554,11 @@ class Model:
                               vtype, ub, lb, obj)
             self.primal = formula
             self.pupdate = False
+
+            if constr_idx_list:
+                self.ciarray = np.concatenate(constr_idx_list)
+            else:
+                self.ciarray = []
 
             return formula
 
@@ -467,14 +634,14 @@ class Model:
         Parameters
         ----------
             solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
-                      cpx_solver, grb_solver, msk_solver}
+                      cpx_solver, grb_solver, msk_solver, cpt_solver}
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
                 Display option of the solver interface.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi, CPLEX,and MOSEK.
+                So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
@@ -498,7 +665,14 @@ class Model:
         """
 
         if self.solution is None:
-            raise RuntimeError('The model is unsolved or no solution is obtained.')
+            raise RuntimeError('The model is unsolved.')
+
+        solution = self.solution
+        if np.isnan(solution.objval):
+            msg = 'No solution available. '
+            msg += f'{solution.solver} solution status: {solution.status}.'
+            raise RuntimeError(msg)
+
         return self.sign * self.solution.objval
 
     def optimal(self):
@@ -610,6 +784,22 @@ class Vars:
 
         return self.to_affine().reshape(shape)
 
+    def flatten(self):
+
+        return self.to_affine().flatten()
+
+    def diag(self, k=0, fill=False):
+
+        return self.to_affine().diag(k, fill)
+
+    def tril(self, k=0):
+
+        return self.to_affine().tril(k)
+
+    def triu(self, k=0):
+
+        return self.to_affine().triu(k)
+
     def abs(self):
 
         return self.to_affine().abs()
@@ -665,6 +855,10 @@ class Vars:
         """
 
         return self.to_affine().quad(qmat)
+
+    def rsocone(self, y, z):
+
+        return self.to_affine().rsocone(y, z)
 
     def expcone(self, x, z):
         """
@@ -746,9 +940,9 @@ class Vars:
 
         return self.to_affine().entropy()
 
-    def kldiv(self, phat, r):
+    def kldiv(self, q, r):
         """
-        Return the KL divergence constraints sum(var*log(var/phat)) <= r.
+        Return the KL divergence constraints sum(var*log(var/q)) <= r.
 
         Refer to `rsome.kldiv` for full documentation.
 
@@ -757,7 +951,11 @@ class Vars:
         rso.kldiv : equivalent function
         """
 
-        return self.to_affine().kldiv(phat, r)
+        return self.to_affine().kldiv(q, r)
+
+    def trace(self):
+
+        return self.to_affine().trace()
 
     def get(self):
         """
@@ -777,10 +975,16 @@ class Vars:
             raise TypeError('Not a decision variable.')
 
         if self.model.solution is None:
-            raise RuntimeError('The model is unsolved or no solution is obtained.')
+            raise RuntimeError('The model is unsolved.')
+
+        solution = self.model.solution
+        if np.isnan(solution.objval):
+            msg = 'No solution available. '
+            msg += f'{solution.solver} solution status: {solution.status}.'
+            raise RuntimeError(msg)
 
         indices = range(self.first, self.first + self.size)
-        var_sol = np.array(self.model.solution.x)[indices]
+        var_sol = np.array(solution.x)[indices]
         if self.shape == ():
             var_sol = var_sol[0]
         else:
@@ -874,6 +1078,14 @@ class Vars:
     def __eq__(self, other):
 
         return self.to_affine() == other
+
+    def __rshift__(self, other):
+
+        return self.to_affine().__rshift__(other)
+
+    def __lshift__(self, other):
+
+        return self.to_affine().__lshift__(other)
 
     def assign(self, values):
 
@@ -1091,6 +1303,68 @@ class Affine:
             new_const = np.array([self.const]).reshape(shape)
         return Affine(self.model, self.linear, new_const)
 
+    def flatten(self):
+
+        return self.reshape((self.size, ))
+
+    def diag(self, k=0, fill=False):
+
+        if len(self.shape) != 2:
+            raise ValueError('The diag function can only be applied to 2D arrays.')
+
+        num = min(self.shape)
+        if k >= 0:
+            idx_row = np.arange(num - k)
+            idx_col = np.arange(k, num)
+        else:
+            idx_row = np.arange(-k, num)
+            idx_col = np.arange(num + k)
+
+        if fill:
+            bool_mat = np.ones(self.shape, dtype=bool)
+            bool_mat[idx_row, idx_col] = False
+            bool_idx = bool_mat.flatten()
+
+            affine = self + 0
+            affine.linear = lil_matrix(affine.linear)
+            affine.linear[bool_idx] = 0.0
+            affine.linear = csr_matrix(affine.linear)
+            affine.const = np.diag(np.diag(affine.const, k), k)
+
+            return affine
+        else:
+            return self[idx_row, idx_col]
+
+    def tril(self, k=0):
+
+        if len(self.shape) != 2:
+            raise ValueError('The tril function can only be applied to 2D arrays.')
+
+        bool_idx = (~np.tril(np.ones(self.shape, dtype=bool), k)).flatten()
+
+        affine = self + 0
+        affine.linear = lil_matrix(affine.linear)
+        affine.linear[bool_idx] = 0.0
+        affine.linear = csr_matrix(affine.linear)
+        affine.const = np.tril(affine.const, k)
+
+        return affine
+
+    def triu(self, k=0):
+
+        if len(self.shape) != 2:
+            raise ValueError('The tril function can only be applied to 2D arrays.')
+
+        bool_idx = (~np.triu(np.ones(self.shape, dtype=bool), k)).flatten()
+
+        affine = self + 0
+        affine.linear = lil_matrix(affine.linear)
+        affine.linear[bool_idx] = 0.0
+        affine.linear = csr_matrix(affine.linear)
+        affine.const = np.triu(affine.const, k)
+
+        return affine
+
     def sum(self, axis=None):
 
         if self.sparray is None:
@@ -1102,6 +1376,16 @@ class Affine:
         const = self.const.sum(axis=axis)
 
         return Affine(self.model, linear, const)
+
+    def trace(self):
+
+        if len(self.shape) != 2:
+            raise ValueError('The trace function only applies to two-dimensional arrays')
+        dim = min(self.shape)
+
+        out = self[range(dim), range(dim)].sum()
+
+        return out
 
     def __abs__(self):
 
@@ -1210,6 +1494,39 @@ class Affine:
         else:
             return - affine.sumsqr()
 
+    def rsocone(self, y, z):
+
+        if self.size > 1:
+            if self.size != max(self.shape):
+                err = 'Improper number of dimensions to norm. '
+                err += 'The array must be a vector.'
+                raise ValueError(err)
+
+        if isinstance(y, (Vars, VarSub, Affine)):
+            y = y.to_affine()
+            if y.size > 1:
+                raise ValueError('The expression of x must be a scalar.')
+        else:
+            raise TypeError('Unsupoorted type for rotated cone. ')
+        if isinstance(y, (Vars, VarSub, Affine)):
+            if self.model is not y.model:
+                raise ValueError('Models mismatch.')
+
+        if isinstance(z, (Vars, VarSub, Affine)):
+            z = z.to_affine()
+            if z.size > 1:
+                raise ValueError('The expression of z must be a scalar.')
+        else:
+            raise TypeError('Unsupoorted type for rotated cone. ')
+        if isinstance(z, (Vars, VarSub, Affine)):
+            if self.model is not z.model:
+                raise ValueError('Models mismatch.')
+
+        affine_in = concat((((y-z)*0.5).reshape((1,)), self))
+        affine_out = - ((y+z)*0.5).reshape((1,))
+
+        return CvxConstr(self.model, affine_in, affine_out, multiplier=1, xtype='E')
+
     def expcone(self, x, z):
         """
         Return the exponential cone constraint z*exp(x/z) <= affine.
@@ -1314,9 +1631,9 @@ class Affine:
 
         return Convex(self, np.float64(0), 'P', -1)
 
-    def kldiv(self, phat, r):
+    def kldiv(self, q, r):
         """
-        Return the KL divergence constraints sum(var*log(var/phat)) <= r.
+        Return the KL divergence constraints sum(affine*log(affine/q)) <= r.
 
         Refer to `rsome.kldiv` for full documentation.
 
@@ -1327,22 +1644,42 @@ class Affine:
 
         affine = self.to_affine().reshape((self.size, ))
 
-        if isinstance(phat, Real):
-            phat = np.array([phat]*self.size)
-        elif isinstance(phat, np.ndarray):
-            if phat.size == 1:
-                phat = np.array([phat.flatten()[0]] * self.size)
+        if isinstance(q, Real):
+            q = np.array([q]*self.size)
+        elif isinstance(q, np.ndarray):
+            if q.size == 1:
+                q = np.array([q.flatten()[0]] * self.size)
             else:
-                phat = phat.reshape(affine.shape)
-        elif isinstance(phat, (Vars, VarSub, Affine)):
-            if affine.model is not phat.model:
+                q = q.reshape(affine.shape)
+        elif isinstance(q, (Vars, VarSub, Affine)):
+            if affine.model is not q.model:
                 raise ValueError('Models mismatch.')
-            if phat.size == 1:
-                phat = phat * np.ones(affine.shape)
+            if q.size == 1:
+                q = q * np.ones(affine.shape)
             else:
-                phat = phat.reshape(affine.shape)
+                q = q.reshape(affine.shape)
 
-        return KLConstr(affine, phat, r)
+        return KLConstr(affine, q, r)
+
+    def concat(self, other, axis=0):
+
+        if not isinstance(other, Affine):
+            raise TypeError('Incorrect type in concatenation.')
+        if self.model != other.model:
+            raise ValueError('Model mismatch.')
+
+        idx_left = np.arange(self.size).reshape(self.shape)
+        idx_other = np.arange(self.size, self.size + other.size).reshape(other.shape)
+        idx_all = np.concatenate((idx_left, idx_other), axis=axis).flatten()
+
+        if self.linear.shape[1] < other.linear.shape[1]:
+            self.linear.resize(self.linear.shape[0], other.linear.shape[1])
+        if self.linear.shape[1] > other.linear.shape[1]:
+            other.linear.resize(other.linear.shape[0], self.linear.shape[1])
+        linear_all = sp.vstack((self.linear, other.linear))[idx_all]
+        const_all = np.concatenate((self.const, other.const), axis=axis)
+
+        return Affine(self.model, linear_all, const_all)
 
     def __mul__(self, other):
 
@@ -1579,6 +1916,24 @@ class Affine:
                              np.ones(left.const.size))
         else:
             return left.__eq__(0)
+
+    def __rshift__(self, other):
+
+        left = self - other
+        if len((left.shape)) != 2:
+            msg = """Only two-dimensional arrays can be used to construct linear
+            matrix equality constraints."""
+            raise ValueError(msg)
+        if left.shape[0] != left.shape[1]:
+            msg = """Only two-dimensional square arrays can be used to construct
+            linear matrix equality constraints."""
+            raise ValueError(msg)
+
+        return LMIConstr(left.model, left.linear, -left.const, left.shape[0])
+
+    def __lshift__(self, other):
+
+        return (-self).__rshift__(-other)
 
     def __call__(self):
 
@@ -2170,6 +2525,7 @@ class LinConstr:
         self.const = const
         self.sense = sense
         self.sign = sign
+        self.index = None
 
     def __repr__(self):
 
@@ -2178,6 +2534,46 @@ class LinConstr:
             return '1 linear constraint'
         else:
             return '{} linear constraints'.format(size)
+
+    def dual(self):
+
+        if self.model.solution is None:
+            raise RuntimeError('The model is unsolved. ')
+
+        cidx = self.index
+        if cidx is None:
+            raise RuntimeError('The constraint is not a part of any model. ')
+
+        solution = self.model.solution
+        if solution.y is None:
+            msg = 'The dual solution is not available. '
+            msg += f'{solution.solver} solution status: {solution.status}.'
+            warnings.warn(msg)
+        else:
+            dual_sol = solution.y['pi'][self.model.ciarray == cidx] * self.model.sign
+            if dual_sol.size == 1:
+                dual_sol = dual_sol.item()
+
+            return dual_sol
+
+
+class LMIConstr:
+    """
+    The LMIConstr class creates an object of linear matrix inequality
+    constraints.
+    """
+
+    def __init__(self, model, linear, const, dim):
+
+        self.model = model
+        self.linear = linear
+        self.const = const
+        self.dim = dim
+
+    def __repr__(self):
+
+        dim = int(self.linear.shape[0] ** 0.5)
+        return f'{dim}x{dim} linear matrix inequliaty constraint'
 
 
 class CvxConstr:
@@ -2246,6 +2642,34 @@ class Bounds:
         self.values = values
         self.btype = btype
 
+    def dual(self):
+
+        if self.model.solution is None:
+            raise RuntimeError('The model is unsolved. ')
+
+        solution = self.model.solution
+        if solution.y is None:
+            msg = 'The dual solution is not available. '
+            msg += f'{solution.solver} solution status: {solution.status}.'
+            warnings.warn(msg)
+        else:
+            primal = self.model.primal
+            if self.btype == 'U':
+                pi = self.model.solution.y['upi'] * self.model.sign
+                output = pi[self.indices]
+                output[primal.ub[self.indices] < self.values] = 0
+            elif self.btype == 'L':
+                pi = self.model.solution.y['lpi'] * self.model.sign
+                output = pi[self.indices]
+                output[primal.lb[self.indices] > self.values] = 0
+            else:
+                raise ValueError('Unknown bounds. ')
+
+            if output.size == 1:
+                output = output.item()
+
+            return output
+
 
 class ConeConstr:
     """
@@ -2301,6 +2725,9 @@ class KLConstr:
         suffix = 's' if ns > 1 else ''
 
         return "KL divergence constraint for {} scenario{}".format(ns, suffix)
+
+
+# class RQCone
 
 
 class RoConstr:
@@ -2412,6 +2839,11 @@ class RoConstr:
                                         dual_var[n, indices[1]],
                                         dual_var[n, indices[2]])
                 constr_list.append(cone_constr)
+            for pconstr in support.lmi:
+                dim = pconstr['dim']
+                symat = (pconstr['linear']@dual_var[n]).reshape((dim, dim))
+                symat -= pconstr['const']
+                constr_list.append(symat >> 0)
 
         return constr_list
 
@@ -2552,7 +2984,13 @@ class DecVar(Vars):
 
         dro_model = self.dro_model
         if dro_model.solution is None:
-            raise RuntimeError('The model is unsolved or infeasible')
+            raise RuntimeError('The model is unsolved.')
+
+        solution = dro_model.solution
+        if np.isnan(solution.objval):
+            msg = 'No solution available. '
+            msg += f'{solution.solver} solution status: {solution.status}.'
+            raise RuntimeError(msg)
 
         var_sol = dro_model.ro_model.rc_model.vars[1].get()
         edict = event_dict(self.event_adapt)
@@ -3018,6 +3456,12 @@ class DecAffine(Affine):
 
         return DecAffine(self.dro_model, expr, self.event_adapt, self.fixed)
 
+    def trace(self):
+
+        expr = super().trace()
+
+        return DecAffine(expr.dro_model, expr, self.event_adapt, self.fixed)
+
     def expcone(self, x, z):
         """
         Return the exponential cone constraint z*exp(x/z) <= affine.
@@ -3124,8 +3568,6 @@ class DecAffine(Affine):
         rso.entropy : equivalent function
         """
 
-        # if self.size > 1:
-        #     raise ValueError('The expression must be a scalar')
         if self.shape != ():
             if self.size != max(self.shape):
                 raise ValueError('The expression must be a vector.')
@@ -3197,6 +3639,20 @@ class DecAffine(Affine):
                                 left.fixed, left.ctype)
         elif isinstance(left, DecRoAffine):
             return DecRoConstr(left, 1, left.event_adapt, left.ctype)
+
+    def __rshift__(self, other):
+
+        left = self - other
+        if isinstance(left, DecAffine):
+            constr = super().__rshift__(other)
+            return DecLMIConstr(constr, left.event_adapt)
+        else:
+            msg = 'Linear matrix inequalities only apply to affine expressions.'
+            raise TypeError(msg)
+
+    def __lshift__(self, other):
+
+        return (-self).__rshift__(-other)
 
     @property
     def E(self):
@@ -3774,6 +4230,15 @@ class DecRoConstr(RoConstr):
             return self
 
 
+class DecLMIConstr(LMIConstr):
+
+    def __init__(self, constr, event_adapt, ctype='R'):
+
+        super().__init__(constr.model, constr.linear, constr.const, constr.dim)
+        self.event_adapt = event_adapt
+        self.ctype = ctype
+
+
 class DecRule:
     """
     The DecRule class creats an object of decision rules for RO models.
@@ -3973,7 +4438,13 @@ class DecRule:
         """
 
         if self.model.solution is None:
-            raise RuntimeError('The model is unsolved or infeasible')
+            raise RuntimeError('The model is unsolved. ')
+
+        solution = self.model.solution
+        if np.isnan(solution.objval):
+            msg = 'No solution available. '
+            msg += f'{solution.solver} solution status: {solution.status}.'
+            raise RuntimeError(msg)
 
         if rvar is None:
             return self.fixed.get()
@@ -4158,7 +4629,7 @@ class LinProg:
         string += ' obj: '
         obj_str = ' '.join(['{} {} x{}'.format('-' if coeff < 0 else '+',
                                                abs(coeff), i+1)
-                            for i, coeff in enumerate(self.obj[0]) if coeff])
+                            for i, coeff in enumerate(self.obj) if coeff])
         string += obj_str[2:] if obj_str[:2] == '+ ' else obj_str
 
         string += '\nSubject To\n'
@@ -4233,13 +4704,29 @@ class Solution:
     The Solution class creats an object summarizing solution information.
     """
 
-    def __init__(self, objval, x, status, time, xs=None):
+    def __init__(self, solver, objval, x, status, time, xs=None, y=None):
 
+        self.solver = solver
         self.objval = objval
         self.x = x
         self.xs = xs
+        self.y = y
         self.status = status
         self.time = time
+
+    def __repr__(self):
+
+        msg = f"Solver:          {self.solver}\n"
+        msg += f"Solution status: {self.status}\n"
+        msg += f"Solution time:   {self.time:.4f}s\n"
+        msg += "-------------------------------------\n"
+        msg += f"Objective value: {self.objval}\n"
+        primal_available = "Available" if self.x is not None else "Unavailable"
+        dual_available = "Available" if self.y is not None else "Unavailable"
+        msg += f"Primal solution: {primal_available}\n"
+        msg += f"Dual solution:   {dual_available}"
+
+        return msg
 
 
 class Scen:
@@ -4300,7 +4787,7 @@ class Scen:
         for arg in args:
             if arg.model is not self.ambset.model.sup_model:
                 raise ValueError('Constraints are not for this support.')
-            if not isinstance(arg, (LinConstr, CvxConstr, Bounds, ConeConstr)):
+            if not isinstance(arg, (LinConstr, CvxConstr, Bounds, ConeConstr, LMIConstr)):
                 raise TypeError('Invalid constraint type.')
 
         # for i in self.series:

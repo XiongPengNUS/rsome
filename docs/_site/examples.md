@@ -11,6 +11,7 @@
   <li> <a href="example_opf">Optimal DC Power Flow</a> </li>
   <li> <a href="example_ucp">The Unit Commitment Problem</a> </li>
   <li> <a href="example_max_volume_box">Box with the Maximum Volume</a> </li>
+  <li> <a href="example_min_ellipsoid">Minimal Enclosing Ellipsoid</a> </li>
 </ul>
 </toc></th>
 

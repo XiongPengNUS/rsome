@@ -1,12 +1,12 @@
 from .gcp import Model as GCPModel
 from .ro import Model as ROModel
 from .lp import DecBounds, DecExpConstr, LinConstr
-from .lp import ConeConstr, PCvxConstr, CvxConstr, ExpConstr
+from .lp import ConeConstr, PCvxConstr, CvxConstr, ExpConstr, LMIConstr
 from .lp import Vars, Affine
 from .lp import RoAffine, RoConstr
 from .lp import DecVar, RandVar, DecLinConstr, DecCvxConstr, DecPCvxConstr
 from .lp import DecRoConstr
-from .lp import PiecewiseConvex, ExpPiecewiseConvex, PWConstr, ExpPWConstr
+from .lp import PiecewiseConvex, PWConstr, ExpPWConstr, DecLMIConstr
 from .lp import Scen
 from .lp import Solution, def_sol
 from .subroutines import event_dict
@@ -368,7 +368,7 @@ class Model:
             else:
                 if isinstance(constr, (DecLinConstr, DecBounds,
                                        DecCvxConstr, DecPCvxConstr,
-                                       DecExpConstr)):
+                                       DecExpConstr, DecLMIConstr)):
                     if constr.model is not self.vt_model:
                         raise ValueError('Models mismatch.')
                 elif isinstance(constr, DecRoConstr):
@@ -633,6 +633,18 @@ class Model:
 
                 ew_constr = ExpConstr(expr1.model, expr1, expr2, expr3)
 
+            elif isinstance(constr, DecLMIConstr):
+                if isinstance(drule, RoAffine):
+                    drule_affine = drule.affine
+                else:
+                    drule_affine = drule
+
+                lmi_left = constr.linear @ drule_affine - constr.const.flatten()
+                lmi_linear = lmi_left.linear
+                lmi_const = (-lmi_left.const).reshape((constr.dim, constr.dim))
+
+                ew_constr = LMIConstr(lmi_left.model, lmi_linear, lmi_const, constr.dim)
+
             else:
                 raise TypeError('Unknown constraint type.')
 
@@ -761,14 +773,15 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, grb_solver, msk_solver}
+            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                      cpx_solver, grb_solver, msk_solver, cpt_solver}
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
                 Display option of the solver interface.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi and MOSEK.
+                So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
@@ -796,6 +809,13 @@ class Model:
 
         if self.solution is None:
             raise RuntimeError('The model is unsolved or no solution is obtained')
+
+        solution = self.solution
+        if np.isnan(solution.objval):
+            msg = 'No solution available. '
+            msg += f'{solution.solver} solution status: {solution.status}'
+            raise RuntimeError(msg)
+
         return self.sign * self.solution.objval
 
     def optimal(self):

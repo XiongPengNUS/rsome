@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=63c479adc26fae1f9b0ca3001d91f09d381db5ac">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -94,9 +94,9 @@
 
 <p>Such an exponential cone program can be implemented by the code below.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">eco_solver</span> <span class="k">as</span> <span class="n">eco</span>
-<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">eco_solver</span> <span class="k">as</span> <span class="n">eco</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 
 <span class="n">A_wall</span> <span class="o">=</span> <span class="mi">200</span>
@@ -126,16 +126,43 @@ Solution status: Optimal solution found
 Running time: 0.0011s
 </code></pre></div></div>
 
+<p>Please note that RSOME does not support the summation of two or more exponential functions, such as the exponential function <code class="language-plaintext highlighter-rouge">rso.exp()</code>. This is why we introduced intermediate variables <code class="language-plaintext highlighter-rouge">a</code> and <code class="language-plaintext highlighter-rouge">b</code> to represent the epigraph of <code class="language-plaintext highlighter-rouge">rso.exp(x + y)</code> and <code class="language-plaintext highlighter-rouge">rso.exp(z + y)</code>, so that their summation can be formulated in constraints.</p>
+
 <p>The optimal solution is presented in the following code segment.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">z</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">z</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div></div>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(1.7329, 1.956, 2.1383)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(1.73287, 1.95601, 2.13833)
 </code></pre></div></div>
 
 <p>Hence the optimal width, height, and depth are 5.6569, 7.0711, and 8.4853, respectively.</p>
 
-<p>Please note that RSOME does not support the summation of two or more exponential functions, such as the exponential function <code class="language-plaintext highlighter-rouge">rso.exp()</code>. This is why we introduced intermediate variables <code class="language-plaintext highlighter-rouge">a</code> and <code class="language-plaintext highlighter-rouge">b</code> to represent the epigraph of <code class="language-plaintext highlighter-rouge">rso.exp(x + y)</code> and <code class="language-plaintext highlighter-rouge">rso.exp(z + y)</code>, so that their summation can be formulated in constraints.</p>
+<p>In this example, the exponential cone programming problem is solved by the ECOS solver. If no exponential cone solver is available, the model can be approximated by a second-order cone program, using the approach mentioned in <a href="#ref1">Zhu et al. (2021)</a>. The following code solves the approximated model using the second-order cone solver Gurobi.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">grb_solver</span> <span class="k">as</span> <span class="n">grb</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">soc_solve</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Gurobi...
+Solution status: 2
+Running time: 0.0039s
+</code></pre></div></div>
+
+<p>The approximated solution is very close to the exact solution.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">y</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">z</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(1.73292, 1.95606, 2.13838)
+</code></pre></div></div>
+
+<p><br /></p>
+
+<h3 id="reference">Reference</h3>
+
+<p><a id="ref1"></a></p>
+
+<p>Zhu, Taozeng, Jingui Xie, Melvyn Sim. 2021. <a href="https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603">Joint Estimation and Robustness Optimization</a>. <i>Management Science</i> <b>68</b>(3) 1659-1677.</p>
 
 
       </section>

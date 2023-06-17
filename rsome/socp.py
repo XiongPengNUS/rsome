@@ -64,6 +64,8 @@ class Model(LPModel):
         self.pupdate = True
         self.dupdate = True
 
+        return constr
+
     def do_math(self, primal=True, refresh=True, obj=True):
         """
         Return the linear or second-order cone programming problem

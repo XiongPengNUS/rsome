@@ -153,9 +153,9 @@ print(model.get())
 We can also directly implement the distributionally robust model in a more concise and readable manner using the `rsome.dro` environment, see the code below.
 
 ```python
-from rsome.rsome import dro
-from rsome.rsome import E
-import rsome.rsome as rso
+from rsome import dro
+from rsome import E
+import rsome as rso
 
 model = dro.Model(n)
 x = model.dvar(m)

@@ -13,7 +13,7 @@
 ![GitHub issues](https://img.shields.io/github/issues-raw/XiongPengNUS/rsome)
 
 - Website: [RSOME for Python](https://xiongpengnus.github.io/rsome/)
-- PyPI: [RSOME 1.1.4](https://pypi.org/project/rsome/)
+- PyPI: [RSOME 1.2.0](https://pypi.org/project/rsome/)
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling of optimization problems (subject to uncertainty). Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of robust optimization models and their applications.
 
@@ -34,18 +34,18 @@ The RSOME package can be installed by using the <code>pip</code> command:
 
 ### Solver interfaces <a id="section3"></a>
 
-The RSOME package transforms robust or distributionally robust optimization models into deterministic second-order cone or exponential cone programming problems, and solved by external solvers. Details of compatible solvers and their interfaces are presented in the following table.
+The RSOME package transforms robust or distributionally robust optimization models into deterministic linear or conic programming problems, and solved by external solvers. Details of compatible solvers and their interfaces are presented in the following table.
 
-| Solver | License  type | Required version | RSOME interface |Integrality constraints| Second-order cone constraints| Exponential cone constraints
+| Solver | License  type | Required version | RSOME interface | Second-order cone constraints| Exponential cone constraints | Semidefiniteness constraints
 |:-------|:--------------|:-----------------|:----------------|:------------------------|:---------------------|:--------------|
-|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.2.1 | `lpg_solver` | Yes for 1.9.0 or above | No | No |
-|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | Yes | No | No |
-|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | Yes | No | No |
-|[ECOS](https://github.com/embotech/ecos-python) | Open-source | >= 2.0.10 | `eco_solver` | Yes | Yes | Yes |
-|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | Yes | No |
-|[MOSEK](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 9.1.11 | `msk_solver` | Yes | Yes | Yes |
-|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | Yes | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 5.0.1 | `cpt_solver` | Yes | Yes | No |
+|[scipy.optimize](https://docs.scipy.org/doc/scipy/reference/optimize.html)| Open-source | >= 1.9.0 | `lpg_solver` | No | No | No |
+|[CyLP](https://github.com/coin-or/cylp)| Open-source | >= 0.9.0 | `clp_solver` | No | No | No |
+|[OR-Tools](https://developers.google.com/optimization/install) | Open-source | >= 7.5.7466 | `ort_solver` | No | No | No |
+|[ECOS](https://github.com/embotech/ecos-python) | Open-source | >= 2.0.10 | `eco_solver` | Yes | Yes | No |
+|[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | No | No |
+|[Mosek](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 10.0.44 | `msk_solver` | Yes | Yes | Yes |
+|[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | No | No |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 6.5.3 | `cpt_solver` | Yes | No | No |
 
 ## Getting started <a id="section4"></a>
 
@@ -62,9 +62,9 @@ RSOME is a software project supported by Singapore Ministry of Education Tier 3 
 
 If you use RSOME in your research, please cite our papers:
 
-- Chen, Zhi, and Peng Xiong. 2021. [RSOME in Python: an open-source package for robust stochastic optimization made easy](http://www.optimization-online.org/DB_HTML/2021/06/8443.html). <i>Optimization Online</i>.
+- Chen, Zhi, and Peng Xiong. 2023. [RSOME in Python: an open-source package for robust stochastic optimization made easy](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2023.1291). Forthcoming in <i>INFORMS Journal on Computing</i>.
 
-- Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329–3339.
+- Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329-3339.
 
 Bibtex entry:
 
@@ -72,8 +72,11 @@ Bibtex entry:
 @article{chen2021rsome,
   title={RSOME in Python: an open-source package for robust stochastic optimization made easy},
   author={Chen, Zhi and Xiong, Peng},
-  journal={Optimization Online. URL: http://www.optimization-online.org/DB_HTML/2021/06/8443.html},
-  year={2021},
+  journal={INFORMS Journal on Computing},
+  year={2023},
+  month={Mar},
+  day={30},
+  publisher={INFORMS}
 }
 ```
 

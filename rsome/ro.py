@@ -1,14 +1,14 @@
 from .gcp import Model as GCPModel
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr
+from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr, LMIConstr
 from .lp import Vars, VarSub, Affine, Convex
-from .lp import DecRule, DecRuleSub
+from .lp import DecRule
 from .lp import RoAffine, RoConstr
 from .lp import PiecewiseConvex, PWConstr
 from .lp import Solution, def_sol
 import numpy as np
 from numbers import Real
 from collections.abc import Iterable
-from .subroutines import *
+# from .subroutines import *
 
 
 class Model:
@@ -54,7 +54,8 @@ class Model:
         Parameters
         ----------
         shape : int or tuple
-            Shape of the variable array.
+            Shape of the variable array. The variable is a scalar if
+            the shape is unspecified.
         vtype : {'C', 'B', 'I'}
             Type of the decision variables. 'C' means continuous; 'B'
             means binary, and 'I" means integer.
@@ -292,7 +293,7 @@ class Model:
                 for piece in constr.pieces:
                     self.st(piece)
             elif isinstance(constr, (LinConstr, Bounds, CvxConstr,
-                                     ConeConstr, ExpConstr, KLConstr)):
+                                     ConeConstr, ExpConstr, KLConstr, LMIConstr)):
                 if (constr.model is not self.rc_model) or \
                         (constr.model.mtype != 'R'):
                     raise ValueError('Models mismatch.')
@@ -323,22 +324,26 @@ class Model:
         self.pupdate = True
         self.dupdate = True
 
+        if len(arg) == 1:
+            return arg[0]
+        else:
+            return arg
+
     def do_math(self, primal=True):
         """
-        Return the linear, second-order cone, or exponential cone
-        programming problem as the standard formula or deterministic
-        counterpart of the model.
+        Return the linear, or conic programming problem as the standard
+        formula or deterministic counterpart of the model.
 
         Parameters
         ----------
         primal : bool, default True
             Specify whether return the primal formula of the model.
-            If primal=False, the method returns the daul formula.
+            If primal=False, the method returns the dual formula.
 
         Returns
         -------
         prog : GCProg
-            An exponential cone programming problem.
+            A conic programming problem.
         """
 
         if primal:
@@ -369,7 +374,7 @@ class Model:
 
         for constr in self.all_constr + more_roc:
             if isinstance(constr, (LinConstr, Bounds, CvxConstr,
-                                   ExpConstr, KLConstr)):
+                                   ExpConstr, KLConstr, LMIConstr)):
                 self.rc_model.st(constr)
             if isinstance(constr, RoConstr):
                 if constr.support:
@@ -396,21 +401,57 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
-                      cpx_solver, grb_solver, msk_solver}
-                Solver interface used for model solution. Use default solver
-                if solver=None.
-            display : bool
-                Display option of the solver interface.
-            params : dict
-                A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi and MOSEK.
+        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                  cpx_solver, grb_solver, msk_solver, cpt_solver}
+            Solver interface used for model solution. Use the default
+            solver if solver=None.
+        display : bool
+            Display option of the solver interface.
+        params : dict
+            A dictionary that specifies parameters of the selected solver.
+            So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
             solution = def_sol(self.do_math(), display, params)
         else:
             solution = solver.solve(self.do_math(), display, params)
+
+        if isinstance(solution, Solution):
+            self.rc_model.solution = solution
+        else:
+            self.rc_model.solution = None
+
+        self.solution = self.rc_model.solution
+
+    def soc_solve(self, solver=None, degree=4, cuts=(-30, 60), display=True, params={}):
+        """
+        Solve the approximated SOC model with the selected solver interface.
+
+        Parameters
+        ----------
+            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                      cpx_solver, grb_solver, msk_solver}
+                Solver interface used for model solution. Use default solver
+                if solver=None.
+            degree : int
+                The L-degree value for approximating exponential cone
+                constraints.
+            cuts : tuple of two integers
+                The lower and upper cut-off values for the SOC approximation
+                of exponential constraints.
+            display : bool
+                Display option of the solver interface.
+            params : dict
+                A dictionary that specifies parameters of the selected solver.
+                So far the argument only applies to Gurobi, CPLEX, and Mosek.
+        """
+
+        formula = self.do_math().to_socp(degree, cuts)
+        if solver is None:
+            solution = def_sol(formula, display, params)
+        else:
+            solution = solver.solve(formula, display, params)
 
         if isinstance(solution, Solution):
             self.rc_model.solution = solution
@@ -430,7 +471,14 @@ class Model:
         """
 
         if self.rc_model.solution is None:
-            raise RuntimeError('The model is unsolved or no solution is obtained.')
+            raise RuntimeError('The model is unsolved.')
+
+        solution = self.rc_model.solution
+        if np.isnan(solution.objval):
+            msg = 'No solution available. '
+            msg += f'{solution.solver} solution status: {solution.status}'
+            raise RuntimeError(msg)
+
         return self.sign * self.rc_model.solution.objval
 
     def optimal(self):

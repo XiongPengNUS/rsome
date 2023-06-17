@@ -1,9 +1,9 @@
 """
 This module is used as an interface to call the MOSEK solver for solving (mixed-
-integer) linear or second-order cone programs.
+integer) linear or conic programs.
 """
 
-import mosek
+from mosek.fusion import *
 import numpy as np
 from scipy.sparse import coo_matrix
 from .socp import SOCProg
@@ -15,130 +15,123 @@ from .lp import Solution
 
 def solve(form, display=True, params={}):
 
-    numlc, numvar = form.linear.shape
     if isinstance(form, (SOCProg, GCProg)):
         qmat = form.qmat
     else:
         qmat = []
     if isinstance(form, GCProg):
         xmat = form.xmat
+        lmi = form.lmi
     else:
         xmat = []
+        lmi = []
 
-    ind_int = np.where(form.vtype == 'I')[0]
-    ind_bin = np.where(form.vtype == 'B')[0]
+    idx_cont = [i for i, v in enumerate(form.vtype) if v == 'C']
+    idx_bin = [i for i, v in enumerate(form.vtype) if v == 'B']
+    idx_int = [i for i, v in enumerate(form.vtype) if v == 'I']
 
-    if ind_bin.size:
-        form.ub[ind_bin] = np.minimum(1, form.ub[ind_bin])
-        form.lb[ind_bin] = np.maximum(0, form.lb[ind_bin])
+    idx_ub = [i for i, v in enumerate(form.ub) if v != np.inf]
+    idx_lb = [i for i, v in enumerate(form.lb) if v != -np.inf]
 
-    ind_ub = np.where((form.ub != np.inf) & (form.lb == -np.inf))[0]
-    ind_lb = np.where((form.lb != -np.inf) & (form.ub == np.inf))[0]
-    ind_ra = np.where((form.lb != -np.inf) & (form.ub != np.inf))[0]
-    ind_fr = np.where((form.lb == -np.inf) & (form.ub == np.inf))[0]
-    ind_eq = np.where(form.sense)[0]
-    ind_ineq = np.where(form.sense == 0)[0]
+    is_eq = (form.sense == 1)
+    coo_linear_ineq = coo_matrix(form.linear[~is_eq])
+    linear_ineq = Matrix.sparse(coo_linear_ineq.shape[0], coo_linear_ineq.shape[1],
+                                coo_linear_ineq.row, coo_linear_ineq.col,
+                                coo_linear_ineq.data)
+    coo_linear_eq = coo_matrix(form.linear[is_eq])
+    linear_eq = Matrix.sparse(coo_linear_eq.shape[0], coo_linear_eq.shape[1],
+                              coo_linear_eq.row, coo_linear_eq.col, coo_linear_eq.data)
 
-    with mosek.Env() as env:
+    const_ineq = form.const[~is_eq]
+    const_eq = form.const[is_eq]
 
-        with env.Task(0, 0) as task:
+    num_constr, num_var = form.linear.shape
+    with Model() as M:
+        num_cont = len(idx_cont)
+        xc = M.variable("xc", num_cont)
+        x = Expr.mul(Matrix.sparse(num_var, num_cont, idx_cont,
+                                   list(range(num_cont)), np.ones(num_cont)), xc)
+        if idx_bin:
+            num_bin = len(idx_bin)
+            xb = M.variable("xb", num_bin, Domain.binary())
+            x = Expr.add(Expr.mul(Matrix.sparse(num_var, num_bin, idx_bin,
+                                                list(range(num_bin)),
+                                                np.ones(num_bin)), xb), x)
 
-            task.appendvars(numvar)
-            task.appendcons(numlc)
+        if idx_int:
+            num_int = len(idx_int)
+            xi = M.variable("xi", num_int, Domain.integral(Domain.unbounded()))
+            x = Expr.add(Expr.mul(Matrix.sparse(num_var, num_int, idx_int,
+                                                list(range(num_int)),
+                                                np.ones(num_int)), xi), x)
 
-            if ind_ub.size:
-                task.putvarboundlist(ind_ub,
-                                     [mosek.boundkey.up] * len(ind_ub),
-                                     form.lb[ind_ub], form.ub[ind_ub])
+        obj_expr = Expr.mul(form.obj.reshape((1, form.obj.size)), x)
+        M.objective(ObjectiveSense.Minimize, obj_expr)
+        c_ineq = M.constraint(Expr.mul(linear_ineq, x), Domain.lessThan(const_ineq))
+        c_eq = M.constraint(Expr.mul(linear_eq, x), Domain.equalsTo(const_eq))
+        c_ub = M.constraint(x.pick(idx_ub), Domain.lessThan(form.ub[idx_ub]))
+        c_lb = M.constraint(x.pick(idx_lb), Domain.greaterThan(form.lb[idx_lb]))
 
-            if ind_lb.size:
-                task.putvarboundlist(ind_lb,
-                                     [mosek.boundkey.lo] * len(ind_lb),
-                                     form.lb[ind_lb], form.ub[ind_lb])
+        for q in qmat:
+            M.constraint(x.pick(q), Domain.inQCone())
 
-            if ind_ra.size:
-                task.putvarboundlist(ind_ra,
-                                     [mosek.boundkey.ra] * len(ind_ra),
-                                     form.lb[ind_ra], form.ub[ind_ra])
+        for e in xmat:
+            M.constraint(x.pick([e[1], e[2], e[0]]), Domain.inPExpCone())
 
-            if ind_fr.size:
-                task.putvarboundlist(ind_fr,
-                                     [mosek.boundkey.fr] * len(ind_fr),
-                                     form.lb[ind_fr], form.ub[ind_fr])
+        for p in lmi:
+            temp_coo = coo_matrix(p['linear'])
+            psd_linear = Matrix.sparse(temp_coo.shape[0], coo_linear_ineq.shape[1],
+                                       temp_coo.row, temp_coo.col, temp_coo.data)
+            psd_const = p['const'].flatten()
+            dim = p['dim']
 
-            if ind_int.size:
-                task.putvartypelist(ind_int,
-                                    [mosek.variabletype.type_int] *
-                                    len(ind_int))
+            left = Expr.reshape(Expr.sub(Expr.mul(psd_linear, x), psd_const), dim, dim)
+            M.constraint(left, Domain.inPSDCone(dim))
 
-            if ind_bin.size:
-                task.putvartypelist(ind_bin,
-                                    [mosek.variabletype.type_int] *
-                                    len(ind_bin))
+        for param, value in params.items():
+            M.setSolverParam(param, value)
 
-            task.putcslice(0, numvar, form.obj.flatten())
-            task.putobjsense(mosek.objsense.minimize)
+        if display:
+            print('Being solved by Mosek...', flush=True)
+            time.sleep(0.2)
+        t0 = time.time()
+        M.solve()
+        stime = time.time() - t0
+        stats_string = M.getPrimalSolutionStatus().__str__()
+        status = stats_string.split('.')[1]
+        if display:
+            print('Solution status: {0}'.format(status))
+            print('Running time: {0:0.4f}s'.format(stime))
 
-            coo = coo_matrix(form.linear)
-            task.putaijlist(coo.row, coo.col, coo.data)
+        if status == 'Optimal':
+            x_sol = coo_matrix((np.ones(num_cont), (idx_cont, np.arange(num_cont))),
+                               (num_var, num_cont)) @ xc.level()
 
-            if ind_eq.size:
-                task.putconboundlist(ind_eq, [mosek.boundkey.fx] * len(ind_eq),
-                                     form.const[ind_eq], form.const[ind_eq])
-            if ind_ineq.size:
-                task.putconboundlist(ind_ineq,
-                                     [mosek.boundkey.up] * len(ind_ineq),
-                                     [-np.inf] * len(ind_ineq),
-                                     form.const[ind_ineq])
+            if idx_bin:
+                x_sol += coo_matrix((np.ones(num_bin), (idx_bin, np.arange(num_bin))),
+                                    (num_var, num_bin)) @ xb.level()
+            if idx_int:
+                x_sol += coo_matrix((np.ones(num_int), (idx_int, np.arange(num_int))),
+                                    (num_var, num_int)) @ xi.level()
 
-            for cone in qmat:
-                task.appendcone(mosek.conetype.quad,
-                                0.0, cone)
-            for cone in xmat:
-                msk_cone = [cone[1], cone[2], cone[0]]
-                task.appendcone(mosek.conetype.pexp, 0.0, msk_cone)
+            if all(form.vtype == 'C'):
+                pi = np.ones(num_constr) * np.nan
+                upi = np.zeros(num_var)
+                lpi = np.zeros(num_var)
+                if not idx_bin and not idx_int:
+                    pi[is_eq] = c_eq.dual()
+                    pi[~is_eq] = c_ineq.dual()
 
-            if display:
-                print('Being solved by Mosek...', flush=True)
-                time.sleep(0.2)
+                    upi[idx_ub] = c_ub.dual()
+                    lpi[idx_lb] = c_lb.dual()
 
-            try:
-                for param, value in params.items():
-                    if isinstance(value, float):
-                        task.putdouparam(getattr(mosek.dparam, param), value)
-                    if isinstance(value, int):
-                        task.putintparam(getattr(mosek.iparam, param), value)
-                    if isinstance(value, str):
-                        task.putstrparam(getattr(mosek.sparam, param), value)
-            except (TypeError, ValueError, AttributeError):
-                raise ValueError('Incorrect parameters or values.')
-
-            t0 = time.time()
-            task.optimize()
-            stime = time.time() - t0
-
-            soltype = mosek.soltype
-            solsta = None
-
-            if 'B' in form.vtype or 'I' in form.vtype:
-                stype = soltype.itg
-            elif not qmat and not xmat:
-                stype = soltype.bas
+                y = {'pi': pi, 'upi': upi, 'lpi': lpi}
             else:
-                stype = soltype.itr
+                y = None
+            solution = Solution('Mosek', x_sol @ form.obj, x_sol, status, stime, y=y)
+        else:
+            warnings.warn('Fail to find the optimal solution.')
+            # solution = None
+            solution = Solution('Mosek', np.nan, None, status, stime)
 
-            solsta = task.getsolsta(stype)
-            if display:
-                print('Solution status: {0}'.format(solsta.__repr__()))
-                print('Running time: {0:0.4f}s'.format(stime))
-
-            xx = [0.] * numvar
-            task.getxx(stype, xx)
-
-            if solsta in [mosek.solsta.optimal, mosek.solsta.integer_optimal]:
-                solution = Solution(xx @ form.obj.flatten(), xx, solsta, stime)
-            else:
-                warnings.warn('Fail to find the optimal solution.')
-                solution = None
-
-            return solution
+    return solution

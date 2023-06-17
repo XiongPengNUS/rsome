@@ -5,7 +5,6 @@ from rsome import ro
 from rsome import lpg_solver as lpg
 # from rsome import clp_solver as clp
 from rsome import ort_solver as ort
-from rsome import cvx_solver as cvx
 from rsome import eco_solver as eco
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
@@ -55,8 +54,6 @@ def test_lp():
     assert abs(y.get() - 2) < 1e-6
     assert model.optimal()
 
-    with pytest.warns(FutureWarning):
-        model.solve(cvx)
     assert abs(model.get() - 22.4) < 1e-6
     assert abs(x.get() - 4.8) < 1e-6
     assert abs(y.get() - 2) < 1e-6
@@ -125,11 +122,6 @@ def test_mip():
     """
 
     model.solve(ort)
-    assert (x_sol == x.get().round()).all()
-    assert model.optimal()
-
-    with pytest.warns(FutureWarning):
-        model.solve(cvx)
     assert (x_sol == x.get().round()).all()
     assert model.optimal()
 

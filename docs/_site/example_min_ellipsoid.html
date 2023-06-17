@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="minimal-enclosing-ellipsoid">Minimal Enclosing Ellipsoid</h3>
+
+<p>In this example, we consider a polytope given as the convex hull of \(m\) of data points,</p>
+
+\[S = \text{conv}\left\{\pmb{x}_1, \pmb{x}_2, ..., \pmb{x}_m\right\}, ~~~\pmb{x}_i \in \mathbb{R}^n.\]
+
+<p>The polytope is enclosed in the following ellipsoid</p>
+
+\[\mathcal{E} := \left\{\pmb{x}\left|\|\pmb{Px} - \pmb{c}\|_2 \leq 1 \right.\right\},\]
+
+<p>where \(\pmb{P}\) and \(\pmb{c}\) are the coefficients of the ellipsoid. According to <a href="https://docs.mosek.com/MOSEKModelingCookbook-letter.pdf">MOSEK Modeling Cookbook</a>, the minimum-volume enclosing ellipsoid can be achieved via solving the solving semidefinite programming problem.</p>
+
+\[\begin{align}
+\max~&amp;\text{det}(\pmb{P}) \\
+\text{s.t.}~&amp;\|\pmb{Px}_i - \pmb{c}\|_2 \leq 1, &amp;i=1, 2, ..., m \\
+&amp;\pmb{P} \succeq 0.
+\end{align}\]
+
+<p>The function \(\text{det}(\cdot)\) indicates the determinant of a given matrix, which is either convex or concave, but the logarithm of the determinant is concave, and maximizing \(\log(\text{det}(\pmb{P}))\) is equivalent to the following conic programming problem:</p>
+
+\[\begin{align}
+\max~&amp;\sum\limits_{i=1}^n v_i \\
+\text{s.t.}~&amp;v_i \leq \log(Z_{ii}), &amp;i=1, 2, ..., n\\
+&amp;\left(
+\begin{array}{cc}
+\pmb{P} &amp; \pmb{Z} \\
+\pmb{Z} &amp; \text{diag}(\pmb{Z})
+\end{array}
+\right) \succeq 0 \\
+&amp;\pmb{Z}\text{ if lower triangular}.
+\end{align}\]
+
+<p>Therefore, the minimum-volume enclosing ellipsoid problem can be rewritten as follows.</p>
+
+\[\begin{align}
+\max~&amp;\sum\limits_{i=1}^n v_i \\
+\text{s.t.}~&amp;v_i \leq \log(Z_{ii}), &amp;i=1, 2, ..., n\\
+&amp;\left(
+\begin{array}{cc}
+\pmb{P} &amp; \pmb{Z} \\
+\pmb{Z} &amp; \text{diag}(\pmb{Z})
+\end{array}
+\right) \succeq 0 \\
+&amp;\|\pmb{Px}_i - \pmb{c}\|_2 \leq 1, &amp;i=1, 2, ..., m \\
+&amp;\pmb{P} \succeq 0 \\
+&amp;\pmb{Z}\text{ if lower triangular}.
+\end{align}\]
+
+<p>In the following numerical experiments, the data points are randomly generated with \(n=2\) and \(m=50\) by the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">xs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.08</span> <span class="o">+</span> <span class="n">xs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>The Python code for implementing the model above is presented below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome.rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+<span class="kn">import</span> <span class="nn">rsome.rsome</span> <span class="k">as</span> <span class="n">rso</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">P</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">rso</span><span class="p">.</span><span class="n">tril</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="nb">sum</span><span class="p">())</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">v</span> <span class="o">&lt;=</span> <span class="n">rso</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Z</span><span class="p">)))</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">rstack</span><span class="p">([</span><span class="n">P</span><span class="p">,</span> <span class="n">Z</span><span class="p">],</span> 
+                    <span class="p">[</span><span class="n">Z</span><span class="p">.</span><span class="n">T</span><span class="p">,</span> <span class="n">rso</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="bp">True</span><span class="p">)])</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">P</span><span class="o">@</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">P</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: Optimal
+Running time: 0.0223s
+</code></pre></div></div>
+
+<p>The boundary of the ellipsoid is achieved by the following code using the solution of \(\pmb{P}\) and \(\pmb{c}\).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Ps</span> <span class="o">=</span> <span class="n">P</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="n">step</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">pi</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="p">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">np</span><span class="p">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))).</span><span class="n">T</span>
+
+<span class="n">ellip</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Ps</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">cs</span><span class="p">).</span><span class="n">T</span>
+</code></pre></div></div>
+
+<p>Finally, the enclosing ellipsoid and randomly generated data points are shown below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> 
+            <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">'none'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'k'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'Data points'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ellip</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ellip</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">,</span> 
+         <span class="n">label</span><span class="o">=</span><span class="s">'Minimum enclosing ellipsoid'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.01</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'equal'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s">'$x_1$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s">'$x_2$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="min_ellipsoid.png" alt="" /></p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

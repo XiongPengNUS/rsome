@@ -23,6 +23,8 @@ def solve(formula, display=True, params={}):
     try:
         if formula.xmat:
             warnings.warn('The LP solver ignores exponential cone constraints.')
+        if formula.lmi:
+            warnings.warn('The LP solver ignores semidefinite cone constraints.')
     except AttributeError:
         pass
 
@@ -71,9 +73,10 @@ def solve(formula, display=True, params={}):
 
     if status == pywraplp.Solver.OPTIMAL:
         x_sol = np.array([xs[i].solution_value() for i in range(col)])
-        solution = Solution(solver.Objective().Value(), x_sol, status, stime)
+        solution = Solution('OR-Tools', solver.Objective().Value(), x_sol, status, stime)
     else:
         warnings.warn('Fail to find the optimal solution.')
-        solution = None
+        # solution = None
+        solution = Solution('OR-Tools', np.nan, None, status, stime)
 
     return solution

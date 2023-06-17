@@ -16,6 +16,8 @@ def solve(formula, display=True, params={}):
     try:
         if formula.xmat:
             warnings.warn('The SOCP solver ignores exponential cone constraints. ')
+        if formula.lmi:
+            warnings.warn('The SOCP solver ignores semidefinite cone constraints. ')
     except AttributeError:
         pass
 
@@ -23,7 +25,7 @@ def solve(formula, display=True, params={}):
 
     # obj = formula.obj.flatten()
     linear = formula.linear
-    row = linear.shape[0]
+    row, col = linear.shape
     spmat = [[linear.indices[linear.indptr[i]:linear.indptr[i + 1]].tolist(),
               linear.data[linear.indptr[i]:linear.indptr[i + 1]].tolist()]
              for i in range(row)]
@@ -33,10 +35,10 @@ def solve(formula, display=True, params={}):
              cpx.variables.type.continuous for vt in formula.vtype]
 
     if all(np.array(vtype) == cpx.variables.type.continuous):
-        cpx.variables.add(obj=formula.obj.flatten(),
+        cpx.variables.add(obj=formula.obj,
                           lb=formula.lb, ub=formula.ub)
     else:
-        cpx.variables.add(obj=formula.obj.flatten(),
+        cpx.variables.add(obj=formula.obj,
                           lb=formula.lb, ub=formula.ub, types=vtype)
     cpx.linear_constraints.add(lin_expr=spmat,
                                senses=sense, rhs=formula.const)
@@ -65,8 +67,9 @@ def solve(formula, display=True, params={}):
     cpx.solve()
     stime = time.time() - t0
     status = cpx.solution.get_status()
+    status_string = cpx.solution.get_status_string()
     if display:
-        print('Solution status: {0}'.format(status))
+        print('Solution status: {0}'.format(status_string))
         print('Running time: {0:0.4f}s'.format(stime))
 
     if status in [1, 6, 10, 11, 12, 13,
@@ -74,9 +77,22 @@ def solve(formula, display=True, params={}):
                   101, 102, 105, 107, 109, 111, 113, 116]:
         obj_val = cpx.solution.get_objective_value()
         x_sol = np.array(cpx.solution.get_values())
-        solution = Solution(obj_val, x_sol, status, stime)
+
+        if all(np.array(vtype) == cpx.variables.type.continuous):
+            pi = np.array(cpx.solution.get_dual_values())
+            upi = np.zeros(col)
+            lpi = np.zeros(col)
+            rc = np.array(cpx.solution.get_reduced_costs())
+            upi[rc < 0] = rc[rc < 0]
+            lpi[rc > 0] = rc[rc > 0]
+            y = {'pi': pi, 'upi': upi, 'lpi': lpi}
+        else:
+            y = None
+
+        solution = Solution('CPLEX', obj_val, x_sol, status_string, stime, y=y)
     else:
         warnings.warn('Fail to find the optimal solution.')
-        solution = None
+        # solution = None
+        solution = Solution('CPLEX', np.nan, None, status_string, stime)
 
     return solution

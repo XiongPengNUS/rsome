@@ -52,7 +52,7 @@ model = ro.Model()
 x = model.dvar((9, 9, 9), vtype='B')
 
 # objective is set to be zero
-model.min(0 * x.sum())
+model.min(0)
 
 # constraints 1 to 3
 model.st(x.sum(axis=0) == 1,
@@ -77,9 +77,9 @@ model.solve(grb)
     Running time: 0.0017s
 
 
-The binary variable \\(x_{ijk}\\) is defined to be a three-dimensional array <code>x</code> with the shape to be <code>(9, 9, 9)</code>. Note that in RSOME, the objective function cannot be specified as a numeric constant, we then use the expression <code>0 * x.sum()</code> as the objective. Based on the decision variable <code>x</code>, each set of constraints can be formulated as the array form by using the <code>sum</code> method. The method <code>sum()</code> in RSOME is consistent with that in NumPy, where you may use the <code>axis</code> argument to specify along which axis the sum is performed.
+The binary variable \\(x_{ijk}\\) is defined to be a three-dimensional array `x` with the shape to be `(9, 9, 9)`. Based on the decision variable `x`, each set of constraints can be formulated as the array form by using the `sum()` method. The method `sum()` in RSOME is consistent with that in NumPy, where you may use the `axis` argument to specify along which axis the sum is performed.
 
-The Sudoku problem and the its solution are presented below.
+The Sudoku puzzle and the its solution are presented below.
 
 
 ```python

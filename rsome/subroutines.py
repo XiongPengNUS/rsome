@@ -3,7 +3,6 @@ import scipy.sparse as sp
 from numbers import Real
 from scipy.sparse import csr_matrix
 from collections.abc import Iterable
-from typing import List
 
 
 def flat(a_list):
@@ -30,6 +29,26 @@ def sparse_mul(ndarray, affine):
 
     return csr_matrix((values, (np.arange(size), index)),
                       shape=(size, affine.size))
+
+
+def diag_comb(upper, lower):
+
+    data = np.concatenate((upper.data, lower.data))
+    indices = np.concatenate((upper.indices, upper.shape[1] + lower.indices))
+    indptr = np.concatenate((upper.indptr[:-1], upper.indptr[-1] + lower.indptr))
+
+    return csr_matrix((data, indices, indptr),
+                      shape=np.array(upper.shape)+np.array(lower.shape))
+
+
+def vert_comb(upper, lower):
+
+    data = np.concatenate((upper.data, lower.data))
+    indices = np.concatenate((upper.indices, lower.indices))
+    indptr = np.concatenate((upper.indptr[:-1], upper.indptr[-1] + lower.indptr))
+
+    shape = upper.shape[0] + lower.shape[0], max([upper.shape[1], lower.shape[1]])
+    return csr_matrix((data, indices, indptr), shape=shape)
 
 
 def sp_matmul(ndarray, affine, shape):
@@ -180,7 +199,7 @@ def check_numeric(array):
 
 def rso_broadcast(*args):
 
-    arrays = [np.array(arg) if isinstance(arg, Real) else arg
+    arrays = [np.array(arg) if isinstance(arg, (Real, np.ndarray)) else arg.to_affine()
               for arg in args]
 
     indices = [np.arange(array.size).reshape(array.shape) for
