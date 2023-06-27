@@ -767,7 +767,7 @@ class Model:
 
         return ro_constr
 
-    def solve(self, solver=None, display=True, params={}):
+    def solve(self, solver=None, display=True, log=False, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -778,16 +778,21 @@ class Model:
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
-                Display option of the solver interface.
+                True for displaying the solution information. False for hiding
+                the solution information.
+            log : bool
+                True for printing the log information. False for hiding the log
+                information. So far the argument only applies to Gurobi, CPLEX,
+                and Mosek.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(), display, params)
+            solution = def_sol(self.do_math(), display, log, params)
         else:
-            solution = solver.solve(self.do_math(), display, params)
+            solution = solver.solve(self.do_math(), display, log, params)
 
         if isinstance(solution, Solution):
             self.ro_model.solution = solution
@@ -820,7 +825,10 @@ class Model:
 
     def optimal(self):
 
-        return self.solution is not None
+        if self.solution is None:
+            return False
+        else:
+            return not np.isnan(self.solution.objval)
 
 
 class Ambiguity:

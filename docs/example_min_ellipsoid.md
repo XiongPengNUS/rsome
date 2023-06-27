@@ -73,9 +73,9 @@ xs[:, 1] = xs[:, 0]*0.08 + xs[:, 1]
 The Python code for implementing the model above is presented below.
 
 ```python
-from rsome.rsome import ro
-from rsome.rsome import msk_solver as msk
-import rsome.rsome as rso
+from rsome import ro
+from rsome import msk_solver as msk
+import rsome as rso
 
 model = ro.Model()
 

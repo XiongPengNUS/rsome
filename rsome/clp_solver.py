@@ -12,7 +12,7 @@ import time
 from .lp import Solution
 
 
-def solve(formula, display=True, params={}):
+def solve(formula, display=True, log=False, params={}):
 
     try:
         if formula.qmat:

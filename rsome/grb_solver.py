@@ -12,7 +12,7 @@ from .socp import SOCProg
 from .lp import Solution
 
 
-def solve(formula, display=True, params={}):
+def solve(formula, display=True, log=False, params={}):
 
     try:
         if formula.xmat:
@@ -51,7 +51,8 @@ def solve(formula, display=True, params={}):
 
     grb.setObjective(formula.obj @ x)
 
-    grb.setParam('LogToConsole', 0)
+    if not log:
+        grb.setParam('LogToConsole', 0)
     try:
         for param, value in params.items():
             if eval('grb.Params.{}'.format(param)) is None:

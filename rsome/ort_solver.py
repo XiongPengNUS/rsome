@@ -12,7 +12,7 @@ from .lp import Solution
 from numbers import Real
 
 
-def solve(formula, display=True, params={}):
+def solve(formula, display=True, log=False, params={}):
 
     try:
         if formula.qmat:

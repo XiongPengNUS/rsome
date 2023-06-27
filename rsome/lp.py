@@ -15,7 +15,7 @@ from collections.abc import Iterable, Sized
 # from typing import List
 
 
-def def_sol(formula, display=True, params={}):
+def def_sol(formula, display=True, log=False, params={}):
     """
     This is the default solver of RSOME.
     """
@@ -76,12 +76,13 @@ def def_sol(formula, display=True, params={}):
             return Solution('SciPy', objval, res.x, res.status, stime, y=y)
         else:
             status = res.status
-            msg = 'The optimal solution can not be found, '
+            msg = 'Fail to find the optimal solution, '
             reasons = ('iteration limit is reached.' if status == 1 else
                        'the problem appears to be infeasible.' if status == 2 else
                        'the problem appears to be unbounded.' if status == 3 else
                        'numerical difficulties encountered.')
             msg += 'because {}'.format(reasons)
+            warnings.warn(msg)
             return Solution('Scipy', np.nan, None, status, stime)
     else:
         b_u = formula.const
@@ -127,8 +128,8 @@ def def_sol(formula, display=True, params={}):
             return Solution('SciPy', objval, res.x, res.status, stime)
         else:
             status = res.status
-            # msg = 'Fail to find the optimal solution.'
-            # warnings.warn(msg)
+            msg = 'Fail to find the optimal solution.'
+            warnings.warn(msg)
             return Solution('Scipy', np.nan, None, status, stime)
 
 
@@ -160,7 +161,30 @@ def concat(iters, axis=0):
     event_adapt = None
     fixed = True
     ctype = None
+
     for item in iters:
+        if isinstance(item, (Real, np.ndarray)):
+            continue
+        if not isinstance(item, (Affine, Vars, VarSub)):
+            raise TypeError('Unsupported data type for concatenation')
+        if model is None:
+            model = item.model
+            num_var = model.last
+        else:
+            if model != item.model:
+                raise ValueError('Model mismatch.')
+
+    if model is None:
+        return np.concatenate(iters, axis)
+
+    for item in iters:
+        if isinstance(item, (Real, np.ndarray)):
+            item_value = np.array(item)
+            item_size = item_value.size
+            item_linear = csr_matrix(([], ([], [])), shape=(item_size, num_var))
+            item = Affine(model, item_linear, item_value)
+            if model.mtype == 'V':
+                item = DecAffine(model, item, [list(range(item.model.top.num_scen))])
         if not isinstance(item, Affine):
             item = item.to_affine()
         if isinstance(item, DecAffine):
@@ -172,12 +196,6 @@ def concat(iters, axis=0):
                 raise ValueError('Cannot concatenate different types of expressions.')
             event_adapt = comb_set(event_adapt, item.event_adapt)
             fixed = fixed and item.fixed
-        if model is None:
-            model = item.model
-            num_var = model.last
-        else:
-            if model != item.model:
-                raise ValueError('Model mismatch.')
 
         if item.linear.shape[1] < num_var:
             item.linear.resize(item.linear.shape[0], num_var)
@@ -230,7 +248,7 @@ def rstack(*args):
 
     rows = []
     for arg in args:
-        if isinstance(arg, Iterable):
+        if isinstance(arg, Iterable) and not isinstance(arg, np.ndarray):
             rows.append(concat(arg, axis=1))
         else:
             rows.append(arg)
@@ -264,7 +282,7 @@ def cstack(*args):
 
     cols = []
     for arg in args:
-        if isinstance(arg, Iterable):
+        if isinstance(arg, Iterable) and not isinstance(arg, np.ndarray):
             cols.append(concat(arg, axis=0))
         else:
             cols.append(arg)
@@ -627,7 +645,7 @@ class Model:
 
             return formula
 
-    def solve(self, solver=None, display=True, params={}):
+    def solve(self, solver=None, display=True, log=False, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -638,16 +656,21 @@ class Model:
                 Solver interface used for model solution. Use default solver
                 if solver=None.
             display : bool
-                Display option of the solver interface.
+                True for displaying the solution information. False for hiding
+                the solution information.
+            log : bool
+                True for printing the log information. False for hiding the log
+                information. So far the argument only applies to Gurobi, CPLEX,
+                and Mosek.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(obj=True), display, params)
+            solution = def_sol(self.do_math(obj=True), display, log, params)
         else:
-            solution = solver.solve(self.do_math(obj=True), display, params)
+            solution = solver.solve(self.do_math(obj=True), display, log, params)
 
         if isinstance(solution, Solution):
             self.solution = solution
@@ -677,7 +700,10 @@ class Model:
 
     def optimal(self):
 
-        return self.solution is not None
+        if self.solution is None:
+            return False
+        else:
+            return not np.isnan(self.solution.objval)
 
 
 class SparseVec:
@@ -2210,6 +2236,14 @@ class PiecewiseConvex:
         pieces = [piece <= 0 for piece in right.pieces]
 
         return PWConstr(right.model, pieces)
+
+    def __getitem__(self, item):
+
+        return self.pieces[item]
+
+    def __len__(self):
+
+        return len(self.pieces)
 
     @property
     def E(self):
@@ -4139,6 +4173,12 @@ class DecLinConstr(LinConstr):
         expr = 'linear' if self.fixed else 'robust'
 
         return '{}{}{} constraint{}{}'.format(size, event, expr, suffix, ctype)
+
+    def forall(self, ambset):
+
+        self.ambset = ambset
+
+        return self
 
 
 class DecBounds(Bounds):

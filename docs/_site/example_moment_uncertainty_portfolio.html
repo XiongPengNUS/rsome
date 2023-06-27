@@ -1,0 +1,413 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="icon" type="image/png"  href="assets/img/favicon.png">
+    <title>RSOME in Python by XiongPengNUS</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css?v=1133c49022053655fa92e79972cc63c5f2737f41">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/rso_left.png" alt="Logo" width=180/>
+        
+
+        <h1>RSOME in Python</h1>
+
+        <table>
+          <tr>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road" data-show-count="true" aria-label="Star XiongPengNUS/road on GitHub">Star</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/subscription" data-show-count="true" aria-label="Watch XiongPengNUS/road on GitHub">Watch</a></td>
+          <td><a class="github-button" href="https://github.com/XiongPengNUS/road/fork" data-show-count="true" aria-label="Fork XiongPengNUS/road on GitHub">Fork</a></td>
+          </tr>
+        </table>
+
+        <table>
+          
+            
+              <tr><th><a href="/">Home</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/user_guide">User Guide</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/examples">Examples</a></th></tr>
+            
+          
+            
+              <tr><th><a href="/about">About</a></th></tr>
+            
+          
+        </table>
+
+        
+          <ul>
+            <li><a href="https://github.com/XiongPengNUS/rsome/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/XiongPengNUS/rsome">View On <strong>GitHub</strong></a></li>
+          </ul>
+        
+
+      </header>
+      <section>
+
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h3 id="distributionally-robust-portfolio-under-moment-uncertainty">Distributionally Robust Portfolio under Moment Uncertainty</h3>
+
+<p>In this example, we will use RSOME to the solve the portfolio problem discussed in <a href="#ref1">Delage and Ye 2010</a>. The portfolio problem is formulated as the following distributionally robust model,</p>
+
+\[\begin{align}
+\min~&amp;\sup\limits_{\mathbb{P}\in\mathcal{F}}\mathbb{E}\left[\alpha + \frac{1}{\epsilon}\max\left\{-\tilde{\pmb{\xi}}^{\top}\pmb{x} - \alpha, 0\right\}\right] \\
+\text{s.t.}~&amp;\pmb{e}^{\top}\pmb{x}=1, \pmb{x}\in\mathbb{R}_+^{n}.
+\end{align}\]
+
+<p>where \(\tilde{\pmb{\xi}}\in\mathbb{R}^n\) is a random vector representing the uncertain returns of \(n\) stocks, and the objective function minimizes the conditional value-at-risk (CVaR) of the investment return under the worst-case distribution \(\mathbb{P}\) over the ambiguity set \(\mathcal{F}\), defined below</p>
+
+\[\mathcal{F} = \left\{
+\mathbb{P}\in\mathcal{P}_0\left(\mathbb{R}^n\right) \left|
+\begin{array}
+\tilde{\pmb{\xi}} \sim \mathbb{P} \\
+\left(\mathbb{E}[\tilde{\pmb{\xi}}] - \mu\right)^{\top}\Sigma^{-1}\left(\mathbb{E}[\tilde{\pmb{\xi}}] - \mu\right) \leq \gamma_1 \\
+\mathbb{E}\left[\left(\tilde{\pmb{\xi}}-\mu\right)\left(\tilde{\pmb{\xi}}-\mu\right)^{\top}\right] \preceq \gamma_2 \Sigma
+\end{array}
+\right.
+\right\}.\]
+
+<p>According to <a href="#ref1">Delage and Ye 2010</a>, the distributionally robust model is equivalent to the following convex optimization problem</p>
+
+\[\begin{align}
+\min~&amp;r + t \\
+\text{s.t.}~&amp;
+\left(
+\begin{array}
+\\\pmb{Q} &amp; \pmb{q}/2 + (1/\epsilon)\pmb{x}/2 \\
+\pmb{q}^{\top}/2 + (1/\epsilon)\pmb{x}^{\top}/2 &amp; r + (1-\epsilon)/\epsilon\alpha
+\end{array}
+\right) \succeq 0\\
+&amp;\left(
+\begin{array}
+\\\pmb{Q} &amp; \pmb{q}/2 \\
+\pmb{q}^{\top}/2 &amp; r - \alpha
+\end{array}
+\right) \succeq 0\\
+&amp;t \geq (\gamma_2\pmb{\Sigma} + \pmb{\mu}\pmb{\mu}^{\top}) \boldsymbol{\cdot} \pmb{Q} + \pmb{\mu}^{\top}\pmb{q} + \sqrt{\gamma_1}\|\pmb{\Sigma}^{1/2}(\pmb{q} + 2\pmb{Q\mu})\| \\
+&amp;\pmb{Q} \succeq 0 \\
+&amp;\pmb{e}^{\top}\pmb{x}=1, \pmb{x}\in\mathbb{R}_+^{n}.
+\end{align}\]
+
+<p>In the numerical experiments below, the mean returns \(\pmb{\mu}\) and covariance matrix \(\pmb{\Sigma}\) are estimated using the sample data of eight stocks “JPM”, “AMZN”, “TSLA”, “AAPL”, “GOOG”, “ZM”, “META”, and “MCD”, in the year of 2021.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="n">yf</span>
+
+<span class="n">stocks</span> <span class="o">=</span> <span class="p">[</span><span class="s">'JPM'</span><span class="p">,</span> <span class="s">'AMZN'</span><span class="p">,</span> <span class="s">'TSLA'</span><span class="p">,</span> <span class="s">'AAPL'</span><span class="p">,</span> <span class="s">'GOOG'</span><span class="p">,</span> <span class="s">'ZM'</span><span class="p">,</span> <span class="s">'META'</span><span class="p">,</span> <span class="s">'MCD'</span><span class="p">]</span>
+<span class="n">start</span> <span class="o">=</span> <span class="s">'2021-01-01'</span> 
+<span class="n">end</span><span class="o">=</span><span class="s">'2021-12-31'</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">([])</span>
+<span class="k">for</span> <span class="n">stock</span> <span class="ow">in</span> <span class="n">stocks</span><span class="p">:</span>
+    <span class="n">each</span> <span class="o">=</span> <span class="n">yf</span><span class="p">.</span><span class="n">Ticker</span><span class="p">(</span><span class="n">stock</span><span class="p">).</span><span class="n">history</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+    <span class="n">close</span> <span class="o">=</span> <span class="n">each</span><span class="p">[</span><span class="s">'Close'</span><span class="p">].</span><span class="n">values</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">close</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">stock</span><span class="p">]</span> <span class="o">=</span> <span class="n">returns</span>
+
+<span class="n">data</span>
+</code></pre></div></div>
+
+<div>
+<table border="1" class="dataframe mystyle">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>JPM</th>
+      <th>AMZN</th>
+      <th>TSLA</th>
+      <th>AAPL</th>
+      <th>GOOG</th>
+      <th>ZM</th>
+      <th>META</th>
+      <th>MCD</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.005441</td>
+      <td>0.010004</td>
+      <td>0.007317</td>
+      <td>0.012364</td>
+      <td>0.007337</td>
+      <td>0.002361</td>
+      <td>0.007548</td>
+      <td>0.005994</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.046956</td>
+      <td>-0.024897</td>
+      <td>0.028390</td>
+      <td>-0.033662</td>
+      <td>-0.003234</td>
+      <td>-0.045506</td>
+      <td>-0.028269</td>
+      <td>-0.002270</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.032839</td>
+      <td>0.007577</td>
+      <td>0.079447</td>
+      <td>0.034123</td>
+      <td>0.029943</td>
+      <td>-0.005546</td>
+      <td>0.020622</td>
+      <td>0.004645</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.001104</td>
+      <td>0.006496</td>
+      <td>0.078403</td>
+      <td>0.008631</td>
+      <td>0.011168</td>
+      <td>0.020759</td>
+      <td>-0.004354</td>
+      <td>0.018351</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.014924</td>
+      <td>-0.021519</td>
+      <td>-0.078214</td>
+      <td>-0.023249</td>
+      <td>-0.022405</td>
+      <td>-0.034038</td>
+      <td>-0.040102</td>
+      <td>-0.007597</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>245</th>
+      <td>0.003574</td>
+      <td>0.000184</td>
+      <td>0.057619</td>
+      <td>0.003644</td>
+      <td>0.001317</td>
+      <td>-0.007663</td>
+      <td>0.014495</td>
+      <td>0.003812</td>
+    </tr>
+    <tr>
+      <th>246</th>
+      <td>0.005723</td>
+      <td>-0.008178</td>
+      <td>0.025248</td>
+      <td>0.022975</td>
+      <td>0.006263</td>
+      <td>-0.021967</td>
+      <td>0.032633</td>
+      <td>0.008610</td>
+    </tr>
+    <tr>
+      <th>247</th>
+      <td>0.003035</td>
+      <td>0.005844</td>
+      <td>-0.005000</td>
+      <td>-0.005767</td>
+      <td>-0.010914</td>
+      <td>-0.019580</td>
+      <td>0.000116</td>
+      <td>-0.001342</td>
+    </tr>
+    <tr>
+      <th>248</th>
+      <td>-0.000504</td>
+      <td>-0.008555</td>
+      <td>-0.002095</td>
+      <td>0.000502</td>
+      <td>0.000386</td>
+      <td>-0.010666</td>
+      <td>-0.009474</td>
+      <td>0.002277</td>
+    </tr>
+    <tr>
+      <th>249</th>
+      <td>-0.000505</td>
+      <td>-0.003289</td>
+      <td>-0.014592</td>
+      <td>-0.006578</td>
+      <td>-0.003427</td>
+      <td>0.047907</td>
+      <td>0.004141</td>
+      <td>-0.004767</td>
+    </tr>
+  </tbody>
+</table>
+<p>250 rows × 8 columns</p>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">μ</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">mean</span><span class="p">().</span><span class="n">values</span>
+<span class="n">Σ</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">cov</span><span class="p">().</span><span class="n">values</span>
+</code></pre></div></div>
+
+<p>Parameters \(\gamma_1\) and \(\gamma_2\) in the ambiguity set \(\mathcal{F}\), together with the risk tolerance level \(\epsilon\), are specified in the code segment below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">γ1</span><span class="p">,</span> <span class="n">γ2</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.50</span>
+<span class="n">ε</span> <span class="o">=</span> <span class="mf">0.05</span>
+</code></pre></div></div>
+
+<p>The equivalent convex optimization problem can be then implemented by the following python code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">sqrtm</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">μ</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">α</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">Q</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">model</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">t</span> <span class="o">&gt;=</span> <span class="n">γ2</span><span class="o">*</span><span class="p">(</span><span class="n">Σ</span><span class="o">*</span><span class="n">Q</span><span class="p">).</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">μ</span><span class="o">@</span><span class="n">Q</span><span class="o">@</span><span class="n">μ</span> <span class="o">+</span> <span class="n">μ</span><span class="o">@</span><span class="n">q</span> <span class="o">+</span> 
+         <span class="n">γ1</span><span class="o">**</span><span class="mf">0.5</span><span class="o">*</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sqrtm</span><span class="p">(</span><span class="n">Σ</span><span class="p">)</span><span class="o">@</span><span class="p">(</span><span class="n">q</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">Q</span><span class="o">@</span><span class="n">μ</span><span class="p">)))</span>
+
+<span class="n">vec</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="mf">0.5</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">ε</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)[</span><span class="bp">None</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">rstack</span><span class="p">([</span><span class="n">Q</span><span class="p">,</span> <span class="n">vec</span><span class="p">.</span><span class="n">T</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">vec</span><span class="p">,</span> <span class="n">r</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ε</span><span class="p">)</span><span class="o">/</span><span class="n">ε</span><span class="o">*</span><span class="n">α</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">vec</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)[</span><span class="bp">None</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">rstack</span><span class="p">([</span><span class="n">Q</span><span class="p">,</span> <span class="n">vec</span><span class="p">.</span><span class="n">T</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">vec</span><span class="p">,</span> <span class="n">r</span><span class="o">-</span><span class="n">α</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">Q</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Objective value: </span><span class="si">{</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">():.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: Optimal
+Running time: 0.0199s
+Objective value: 0.042948
+</code></pre></div></div>
+
+<p>Note that the ambiguity set \(\mathcal{F}\) can also be written as the following lifted version,</p>
+
+\[\mathcal{G} = \left\{
+\mathbb{P}\in\mathcal{P}_0\left(\mathbb{R}^n\times\mathbb{S}^n\right) \left|
+\begin{array}{l}
+(\tilde{\pmb{\xi}}, \tilde{\pmb{U}}) \sim \mathbb{P} \\
+\mathbb{P}\left[
+\left(
+\begin{array}{ll}
+\tilde{\pmb{U}} &amp; \tilde{\pmb{\xi}} - \pmb{\mu} \\
+\tilde{\pmb{\xi}}^{\top} - \pmb{\mu}^{\top} &amp; 1
+\end{array}
+\right) \succeq 0
+\right] = 1 \\
+\left(\mathbb{E}[\tilde{\pmb{\xi}}] - \mu\right)^{\top}\Sigma^{-1}\left(\mathbb{E}[\tilde{\pmb{\xi}}] - \mu\right) \leq \gamma_1 \\
+\mathbb{E}\left[\tilde{\pmb{U}}\right] = \gamma_2 \Sigma
+\end{array}
+\right.
+\right\},\]
+
+<p>where the support of the ambiguity set is used to enforce the constraint \(\left(\tilde{\pmb{\xi}} - \pmb{\mu}\right)\left(\tilde{\pmb{\xi}} - \pmb{\mu}\right)^{\top} \preceq \tilde{\pmb{U}}\). Such an ambiguity set can be directly constructed using the RSOME package, so the distributionally robust optimization model can be implemented in a more concise and readable manner.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">dro</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">E</span>
+<span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">dro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">μ</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">α</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">dvar</span><span class="p">()</span>
+
+<span class="n">ξ</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">U</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">rvar</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">gset</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">ambiguity</span><span class="p">()</span>
+<span class="n">gset</span><span class="p">.</span><span class="n">suppset</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">rstack</span><span class="p">([</span><span class="n">U</span><span class="p">,</span> <span class="p">(</span><span class="n">ξ</span> <span class="o">-</span> <span class="n">μ</span><span class="p">)[:,</span> <span class="bp">None</span><span class="p">]],</span>
+                        <span class="p">[(</span><span class="n">ξ</span> <span class="o">-</span> <span class="n">μ</span><span class="p">)[</span><span class="bp">None</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">inv_Σ</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Σ</span><span class="p">)</span>
+<span class="n">gset</span><span class="p">.</span><span class="n">exptset</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">quad</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">ξ</span><span class="p">)</span> <span class="o">-</span> <span class="n">μ</span><span class="p">,</span> <span class="n">inv_Σ</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">γ1</span><span class="p">,</span>
+             <span class="n">E</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">==</span> <span class="n">γ2</span><span class="o">*</span><span class="n">Σ</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">minsup</span><span class="p">(</span><span class="n">α</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">ε</span><span class="p">)</span><span class="o">*</span><span class="n">E</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">maxof</span><span class="p">(</span><span class="o">-</span><span class="n">ξ</span><span class="o">@</span><span class="n">x</span> <span class="o">-</span> <span class="n">α</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">gset</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Objective value: </span><span class="si">{</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">():.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
+Solution status: Optimal
+Running time: 0.0304s
+Objective value: 0.042948
+</code></pre></div></div>
+
+<p>Both convex optimization problems above give the same investment decision, which is visualized by the following code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">bar</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'b'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Allocation'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/example_dro_cvar_moment_dec.png" alt="png" /></p>
+
+<h4 id="reference">Reference</h4>
+
+<p><a id="ref1"></a></p>
+
+<p>Delage, Erick, and Yinyu Ye. 2010. <a href="https://pubsonline.informs.org/doi/abs/10.1287/opre.1090.0741">Distributionally robust optimization under moment uncertainty with application to data-driven problems</a>. Operations Research 58(3) 595-612.</p>
+
+
+      </section>
+      <footer>
+        
+        <p>Maintained by <a href="https://github.com/XiongPengNUS">XiongPengNUS</a></p>
+        
+      </footer>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+
+
+  
+  </body>
+</html>

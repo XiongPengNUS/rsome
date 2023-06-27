@@ -13,7 +13,7 @@ from .gcp import GCProg
 from .lp import Solution
 
 
-def solve(form, display=True, params={}):
+def solve(form, display=True, log=False, params={}):
 
     if isinstance(form, (SOCProg, GCProg)):
         qmat = form.qmat

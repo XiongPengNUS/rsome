@@ -623,7 +623,7 @@ model.do_math().to_lp('model')
 The standard form of a model can be solved via calling the `solve()` method of the model object. Arguments of the `solve()` method are listed below.
 
 ```
-solve(self, solver=None, display=True, params={})
+solve(self, solver=None, display=True, log=False, params={})
     Solve the model with the selected solver interface.
     
     Parameters
@@ -633,7 +633,12 @@ solve(self, solver=None, display=True, params={})
         Solver interface used for model solution. Use the default
         solver if solver=None.
     display : bool
-        Display option of the solver interface.
+        True for displaying the solution information. False for hiding
+        the solution information.
+    log : bool
+        True for printing the log information. False for hiding the log
+        information. So far the argument only applies to Gurobi, CPLEX,
+        and Mosek.
     params : dict
         A dictionary that specifies parameters of the selected solver.
         So far the argument only applies to Gurobi, CPLEX, and Mosek.
@@ -715,7 +720,7 @@ It can be seen that as the model is solved, a three-line message is displayed in
 
 The third argument `params` is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The `params` argument is a `dict` type object in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>, ..., <paramk>: <valuek>}`. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
 - Gurobi parameters: [https://www.gurobi.com/documentation/9.1/refman/parameters.html](https://www.gurobi.com/documentation/9.1/refman/parameters.html)
-- MOSEK parameters: [https://docs.mosek.com/latest/pythonapi/parameters.html](https://docs.mosek.com/latest/pythonapi/parameters.html)
+- MOSEK parameters: [https://docs.mosek.com/latest/pythonapi/parameters.html](https://docs.mosek.com/latest/pythonfusion/parameters.html)
 - CPLEX parameters: [https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters](https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters)
 
 
@@ -723,7 +728,7 @@ For example, the following code solves the problem using Gurobi, MOSEK, and CPLE
 
 ```python
 model.solve(grb, params={'MIPGap': 1e-3})
-model.solve(msk, params={'mio_rel_gap_const': 1e-3})
+model.solve(msk, params={'mioTolRelGap': 1e-3})
 model.solve(cpx, params={'mip.tolerances.mipgap': 1e-3})
 ```
 

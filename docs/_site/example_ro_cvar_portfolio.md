@@ -7,7 +7,7 @@ This robust portfolio management model is proposed by [Zhu and Fukushima (2009)]
 $$
 \begin{align}
 \min~&\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^{\top}\pmb{u} &\\
-\text{s.t.}~& u_k \geq \pmb{y}_k^{\top}\pmb{x} - \alpha, &\forall k = 1, 2, ..., s \\
+\text{s.t.}~& u_k \geq -\pmb{y}_k^{\top}\pmb{x} - \alpha, &\forall k = 1, 2, ..., s \\
 &u_k \geq 0, &\forall k=1, 2, ..., s \\
 &\sum\limits_{k=1}^s\pi_k\pmb{y}_k^{\top}\pmb{x} \geq \mu, &\forall \pmb{\pi} \in \Pi  \\
 &\underline{\pmb{x}} \leq \pmb{x} \leq \overline{\pmb{x}} \\
@@ -15,7 +15,7 @@ $$
 \end{align}
 $$
 
-with investment decisions \\(\pmb{x}\in\mathbb{R}^n\\) and auxiliary variables \\(\pmb{u}\in\mathbb{R}^s\\) and \\(\alpha\in\mathbb{R}\\), where \\(n\\) is the number of stocks, and \\(s\\) is the number of samples. The array \\(\pmb{\pi}\\) denotes the probabilities of samples, and \\(\Pi\\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \\(\pmb{y}_k\in\mathbb{R}^n\\) indicates the \\(k\\)th sample of stock return rates, and \\(\bar{x}\\) and \\(\underline{x}\\) are the lower and upper bounds of \\(x\\). The worst-case minimum expected overall return rate is set to be \\(\mu=0.001\\), the confidence level is \\(\beta=0.95\\), and the budget of investment is set to be \\(w_0=1\\). In this case study, we consider the sample data of five stocks "JPM", "AMZN", "TSLA", "AAPL", "GOOG", "ZM", "META", and "MCD", in the year of 2021, and the other parameters are specified by the following code segment.
+with investment decisions \\(\pmb{x}\in\mathbb{R}^n\\) and auxiliary variables \\(\pmb{u}\in\mathbb{R}^s\\) and \\(\alpha\in\mathbb{R}\\), where \\(n\\) is the number of stocks, and \\(s\\) is the number of samples. The array \\(\pmb{\pi}\\) denotes the probabilities of samples, and \\(\Pi\\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \\(\pmb{y}_k\in\mathbb{R}^n\\) indicates the \\(k\\)th sample of stock return rates, and \\(\bar{x}\\) and \\(\underline{x}\\) are the lower and upper bounds of \\(x\\). The worst-case minimum expected overall return rate is set to be \\(\mu=0.001\\), the confidence level is \\(\beta=0.95\\), and the budget of investment is set to be \\(w_0=1\\). In this case study, we consider the sample data of eight stocks "JPM", "AMZN", "TSLA", "AAPL", "GOOG", "ZM", "META", and "MCD", in the year of 2021, and the other parameters are specified by the following code segment.
 
 ```python
 import pandas as pd

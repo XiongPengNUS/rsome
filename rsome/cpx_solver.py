@@ -11,7 +11,7 @@ from .lp import Solution
 from .socp import SOCProg
 
 
-def solve(formula, display=True, params={}):
+def solve(formula, display=True, log=False, params={}):
 
     try:
         if formula.xmat:
@@ -54,8 +54,9 @@ def solve(formula, display=True, params={}):
         print('Being solved by CPLEX...', flush=True)
         time.sleep(0.2)
 
-    cpx.set_results_stream(None)
-    cpx.set_warning_stream(None)
+    if not log:
+        cpx.set_results_stream(None)
+        cpx.set_warning_stream(None)
     try:
         for param, value in params.items():
             text = 'cpx.parameters.' + param + '.set({0})'.format(value)

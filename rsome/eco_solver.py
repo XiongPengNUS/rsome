@@ -13,7 +13,7 @@ from .gcp import GCProg
 from .lp import Solution
 
 
-def solve(formula, display=True, params={}):
+def solve(formula, display=True, log=False, params={}):
 
     try:
         if formula.lmi:

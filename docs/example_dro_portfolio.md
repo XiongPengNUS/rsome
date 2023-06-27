@@ -12,7 +12,7 @@ $$
 \end{align}
 $$
 
-Here we assume that a commonly used utility function is piecewise affine and concave such that \\(U(y) = \min_{k \in [K]} \left\\{\alpha_k y + \beta_k\right\\}\\) with \\(\alpha_k \geq 0\\). We also assume the mean returns, the variance of each option, as well as the variance of sum of these options are known, captured by the widely used partial cross-moment ambiguity set ([Bertsimas et al. 2019](#ref1), [Delgage and Ye 2010](#ref3),  [Wiesemann et al. 2014](#ref4)):
+Here we assume that a commonly used utility function is piecewise affine and concave such that \\(U(y) = \min_{k \in [K]} \left\\{\alpha_k y + \beta_k\right\\}\\) with \\(\alpha_k \geq 0\\). We also assume the mean returns, the variance of each option, as well as the variance of sum of these options are known, captured by the widely used partial cross-moment ambiguity set ([Bertsimas et al. 2019](#ref1), [Delage and Ye 2010](#ref3),  [Wiesemann et al. 2014](#ref4)):
 
 $$
 \mathcal{G} =

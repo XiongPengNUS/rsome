@@ -8,12 +8,13 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from .socp import SOCProg
 from .gcp import GCProg
+from .lp import Solution
 import warnings
 import time
-from .lp import Solution
+import sys
 
 
-def solve(form, display=True, params={}):
+def solve(form, display=True, log=False, params={}):
 
     if isinstance(form, (SOCProg, GCProg)):
         qmat = form.qmat
@@ -90,6 +91,9 @@ def solve(form, display=True, params={}):
 
         for param, value in params.items():
             M.setSolverParam(param, value)
+
+        if log:
+            M.setLogHandler(sys.stdout)
 
         if display:
             print('Being solved by Mosek...', flush=True)

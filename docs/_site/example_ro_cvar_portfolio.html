@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=1133c49022053655fa92e79972cc63c5f2737f41">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -69,14 +69,14 @@
 
 \[\begin{align}
 \min~&amp;\max\limits_{\pmb{\pi}\in \Pi} \alpha + \frac{1}{1-\beta}\pmb{\pi}^{\top}\pmb{u} &amp;\\
-\text{s.t.}~&amp; u_k \geq \pmb{y}_k^{\top}\pmb{x} - \alpha, &amp;\forall k = 1, 2, ..., s \\
+\text{s.t.}~&amp; u_k \geq -\pmb{y}_k^{\top}\pmb{x} - \alpha, &amp;\forall k = 1, 2, ..., s \\
 &amp;u_k \geq 0, &amp;\forall k=1, 2, ..., s \\
 &amp;\sum\limits_{k=1}^s\pi_k\pmb{y}_k^{\top}\pmb{x} \geq \mu, &amp;\forall \pmb{\pi} \in \Pi  \\
 &amp;\underline{\pmb{x}} \leq \pmb{x} \leq \overline{\pmb{x}} \\
 &amp;\pmb{1}^{\top}\pmb{x} = w_0
 \end{align}\]
 
-<p>with investment decisions \(\pmb{x}\in\mathbb{R}^n\) and auxiliary variables \(\pmb{u}\in\mathbb{R}^s\) and \(\alpha\in\mathbb{R}\), where \(n\) is the number of stocks, and \(s\) is the number of samples. The array \(\pmb{\pi}\) denotes the probabilities of samples, and \(\Pi\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \(\pmb{y}_k\in\mathbb{R}^n\) indicates the \(k\)th sample of stock return rates, and \(\bar{x}\) and \(\underline{x}\) are the lower and upper bounds of \(x\). The worst-case minimum expected overall return rate is set to be \(\mu=0.001\), the confidence level is \(\beta=0.95\), and the budget of investment is set to be \(w_0=1\). In this case study, we consider the sample data of five stocks “JPM”, “AMZN”, “TSLA”, “AAPL”, “GOOG”, “ZM”, “META”, and “MCD”, in the year of 2021, and the other parameters are specified by the following code segment.</p>
+<p>with investment decisions \(\pmb{x}\in\mathbb{R}^n\) and auxiliary variables \(\pmb{u}\in\mathbb{R}^s\) and \(\alpha\in\mathbb{R}\), where \(n\) is the number of stocks, and \(s\) is the number of samples. The array \(\pmb{\pi}\) denotes the probabilities of samples, and \(\Pi\) is the uncertainty set that captures the distributional ambiguity of probabilities. The constant array \(\pmb{y}_k\in\mathbb{R}^n\) indicates the \(k\)th sample of stock return rates, and \(\bar{x}\) and \(\underline{x}\) are the lower and upper bounds of \(x\). The worst-case minimum expected overall return rate is set to be \(\mu=0.001\), the confidence level is \(\beta=0.95\), and the budget of investment is set to be \(w_0=1\). In this case study, we consider the sample data of eight stocks “JPM”, “AMZN”, “TSLA”, “AAPL”, “GOOG”, “ZM”, “META”, and “MCD”, in the year of 2021, and the other parameters are specified by the following code segment.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="n">yf</span>
@@ -449,7 +449,7 @@ Running time: 0.0936s
 <span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div></div>
 
-<p><img src="example_ro_cvar_portfolio_dec.png" alt="png" /></p>
+<p><img src="/example_ro_cvar_portfolio_dec.png" alt="png" /></p>
 
 <p>In this example, we show that data acquisition tools provided in the Python ecosystem (<i>e.g.</i>, <code class="language-plaintext highlighter-rouge">pandas-datareader</code>) can be readily used to collect and feed real data into RSOME models.  Apart from acquiring data, rich machine learning tools in the Python ecosystem can also be used to develop data-driven optimization models. More such examples will be provided in introducing the <code class="language-plaintext highlighter-rouge">dro</code> module for modeling distributionally robust optimization problems.</p>
 

@@ -4,7 +4,7 @@
 
 <table>
 <th><toc>
-<li> Deterministic Linear and Second-Order Cone Programs</li>
+<li> Deterministic Linear and Conic Programs</li>
 <ul class="a">
   <li> <a href="example_mv_portfolio">Mean-Variance Portfolio</a> </li>
   <li> <a href="example_sudoku">Integer Programming for Sudoku</a> </li>
@@ -31,6 +31,7 @@
 <li> RSOME for Distributionally Robust Optimization Models </li>
 <ul class="a">
   <li> <a href="example_dro_portfolio">Distributionally Robust Portfolio </a></li>
+  <li> <a href="example_moment_uncertainty_portfolio">Distributionally Robust Portfolio under Moment Uncertainty</a> </li>
   <li> <a href="example_dro_mas">Distributionally Robust Medical Appointment </a></li>
   <li> <a href="example_dro_wass_portfolio">Mean-Risk Portfolio Optimization with a Wasserstein Ambiguity Set</a></li>
   <li><a href="example_dro_rs_portfolio">Robust Satisficing for Portfolio Optimization </a></li>

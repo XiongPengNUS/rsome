@@ -12,6 +12,7 @@ from rsome import cpx_solver as cpx
 import numpy as np
 import numpy.random as rd
 import gurobipy as gp
+from mosek.fusion import ParameterError
 import pytest
 
 
@@ -77,13 +78,13 @@ def test_lp():
     with pytest.raises(AttributeError):
         model.solve(grb, params={'NotAParameter': 1})
 
-    model.solve(msk, params={'optimizer_max_time': 100.0,
-                             'simplex_abs_tol_piv': 1e-9})
+    model.solve(msk, params={'optimizerMaxTime': 100.0,
+                             'simplexAbsTolPiv': 1e-9})
     assert abs(model.get() - 22.4) < 1e-6
     assert abs(x.get() - 4.8) < 1e-6
     assert abs(y.get() - 2) < 1e-6
     assert model.optimal()
-    with pytest.raises(ValueError):
+    with pytest.raises(ParameterError):
         model.solve(msk, params={'not_a_parameter': 1})
 
     model.solve(cpx, params={'timelimit': 100.0,
@@ -112,14 +113,9 @@ def test_mip():
     model.st(x >= -10)
     model.st(x <= 10)
 
-    with pytest.warns(UserWarning):
-        model.solve()
-
-    """
-    model.solve(clp)
+    model.solve()
     assert (x_sol == x.get().round()).all()
     assert model.optimal()
-    """
 
     model.solve(ort)
     assert (x_sol == x.get().round()).all()

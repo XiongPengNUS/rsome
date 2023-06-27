@@ -373,7 +373,7 @@ class Model:
             raise TypeError('Incorrect type for the objective function.')
 
         for constr in self.all_constr + more_roc:
-            if isinstance(constr, (LinConstr, Bounds, CvxConstr,
+            if isinstance(constr, (LinConstr, Bounds, CvxConstr, ConeConstr,
                                    ExpConstr, KLConstr, LMIConstr)):
                 self.rc_model.st(constr)
             if isinstance(constr, RoConstr):
@@ -395,7 +395,7 @@ class Model:
 
         return formula
 
-    def solve(self, solver=None, display=True, params={}):
+    def solve(self, solver=None, display=True, log=False, params={}):
         """
         Solve the model with the selected solver interface.
 
@@ -406,16 +406,21 @@ class Model:
             Solver interface used for model solution. Use the default
             solver if solver=None.
         display : bool
-            Display option of the solver interface.
+            True for displaying the solution information. False for hiding
+            the solution information.
+        log : bool
+            True for printing the log information. False for hiding the log
+            information. So far the argument only applies to Gurobi, CPLEX,
+            and Mosek.
         params : dict
             A dictionary that specifies parameters of the selected solver.
             So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
-            solution = def_sol(self.do_math(), display, params)
+            solution = def_sol(self.do_math(), display, log, params)
         else:
-            solution = solver.solve(self.do_math(), display, params)
+            solution = solver.solve(self.do_math(), display, log, params)
 
         if isinstance(solution, Solution):
             self.rc_model.solution = solution
@@ -424,7 +429,8 @@ class Model:
 
         self.solution = self.rc_model.solution
 
-    def soc_solve(self, solver=None, degree=4, cuts=(-30, 60), display=True, params={}):
+    def soc_solve(self, solver=None, degree=4, cuts=(-30, 60),
+                  display=True, log=False, params={}):
         """
         Solve the approximated SOC model with the selected solver interface.
 
@@ -449,9 +455,9 @@ class Model:
 
         formula = self.do_math().to_socp(degree, cuts)
         if solver is None:
-            solution = def_sol(formula, display, params)
+            solution = def_sol(formula, display, log, params)
         else:
-            solution = solver.solve(formula, display, params)
+            solution = solver.solve(formula, display, log, params)
 
         if isinstance(solution, Solution):
             self.rc_model.solution = solution
@@ -483,4 +489,7 @@ class Model:
 
     def optimal(self):
 
-        return self.solution is not None
+        if self.solution is None:
+            return False
+        else:
+            return not np.isnan(self.solution.objval)

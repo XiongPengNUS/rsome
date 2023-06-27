@@ -10,6 +10,7 @@ import pytest
 
 rd.seed(1)
 
+
 @pytest.mark.parametrize('array, const', [
     (rd.rand(3, 7), rd.rand()),
     (rd.rand(4, 7), rd.rand()),

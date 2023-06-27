@@ -568,6 +568,7 @@ model.st(2x >= z)               # worst-case over the support of fset
 
 ## Application Examples <a name="section3.6"></a>
 ### [Distributionally Robust Portfolio](example_dro_portfolio)
+### [Distributionally Robust Portfolio under Moment Uncertainty](example_moment_uncertainty_portfolio)
 ### [Distributionally Robust Medical Appointment](example_dro_mas)
 ### [Mean-Risk Portfolio Optimization with a Wasserstein Ambiguity Set](example_dro_wass_portfolio)
 ### [Robust Satisficing for Portfolio Optimization](example_dro_rs_portfolio)

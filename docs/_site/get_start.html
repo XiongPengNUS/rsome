@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>RSOME in Python by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=ad85233a705aa05f30500755954726d44026f23d">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=1133c49022053655fa92e79972cc63c5f2737f41">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -755,7 +755,7 @@ Export the standard form of the optimization model as a .lp file.
 
 <p>The standard form of a model can be solved via calling the <code class="language-plaintext highlighter-rouge">solve()</code> method of the model object. Arguments of the <code class="language-plaintext highlighter-rouge">solve()</code> method are listed below.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(self, solver=None, display=True, params={})
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>solve(self, solver=None, display=True, log=False, params={})
     Solve the model with the selected solver interface.
     
     Parameters
@@ -765,7 +765,12 @@ Export the standard form of the optimization model as a .lp file.
         Solver interface used for model solution. Use the default
         solver if solver=None.
     display : bool
-        Display option of the solver interface.
+        True for displaying the solution information. False for hiding
+        the solution information.
+    log : bool
+        True for printing the log information. False for hiding the log
+        information. So far the argument only applies to Gurobi, CPLEX,
+        and Mosek.
     params : dict
         A dictionary that specifies parameters of the selected solver.
         So far the argument only applies to Gurobi, CPLEX, and Mosek.
@@ -919,14 +924,14 @@ Running time: 0.0028s
 <p>The third argument <code class="language-plaintext highlighter-rouge">params</code> is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The <code class="language-plaintext highlighter-rouge">params</code> argument is a <code class="language-plaintext highlighter-rouge">dict</code> type object in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;, ..., &lt;paramk&gt;: &lt;valuek&gt;}</code>. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
 <ul>
   <li>Gurobi parameters: <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">https://www.gurobi.com/documentation/9.1/refman/parameters.html</a></li>
-  <li>MOSEK parameters: <a href="https://docs.mosek.com/latest/pythonapi/parameters.html">https://docs.mosek.com/latest/pythonapi/parameters.html</a></li>
+  <li>MOSEK parameters: <a href="https://docs.mosek.com/latest/pythonfusion/parameters.html">https://docs.mosek.com/latest/pythonapi/parameters.html</a></li>
   <li>CPLEX parameters: <a href="https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters">https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters</a></li>
 </ul>
 
 <p>For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be <code class="language-plaintext highlighter-rouge">1e-3</code>.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">grb</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'MIPGap'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mio_rel_gap_const'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mioTolRelGap'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
 <span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpx</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s">'mip.tolerances.mipgap'</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">})</span>
 </code></pre></div></div>
 
