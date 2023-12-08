@@ -2,6 +2,7 @@ from .lp import PiecewiseConvex
 from .lp import Vars, VarSub, Affine
 from .lp import DecRule, DecRuleSub
 from .lp import RoAffine
+from .lp import concat
 from .subroutines import *
 from numbers import Real
 import numpy as np
@@ -46,20 +47,27 @@ def square(affine):
     return affine.to_affine().square()
 
 
-def sumsqr(affine):
+def sumsqr(*args):
     """
     Return the sum of squares of a 1-D array.
 
     Parameters
     ----------
-    affine : an array of variables or affine expression
-        Input array. The array must be 1-D.
+    arg : an array of variables or affine expression
+        Input array. 
 
     Returns
     -------
     out : Convex
-        The sum of squares of the given array
+        The sum of squares of elements of all input arrays
     """
+
+    iters = []
+    for arg in args:
+        arg = arg.to_affine()
+        iters.append(arg.reshape((arg.size, )))
+
+    affine = concat(iters)
 
     return affine.to_affine().sumsqr()
 

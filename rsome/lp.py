@@ -86,7 +86,7 @@ def def_sol(formula, display=True, log=False, params={}):
             return Solution('Scipy', np.nan, None, status, stime)
     else:
         b_u = formula.const
-        b_l = np.ones(A.shape[0]) * (-np.inf)
+        b_l = np.array([-np.inf] * A.shape[0])
         bool_eq = (sense == 1)
         b_l[bool_eq] = b_u[bool_eq]
 
@@ -288,6 +288,46 @@ def cstack(*args):
             cols.append(arg)
 
     return concat(cols, axis=1)
+
+
+def vec(*args):
+    """
+    Create a one-dimensional array with the provided the scalars.
+
+    Parameters
+    ----------
+    arg : Affine, Var, VarSub, Real, np.ndarray
+        Each arg represents a scalar to be included into the one-dimensional array.
+    
+    Returns
+    -------
+    out : Affine
+        A one-dimensional array created with the provided scalars.
+    
+    Notes
+    -----
+    The input arguments can be real numbers, NumPy arrays, or RSOME objects. All 
+    arguments must be scalars, i.e. their sizes must be one, otherwise the function
+    raises an error message.
+    """
+
+    iters = []
+    for arg in args:
+        if isinstance(arg, Real):
+            arg = np.array([arg])
+        if isinstance(arg, np.ndarray):
+            if arg.size != 1:
+                raise ValueError('All inputs must have their sizes to be one.')
+            arg = arg.reshape((1, ))
+        else:
+            arg = arg.to_affine()
+            if arg.size != 1:
+                raise ValueError('All inputs must have their sizes to be one.')
+            arg = arg.reshape((1, ))
+        
+        iters.append(arg)
+
+    return concat(iters)
 
 
 class Model:

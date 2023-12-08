@@ -130,7 +130,7 @@ The RSOME package also supports several functions for specifying convex expressi
 |`plog(x, y)`|The element-wise perspective natural logarithm `y * log(x/y)`. | |
 |`quad(x, Q)`|The quadratic term `x @ Q @ x`. |`x` must be a 1-D array, and `Q` must be a positive semidefinite matrix (2-D array).|
 |`square(x)`|The element-wise squared values of `x`. | |
-|`sumsqr(x)`|The sum of squares of `x`. |`x` must be a vector. |
+|`sumsqr(x1, x2, ...)`|The sum of squares of elements in arrays `x1`, `x2`, ... | |
 
 
 |Convex Constraints| Output| Remarks  
