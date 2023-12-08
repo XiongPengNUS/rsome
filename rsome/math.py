@@ -54,7 +54,7 @@ def sumsqr(*args):
     Parameters
     ----------
     arg : an array of variables or affine expression
-        Input array. 
+        Input array.
 
     Returns
     -------

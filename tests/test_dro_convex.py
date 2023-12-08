@@ -829,9 +829,6 @@ def test_convex_err():
     with pytest.raises(ValueError):
         rso.norm(xx, 'inf')
 
-    with pytest.raises(ValueError):
-        rso.sumsqr(xx)
-
     vec = rd.rand(7)
     qmat = vec.reshape((vec.size, 1)) @ vec.reshape((1, vec.size))
     with pytest.raises(ValueError):

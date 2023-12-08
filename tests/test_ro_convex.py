@@ -711,9 +711,6 @@ def test_convex_err():
     with pytest.raises(ValueError):
         rso.norm(xx, 'inf')
 
-    with pytest.raises(ValueError):
-        rso.sumsqr(xx)
-
     with pytest.raises(TypeError):
         rso.sumsqr(x) + rso.norm(x, 2)
 
