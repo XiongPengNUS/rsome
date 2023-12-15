@@ -119,25 +119,27 @@ model.st(x[i] <= i for i in range(3))   # define constraints by a loop
 
 The RSOME package also supports several functions for specifying convex expressions and constraints. The definition and syntax of these functions are also similar to the NumPy package, see the tables below.
 
-|Convex Function| Output&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Remarks  
+|Convex Function&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Output &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Remarks  
 |:-------|:--------------|:-----------------|
 |`abs(x)`|The element-wise absolute values of `x`. | |
-|`entropy(x)`|The entropic expression `-sum(x * log(x))`. |`x` must be a vector.|
+|`entropy(x)`|The entropic expression `-sum(x*log(x))`. |`x` must be a vector.|
 |`exp(x)`|The element-wise natural exponential of `x`. | |
+|`fnorm(x1, x2, ...)`| The Frobenius norm expressed as `sqrt(sumsqr(x1, x2, ...))` | No need to match the shapes of `x1`, `x2`, ... | 
 |`log(x)`|The element-wise natural logarithm of `x`.| |
 |`norm(x, degree)`| The norm of the `x`. |`x` must be a vector. `degree` can be 1, 2, or `numpy.inf`. The default value is `degree=2`, indicating an Euclidean norm. |
 |`pexp(x, y)`|The element-wise perspective natural exponential `y * exp(x/y)`. | |
 |`plog(x, y)`|The element-wise perspective natural logarithm `y * log(x/y)`. | |
 |`quad(x, Q)`|The quadratic term `x @ Q @ x`. |`x` must be a 1-D array, and `Q` must be a positive semidefinite matrix (2-D array).|
+|`softplus(x)`|The element-wise softplus expression `log(1 + exp(x))`. | |
 |`square(x)`|The element-wise squared values of `x`. | |
-|`sumsqr(x1, x2, ...)`|The sum of squares of elements in arrays `x1`, `x2`, ... | |
+|`sumsqr(x1, x2, ...)`|The sum of squares of elements in arrays `x1`, `x2`, ... | No need to match the shapes of `x1`, `x2`, ... |
 
 
 |Convex Constraints| Output| Remarks  
 |:-------|:--------------|:-----------------|
 |`expcone(x, y, z)`| The exponential cone constraint `z * exp(x/z) <= y`. |`x` and `z` must be scalars.|
 |`kldiv(p, q, r)`| The KL divergence constraint `sum(p*log(p/q)) <= r`. |`p` and `q` are vectors,<br>and `r` is a scalar.|
-|`rsocone(x, y, z)`| The rotated conic constraint `sumsqr(x) <= y*z`. |`x` must be a vector.|
+|`rsocone(x, y, z)`| The rotated conic constraint `sumsqr(x) <= y*z`. | |
 
 
 Examples of specifying convex constraints are provided below.
@@ -655,7 +657,7 @@ The `solve()` method calls for external solvers to solve the optimization proble
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | No | No |
 |[Mosek](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 10.0.44 | `msk_solver` | Yes | Yes | Yes |
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | No | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 6.5.3 | `cpt_solver` | Yes | No | No |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 7.0.3 | `cpt_solver` | Yes | No | Yes |
 
 
 The model above involves second-order cone constraints, so we could use ECOS, Gurobi, Mosek, CPLEX, or COPT to solve it. The interfaces for these solvers are imported by the following commands.
@@ -709,7 +711,7 @@ model.solve(cpx)
 model.solve(cpt)
 ```
 
-    Cardinal Optimizer v6.5.3. Build date Apr 28 2023
+    Cardinal Optimizer v7.0.3. Build date Nov 14 2023
     Copyright Cardinal Operations 2023. All Rights Reserved
 
     Being solved by COPT...

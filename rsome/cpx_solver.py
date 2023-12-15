@@ -11,6 +11,11 @@ from .lp import Solution
 from .socp import SOCProg
 
 
+version = cplex.__version__
+name = 'CPLEX'
+info = f'{name} {version}'
+
+
 def solve(formula, display=True, log=False, params={}):
 
     try:

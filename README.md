@@ -1,6 +1,6 @@
 <img src="https://github.com/XiongPengNUS/rsome/blob/master/rsologo.png?raw=true" width=100>
 
-# RSOME: Robust Stochastic Optimization Made Easy
+# Robust Stochastic Optimization Made Easy
 
 [![PyPI](https://img.shields.io/pypi/v/rsome?label=PyPI)](https://pypi.org/project/rsome/)
 [![PyPI - downloads](https://img.shields.io/pypi/dm/rsome?label=PyPI%20downloads)](https://pypi.org/project/rsome/)
@@ -13,7 +13,7 @@
 ![GitHub issues](https://img.shields.io/github/issues-raw/XiongPengNUS/rsome)
 
 - Website: [RSOME for Python](https://xiongpengnus.github.io/rsome/)
-- PyPI: [RSOME 1.2.2](https://pypi.org/project/rsome/)
+- PyPI: [RSOME 1.2.3](https://pypi.org/project/rsome/)
 
 RSOME (Robust Stochastic Optimization Made Easy) is an open-source Python package for generic modeling of optimization problems (subject to uncertainty). Models in RSOME are constructed by variables, constraints, and expressions that are formatted as N-dimensional arrays. These arrays are consistent with the NumPy library in terms of syntax and operations, including broadcasting, indexing, slicing, element-wise operations, and matrix calculation rules, among others. In short, RSOME provides a convenient platform to facilitate developments of robust optimization models and their applications.
 
@@ -45,7 +45,7 @@ The RSOME package transforms robust or distributionally robust optimization mode
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | No | No |
 |[Mosek](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 10.0.44 | `msk_solver` | Yes | Yes | Yes |
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | No | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 6.5.3 | `cpt_solver` | Yes | No | No |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 7.0.3 | `cpt_solver` | Yes | No | Yes |
 
 ## Getting started <a id="section4"></a>
 
@@ -56,13 +56,13 @@ Documents of RSOME are provided as follows:
 
 ## Team <a id="section5"></a>
 
-RSOME is a software project supported by Singapore Ministry of Education Tier 3 Grant *Science of Prescriptive Analytics*. It is primarly developed and maintained by [Zhi Chen](https://www.cb.cityu.edu.hk/staff/zchen96/), [Melvyn Sim](https://bizfaculty.nus.edu.sg/faculty-details/?profId=127), and [Peng Xiong](https://bizfaculty.nus.edu.sg/faculty-details/?profId=543). Many other researchers, including Erick Delage, Zhaowei Hao, Long He, Zhenyu Hu, Jun Jiang, Brad Sturt, Qinshen Tang, as well as anonymous users and paper reviewers, have helped greatly in the way of developing RSOME.
+RSOME is a software project supported by Singapore Ministry of Education Tier 3 Grant *Science of Prescriptive Analytics*. It is primarly developed and maintained by [Zhi Chen](https://www.bschool.cuhk.edu.hk/staff/chen-zhi/), [Melvyn Sim](https://bizfaculty.nus.edu.sg/faculty-details/?profId=127), and [Peng Xiong](https://bizfaculty.nus.edu.sg/faculty-details/?profId=543). Many other researchers, including Erick Delage, Zhaowei Hao, Long He, Zhenyu Hu, Jun Jiang, Brad Sturt, Qinshen Tang, as well as anonymous users and paper reviewers, have helped greatly in the way of developing RSOME.
 
 ## Citation <a id="section6">
 
 If you use RSOME in your research, please cite our papers:
 
-- Chen, Zhi, and Peng Xiong. 2023. [RSOME in Python: an open-source package for robust stochastic optimization made easy](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2023.1291). Forthcoming in <i>INFORMS Journal on Computing</i>.
+- Chen, Zhi, and Peng Xiong. 2023. [RSOME in Python: an open-source package for robust stochastic optimization made easy](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2023.1291). <i>INFORMS Journal on Computing</i> <b>35</b>(4) 717-724.
 
 - Chen, Zhi, Melvyn Sim, Peng Xiong. 2020. [Robust stochastic optimization made easy with RSOME](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3603). <i>Management Science</i> <b>66</b>(8) 3329-3339.
 
@@ -70,12 +70,13 @@ Bibtex entry:
 
 ```
 @article{chen2021rsome,
-  title={RSOME in Python: an open-source package for robust stochastic optimization made easy},
+  title={{RSOME} in {Python}: An open-source package for robust stochastic optimization made easy},
   author={Chen, Zhi and Xiong, Peng},
-  journal={INFORMS Journal on Computing},
-  year={2023},
-  month={Mar},
-  day={30},
+  journal={INFORMS Journal of Computing},
+  volume={35},
+  number={4},
+  pages={717--724},
+  year = {2023},
   publisher={INFORMS}
 }
 ```

@@ -42,7 +42,7 @@ def test_model():
     assert primal.__repr__() == string
 
     df = primal.show()
-    assert type(df) == pd.DataFrame
+    assert isinstance(df, pd.DataFrame)
 
     model.solve(grb)
     print(model.solution.status)

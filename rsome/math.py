@@ -29,6 +29,33 @@ def norm(affine, degree=2):
     return affine.norm(degree)
 
 
+def fnorm(*args):
+    """
+    Return the Frobenius norm of all given arrays, regardless
+    of their shapes.
+
+    Parameters
+    ----------
+    arg : an array of variables or affine expression
+        Input array.
+
+    Returns
+    -------
+    out : Convex
+        The Frobenius norm of all given arrays. These arrays do
+        not have to be two-dimensional.
+    """
+
+    iters = []
+    for arg in args:
+        arg = arg.to_affine()
+        iters.append(arg.reshape((arg.size, )))
+
+    affine = concat(iters)
+
+    return affine.to_affine().norm()
+
+
 def square(affine):
     """
     Return the element-wise square of an array.
@@ -49,7 +76,8 @@ def square(affine):
 
 def sumsqr(*args):
     """
-    Return the sum of squares of a 1-D array.
+    Return the sum of squares of elements in all given arrays,
+    regardless of their shapes.
 
     Parameters
     ----------
@@ -59,7 +87,7 @@ def sumsqr(*args):
     Returns
     -------
     out : Convex
-        The sum of squares of elements of all input arrays
+        The sum of squares of elements of all input arrays.
     """
 
     iters = []
@@ -97,8 +125,10 @@ def rsocone(x, y, z):
 
     Parameters
     ----------
-    x : an array of variables or affine expressions
-        Input array. The array must be a vector.
+    x : {Iterables, Vars, VarSub, Affine}
+        Input arrays. If x is a collection of arrays, the
+        left-hand-side expression is the sum of squares of
+        all elements in given arrays.
     y : {Real, Vars, VarSub, Affine}
         The y value in the constraint. It must be a scalar.
     z : {Real, Vars, VarSub, Affine}
@@ -110,7 +140,17 @@ def rsocone(x, y, z):
         The rotated cone constraint
     """
 
-    return x.to_affine().rsocone(y, z)
+    if isinstance(x, Iterable):
+        iters = []
+        for arg in x:
+            arg = arg.to_affine()
+            iters.append(arg.reshape((arg.size, )))
+
+        affine = concat(iters)
+    else:
+        affine = x
+
+    return affine.to_affine().rsocone(y, z)
 
 
 def exp(affine):
@@ -237,6 +277,24 @@ def expcone(y, x, z):
     """
 
     return y.expcone(x, z)
+
+
+def softplus(x):
+    """
+    Return the element-wise softplus function log(1 + exp(x)).
+
+    Parameters
+    ----------
+    x : {Vars, VarSub, Affine}
+        The x value as the function input.
+
+    Returns
+    -------
+    constr : Convex
+        The element-wise softplus function log(1 + exp(x)).
+    """
+
+    return x.softplus()
 
 
 def kldiv(p, q, r):

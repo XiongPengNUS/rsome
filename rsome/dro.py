@@ -802,6 +802,49 @@ class Model:
         self.ro_model.rc_model.solution = solution
         self.solution = solution
 
+    def soc_solve(self, solver=None, degree=4, cuts=(-30, 60),
+                  display=True, log=False, params={}):
+        """
+        Solve the model with the selected solver interface.
+
+        Parameters
+        ----------
+            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                      cpx_solver, grb_solver, msk_solver, cpt_solver}
+                Solver interface used for model solution. Use default solver
+                if solver=None.
+            degree : int
+                The L-degree value for approximating exponential cone
+                constraints.
+            cuts : tuple of two integers
+                The lower and upper cut-off values for the SOC approximation
+                of exponential constraints.
+            display : bool
+                True for displaying the solution information. False for hiding
+                the solution information.
+            log : bool
+                True for printing the log information. False for hiding the log
+                information. So far the argument only applies to Gurobi, CPLEX,
+                and Mosek.
+            params : dict
+                A dictionary that specifies parameters of the selected solver.
+                So far the argument only applies to Gurobi, CPLEX, and Mosek.
+        """
+
+        formula = self.do_math().to_socp(degree, cuts)
+        if solver is None:
+            solution = def_sol(formula, display, log, params)
+        else:
+            solution = solver.solve(formula, display, log, params)
+
+        if isinstance(solution, Solution):
+            self.ro_model.solution = solution
+        else:
+            self.ro_model.solution = None
+
+        self.ro_model.rc_model.solution = solution
+        self.solution = solution
+
     def get(self):
         """
         Return the optimal objective value of the solved model.

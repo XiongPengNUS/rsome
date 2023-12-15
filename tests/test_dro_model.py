@@ -19,19 +19,19 @@ def test_model():
     fset.suppset(z == 0)
 
     affine1 = z@x
-    assert type(affine1) == rso.lp.DecRoAffine
+    assert isinstance(affine1, rso.lp.DecRoAffine)
     assert affine1.__repr__() == 'a bi-affine expression'
 
     affine2 = z + z@x
-    assert type(affine2) == rso.lp.DecRoAffine
+    assert isinstance(affine2, rso.lp.DecRoAffine)
     assert affine2.__repr__() == '3 bi-affine expressions'
 
     affine3 = z@(x + 3)
-    assert type(affine3) == rso.lp.DecRoAffine
+    assert isinstance(affine3, rso.lp.DecRoAffine)
     assert affine3.__repr__() == 'a bi-affine expression'
 
     affine4 = affine2.sum()
-    assert type(affine4) == rso.lp.DecRoAffine
+    assert isinstance(affine4, rso.lp.DecRoAffine)
     assert affine4.__repr__() == 'a bi-affine expression'
 
     with pytest.raises(ValueError):

@@ -27,7 +27,7 @@ def test_norm_one(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'a one-norm expression'
     else:
@@ -54,7 +54,7 @@ def test_norm_one(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'a one-norm expression'
     else:
@@ -109,7 +109,7 @@ def test_norm_two(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'an Eclidean norm expression'
     else:
@@ -130,7 +130,7 @@ def test_norm_two(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'an Eclidean norm expression'
     else:
@@ -174,7 +174,7 @@ def test_norm_inf(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'an infinity norm expression'
     else:
@@ -195,7 +195,7 @@ def test_norm_inf(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'an infinity norm expression'
     else:
@@ -249,7 +249,7 @@ def test_squares(array, const):
     m.solve(grb)
 
     assert abs(m.get()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'an element-wise square expression'
     else:
@@ -273,7 +273,7 @@ def test_squares(array, const):
     m.solve(grb)
 
     assert abs(m.get()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'an element-wise square expression'
     else:
@@ -318,7 +318,7 @@ def test_square_sum(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
     else:
@@ -339,7 +339,7 @@ def test_square_sum(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
     else:
@@ -380,7 +380,7 @@ def test_quad(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.max()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
     else:
@@ -401,7 +401,7 @@ def test_quad(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.min()) < 1e-4
-    assert type(expr) == ro.Convex
+    assert isinstance(expr, ro.Convex)
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
     else:
@@ -636,6 +636,34 @@ def test_plog(xvalue, scales):
 
     with pytest.raises(ValueError):
         rso.plog(x, 1.5) <= y
+
+
+@pytest.mark.parametrize('xvalue, shift', [
+    (rd.rand(3, 5), np.maximum(0.2, rd.rand(3, 5))),
+    (rd.rand(2, 3, 2), rd.rand(3, 2))
+])
+def test_softplus(xvalue, shift):
+
+    shape1 = xvalue.shape
+    targets = (3*np.log(1 + np.exp(xvalue)) + shift)
+    shape = targets.shape
+
+    m = ro.Model()
+    x = m.dvar(shape1)
+    y = m.dvar(shape)
+
+    m.min(y.sum())
+    m.st(y >= 3*rso.softplus(x) + shift)
+    m.st(x == xvalue)
+    m.solve(eco)
+
+    assert abs(m.get() - targets.sum()) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    with pytest.raises(ValueError):
+        rso.softplus(x) >= y
 
 
 @pytest.mark.parametrize('xvalue', [

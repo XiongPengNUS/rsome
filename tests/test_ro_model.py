@@ -54,7 +54,7 @@ def test_model():
     assert primal.__repr__() == string
 
     df = primal.show()
-    assert type(df) == pd.DataFrame
+    assert isinstance(df, pd.DataFrame)
     assert (df.loc['Obj', 'x1':'x8'].values == np.array([1] + [0]*7)).all()
     eye = np.eye(3)
     rows = np.concatenate((np.zeros((3, 1)), eye, -eye, np.zeros((3, 1))), axis=1)
@@ -101,7 +101,7 @@ def test_model():
     assert dual.__repr__() == string
 
     df = dual.show()
-    assert type(df) == pd.DataFrame
+    assert isinstance(df, pd.DataFrame)
     assert (df.loc['Obj', 'x1':'x5'].values == np.array([0]*3 + [1] + [0])).all()
     rows = np.zeros((4, 5))
     rows[0, -1], rows[1:, 0:3], rows[1:, -1] = -1, np.eye(3), -c

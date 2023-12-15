@@ -4,12 +4,18 @@ solving (mixed-integer) linear programming problems.
 """
 
 from ortools.linear_solver import pywraplp
+import ortools
 
 import numpy as np
 import warnings
 import time
 from .lp import Solution
 from numbers import Real
+
+
+version = ortools.__version__
+name = 'OR-Tools'
+info = f'{name} {version}'
 
 
 def solve(formula, display=True, log=False, params={}):

@@ -14,26 +14,26 @@ def test_scalar_opt():
     z = model.rvar()
 
     affine1 = 2*x + y + 2.0
-    assert type(affine1) == ro.Affine
+    assert isinstance(affine1, ro.Affine)
     assert affine1.const == 2
     assert affine1.__repr__() == 'an affine expression'
     assert (affine1 <= 0).__repr__() == '1 linear constraint'
 
     neg_affine1 = - affine1
-    assert type(neg_affine1) == ro.Affine
+    assert isinstance(neg_affine1, ro.Affine)
     assert (neg_affine1.linear.toarray() == - affine1.linear.toarray()).all()
     assert neg_affine1.const == - affine1.const
     assert neg_affine1.__repr__() == 'an affine expression'
 
     array1 = 3.5*affine1 - 0.5
-    assert type(array1) == ro.Affine
+    assert isinstance(array1, ro.Affine)
     assert (array1.linear.toarray() == 3.5*affine1.linear.toarray()).all()
     assert array1.const == 3.5*affine1.const - 0.5
     assert array1.__repr__() == 'an affine expression'
     assert (array1 <= 0).__repr__() == '1 linear constraint'
 
     array2 = np.arange(1, 5)*affine1 - 0.5
-    assert type(array2) == ro.Affine
+    assert isinstance(array2, ro.Affine)
     new_linear = np.arange(1, 5).reshape((4, 1))*affine1.linear.toarray()
     assert (array2.linear.toarray() == new_linear).all()
     assert (array2.const == np.arange(1, 5)*affine1.const - 0.5).all()
@@ -41,7 +41,7 @@ def test_scalar_opt():
     assert (array2 <= 0).__repr__() == '4 linear constraints'
 
     array3 = affine1 - np.arange(1, 5)
-    assert type(array3) == ro.Affine
+    assert isinstance(array3, ro.Affine)
     new_linear = np.ones((4, 1))*affine1.linear.toarray()
     assert (array3.linear.toarray() == affine1.linear.toarray()).all()
     assert (array3.const == affine1.const - np.arange(1, 5)).all()
@@ -49,7 +49,7 @@ def test_scalar_opt():
     assert (array3 <= 0).__repr__() == '4 linear constraints'
 
     array4 = affine1 - 3*z
-    assert type(array4) == ro.RoAffine
+    assert isinstance(array4, ro.RoAffine)
     assert (array4.raffine.linear.toarray() == 0).all()
     assert (array4.raffine.const == -3).all()
     assert (array4.affine.linear.toarray() == affine1.linear.toarray()).all()
@@ -58,7 +58,7 @@ def test_scalar_opt():
     assert (array4 <= 0).__repr__() == '1 robust constraint'
 
     array5 = affine1*z - z + 3.2
-    assert type(array5) == ro.RoAffine
+    assert isinstance(array5, ro.RoAffine)
     assert (array5.raffine.linear.toarray() == affine1.linear.toarray()).all()
     assert (array5.raffine.const == affine1.const - 1).all()
     assert (array5.affine.linear.toarray() == 0).all()
@@ -107,7 +107,7 @@ def test_array_mul(array1, array2, const, solver):
     m.solve(solver)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == ro.Affine
+    assert isinstance(expr, ro.Affine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -148,7 +148,7 @@ def test_random_array_add(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == ro.RoAffine
+    assert isinstance(expr, ro.RoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -190,7 +190,7 @@ def test_random_array_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == ro.RoAffine
+    assert isinstance(expr, ro.RoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -232,7 +232,7 @@ def test_mat_rmul(array1, array2, const, solver):
     m.solve(solver)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == ro.Affine
+    assert isinstance(expr, ro.Affine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -274,7 +274,7 @@ def test_mat_mul(array1, array2, const, solver):
     m.solve(solver)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == ro.Affine
+    assert isinstance(expr, ro.Affine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -321,7 +321,7 @@ def test_random_mat_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == ro.RoAffine
+    assert isinstance(expr, ro.RoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -368,7 +368,7 @@ def test_mat_random_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == ro.RoAffine
+    assert isinstance(expr, ro.RoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''

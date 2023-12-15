@@ -14,6 +14,11 @@ import time
 import sys
 
 
+version = Model.getVersion()
+name = 'Mosek'
+info = f'{name} {version}'
+
+
 def solve(form, display=True, log=False, params={}):
 
     if isinstance(form, (SOCProg, GCProg)):

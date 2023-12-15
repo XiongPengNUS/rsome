@@ -34,7 +34,7 @@ def test_milp_model():
 
     primal = model.do_math()
     df = primal.show()
-    assert type(df) == pd.DataFrame
+    assert isinstance(df, pd.DataFrame)
 
     model.solve(grb)
     assert abs(model.get() - 22.4) < 1e-4

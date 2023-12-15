@@ -41,7 +41,7 @@ class Model(SOCModel):
         elif isinstance(constr, ExpConstr):
             self.exp_constr.append(constr)
         elif isinstance(constr, CvxConstr):
-            if constr.xtype in 'XLP':
+            if constr.xtype in 'XLPF':
                 self.other_constr.append(constr)
             else:
                 super().st(constr)
@@ -97,7 +97,7 @@ class Model(SOCModel):
                 obj_constr = (self.vars[0] - self.sign * self.obj >= 0)
                 if isinstance(obj_constr, CvxConstr):
                     constr = obj_constr
-                    if constr.xtype in 'XLP':
+                    if constr.xtype in 'XLPF':
                         self.other_constr.append(constr)
 
             lmi = []
@@ -162,6 +162,21 @@ class Model(SOCModel):
                         for exprs in exprs_list:
                             exp_cone_constr = ExpConstr(constr.model,
                                                         exprs[1], exprs[0], 1)
+                            self.exp_constr.append(exp_cone_constr)
+                    elif constr.xtype == 'F':
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        exprs_list = rso_broadcast(constr.affine_in, affine_out)
+                        ns = len(exprs_list)
+                        aux_var = self.dvar((ns, 2))
+                        self.aux_constr.append(aux_var.sum(axis=1) <= 1)
+                        for s, exprs in enumerate(exprs_list):
+                            exp_cone_constr = ExpConstr(constr.model,
+                                                        exprs[0] + exprs[1],
+                                                        aux_var[s, 0], 1)
+                            self.exp_constr.append(exp_cone_constr)
+                            exp_cone_constr = ExpConstr(constr.model,
+                                                        exprs[1],
+                                                        aux_var[s, 1], 1)
                             self.exp_constr.append(exp_cone_constr)
                 elif isinstance(constr, LMIConstr):
                     lmi.append({'linear': constr.linear,
@@ -263,8 +278,6 @@ class Model(SOCModel):
                     each_linear = each['linear']
                     if each_linear.shape[1] != linear.shape[0]:
                         each_linear.resize([each_linear.shape[0], linear.shape[0]])
-                    # elif each_linear.shape[1] > linear.shape[0]:
-                    #     linear.resize([each_linear.shape[1], linear.shape[1]])
                     linear_list.append(each_linear)
 
                     each_const = -each['const']

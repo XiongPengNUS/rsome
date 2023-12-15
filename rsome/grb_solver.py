@@ -12,6 +12,11 @@ from .socp import SOCProg
 from .lp import Solution
 
 
+version = '.'.join([str(d) for d in gp.gurobi.version()])
+name = 'Gurobi'
+info = f'{name} {version}'
+
+
 def solve(formula, display=True, log=False, params={}):
 
     try:

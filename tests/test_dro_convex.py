@@ -775,7 +775,7 @@ def test_quad(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.max()) < 5e-4
-    assert type(expr) == rso.lp.DecConvex
+    assert isinstance(expr, rso.lp.DecConvex)
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
     else:
@@ -796,7 +796,7 @@ def test_quad(array, const):
     m.solve(grb)
 
     assert abs(m.get() - target.min()) < 5e-4
-    assert type(expr) == rso.lp.DecConvex
+    assert isinstance(expr, rso.lp.DecConvex)
     if target.shape == ():
         assert expr.__repr__() == 'a sum of squares expression'
     else:

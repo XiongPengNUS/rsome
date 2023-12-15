@@ -1,6 +1,6 @@
 math: ture
 markdown: kramdown
-title: RSOME in Python
+title: Robust Stochastic Optimization Made Easy
 show_downloads: "true"
 logo: rso_left.png
 theme: jekyll-theme-minimal

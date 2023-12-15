@@ -26,7 +26,7 @@ The current version of RSOME supports deterministic, robust optimization and dis
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | No | No |
 |[Mosek](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 10.0.44 | `msk_solver` | Yes | Yes | Yes |
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | No | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 6.5.3 | `cpt_solver` | Yes | No | No |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 7.0.3 | `cpt_solver` | Yes | No | Yes |
 
 
 ## A Linear Programming Example
@@ -91,7 +91,6 @@ formula = model.do_math()
 print(formula)
 ```
 
-```
     Conic program object:
     =============================================
     Number of variables:           3
@@ -106,4 +105,4 @@ print(formula)
     Number of ExpCone constraints: 0
     ---------------------------------------------
     Number of PSCone constraints:  0
-```
+

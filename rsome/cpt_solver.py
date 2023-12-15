@@ -13,6 +13,12 @@ from .gcp import GCProg
 from .lp import Solution
 
 
+ds = [cp.GetCoptVersion(i) for i in range(5) if cp.GetCoptVersion(i) >= 0]
+version = '.'.join([str(d) for d in ds])
+name = 'COPT'
+info = f'{name} {version}'
+
+
 def solve(form, display=True, log=False, params={}):
 
     if isinstance(form, (SOCProg, GCProg)):
@@ -29,8 +35,8 @@ def solve(form, display=True, log=False, params={}):
     try:
         if xmat:
             warnings.warn('The SOCP solver ignores exponential cone constraints. ')
-        if lmi:
-            warnings.warn('The SOCP solver ignores semidefinite cone constraints. ')
+        # if lmi:
+        #     warnings.warn('The SOCP solver ignores semidefinite cone constraints. ')
     except AttributeError:
         pass
 
@@ -55,7 +61,7 @@ def solve(form, display=True, log=False, params={}):
 
     env = cp.Envr()
     m = env.createModel()
-    m.setParam(cp.COPT.Param.Logging, False)
+    m.setParam(cp.COPT.Param.Logging, log)
     m.setParam(cp.COPT.Param.LogToConsole, False)
 
     num_cont = len(idx_cont)
@@ -94,12 +100,25 @@ def solve(form, display=True, log=False, params={}):
         var_list = []
         for idx in idx_q:
             if form.vtype[idx] == 'C':
-                var_list.extend(xc[np.argwhere(idx_cont == idx).item()].tolist())
+                var_list.extend(xc[idx_cont.index(idx)].tolist())
             elif form.vtype[idx] == 'B':
-                var_list.extend(xb[np.argwhere(idx_bin == idx).item()].tolist())
+                var_list.extend(xb[idx_bin.index(idx)].tolist())
             elif form.vtype[idx] == 'I':
-                var_list.extend(xi[np.argwhere(idx_int == idx).item()].tolist())
+                var_list.extend(xi[idx_int.index(idx)].tolist())
         m.addCone(var_list, cp.COPT.CONE_QUAD)
+
+    for sdc in lmi:
+        dim = sdc['dim']
+        Xbar = m.addPsdVars(dim)
+        num_col = sdc['linear'].shape[1]
+        lhs = (sdc['linear']@xx[:num_col]).reshape((dim, dim)) + sdc['const']
+        for i in range(dim):
+            for j in range(i+1):
+                matmul = m.addSparseMat(dim, [(i, j, 1)])
+                if i == j:
+                    m.addConstr(matmul*Xbar - lhs[i].tolist()[j] == 0)
+                else:
+                    m.addConstr(matmul*Xbar - 2*lhs[i].tolist()[j] == 0)
 
     if display:
         print('', 'Being solved by COPT...', sep='', flush=True)

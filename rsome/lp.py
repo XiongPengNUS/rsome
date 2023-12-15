@@ -298,15 +298,15 @@ def vec(*args):
     ----------
     arg : Affine, Var, VarSub, Real, np.ndarray
         Each arg represents a scalar to be included into the one-dimensional array.
-    
+
     Returns
     -------
     out : Affine
         A one-dimensional array created with the provided scalars.
-    
+
     Notes
     -----
-    The input arguments can be real numbers, NumPy arrays, or RSOME objects. All 
+    The input arguments can be real numbers, NumPy arrays, or RSOME objects. All
     arguments must be scalars, i.e. their sizes must be one, otherwise the function
     raises an error message.
     """
@@ -324,7 +324,7 @@ def vec(*args):
             if arg.size != 1:
                 raise ValueError('All inputs must have their sizes to be one.')
             arg = arg.reshape((1, ))
-        
+
         iters.append(arg)
 
     return concat(iters)
@@ -923,6 +923,15 @@ class Vars:
         return self.to_affine().quad(qmat)
 
     def rsocone(self, y, z):
+        """
+        Return the rotated second-order cone constraint.
+
+        Refer to `rsome.rsocone` for full documentation.
+
+        See Also
+        --------
+        rso.rsocone : equivalent function
+        """
 
         return self.to_affine().rsocone(y, z)
 
@@ -1005,6 +1014,19 @@ class Vars:
         """
 
         return self.to_affine().entropy()
+
+    def softplus(self):
+        """
+        Return the softplus function log(1 + exp(var)).
+
+        Refer to `rsome.softplus` for full documentation.
+
+        See Also
+        --------
+        rso.softplus : equivalent function
+        """
+
+        return self.to_affine().softplus()
 
     def kldiv(self, q, r):
         """
@@ -1525,18 +1547,13 @@ class Affine:
 
     def quad(self, qmat):
         """
-        Return the quadratic expression affine @ qmat affine.
+        Return the quadratic expression var @ qmat @ var.
 
-        Parameters
-        ----------
-        affine : an array of variables or affine expression
-            Input array. The array must be 1-D.
-        qmat : a positive or negative semidefinite matrix.
+        Refer to `rsome.quad` for full documentation.
 
-        Returns
-        -------
-        q : Convex
-            The quadratic expression affine @ qmat affine
+        See Also
+        --------
+        rso.quad : equivalent function
         """
 
         if len(self.shape) != 1:
@@ -1561,6 +1578,15 @@ class Affine:
             return - affine.sumsqr()
 
     def rsocone(self, y, z):
+        """
+        Return the rotated second-order cone constraint.
+
+        Refer to `rsome.rsocone` for full documentation.
+
+        See Also
+        --------
+        rso.rsocone : equivalent function
+        """
 
         if self.size > 1:
             if self.size != max(self.shape):
@@ -1696,6 +1722,19 @@ class Affine:
                 raise ValueError('The expression must be a vector.')
 
         return Convex(self, np.float64(0), 'P', -1)
+
+    def softplus(self):
+        """
+        Return the softplus function log(1 + exp(var)).
+
+        Refer to `rsome.softplus` for full documentation.
+
+        See Also
+        --------
+        rso.softplus : equivalent function
+        """
+
+        return Convex(self, np.zeros(self.shape), 'F', 1)
 
     def kldiv(self, q, r):
         """
@@ -2051,6 +2090,7 @@ class Convex:
                   'Q': 'sum of squares expression',
                   'X': 'natural exponential expression',
                   'L': 'natural logarithm expression',
+                  'F': 'softplus function',
                   'P': 'entropy expression',
                   'K': 'KL divergence expression',
                   'W': 'piecewise linear expression'}
@@ -2107,7 +2147,7 @@ class Convex:
         if not isinstance(other, Real):
             raise TypeError('Incorrect syntax.')
 
-        if self.xtype in 'AMIEXLPK':
+        if self.xtype in 'AMIEXLPFK':
             multiplier = self.multiplier * abs(other)
         elif self.xtype in 'SQ':
             multiplier = self.multiplier * abs(other) ** 0.5
@@ -2181,6 +2221,8 @@ class Convex:
                 output = self.multiplier*self.sign*np.exp(value_in) + value_out
             elif self.xtype == 'L':
                 output = - self.multiplier*self.sign*np.log(value_in) + value_out
+            elif self.xtype == 'F':
+                output = self.multiplier*self.sign*np.log(1+np.exp(value_in)) + value_out
             elif self.xtype == 'P':
                 output = self.multiplier*self.sign*(value_in * np.log(1/value_in)).sum()
                 output += value_out
@@ -3524,6 +3566,42 @@ class DecAffine(Affine):
 
         return DecConvex(expr, self.event_adapt)
 
+    def quad(self, qmat):
+        """
+        Return the quadratic expression var @ qmat @ var.
+
+        Refer to `rsome.quad` for full documentation.
+
+        See Also
+        --------
+        rso.quad : equivalent function
+        """
+
+        if not self.fixed:
+            raise ValueError('Incorrect convex expressions.')
+
+        expr = super().quad(qmat)
+
+        return DecConvex(expr, self.event_adapt)
+
+    def rsocone(self, y, z):
+        """
+        Return the rotated second-order cone constraint.
+
+        Refer to `rsome.rsocone` for full documentation.
+
+        See Also
+        --------
+        rso.rsocone : equivalent function
+        """
+
+        if not self.fixed:
+            raise ValueError('Incorrect convex expressions.')
+
+        expr = super().rsocone(y, z)
+
+        return DecConvex(expr, self.event_adapt)
+
     def sum(self, axis=None):
 
         expr = super().sum(axis)
@@ -3630,6 +3708,20 @@ class DecAffine(Affine):
         return DecPerspConvex(PerspConvex(self, scale,
                                           np.zeros(self.shape), 'L', -1),
                               self.event_adapt)
+
+    def softplus(self):
+        """
+        Return the softplus function log(1 + exp(var)).
+
+        Refer to `rsome.softplus` for full documentation.
+
+        See Also
+        --------
+        rso.softplus : equivalent function
+        """
+
+        return DecConvex(Convex(self, np.zeros(self.shape), 'F', 1),
+                         self.event_adapt)
 
     def entropy(self):
         """

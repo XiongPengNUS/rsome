@@ -55,7 +55,7 @@ def test_array_mul(array1, array2, const):
 
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == rso.lp.DecAffine
+    assert isinstance(expr, rso.lp.DecAffine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -98,7 +98,7 @@ def test_random_array_add(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -151,7 +151,7 @@ def test_event_exp_random_array_add(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -236,7 +236,7 @@ def test_random_array_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -285,7 +285,7 @@ def test_event_exp_random_array_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
     if target.shape == ():
         shape_str = 'a'
         suffix = ''
@@ -416,7 +416,7 @@ def test_mat_rmul(array1, array2, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == rso.lp.DecAffine
+    assert isinstance(expr, rso.lp.DecAffine)
 
 
 @pytest.mark.parametrize('array1, array2, const', [
@@ -450,7 +450,7 @@ def test_mat_mul(array1, array2, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == rso.lp.DecAffine
+    assert isinstance(expr, rso.lp.DecAffine)
 
 
 @pytest.mark.parametrize('array1, array2, array3, const', [
@@ -489,7 +489,7 @@ def test_random_mat_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
 
 
 @pytest.mark.parametrize('array1, array2, array3, const', [
@@ -528,7 +528,7 @@ def test_mat_random_mul(array1, array2, array3, const):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
 
 
 @pytest.mark.parametrize('array1, array2, const, array3', [
@@ -559,7 +559,7 @@ def test_roaffine_mat_mul(array1, array2, const, array3):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
 
 
 @pytest.mark.parametrize('array1, array2, const, array3', [
@@ -590,7 +590,7 @@ def test_mat_roaffine_mul(array1, array2, const, array3):
     m.solve(ort)
     assert abs(m.get()) < 1e-3
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == rso.lp.DecRoAffine
+    assert isinstance(expr, rso.lp.DecRoAffine)
 
 
 def test_affine_errors():

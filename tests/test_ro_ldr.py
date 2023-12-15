@@ -127,11 +127,11 @@ def test_scalar_ldr_opt():
     y.adapt(z[0])
 
     affine1 = 2*x + y + 2.0
-    assert type(affine1) == ro.RoAffine
+    assert isinstance(affine1, ro.RoAffine)
     assert affine1.__repr__() == 'a bi-affine expression'
 
     array1 = -2.5*affine1 - 0.5
-    assert type(array1) == ro.RoAffine
+    assert isinstance(array1, ro.RoAffine)
     new_linear = -2.5 * affine1.raffine.linear.toarray()
     assert (array1.raffine.linear.toarray() == new_linear).all()
     assert (array1.raffine.const == -2.5 * affine1.raffine.const).all()
@@ -173,7 +173,7 @@ def test_ldr_mul(array1, array2, const):
     m.st(v == array2)
     m.solve(grb)
     assert abs(m.get()) < 1e-4
-    assert type(expr) == ro.Affine
+    assert isinstance(expr, ro.Affine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -214,7 +214,7 @@ def test_ldr_mat_rmul(array1, array2, const):
     m.solve(grb)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array2) < 1e-4).all()
-    assert type(expr) == ro.Affine
+    assert isinstance(expr, ro.Affine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -255,7 +255,7 @@ def test_ldr_mat_mul(array1, array2, const):
     m.solve(grb)
     assert abs(m.get()) < 1e-4
     assert (abs(v.get() - array1) < 1e-4).all()
-    assert type(expr) == ro.Affine
+    assert isinstance(expr, ro.Affine)
     if target.shape == ():
         shape_str = 'an'
         suffix = ''
@@ -278,7 +278,7 @@ def test_array_ldr_opt():
     yy[:, 2].adapt(z[1])
 
     affine1 = x + 3*y - 2
-    assert type(affine1) == ro.RoAffine
+    assert isinstance(affine1, ro.RoAffine)
     new_linear = 3*y.to_affine().raffine.linear.toarray()
     assert (affine1.raffine.linear.toarray() == new_linear).all()
     assert (affine1.raffine.const == np.zeros((5, 8))).all()
@@ -288,7 +288,7 @@ def test_array_ldr_opt():
     assert affine1.__repr__() == '5 bi-affine expressions'
 
     affine2 = x - 3*yy[:, 0] + 2.5
-    assert type(affine1) == ro.RoAffine
+    assert isinstance(affine1, ro.RoAffine)
     assert (affine2.raffine.linear.toarray() == 0).all()
     assert (affine2.raffine.const == np.zeros((5, 8))).all()
     new_linear = (x - 3*yy.fixed[:, 0]).linear.toarray()
@@ -297,7 +297,7 @@ def test_array_ldr_opt():
     assert affine2.__repr__() == '5 bi-affine expressions'
 
     affine3 = x*z[:5] + y*(-2) - z[:5] + 1.5
-    assert type(affine3) == ro.RoAffine
+    assert isinstance(affine3, ro.RoAffine)
     new_linear = (x*z[:5] - 2*y).raffine.linear.toarray()
     assert (affine3.raffine.linear.toarray() == new_linear).all()
     new_const = - sp.csr_matrix((np.ones(5),
@@ -310,7 +310,7 @@ def test_array_ldr_opt():
     assert affine3.__repr__() == '5 bi-affine expressions'
 
     affine4 = x*z[:5] + yy.T - 2.5*x + 3.5
-    assert type(affine4) == ro.RoAffine
+    assert isinstance(affine4, ro.RoAffine)
     new_linear = (x*z[:5] + yy.T).raffine.linear.toarray()
     assert (affine4.raffine.linear.toarray() == new_linear).all()
     assert (affine4.raffine.const == np.zeros((15, 8))).all()
@@ -320,7 +320,7 @@ def test_array_ldr_opt():
     assert affine4.__repr__() == '3x5 bi-affine expressions'
 
     affine5 = x*z[:5] + yy[:, :1].T - 2.5*x + 3.5
-    assert type(affine5) == ro.RoAffine
+    assert isinstance(affine5, ro.RoAffine)
     assert affine5.__repr__() == '1x5 bi-affine expressions'
 
     with pytest.raises(TypeError):
@@ -334,7 +334,7 @@ def test_array_ldr_opt():
 
     coef_array = np.arange(1, 6)
     array1 = coef_array * affine1 + x
-    assert type(array1) == ro.RoAffine
+    assert isinstance(array1, ro.RoAffine)
     new_linear = (np.diag(coef_array) @ affine1.raffine).linear.toarray()
     new_const = (np.diag(coef_array) @ affine1.raffine).const
     assert (array1.raffine.linear.toarray() == new_linear).all()
@@ -351,7 +351,7 @@ def test_array_ldr_opt():
 
     coef_array = np.arange(1, 16).reshape((3, 5))
     array2 = coef_array * affine2 + x + 3.5
-    assert type(array2) == ro.RoAffine
+    assert isinstance(array2, ro.RoAffine)
     temp = np.concatenate([np.diag(np.arange(i, i+5)) for i in range(0, 15, 5)])
     new_linear = (temp @ affine2.raffine).linear.toarray()
     new_const = (temp @ affine2.raffine).const
@@ -367,7 +367,7 @@ def test_array_ldr_opt():
     index = 1
     array3 = coef_array * affine4[index] + x - 0.5
     slice = np.arange(index*5, (index+1)*5, dtype=int)
-    assert type(array3) == ro.RoAffine
+    assert isinstance(array3, ro.RoAffine)
     new_linear = (np.diag(coef_array) @ affine4.raffine[slice]).linear.toarray()
     new_const = (np.diag(coef_array) @ affine4.raffine[slice]).const
     assert (array3.raffine.linear.toarray() == new_linear).sum()

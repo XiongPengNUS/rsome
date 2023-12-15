@@ -13,6 +13,11 @@ from .gcp import GCProg
 from .lp import Solution
 
 
+version = ecos.__version__
+name = 'ECOS'
+info = f'{name} {version}'
+
+
 def solve(formula, display=True, log=False, params={}):
 
     try:

@@ -5,11 +5,16 @@ This module is used as an interface to call the CyLP solver for solving
 
 from cylp.cy import CyClpSimplex
 from cylp.py.modeling.CyLPModel import CyLPArray
-
+import cylp
 import numpy as np
 import warnings
 import time
 from .lp import Solution
+
+
+version = cylp.__version__
+name = 'CyLP'
+info = f'{name} {version}'
 
 
 def solve(formula, display=True, log=False, params={}):
