@@ -448,6 +448,10 @@ class Model:
                 of exponential constraints.
             display : bool
                 Display option of the solver interface.
+            log : bool
+                True for printing the log information. False for hiding the log
+                information. So far the argument only applies to Gurobi, CPLEX,
+                and Mosek.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi, CPLEX, and Mosek.
