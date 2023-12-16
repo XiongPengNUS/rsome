@@ -53,7 +53,7 @@ def fnorm(*args):
 
     affine = concat(iters)
 
-    return affine.to_affine().norm()
+    return affine.to_affine().norm(2)
 
 
 def square(affine):
