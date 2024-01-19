@@ -543,6 +543,7 @@ class GCProg(SOCProg):
 
         left_width = self.linear.shape[1]
         qmat = self.qmat
+        lmi = self.lmi
 
         linear = self.linear
         const = self.const
@@ -570,4 +571,5 @@ class GCProg(SOCProg):
             qmat += [list(left_width + num_vars + np.array([2, 1, 0]) + q*3)
                      for q in range(3+degree)]
 
-        return SOCProg(linear, const, sense, vtype, ub, lb, qmat, obj)
+        # return SOCProg(linear, const, sense, vtype, ub, lb, qmat, obj)
+        return GCProg(linear, const, sense, vtype, ub, lb, qmat, [], lmi, obj)

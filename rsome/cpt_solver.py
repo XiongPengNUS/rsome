@@ -34,9 +34,7 @@ def solve(form, display=True, log=False, params={}):
 
     try:
         if xmat:
-            warnings.warn('The SOCP solver ignores exponential cone constraints. ')
-        # if lmi:
-        #     warnings.warn('The SOCP solver ignores semidefinite cone constraints. ')
+            warnings.warn('The conic solver ignores exponential cone constraints. ')
     except AttributeError:
         pass
 
@@ -52,14 +50,15 @@ def solve(form, display=True, log=False, params={}):
     linear_ineq = form.linear[~is_eq]
     linear_eq = form.linear[is_eq]
     num_ineq = linear_ineq.shape[0]
-    # num_eq = linear_eq.shape[0]
 
     const_ineq = form.const[~is_eq]
     const_eq = form.const[is_eq]
 
     num_constr, num_var = form.linear.shape
 
-    env = cp.Envr()
+    envconfig = cp.EnvrConfig()
+    envconfig.set('nobanner', '1')
+    env = cp.Envr(envconfig)
     m = env.createModel()
     m.setParam(cp.COPT.Param.Logging, log)
     m.setParam(cp.COPT.Param.LogToConsole, False)
@@ -149,7 +148,14 @@ def solve(form, display=True, log=False, params={}):
         else:
             y = None
 
-        solution = Solution('COPT', objval, x_sol, status, stime, y=y)
+        xx_sol = np.zeros(len(form.vtype))
+        xx_sol[idx_cont] = x_sol[:len(idx_cont)]
+        if idx_bin:
+            xx_sol[idx_bin] = x_sol[len(idx_cont): len(idx_cont)+len(idx_bin)]
+        if idx_int:
+            xx_sol[idx_int] = x_sol[len(idx_cont)+len(idx_bin):]
+
+        solution = Solution('COPT', objval, xx_sol, status, stime, y=y)
     except cp.CoptError:
         warnings.warn('Fail to find the optimal solution.')
         # solution = None

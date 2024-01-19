@@ -109,6 +109,7 @@ def quad(x, qmat):
     x : an array of variables or affine expressions
         Input array. The array must be 1-D.
     qmat : a positive or negative semidefinite matrix.
+        A matrix representing the quadratic coefficients.
 
     Returns
     -------
@@ -432,10 +433,10 @@ def diag(affine, k=0, fill=False):
         filled with zeros. Otherwise, return the diagonal elements as a
         1-D array
 
-        Returns
-        -------
-        out : Affine
-            The diagonal elements of a given 2-D array.
+    Returns
+    -------
+    out : Affine
+        The diagonal elements of a given 2-D array.
     """
 
     return affine.diag(k, fill)
@@ -446,20 +447,19 @@ def tril(affine, k=0):
     Return the lower triangular elements of a 2-D array. The remaining
     elements are filled with zeros.
 
-        Parameters
-        ----------
-        affine : an array of variables or affine expressions.
-            Input array. It must be a 2-D array.
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. It must be a 2-D array.
 
-        k : int, optional
-            Diagonal above which to zero elements.  `k = 0` (the
-            default) is the main diagonal, `k < 0` is below it and
-            `k > 0` is above.
+    k : int, optional
+        Diagonal above which to zero elements.  `k = 0` (the default) is
+        the main diagonal, `k < 0` is below it and `k > 0` is above.
 
-        Returns
-        -------
-        out : Affine
-            The lower triangular elements of the given 2-D array.
+    Returns
+    -------
+    out : Affine
+        The lower triangular elements of the given 2-D array.
     """
 
     return affine.tril(k)
@@ -481,7 +481,7 @@ def triu(affine, k):
 
     Returns
     -------
-        out : Affine
+    out : Affine
         The upper triangular elements of the given 2-D array.
     """
 

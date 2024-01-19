@@ -137,20 +137,20 @@ def concat(iters, axis=0):
     """
     Join a sequence of arrays of affine expressions along an existing axis.
 
-        Parameters
-        ----------
-        iters : array_like.
-            A sequence of RSOME variables or affine expressions. The arrays must
-            have the same shape, except in the dimension corresponding to `axis`
-            (the first, by default).
+    Parameters
+    ----------
+    iters : array_like.
+        A sequence of RSOME variables or affine expressions. The arrays must
+        have the same shape, except in the dimension corresponding to `axis`
+        (the first, by default).
 
-        axis : int, optional
-            The axis along which the arrays will be joined.  Default is 0.
+    axis : int, optional
+        The axis along which the arrays will be joined.  Default is 0.
 
-        Returns
-        -------
-        out : Affine
-            The concatenated array of affine expressions.
+    Returns
+    -------
+    out : Affine
+        The concatenated array of affine expressions.
     """
 
     linear_each = []
@@ -226,24 +226,24 @@ def rstack(*args):
     """
     Stack a sequence of rows of affine expressions vertically (row wise).
 
-        Parameters
-        ----------
-        arg : {list, Affine}.
-            Each arg represents an array of affine expressions. If arg is a list
-            of affine expressions, they will be concatenated horizontally (column
-            wise) first.
+    Parameters
+    ----------
+    arg : {list, Affine}.
+        Each arg represents an array of affine expressions. If arg is a list
+        of affine expressions, they will be concatenated horizontally (column
+        wise) first.
 
-        Returns
-        -------
-        out : Affine
-            The vertically stacked array of affine expressions.
+    Returns
+    -------
+    out : Affine
+        The vertically stacked array of affine expressions.
 
-        Notes
-        -----
-        The rstack function is different from the vstack function from the numpy
-        package in 1) the arrays to be stacked together are presented as separate
-        arguments, instead of elements in an array-like sequence; and 2) a list of
-        arrays can be stacked horizontally first before being vertically stacked.
+    Notes
+    -----
+    The rstack function is different from the vstack function from the numpy
+    package in 1) the arrays to be stacked together are presented as separate
+    arguments, instead of elements in an array-like sequence; and 2) a list of
+    arrays can be stacked horizontally first before being vertically stacked.
     """
 
     rows = []
@@ -260,24 +260,23 @@ def cstack(*args):
     """
     Stack a sequence of rows of affine expressions horizontally (column wise).
 
-        Parameters
-        ----------
-        arg : {list, Affine}.
-            Each arg represents an array of affine expressions. If arg is a list
-            of affine expressions, they will be concatenated vertically (row wise)
-            first.
+    Parameters
+    ----------
+    arg : {list, Affine}.
+        Each arg represents an array of affine expressions. If arg is a list of
+        affine expressions, they will be concatenated vertically (row wise) first.
 
-        Returns
-        -------
-        out : Affine
-            The horizontally stacked array of affine expressions.
+    Returns
+    -------
+    out : Affine
+        The horizontally stacked array of affine expressions.
 
-        Notes
-        -----
-        The cstack function is different from the hstack function from the numpy
-        package in 1) the arrays to be stacked together are presented as separate
-        arguments, instead of elements in an array-like sequence; and 2) a list of
-        arrays can be stacked vertically first before being horizontally stacked.
+    Notes
+    -----
+    The cstack function is different from the hstack function from the numpy
+    package in 1) the arrays to be stacked together are presented as separate
+    arguments, instead of elements in an array-like sequence; and 2) a list of
+    arrays can be stacked vertically first before being horizontally stacked.
     """
 
     cols = []
@@ -847,22 +846,72 @@ class Vars:
         return np.array(range(self.first, self.first + self.size))
 
     def reshape(self, shape):
+        """
+        Returns an array containing the same variables with a new shape.
+
+        Parameters
+        ----------
+        shape : tuple
+            The new shape of the returned array.
+
+        Returns
+        -------
+        out : Affine
+            An array of the specified shape containing the given variables.
+        """
 
         return self.to_affine().reshape(shape)
 
     def flatten(self):
+        """
+        Returns a 1D array containing the same variables.
+
+        Returns
+        -------
+        out : Affine
+            A 1D array of the given variables.
+        """
 
         return self.to_affine().flatten()
 
     def diag(self, k=0, fill=False):
+        """
+        Return the diagonal elements of a 2-D array.
+
+        Refer to `rsome.math.diag` for full documentation.
+
+        See Also
+        --------
+        rsome.math.diag : equivalent function
+        """
 
         return self.to_affine().diag(k, fill)
 
     def tril(self, k=0):
+        """
+        Return the lower triangular elements of a 2-D array. The remaining
+        elements are filled with zeros.
+
+        Refer to `rsome.math.tril` for full documentation.
+
+        See Also
+        --------
+        rsome.math.tril : equivalent function
+        """
 
         return self.to_affine().tril(k)
 
     def triu(self, k=0):
+        """
+        Return the upper triangular elements of a 2-D array. The remaining
+        elements are filled with zeros.
+
+        Refer to `rsome.math.triu` for full documentation.
+
+        See Also
+        --------
+        rsome.math.triu : equivalent function
+        """
 
         return self.to_affine().triu(k)
 
@@ -874,11 +923,11 @@ class Vars:
         """
         Return the first, second, or infinity norm of a 1-D array.
 
-        Refer to `rsome.norm` for full documentation.
+        Refer to `rsome.math.norm` for full documentation.
 
         See Also
         --------
-        rso.norm : equivalent function
+        rsome.math.norm : equivalent function
         """
 
         return self.to_affine().norm(degree)
@@ -887,11 +936,11 @@ class Vars:
         """
         Return the element-wise square of an array.
 
-        Refer to `rsome.square` for full documentation
+        Refer to `rsome.math.square` for full documentation
 
         See Also
         --------
-        rso.square : equivalent function
+        rsome.lp.square : equivalent function
         """
 
         return self.to_affine().square()
@@ -900,11 +949,11 @@ class Vars:
         """
         Return the sum of squares of a 1-D array.
 
-        Refer to `rsome.sumsqr` for full documentation.
+        Refer to `rsome.math.sumsqr` for full documentation.
 
         See Also
         --------
-        rso.sumsqr : equivalent function
+        rsome.math.sumsqr : equivalent function
         """
 
         return self.to_affine().sumsqr()
@@ -913,11 +962,11 @@ class Vars:
         """
         Return the quadratic expression var @ qmat @ var.
 
-        Refer to `rsome.quad` for full documentation.
+        Refer to `rsome.math.quad` for full documentation.
 
         See Also
         --------
-        rso.quad : equivalent function
+        rsome.math.quad : equivalent function
         """
 
         return self.to_affine().quad(qmat)
@@ -926,11 +975,11 @@ class Vars:
         """
         Return the rotated second-order cone constraint.
 
-        Refer to `rsome.rsocone` for full documentation.
+        Refer to `rsome.math.rsocone` for full documentation.
 
         See Also
         --------
-        rso.rsocone : equivalent function
+        rsome.math.rsocone : equivalent function
         """
 
         return self.to_affine().rsocone(y, z)
@@ -939,11 +988,11 @@ class Vars:
         """
         Return the exponential cone constraint z*exp(x/z) <= var.
 
-        Refer to `rsome.expcone` for full documentation.
+        Refer to `rsome.math.expcone` for full documentation.
 
         See Also
         --------
-        rso.expcone : equivalent function
+        rsome.math.expcone : equivalent function
         """
 
         return self.to_affine().expcone(x, z)
@@ -952,11 +1001,11 @@ class Vars:
         """
         Return the natural exponential function exp(var).
 
-        Refer to `rsome.exp` for full documentation.
+        Refer to `rsome.math.exp` for full documentation.
 
         See Also
         --------
-        rso.exp : equivalent function
+        rsome.math.exp : equivalent function
         """
 
         return self.to_affine().exp()
@@ -966,11 +1015,11 @@ class Vars:
         Return the perspective natural exponential function
         scale * exp(var/scale).
 
-        Refer to `rsome.pexp` for full documentation.
+        Refer to `rsome.math.pexp` for full documentation.
 
         See Also
         --------
-        rso.pexp : equivalent function
+        rsome.math.pexp : equivalent function
         """
 
         return self.to_affine().pexp(scale)
@@ -979,11 +1028,11 @@ class Vars:
         """
         Return the natural logarithm function log(var).
 
-        Refer to `rsome.log` for full documentation.
+        Refer to `rsome.math.log` for full documentation.
 
         See Also
         --------
-        rso.log : equivalent function
+        rsome.math.log : equivalent function
         """
 
         return self.to_affine().log()
@@ -993,11 +1042,11 @@ class Vars:
         Return the perspective of natural logarithm function
         scale * log(var/scale).
 
-        Refer to `rsome.plog` for full documentation.
+        Refer to `rsome.math.plog` for full documentation.
 
         See Also
         --------
-        rso.plog : equivalent function
+        rsome.math.plog : equivalent function
         """
 
         return self.to_affine().plog(scale)
@@ -1006,11 +1055,11 @@ class Vars:
         """
         Return the natural exponential function -sum(var*log(var)).
 
-        Refer to `rsome.entropy` for full documentation.
+        Refer to `rsome.math.entropy` for full documentation.
 
         See Also
         --------
-        rso.entropy : equivalent function
+        rsome.math.entropy : equivalent function
         """
 
         return self.to_affine().entropy()
@@ -1019,11 +1068,11 @@ class Vars:
         """
         Return the softplus function log(1 + exp(var)).
 
-        Refer to `rsome.softplus` for full documentation.
+        Refer to `rsome.math.softplus` for full documentation.
 
         See Also
         --------
-        rso.softplus : equivalent function
+        rsome.math.softplus : equivalent function
         """
 
         return self.to_affine().softplus()
@@ -1032,16 +1081,25 @@ class Vars:
         """
         Return the KL divergence constraints sum(var*log(var/q)) <= r.
 
-        Refer to `rsome.kldiv` for full documentation.
+        Refer to `rsome.math.kldiv` for full documentation.
 
         See Also
         --------
-        rso.kldiv : equivalent function
+        rsome.math.kldiv : equivalent function
         """
 
         return self.to_affine().kldiv(q, r)
 
     def trace(self):
+        """
+        Return the trace of a 2D array.
+
+        Refer to `rsome.lp.trace` for full documentation.
+
+        See Also
+        --------
+        rsome.lp.rsocone : equivalent function
+        """
 
         return self.to_affine().trace()
 
@@ -1384,6 +1442,21 @@ class Affine:
         return Affine(self.model, linear, const)
 
     def reshape(self, shape):
+        """
+        Returns an array containing the same affine expressions with a
+        new shape.
+
+        Parameters
+        ----------
+        shape : tuple
+            The new shape of the returned array.
+
+        Returns
+        -------
+        out : Affine
+            An array of the specified shape containing the given affine
+            expressions.
+        """
 
         if isinstance(self.const, np.ndarray):
             new_const = self.const.reshape(shape)
@@ -1392,10 +1465,27 @@ class Affine:
         return Affine(self.model, self.linear, new_const)
 
     def flatten(self):
+        """
+        Returns a 1D array containing the same affine expressions.
+
+        Returns
+        -------
+        out : Affine
+            A 1D array of the given affine expressions.
+        """
 
         return self.reshape((self.size, ))
 
     def diag(self, k=0, fill=False):
+        """
+        Return the diagonal elements of a 2-D array.
+
+        Refer to `rsome.math.diag` for full documentation.
+
+        See Also
+        --------
+        rsome.math.diag : equivalent function
+        """
 
         if len(self.shape) != 2:
             raise ValueError('The diag function can only be applied to 2D arrays.')
@@ -1424,6 +1514,16 @@ class Affine:
             return self[idx_row, idx_col]
 
     def tril(self, k=0):
+        """
+        Return the lower triangular elements of a 2-D array. The remaining
+        elements are filled with zeros.
+
+        Refer to `rsome.math.tril` for full documentation.
+
+        See Also
+        --------
+        rsome.math.tril : equivalent function
+        """
 
         if len(self.shape) != 2:
             raise ValueError('The tril function can only be applied to 2D arrays.')
@@ -1439,6 +1539,16 @@ class Affine:
         return affine
 
     def triu(self, k=0):
+        """
+        Return the upper triangular elements of a 2-D array. The remaining
+        elements are filled with zeros.
+
+        Refer to `rsome.math.triu` for full documentation.
+
+        See Also
+        --------
+        rsome.math.triu : equivalent function
+        """
 
         if len(self.shape) != 2:
             raise ValueError('The tril function can only be applied to 2D arrays.')
@@ -1466,6 +1576,15 @@ class Affine:
         return Affine(self.model, linear, const)
 
     def trace(self):
+        """
+        Return the trace of a 2D array.
+
+        Refer to `rsome.math.trace` for full documentation.
+
+        See Also
+        --------
+        rsome.math.rsocone : equivalent function
+        """
 
         if len(self.shape) != 2:
             raise ValueError('The trace function only applies to two-dimensional arrays')
@@ -1487,11 +1606,11 @@ class Affine:
         """
         Return the first, second, or infinity norm of a 1-D array.
 
-        Refer to `rsome.norm` for full documentation
+        Refer to `rsome.math.norm` for full documentation
 
         See Also
         --------
-        rso.norm : equivalent function
+        rsome.math.norm : equivalent function
         """
 
         if len(self.shape) != 1:
@@ -1513,11 +1632,11 @@ class Affine:
         """
         Return the element-wise square of an array.
 
-        Refer to `rsome.square` for full documentation
+        Refer to `rsome.math.square` for full documentation
 
         See Also
         --------
-        rso.square : equivalent function
+        rsome.math.square : equivalent function
         """
 
         size = self.size
@@ -1529,11 +1648,11 @@ class Affine:
         """
         Return the sum of squares of a 1-D array.
 
-        Refer to `rsome.sumsqr` for full documentation.
+        Refer to `rsome.math.sumsqr` for full documentation.
 
         See Also
         --------
-        rso.sumsqr : equivalent function
+        rsome.math.sumsqr : equivalent function
         """
 
         shape = self.shape
@@ -1549,11 +1668,11 @@ class Affine:
         """
         Return the quadratic expression var @ qmat @ var.
 
-        Refer to `rsome.quad` for full documentation.
+        Refer to `rsome.math.quad` for full documentation.
 
         See Also
         --------
-        rso.quad : equivalent function
+        rsome.math.quad : equivalent function
         """
 
         if len(self.shape) != 1:
@@ -1581,11 +1700,11 @@ class Affine:
         """
         Return the rotated second-order cone constraint.
 
-        Refer to `rsome.rsocone` for full documentation.
+        Refer to `rsome.math.rsocone` for full documentation.
 
         See Also
         --------
-        rso.rsocone : equivalent function
+        rsome.math.rsocone : equivalent function
         """
 
         if self.size > 1:
@@ -1623,11 +1742,11 @@ class Affine:
         """
         Return the exponential cone constraint z*exp(x/z) <= affine.
 
-        Refer to `rsome.expcone` for full documentation.
+        Refer to `rsome.math.expcone` for full documentation.
 
         See Also
         --------
-        rso.expcone : equivalent function
+        rsome.math.expcone : equivalent function
         """
 
         if isinstance(x, (Vars, VarSub)):
@@ -1656,11 +1775,11 @@ class Affine:
         """
         Return the natural exponential function exp(affine).
 
-        Refer to `rsome.exp` for full documentation.
+        Refer to `rsome.math.exp` for full documentation.
 
         See Also
         --------
-        rso.exp : equivalent function
+        rsome.math.exp : equivalent function
         """
 
         return Convex(self, np.zeros(self.shape), 'X', 1)
@@ -1670,11 +1789,11 @@ class Affine:
         Return the perspective natural exponential function
         scale * exp(affine/scale).
 
-        Refer to `rsome.pexp` for full documentation.
+        Refer to `rsome.math.pexp` for full documentation.
 
         See Also
         --------
-        rso.pexp : equivalent function
+        rsome.math.pexp : equivalent function
         """
 
         return PerspConvex(self, scale, np.zeros(self.shape), 'X', 1)
@@ -1683,11 +1802,11 @@ class Affine:
         """
         Return the natural logarithm function log(affine).
 
-        Refer to `rsome.log` for full documentation.
+        Refer to `rsome.math.log` for full documentation.
 
         See Also
         --------
-        rso.log : equivalent function
+        rsome.math.log : equivalent function
         """
 
         return Convex(self, np.zeros(self.shape), 'L', -1)
@@ -1697,11 +1816,11 @@ class Affine:
         Return the perspective of natural logarithm function
         scale * log(affine/scale).
 
-        Refer to `rsome.plog` for full documentation.
+        Refer to `rsome.math.plog` for full documentation.
 
         See Also
         --------
-        rso.plog : equivalent function
+        rsome.math.plog : equivalent function
         """
 
         return PerspConvex(self, scale, np.zeros(self.shape), 'L', -1)
@@ -1710,11 +1829,11 @@ class Affine:
         """
         Return the natural exponential function -sum(affine*log(affine)).
 
-        Refer to `rsome.entropy` for full documentation.
+        Refer to `rsome.math.entropy` for full documentation.
 
         See Also
         --------
-        rso.entropy : equivalent function
+        rsome.math.entropy : equivalent function
         """
 
         if self.shape != ():
@@ -1727,11 +1846,11 @@ class Affine:
         """
         Return the softplus function log(1 + exp(var)).
 
-        Refer to `rsome.softplus` for full documentation.
+        Refer to `rsome.math.softplus` for full documentation.
 
         See Also
         --------
-        rso.softplus : equivalent function
+        rsome.math.softplus : equivalent function
         """
 
         return Convex(self, np.zeros(self.shape), 'F', 1)
@@ -1740,11 +1859,11 @@ class Affine:
         """
         Return the KL divergence constraints sum(affine*log(affine/q)) <= r.
 
-        Refer to `rsome.kldiv` for full documentation.
+        Refer to `rsome.math.kldiv` for full documentation.
 
         See Also
         --------
-        rso.kldiv : equivalent function
+        rsome.math.kldiv : equivalent function
         """
 
         affine = self.to_affine().reshape((self.size, ))
@@ -3609,6 +3728,15 @@ class DecAffine(Affine):
         return DecAffine(self.dro_model, expr, self.event_adapt, self.fixed)
 
     def trace(self):
+        """
+        Return the trace of a 2D array.
+
+        Refer to `rsome.lp.trace` for full documentation.
+
+        See Also
+        --------
+        rsome.lp.rsocone : equivalent function
+        """
 
         expr = super().trace()
 
@@ -4817,25 +4945,14 @@ class LinProg:
                 each_line = each_line[2:]
 
             string += ' c{}: '.format(i+1) + each_line
-            string += ' <= ' if self.sense[i] == 0 else ' == '
+            string += ' <= ' if self.sense[i] == 0 else ' = '
             string += '{}\n'.format(self.const[i])
 
         ub, lb = self.ub, self.lb
         nvar = len(ub)
-        ub_string = '\n'.join([' x{} <= {}'.format(i+1, ub[i])
-                               for i in range(nvar) if ub[i] < np.inf])
-        lb_string = '\n'.join([' {} <= x{}'.format(lb[i], i+1)
-                               for i in range(nvar) if lb[i] > -np.inf])
-        free_string = '\n'.join([' x{} free'.format(i+1)
-                                 for i in range(nvar)
-                                 if lb[i] == -np.inf and ub[i] == np.inf])
         string += 'Bounds\n'
-        if len(ub_string) > 0:
-            string += ub_string + '\n'
-        if len(lb_string) > 0:
-            string += lb_string + '\n'
-        if len(free_string) > 0:
-            string += free_string + '\n'
+        for i in range(nvar):
+            string += '{} <= x{} <= {}\n'.format(lb[i], i+1, ub[i])
 
         ind_int, = np.where(self.vtype == 'I')
         int_string = '\n'.join(['x{}'.format(i+1) for i in ind_int])
