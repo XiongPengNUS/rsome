@@ -351,7 +351,7 @@ class Model:
 
         Parameters
         ----------
-        *args
+        args
             Constraints or collections of constraints that the model
             subject to.
 
@@ -593,6 +593,7 @@ class Model:
                 linear_in = constr.affine_in.linear
                 const_in = constr.affine_in.const
                 aff_in = linear_in@drule + const_in.reshape(const_in.size)
+                aff_in = aff_in.reshape(constr.affine_in.shape)
                 if isinstance(aff_in, RoAffine):
                     aff_in = aff_in.affine
                 if isinstance(constr.affine_out, (np.ndarray, Real)):
@@ -602,10 +603,12 @@ class Model:
                     linear_out = constr.affine_out.linear
                     const_out = constr.affine_out.const
                 aff_out = linear_out@drule + const_out.reshape(const_out.size)
+                aff_out = aff_out.reshape(constr.affine_out.shape)
                 if isinstance(aff_out, RoAffine):
                     aff_out = aff_out.affine
                 ew_constr = CvxConstr(aff_in.model, aff_in, aff_out,
-                                      constr.multiplier, constr.xtype)
+                                      constr.multiplier, constr.xtype, 
+                                      params=constr.params)
             elif isinstance(constr, DecExpConstr):
                 if isinstance(drule, RoAffine):
                     drule_affine = drule.affine
@@ -773,20 +776,20 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
-                      cpx_solver, grb_solver, msk_solver, cpt_solver}
-                Solver interface used for model solution. Use default solver
-                if solver=None.
-            display : bool
-                True for displaying the solution information. False for hiding
-                the solution information.
-            log : bool
-                True for printing the log information. False for hiding the log
-                information. So far the argument only applies to Gurobi, CPLEX,
-                and Mosek.
-            params : dict
-                A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi, CPLEX, and Mosek.
+        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                  cpx_solver, grb_solver, msk_solver, cpt_solver}
+            Solver interface used for model solution. Use default solver if
+            solver=None.
+        display : bool
+            True for displaying the solution information. False for hiding the
+            solution information.
+        log : bool
+            True for printing the log information. False for hiding the log
+            information. So far the argument only applies to Gurobi, CPLEX,
+            Mosek, and COPT.
+        params : dict
+            A dictionary that specifies parameters of the selected solver.
+            So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         if solver is None:
@@ -809,26 +812,25 @@ class Model:
 
         Parameters
         ----------
-            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
-                      cpx_solver, grb_solver, msk_solver, cpt_solver}
-                Solver interface used for model solution. Use default solver
-                if solver=None.
-            degree : int
-                The L-degree value for approximating exponential cone
-                constraints.
-            cuts : tuple of two integers
-                The lower and upper cut-off values for the SOC approximation
-                of exponential constraints.
-            display : bool
-                True for displaying the solution information. False for hiding
-                the solution information.
-            log : bool
-                True for printing the log information. False for hiding the log
-                information. So far the argument only applies to Gurobi, CPLEX,
-                and Mosek.
-            params : dict
-                A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi, CPLEX, and Mosek.
+        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                  cpx_solver, grb_solver, msk_solver, cpt_solver}
+            Solver interface used for model solution. Use default solver
+            if solver=None.
+        degree : int
+            The L-degree value for approximating exponential cone constraints.
+        cuts : tuple of two integers
+            The lower and upper cut-off values for the SOC approximation of
+            exponential constraints.
+        display : bool
+            True for displaying the solution information. False for hiding the
+            solution information.
+        log : bool
+            True for printing the log information. False for hiding the log
+            information. So far the argument only applies to Gurobi, CPLEX,
+            Mosek, and COPT.
+        params : dict
+            A dictionary that specifies parameters of the selected solver.
+            So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         formula = self.do_math().to_socp(degree, cuts)

@@ -417,8 +417,6 @@ class Model:
                 else:
                     raise TypeError('Incorrect constraint type.')
             elif isinstance(constr, Bounds):
-                # onstr.index = self.constr_idx
-                # self.constr_idx += 1
                 self.bounds.append(constr)
 
         self.pupdate = True
@@ -507,7 +505,7 @@ class Model:
 
         Returns
         -------
-        prog : LinProg
+        prog : rsome.lp.LinProg
             A linear programming problem.
         """
 
@@ -582,8 +580,8 @@ class Model:
                                   self.lin_constr + self.aux_constr]
 
                     sense_list = [item.sense
-                                  if isinstance(item.sense, np.ndarray) else
-                                  np.array([item.sense])
+                                  #if isinstance(item.sense, np.ndarray) else
+                                  #np.array([item.sense])
                                   for item in self.lin_constr + self.aux_constr]
 
                 const = np.concatenate(tuple(const_list))
@@ -636,9 +634,11 @@ class Model:
                                   (primal.ub != np.infty))[0]
             indices_lb = np.where((primal.lb != 0) &
                                   (primal.lb != - np.infty))[0]
+            indices_fixed = np.where(primal.lb == primal.ub)[0]
 
             nub = len(indices_ub)
             nlb = len(indices_lb)
+            nfixed = len(indices_fixed)
             nv = primal_linear.shape[1]
             if nub > 0:
                 matrix_ub = csr_matrix((np.array([1] * nub), indices_ub,
@@ -654,6 +654,13 @@ class Model:
                 primal_const = np.concatenate((primal_const,
                                                -primal.lb[indices_lb]))
                 primal_sense = np.concatenate((primal_sense, np.zeros(nlb)))
+            if nfixed > 0:
+                matrix_fixed = csr_matrix((np.array([-1] * nfixed), indices_fixed,
+                                           np.arange(nfixed + 1)), (nfixed, nv))
+                primal_linear = sp.vstack((primal_linear, matrix_fixed))
+                primal_const = np.concatenate((primal_const,
+                                               primal.lb[indices_fixed]))
+                primal_sense = np.concatenate((primal_sense, np.ones(nfixed)))
 
             indices_free = np.where((primal.lb != 0) &
                                     (primal.ub != 0))[0]
@@ -700,7 +707,7 @@ class Model:
             log : bool
                 True for printing the log information. False for hiding the log
                 information. So far the argument only applies to Gurobi, CPLEX,
-                and Mosek.
+                Mosek, and COPT.
             params : dict
                 A dictionary that specifies parameters of the selected solver.
                 So far the argument only applies to Gurobi, CPLEX, and Mosek.
@@ -919,7 +926,7 @@ class Vars:
 
         return self.to_affine().abs()
 
-    def norm(self, degree):
+    def norm(self, degree, method=None):
         """
         Return the first, second, or infinity norm of a 1-D array.
 
@@ -930,7 +937,36 @@ class Vars:
         rsome.math.norm : equivalent function
         """
 
-        return self.to_affine().norm(degree)
+        return self.to_affine().norm(degree, method)
+    
+    def pnorm(self, degree, method=None):
+        """
+        Return the p-norm of a 1-D array, where p is a real number
+        larger than 1. 
+
+        Refer to `rsome.math.pnorm` for full documentation
+
+        See Also
+        --------
+        rsome.math.pnorm : equivalent function
+        """
+
+        return self.to_affine().pnorm(degree, method)
+    
+    def gmean(self, beta=None):
+        """
+        Return the weighted geometric mean of a 1-D array. The weights 
+        are specified by an array-like structure beta. It is expressed
+        as prod(affine ** beta) ** (1/sum(beta))
+
+        Refer to `rsome.gmean` for full documentation.
+
+        See Also
+        --------
+        rso.gmean : equivalent function
+        """
+
+        return self.to_affine().gmean(beta)
 
     def square(self):
         """
@@ -944,6 +980,20 @@ class Vars:
         """
 
         return self.to_affine().square()
+    
+    def power(self, p, q=1):
+        """
+        Return the element-wise integer power of the given affine
+        array, i.e. affine ** (p/q)
+
+        Refer to `rsome.power` for full documentation.
+
+        See Also
+        --------
+        rso.power : equivalent function
+        """
+
+        return self.to_affine().power(p, q)
 
     def sumsqr(self):
         """
@@ -1102,6 +1152,36 @@ class Vars:
         """
 
         return self.to_affine().trace()
+    
+    def logdet(self):
+        """
+        Return the log-determinant of a positive semidefinite matrix
+        expressed as a two-dimensional array.
+
+        Refer to `rsome.logdet` for full documentation.
+
+        See Also
+        --------
+        rsome.logdet : equivalent function
+        """
+
+        return self.to_affine().logdet()
+    
+    def rootdet(self):
+        """
+        Return the root-determinant of a positive semidefinite matrix
+        expressed as a two-dimensional array. The root-determinant is
+        expressed as (det(A))**(1/L), where L is the dimension of the
+        two-dimensinoal array.
+
+        Refer to `rsome.rootdet` for full documentation.
+
+        See Also
+        --------
+        rsome.rootdet : equivalent function
+        """
+
+        return self.to_affine().rootdet()
 
     def get(self):
         """
@@ -1602,7 +1682,7 @@ class Affine:
 
         return self.__abs__()
 
-    def norm(self, degree):
+    def norm(self, degree, method=None):
         """
         Return the first, second, or infinity norm of a 1-D array.
 
@@ -1626,7 +1706,91 @@ class Affine:
         elif degree == 2:
             return Convex(self, np.zeros(new_shape), 'E', 1)
         else:
-            raise ValueError('Invalid norm order for the array.')
+            # raise ValueError('Invalid norm order for the array.')
+            return self.pnorm(degree, method)
+    
+    def pnorm(self, degree, method=None):
+        """
+        Return the p-norm of a 1-D array, where p is a real number
+        larger than 1. 
+
+        Refer to `rsome.math.pnorm` for full documentation
+
+        See Also
+        --------
+        rsome.math.pnorm : equivalent function
+        """
+
+        if len(self.shape) != 1:
+            err = 'Improper number of dimensions to norm. '
+            err += 'The array must be 1-D.'
+            raise ValueError(err)
+
+        new_shape = ()
+        if method is None:
+            if isinstance(degree, (int, Iterable)):
+                method = 'soc'
+            elif isinstance(degree, float):
+                method = 'exc'
+            else:
+                raise TypeError('The degree parameter must be a real number.')
+        
+        if isinstance(degree, Iterable):
+            a, b = degree
+            if a <= b:
+                raise ValueError('The degree parameter a/b must be larger than one.')
+            if not (isinstance(a, int) and isinstance(b, int)):
+                raise TypeError('The coefficients a and b must be integers.')
+        elif isinstance(degree, Real):
+            if degree <= 1:
+                raise ValueError('The degree parameter must be larger than 1.')
+        else:
+            raise TypeError('The degree parameter can only one real number or two integers.')
+        
+        if method == 'soc':
+            if not isinstance(degree, (int, Iterable)):
+                raise TypeError('Unsupported degree for second-order conic expressions.')
+            return Convex(self, np.zeros(new_shape), 'G', 1, params=degree)
+        elif method == 'exc':
+            if isinstance(degree, Iterable):
+                a, b = degree
+                degree = a / b
+            return Convex(self, np.zeros(new_shape), 'N', 1, params=degree)
+        else:
+            raise ValueError("The method can only be 'soc' or 'exc'.")
+    
+    def gmean(self, beta=None):
+        """
+        Return the weighted geometric mean of a 1-D array. The weights 
+        are specified by an array-like structure beta. It is expressed
+        as prod(affine ** beta) ** (1/sum(beta))
+
+        Refer to `rsome.gmean` for full documentation.
+
+        See Also
+        --------
+        rso.gmean : equivalent function
+        """
+
+        if len(self.shape) != 1:
+            err = 'Improper number of dimensions for geometric mean. '
+            err += 'The array must be 1-D.'
+            raise ValueError(err)
+        if beta is None:
+            beta = [1] * self.size
+        beta_array = np.array(beta)
+        if (beta_array % beta_array.astype(int) > 0).any():
+            raise ValueError('All beta values must be integers.')
+        if len(beta_array.shape) != 1:
+            err = 'Improper number of dimensions for beta values. '
+            err += 'It must be 1-D.'
+            raise ValueError(err)
+        if (beta_array < 1).any():
+            raise ValueError('All beta values must be no smaller than one.')
+        if beta_array.size != self.size:
+            raise ValueError('The sizes of the array and beta values do not match.')
+
+        return Convex(self, np.zeros(1), 'C', -1, params=beta)
 
     def square(self):
         """
@@ -1643,6 +1807,34 @@ class Affine:
         shape = self.shape
 
         return Convex(self.reshape((size,)), np.zeros(shape), 'S', 1)
+    
+    def power(self, p, q=1):
+        """
+        Return the element-wise integer power of the given affine
+        array, i.e. affine ** (p/q)
+
+        Refer to `rsome.power` for full documentation.
+
+        See Also
+        --------
+        rso.power : equivalent function
+        """
+
+        p_array, q_array = np.array(p), np.array(q)
+        
+        if (p_array == q_array).all():
+            return self.__abs__()
+        elif (p_array < q_array).any():
+            raise ValueError('Exponent values must be no smaller than one.')
+        
+        if (p_array % p_array.astype(int) > 0).any():
+            raise TypeError('RSOME only supports integer exponents.')
+        if (q_array % q_array.astype(int) > 0).any():
+            raise TypeError('RSOME only supports integer exponents.')    
+
+        shape = np.broadcast(np.zeros(self.shape), p_array, q_array).shape
+
+        return Convex(self, np.zeros(shape), 'T', 1, params=(p_array, q_array))
 
     def sumsqr(self):
         """
@@ -1884,6 +2076,40 @@ class Affine:
                 q = q.reshape(affine.shape)
 
         return KLConstr(affine, q, r)
+    
+    def logdet(self):
+        """
+        Return the log-determinant of a positive semidefinite matrix
+        expressed as a two-dimensional array.
+
+        Refer to `rsome.logdet` for full documentation.
+
+        See Also
+        --------
+        rsome.logdet : equivalent function
+        """
+
+        new_shape = ()
+
+        return Convex(self, np.zeros(new_shape), 'O', -1)
+    
+    def rootdet(self):
+        """
+        Return the root-determinant of a positive semidefinite matrix
+        expressed as a two-dimensional array. The root-determinant is
+        expressed as (det(A))**(1/L), where L is the dimension of the
+        two-dimensinoal array.
+
+        Refer to `rsome.rootdet` for full documentation.
+
+        See Also
+        --------
+        rsome.rootdet : equivalent function
+        """
+
+        new_shape = ()
+
+        return Convex(self, np.zeros(new_shape), 'D', -1)
 
     def concat(self, other, axis=0):
 
@@ -2189,13 +2415,14 @@ class Convex:
     __array_priority__ = 101
 
     def __init__(self, affine_in, affine_out, xtype, sign,
-                 multiplier=1, sum_axis=False):
+                 multiplier=1, sum_axis=False, params=None):
 
         self.model = affine_in.model
         self.affine_in = affine_in
         self.affine_out = affine_out
         self.multiplier = multiplier
         self.sum_axis = sum_axis
+        self.params = params
         self.size = affine_out.size
         self.xtype = xtype
         self.sign = sign
@@ -2203,6 +2430,12 @@ class Convex:
     def __repr__(self):
         xtypes = {'A': 'absolute expression',
                   'M': 'one-norm expression',
+                  'N': 'general Lp-norm expression',       # Expressed by exponential cones
+                  'G': 'general Lp-norm expression',       # Expressed by second-order cones
+                  'D': 'root determinant',                 # Expressed by second-order cones
+                  'O': 'log determinant',                  # Expressed by exponential cones
+                  'T': 'power expression',                 # Expressed by second-order cones
+                  'C': 'geometric mean',                   # Expressed by second-order cones
                   'E': 'Eclidean norm expression',
                   'I': 'infinity norm expression',
                   'S': 'element-wise square expression',
@@ -2226,7 +2459,8 @@ class Convex:
     def __neg__(self):
 
         return Convex(self.affine_in, -self.affine_out, self.xtype, -self.sign,
-                      self.multiplier)
+                      self.multiplier,
+                      params=self.params)
 
     def __add__(self, other):
 
@@ -2245,7 +2479,8 @@ class Convex:
             raise TypeError('Incorrect data types.')
 
         new_convex = Convex(affine_in, affine_out,
-                            self.xtype, self.sign, self.multiplier)
+                            self.xtype, self.sign, self.multiplier,
+                            params=self.params)
 
         return new_convex
 
@@ -2266,7 +2501,7 @@ class Convex:
         if not isinstance(other, Real):
             raise TypeError('Incorrect syntax.')
 
-        if self.xtype in 'AMIEXLPFK':
+        if self.xtype in 'AMNGIEXLPFKODTC':
             multiplier = self.multiplier * abs(other)
         elif self.xtype in 'SQ':
             multiplier = self.multiplier * abs(other) ** 0.5
@@ -2274,7 +2509,8 @@ class Convex:
             raise ValueError('Unknown type of convex function.')
 
         return Convex(self.affine_in, other * self.affine_out,
-                      self.xtype, np.sign(other)*self.sign, multiplier)
+                      self.xtype, np.sign(other)*self.sign, multiplier,
+                      params=self.params)
 
     def __rmul__(self, other):
 
@@ -2287,7 +2523,7 @@ class Convex:
             raise ValueError('Nonconvex constraints.')
 
         return CvxConstr(left.model, left.affine_in, left.affine_out,
-                         left.multiplier, left.xtype)
+                         left.multiplier, left.xtype, params=left.params)
 
     def __ge__(self, other):
 
@@ -2296,7 +2532,7 @@ class Convex:
             raise ValueError('Nonconvex constraints.')
 
         return CvxConstr(right.model, right.affine_in, right.affine_out,
-                         right.multiplier, right.xtype)
+                         right.multiplier, right.xtype, params=right.params)
 
     def __eq__(self, other):
 
@@ -2308,7 +2544,7 @@ class Convex:
             raise ValueError('Convex functions do not support the sum() method.')
 
         return Convex(self.affine_in, self.affine_out.sum(axis=axis),
-                      self.xtype, self.sign, self.multiplier, axis)
+                      self.xtype, self.sign, self.multiplier, axis, params=self.params)
 
     def __call__(self):
 
@@ -2328,6 +2564,11 @@ class Convex:
                 output = self.multiplier*self.sign*abs(value_in) + value_out
             elif self.xtype == 'M':
                 output = self.multiplier*self.sign*abs(value_in).sum() + value_out
+            elif self.xtype in 'NG':
+                d = self.params
+                if isinstance(d, Iterable):
+                    d = d[0] / d[1]
+                output = self.multiplier*self.sign*np.linalg.norm(abs(value_in), d) + value_out
             elif self.xtype == 'E':
                 output = self.multiplier*self.sign*((value_in**2).sum())**0.5 + value_out
             elif self.xtype == 'I':
@@ -2344,6 +2585,10 @@ class Convex:
                 output = self.multiplier*self.sign*np.log(1+np.exp(value_in)) + value_out
             elif self.xtype == 'P':
                 output = self.multiplier*self.sign*(value_in * np.log(1/value_in)).sum()
+                output += value_out
+            elif self.xtype == 'T':
+                expo = self.params[0] / self.params[1]
+                output = self.multiplier*self.sign*(value_in ** expo) + value_out
                 output += value_out
             else:
                 raise ValueError('Unsupported convex/concave expression.')
@@ -2816,13 +3061,14 @@ class CvxConstr:
     The CvxConstr class creates an object of convex constraints.
     """
 
-    def __init__(self, model, affine_in, affine_out, multiplier, xtype):
+    def __init__(self, model, affine_in, affine_out, multiplier, xtype, params=None):
 
         self.model = model
         self.affine_in = affine_in
         self.affine_out = affine_out
         self.multiplier = multiplier
         self.xtype = xtype
+        self.params = params
 
     def __repr__(self):
 
@@ -2962,7 +3208,116 @@ class KLConstr:
         return "KL divergence constraint for {} scenario{}".format(ns, suffix)
 
 
-# class RQCone
+class IPCone:
+    
+    def __init__(self, x, r, beta):
+        
+        if x.model != r.model:
+            raise ValueError('Model mismatch.')
+        self.model = x.model
+        self.left = x.to_affine()
+        if self.left != 1:
+            raise ValueError('Variable dimension')
+        self.right = r.flatten()
+        if self.right.size != len(beta):
+            raise ValueError('Variable dimension mismatches degrees.')
+        
+        self.beta = list(beta)
+        
+        self.branches = None
+    
+    def __repr__(self):
+        
+        return f"betas: {self.beta}"
+    
+    def __str__(self):
+        
+        return self.__repr__()
+    
+    def to_pot(self):
+        
+        model = self.model
+        
+        beta = self.beta.copy()
+        degree = sum(beta)
+        
+        xbeta = int(2 ** np.ceil(np.log2(degree)) - degree)
+        
+        if xbeta > 0:
+            s = model.dvar(aux=True).flatten()
+            right = concat((self.right, s))
+            beta.append(xbeta)
+            return IPCone(s, right, beta), [s >= abs(self.left)]
+        else:
+            return IPCone(self.left, self.right, beta), []
+    
+    def split(self):
+        
+        model = self.model
+        
+        beta = self.beta
+        degree = sum(beta)
+        left = self.left
+        right = self.right
+        
+        if len(beta) == 2 and beta[0] == beta[1]:
+            return [left.rsocone(right[0], right[1])]
+        elif max(beta) >= degree/2:
+            index = np.argmax(beta)
+            mid = beta[index] - degree//2
+            beta1 = beta[:index] + ([] if mid == 0 else [mid]) + beta[index+1:]
+            if mid > 0:
+                right1 = right
+            else:
+                idx = list(range(len(beta)))
+                idx.remove(index)
+                right1 = right[idx]
+                
+            u = model.dvar()
+            
+            b1 = IPCone(u, right1, beta1)
+            
+            self.branches = [b1]
+            
+            constr = [left.rsocone(u, right[index])]
+            constr.extend(b1.split())
+            
+            return constr
+            
+        else:
+            cum = np.cumsum(beta)
+            index = np.argmax(cum >= degree/2)
+
+            mid = degree//2 - cum[index-1]
+            beta1 = beta[:index] + [mid]
+            right1 = right[:index+1]
+            if mid == beta[index]:
+                beta2 = beta[index+1:]
+                right2 = right[index+1:]
+            else:
+                beta2 = [beta[index] - mid] + beta[index+1:]
+                right2 = right[index:]
+
+            u = model.dvar(aux=True)
+            v = model.dvar(aux=True)
+            
+            b1 = IPCone(u, right1, beta1)
+            b2 = IPCone(v, right2, beta2)
+            
+            self.branches = [b1, b2]
+            
+            constr = [left.rsocone(u, v)]
+            constr.extend(b1.split() + b2.split())
+            return constr
+        
+    def to_soc(self):
+
+        if len(self.beta) == 1:
+            return [self.left.abs() <= self.right]
+        else:
+            ip_cone, constr = self.to_pot()
+            constr.extend(ip_cone.split())
+            return constr
 
 
 class RoConstr:
@@ -3631,7 +3986,7 @@ class DecAffine(Affine):
 
         return self.__abs__()
 
-    def norm(self, degree):
+    def norm(self, degree, method=None):
         """
         Return the first, second, or infinity norm of a 1-D array.
 
@@ -3645,7 +4000,26 @@ class DecAffine(Affine):
         if not self.fixed:
             raise ValueError('Incorrect convex expressions.')
 
-        expr = super().norm(degree)
+        expr = super().norm(degree, method)
+
+        return DecConvex(expr, self.event_adapt)
+    
+    def pnorm(self, degree, method=None):
+        """
+        Return p-norm of a 1-D array, where p is a real number
+        larger than 1. 
+
+        Refer to `rsome.math.pnorm` for full documentation
+
+        See Also
+        --------
+        rsome.math.pnorm : equivalent function
+        """
+
+        if not self.fixed:
+            raise ValueError('Incorrect convex expressions.')
+
+        expr = super().pnorm(degree, method)
 
         return DecConvex(expr, self.event_adapt)
 
@@ -3790,6 +4164,40 @@ class DecAffine(Affine):
 
         return DecConvex(Convex(self, np.zeros(self.shape), 'X', 1),
                          self.event_adapt)
+    
+    def power(self, p, q=1):
+        """
+        Return the element-wise integer power of the given affine
+        array, i.e. affine ** (p/q)
+
+        Refer to `rsome.power` for full documentation.
+
+        See Also
+        --------
+        rso.power : equivalent function
+        """
+
+        expr = super().power(p, q)
+
+        return DecConvex(expr, self.event_adapt)
+    
+    def gmean(self, beta=None):
+        """
+        Return the weighted geometric mean of a 1-D array. The weights 
+        are specified by an array-like structure beta. It is expressed
+        as prod(affine ** beta) ** (1/sum(beta))
+
+        Refer to `rsome.gmean` for full documentation.
+
+        See Also
+        --------
+        rso.gmean : equivalent function
+        """
+
+        expr = super().gmean(beta)
+
+        return DecConvex(expr, self.event_adapt)
+
 
     def pexp(self, scale):
         """
@@ -3820,6 +4228,40 @@ class DecAffine(Affine):
 
         return DecConvex(Convex(self, np.zeros(self.shape), 'L', -1),
                          self.event_adapt)
+    
+    def logdet(self):
+        """
+        Return the log-determinant of a positive semidefinite matrix
+        expressed as a two-dimensional array.
+
+        Refer to `rsome.logdet` for full documentation.
+
+        See Also
+        --------
+        rso.logdet : equivalent function
+        """
+
+        expr = super().logdet()
+
+        return DecConvex(expr, self.event_adapt)
+    
+    def rootdet(self):
+        """
+        Return the root-determinant of a positive semidefinite matrix
+        expressed as a two-dimensional array. The root-determinant is
+        expressed as (det(A))**(1/L), where L is the dimension of the 
+        two-dimensinoal array.
+
+        Refer to `rsome.rootdet` for full documentation.
+
+        See Also
+        --------
+        rso.rootdet : equivalent function
+        """
+
+        expr = super().rootdet()
+
+        return DecConvex(expr, self.event_adapt)
 
     def plog(self, scale):
         """
@@ -3997,7 +4439,8 @@ class DecConvex(Convex):
     def __init__(self, convex, event_adapt):
 
         super().__init__(convex.affine_in, convex.affine_out,
-                         convex.xtype, convex.sign, convex.multiplier)
+                         convex.xtype, convex.sign, convex.multiplier, 
+                         params=convex.params)
         self.event_adapt = event_adapt
 
     def __neg__(self):
@@ -4066,6 +4509,13 @@ class DecConvex(Convex):
                     item = self.multiplier*self.sign*abs(value_in).sum()
                     item += value_out
                     output.append(item)
+                elif self.xtype == 'N':
+                    d = self.params
+                    if isinstance(d, Iterable):
+                        d = d[0] / d[1]
+                    item = self.multiplier*self.sign*np.linalg.norm(abs(value_in), d)
+                    item += value_out
+                    output.append(item)
                 elif self.xtype == 'E':
                     item = self.multiplier*self.sign*((value_in**2).sum())**0.5
                     item += value_out
@@ -4088,6 +4538,13 @@ class DecConvex(Convex):
                     output.append(item)
                 elif self.xtype == 'P':
                     item = self.multiplier*self.sign*(value_in*np.log(1/value_in)).sum()
+                    item += value_out
+                    output.append(item)
+                elif self.xtype == 'G':
+                    d = self.params
+                    if isinstance(d, Iterable):
+                        d = d[0] / d[1]
+                    item = self.multiplier*self.sign*np.linalg.norm(abs(value_in), d)
                     item += value_out
                     output.append(item)
                 else:
@@ -4455,7 +4912,8 @@ class DecCvxConstr(CvxConstr):
     def __init__(self, constr, event_adapt):
 
         super().__init__(constr.model, constr.affine_in,
-                         constr.affine_out, constr.multiplier, constr.xtype)
+                         constr.affine_out, constr.multiplier, constr.xtype, 
+                         params=constr.params)
         self.event_adapt = event_adapt
 
 

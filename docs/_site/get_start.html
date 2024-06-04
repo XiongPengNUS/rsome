@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>Robust Stochastic Optimization Made Easy by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=8140be9c666315aa70a9267280b4b68f20877d6c">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=552f0095bb978cceee79a8fd1480ca4a1ed0c4f7">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -206,6 +206,11 @@
       <td style="text-align: left">No need to match the shapes of <code class="language-plaintext highlighter-rouge">x1</code>, <code class="language-plaintext highlighter-rouge">x2</code>, …</td>
     </tr>
     <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">gmean(x, beta)</code></td>
+      <td style="text-align: left">The weighted geometric mean expressed as <code class="language-plaintext highlighter-rouge">prod(x ** beta) ** (1/sum(beta))</code></td>
+      <td style="text-align: left">The weights <code class="language-plaintext highlighter-rouge">beta</code> must be all positive integers. The default value is an array of all ones.</td>
+    </tr>
+    <tr>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">log(x)</code></td>
       <td style="text-align: left">The element-wise natural logarithm of <code class="language-plaintext highlighter-rouge">x</code>.</td>
       <td style="text-align: left"> </td>
@@ -213,7 +218,7 @@
     <tr>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">norm(x, degree)</code></td>
       <td style="text-align: left">The norm of the <code class="language-plaintext highlighter-rouge">x</code>.</td>
-      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a vector. <code class="language-plaintext highlighter-rouge">degree</code> can be 1, 2, or <code class="language-plaintext highlighter-rouge">numpy.inf</code>. The default value is <code class="language-plaintext highlighter-rouge">degree=2</code>, indicating an Euclidean norm.</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a vector. <code class="language-plaintext highlighter-rouge">degree</code> can be positive integers or fractional numbers larger than one,  or <code class="language-plaintext highlighter-rouge">numpy.inf</code>, or a tuple of two integers. The default value is <code class="language-plaintext highlighter-rouge">degree=2</code>, indicating an Euclidean norm.</td>
     </tr>
     <tr>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">pexp(x, y)</code></td>
@@ -226,13 +231,18 @@
       <td style="text-align: left"> </td>
     </tr>
     <tr>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">power(x, p, q)</code></td>
+      <td style="text-align: left">The element-wise exponentiation <code class="language-plaintext highlighter-rouge">x ** (p/q)</code>.</td>
+      <td style="text-align: left">Both <code class="language-plaintext highlighter-rouge">p</code> and <code class="language-plaintext highlighter-rouge">q</code> must be positive integers and <code class="language-plaintext highlighter-rouge">q</code> must be larger than <code class="language-plaintext highlighter-rouge">q</code>. The default value of <code class="language-plaintext highlighter-rouge">q</code> is one.</td>
+    </tr>
+    <tr>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">quad(x, Q)</code></td>
       <td style="text-align: left">The quadratic term <code class="language-plaintext highlighter-rouge">x @ Q @ x</code>.</td>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">x</code> must be a 1-D array, and <code class="language-plaintext highlighter-rouge">Q</code> must be a positive semidefinite matrix (2-D array).</td>
     </tr>
     <tr>
       <td style="text-align: left"><code class="language-plaintext highlighter-rouge">softplus(x)</code></td>
-      <td style="text-align: left">The element-wise softplus expression <code class="language-plaintext highlighter-rouge">log(1 + exp(x))</code>.</td>
+      <td style="text-align: left">The element-wise softplus term <code class="language-plaintext highlighter-rouge">log(1 + exp(x))</code>.</td>
       <td style="text-align: left"> </td>
     </tr>
     <tr>

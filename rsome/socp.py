@@ -1,6 +1,7 @@
 from .lp import Model as LPModel
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
+from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, IPCone
 from .lp import LinProg
+from .lp import concat
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -17,6 +18,7 @@ class Model(LPModel):
         super().__init__(nobj, mtype, name, top)
         self.cvx_constr = []
         self.cone_constr = []
+        self.ip_constr = []
         # self.avar_indices = []
 
     def reset(self):
@@ -27,6 +29,7 @@ class Model(LPModel):
         self.bounds = []
         self.aux_constr = []
         self.aux_bounds = []
+        self.aux_ipc = []
         self.cvx_constr = []
 
     def st(self, constr):
@@ -52,12 +55,18 @@ class Model(LPModel):
                 super().st(constr)
             elif constr.xtype in 'ESQ':
                 self.cvx_constr.append(constr)
+            elif constr.xtype in 'GCDTC':
+                self.ip_constr.append(constr)
             else:
                 raise ValueError('Unsupported convex constraints.')
         elif isinstance(constr, ConeConstr):
             if constr.model is not self:
                 raise ValueError('Constraints are not defined for this model.')
             self.cone_constr.append(constr)
+        elif isinstance(constr, IPCone):
+            if constr.model is not self:
+                raise ValueError('Constraints are not defined for this model.')
+            self.ip_constr.append(constr)
         else:
             raise TypeError('Unknown constraint type.')
 
@@ -97,13 +106,63 @@ class Model(LPModel):
                 self.auxs = []
                 self.aux_constr = []
                 self.aux_bounds = []
+                self.aux_ipc = []
                 self.last = self.vars[-1].first + self.vars[-1].size
 
             more_cvx = []
             if self.obj is not None:
                 obj_constr = (self.vars[0] - self.sign * self.obj >= 0)
                 if isinstance(obj_constr, CvxConstr):
-                    more_cvx.append(obj_constr)
+                    if obj_constr.xtype in 'GTC':
+                        self.aux_ipc.append(obj_constr)
+                    else:
+                        more_cvx.append(obj_constr)
+            for constr in self.ip_constr + self.aux_ipc:
+                if isinstance(constr, IPCone):
+                    more_cvx.extend(constr.to_soc())
+                else:
+                    if constr.xtype == 'G':
+                        degree = constr.params
+                        affine_in = constr.affine_in * constr.multiplier
+                        if isinstance(degree, int):
+                            beta = [1, degree - 1]
+                        else:
+                            a, b = degree
+                            beta = [b, a - b]
+                        aux1 = self.dvar(constr.affine_in.size, aux=True)
+                        aux2 = self.dvar(1, aux=True)
+                        self.aux_constr.append(aux2 + constr.affine_out <= 0)
+                        self.aux_constr.append(aux1.sum() <= aux2)
+                        for j in range(constr.affine_in.size):
+                            more_cvx.extend(IPCone(affine_in[j], 
+                                                   concat((aux1[j], aux2)), beta).to_soc())
+                    elif constr.xtype == 'T':
+                        p, q = constr.params
+                        affine_in = constr.affine_in
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        
+                        bd = np.broadcast(np.arange(affine_in.size).reshape(affine_in.shape), p, q)
+                        size = bd.size
+                        aux1 = self.dvar((size, 1), aux=True)
+                        aux2 = self.dvar((size, 1), aux=True)
+                        affine_array = affine_in.flatten()
+                        
+                        for idx_var, (idx_affine, item_p, item_q) in enumerate(zip(*bd.iters)):
+                            if item_p == item_q:
+                                self.aux_constr.append(affine_array[idx_affine] <= aux1[idx_var])
+                                self.aux_constr.append(affine_array[idx_affine] >= -aux1[idx_var])
+                            else:
+                                beta = [item_q, item_p - item_q]
+                                more_cvx.extend(IPCone(affine_array[idx_affine], 
+                                                       concat((aux1[idx_var], aux2[idx_var])),
+                                                       beta).to_soc())
+                        self.aux_constr.append(aux2 == 1)
+                        self.aux_constr.append(aux1.reshape(bd.shape) + affine_out <= 0)
+                    elif constr.xtype == 'C':
+                        aux = self.dvar(aux=True)
+                        beta = constr.params
+                        self.aux_constr.append(aux*constr.multiplier + constr.affine_out <= 0)
+                        more_cvx.extend(IPCone(aux, constr.affine_in, beta).to_soc())
 
             qmat = []
             for constr in self.cvx_constr + more_cvx:
@@ -155,7 +214,13 @@ class Model(LPModel):
                     else:
                         self.aux_constr.append(bounds)
                     qmat.append([aux3.first] + [aux1.first] +
-                                list(aux2.first + np.arange(aux2.size)))
+                                list(aux2.first + np.arange(aux2.size)))    
+                elif constr.xtype == 'A':
+                    affine_in = constr.affine_in * constr.multiplier
+                    self.aux_constr.append(affine_in +
+                                           constr.affine_out <= 0)
+                    self.aux_constr.append(-affine_in +
+                                           constr.affine_out <= 0)
 
             for constr in self.cone_constr:
                 qmat.append([constr.right_var.first + constr.right_index] +

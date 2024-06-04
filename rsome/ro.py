@@ -1,5 +1,5 @@
 from .gcp import Model as GCPModel
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr, LMIConstr
+from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr, LMIConstr, IPCone
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import DecRule
 from .lp import RoAffine, RoConstr
@@ -186,7 +186,7 @@ class Model:
         ----------
         obj : RSOME expression, numeric constant
             Objective function involving random variables
-        *args
+        args
             Constraints or collections of constraints of random variables
             used for defining the uncertainty set
 
@@ -232,7 +232,7 @@ class Model:
         ----------
         obj : RSOME expression, numeric constant
             Objective function involving random variables
-        *args
+        args
             Constraints or collections of constraints of random variables
             used for defining the uncertainty set
 
@@ -275,9 +275,16 @@ class Model:
 
         Parameters
         ----------
-        *args : RSOME constraints, iterables
+        args : RSOME constraints, iterables
             Constraints or collections of constraints that the model
             subject to.
+
+        Returns
+        -------
+        constrs : RSOME constraints, iterables
+            Constraints or collections of constraints that are added to
+            the model. The returned linear or bound constraints can be 
+            used for duality analysis after the model is solved.
 
         Notes
         -----
@@ -293,7 +300,7 @@ class Model:
                 for piece in constr.pieces:
                     self.st(piece)
             elif isinstance(constr, (LinConstr, Bounds, CvxConstr,
-                                     ConeConstr, ExpConstr, KLConstr, LMIConstr)):
+                                     ConeConstr, ExpConstr, KLConstr, LMIConstr, IPCone)):
                 if (constr.model is not self.rc_model) or \
                         (constr.model.mtype != 'R'):
                     raise ValueError('Models mismatch.')
@@ -374,7 +381,7 @@ class Model:
 
         for constr in self.all_constr + more_roc:
             if isinstance(constr, (LinConstr, Bounds, CvxConstr, ConeConstr,
-                                   ExpConstr, KLConstr, LMIConstr)):
+                                   ExpConstr, KLConstr, LMIConstr, IPCone)):
                 self.rc_model.st(constr)
             if isinstance(constr, RoConstr):
                 if constr.support:
@@ -411,7 +418,7 @@ class Model:
         log : bool
             True for printing the log information. False for hiding the log
             information. So far the argument only applies to Gurobi, CPLEX,
-            and Mosek.
+            Mosek, and COPT.
         params : dict
             A dictionary that specifies parameters of the selected solver.
             So far the argument only applies to Gurobi, CPLEX, and Mosek.
@@ -432,29 +439,30 @@ class Model:
     def soc_solve(self, solver=None, degree=4, cuts=(-30, 60),
                   display=True, log=False, params={}):
         """
-        Solve the approximated SOC model with the selected solver interface.
+        Solve the conic model with the selected solver interface, where the
+        exponential cone constraints are approximated by second-order cone 
+        constraints.
 
         Parameters
         ----------
-            solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
-                      cpx_solver, grb_solver, msk_solver}
-                Solver interface used for model solution. Use default solver
-                if solver=None.
-            degree : int
-                The L-degree value for approximating exponential cone
-                constraints.
-            cuts : tuple of two integers
-                The lower and upper cut-off values for the SOC approximation
-                of exponential constraints.
-            display : bool
-                Display option of the solver interface.
-            log : bool
-                True for printing the log information. False for hiding the log
-                information. So far the argument only applies to Gurobi, CPLEX,
-                and Mosek.
-            params : dict
-                A dictionary that specifies parameters of the selected solver.
-                So far the argument only applies to Gurobi, CPLEX, and Mosek.
+        solver : {None, lpg_solver, clp_solver, ort_solver, eco_solver
+                  cpx_solver, grb_solver, msk_solver}
+            Solver interface used for model solution. Use default solver
+            if solver=None.
+        degree : int
+            The L-degree value for approximating exponential cone constraints.
+        cuts : tuple of two integers
+            The lower and upper cut-off values for the SOC approximation of
+            exponential constraints.
+        display : bool
+            Display option of the solver interface.
+        log : bool
+            True for printing the log information. False for hiding the log
+            information. So far the argument only applies to Gurobi, CPLEX,
+            Mosek, and COPT.
+        params : dict
+            A dictionary that specifies parameters of the selected solver.
+            So far the argument only applies to Gurobi, CPLEX, and Mosek.
         """
 
         formula = self.do_math().to_socp(degree, cuts)

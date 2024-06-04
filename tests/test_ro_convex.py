@@ -71,12 +71,6 @@ def test_norm_one(array, const):
     with pytest.raises(TypeError):
         rso.norm(x, 1) + const == 0
 
-    with pytest.raises(ValueError):
-        rso.norm(x, 3) + const == 0
-
-    with pytest.raises(ValueError):
-        rso.norm(x, '2') + const == 0
-
     constr = (a <= expr)
     cnum = constr.affine_out.size
     suffix = '' if cnum == 1 else 's'
@@ -146,6 +140,138 @@ def test_norm_two(array, const):
 
     with pytest.raises(TypeError):
         rso.norm(x, 2) + const == 0
+
+
+@pytest.mark.parametrize('array, const', [
+    (rd.rand(8), rd.rand()),
+    (rd.rand(8), rd.rand(5)),
+    (rd.rand(1), rd.rand(1))
+])
+def test_norm_three(array, const):
+
+    target = (array**3).sum()**(1/3) + const
+
+    m = ro.Model()
+    a = m.dvar()
+    x = m.dvar(array.shape)
+
+    expr1, expr2 = rso.norm(x, 3), x.norm(3)
+    assert (expr1.affine_in.linear.toarray() ==
+            expr2.affine_in.linear.toarray()).all()
+    assert (expr1.affine_in.const == expr2.affine_in.const).all()
+    assert (expr1.affine_out == expr2.affine_out).all()
+
+    expr = rso.norm(x, 3) + const
+    m.min(a)
+    m.st(a >= expr)
+    m.st(x == array)
+    m.solve(grb)
+
+    assert abs(m.get() - target.max()) < 1e-4
+    assert isinstance(expr, ro.Convex)
+    if target.shape == ():
+        assert expr.__repr__() == 'a general Lp-norm expression'
+    else:
+        shape_str = 'x'.join([str(dim) for dim in target.shape])
+        suffix = 's' if target.size > 1 else ''
+        assert expr.__repr__() == f'{shape_str} general Lp-norm expression{suffix}'
+
+    target = -(array**3).sum()**(1/3) + const
+
+    m = ro.Model()
+    a = m.dvar()
+    x = m.dvar(array.shape)
+
+    expr = - rso.norm(x, 3) + const
+    m.max(a)
+    m.st(a <= expr)
+    m.st(x == array)
+    m.solve(grb)
+
+    assert abs(m.get() - target.min()) < 1e-4
+    assert isinstance(expr, ro.Convex)
+    if target.shape == ():
+        assert expr.__repr__() == 'a general Lp-norm expression'
+    else:
+        shape_str = 'x'.join([str(dim) for dim in target.shape])
+        suffix = 's' if target.size > 1 else ''
+        assert expr.__repr__() == f'{shape_str} general Lp-norm expression{suffix}'
+
+    with pytest.raises(ValueError):
+        rso.norm(x, 3) + const >= 0
+
+    with pytest.raises(ValueError):
+        -rso.norm(x, 3) + const <= 0
+
+    with pytest.raises(TypeError):
+        rso.norm(x, 3) + const == 0
+
+
+@pytest.mark.parametrize('array, const', [
+    (rd.rand(8), rd.rand()),
+    (rd.rand(8), rd.rand(5)),
+    (rd.rand(1), rd.rand(1))
+])
+def test_norm_fractional(array, const):
+
+    p = (7, 3)
+    degree = p[0] / p[1]
+    target = (array**degree).sum()**(1/degree) + const
+
+    m = ro.Model()
+    a = m.dvar()
+    x = m.dvar(array.shape)
+
+    expr1, expr2 = rso.norm(x, p), x.norm(p)
+    assert (expr1.affine_in.linear.toarray() ==
+            expr2.affine_in.linear.toarray()).all()
+    assert (expr1.affine_in.const == expr2.affine_in.const).all()
+    assert (expr1.affine_out == expr2.affine_out).all()
+
+    expr = rso.norm(x, p) + const
+    m.min(a)
+    m.st(a >= expr)
+    m.st(x == array)
+    m.solve(grb)
+
+    assert abs(m.get() - target.max()) < 1e-4
+    assert isinstance(expr, ro.Convex)
+    if target.shape == ():
+        assert expr.__repr__() == 'a general Lp-norm expression'
+    else:
+        shape_str = 'x'.join([str(dim) for dim in target.shape])
+        suffix = 's' if target.size > 1 else ''
+        assert expr.__repr__() == f'{shape_str} general Lp-norm expression{suffix}'
+
+    target = -(array**degree).sum()**(1/degree) + const
+
+    m = ro.Model()
+    a = m.dvar()
+    x = m.dvar(array.shape)
+
+    expr = -rso.norm(x, p) + const
+    m.max(a)
+    m.st(a <= expr)
+    m.st(x == array)
+    m.solve(grb)
+
+    assert abs(m.get() - target.min()) < 1e-4
+    assert isinstance(expr, ro.Convex)
+    if target.shape == ():
+        assert expr.__repr__() == 'a general Lp-norm expression'
+    else:
+        shape_str = 'x'.join([str(dim) for dim in target.shape])
+        suffix = 's' if target.size > 1 else ''
+        assert expr.__repr__() == f'{shape_str} general Lp-norm expression{suffix}'
+
+    with pytest.raises(ValueError):
+        rso.norm(x, p) + const >= 0
+
+    with pytest.raises(ValueError):
+        -rso.norm(x, p) + const <= 0
+
+    with pytest.raises(TypeError):
+        rso.norm(x, p) + const == 0
 
 
 @pytest.mark.parametrize('array, const', [
@@ -528,6 +654,103 @@ def test_exp(xvalue):
 
     with pytest.raises(ValueError):
         rso.exp(x) >= y
+
+
+@pytest.mark.parametrize('xvalue', [
+    rd.rand(3, 5),
+    rd.rand(2, 3, 2)
+])
+def test_power(xvalue):
+
+    shape = xvalue.shape
+    m = ro.Model()
+    x = m.dvar(shape)
+    y = m.dvar(shape)
+    p = np.arange(1, shape[-1]+1)
+
+    m.min(y.sum())
+    m.st(x == xvalue)
+    m.st(3*y + 2.3 >= rso.power(2.1*x + 1.5, p))
+
+    m.solve(eco)
+    target = ((np.power(2.1*xvalue + 1.5, p) - 2.3) / 3).sum()
+
+    assert abs(m.get() - target) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    m = ro.Model()
+    x = m.dvar(shape)
+    y = m.dvar(shape)
+    q = np.arange(2, shape[-1]+2)
+
+    m.min(y.sum())
+    m.st(x == xvalue)
+    m.st(y >= rso.power(2.1*x + 1.5, p*2+3, q))
+
+    m.solve(eco)
+    target = np.power(2.1*xvalue + 1.5, (p*2+3)/q).sum()
+
+    assert abs(m.get() - target) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    with pytest.raises(ValueError):
+        rso.power(x, p*2+3, q) >= y
+
+
+@pytest.mark.parametrize('array, const', [
+    (rd.rand(5), rd.rand()),
+    (rd.rand(5), rd.rand(3)),
+    (rd.rand(1), rd.rand(1))
+])
+def test_gmean(array, const):
+
+    shape = array.shape
+    m = ro.Model()
+    x = m.dvar(shape)
+    y = m.dvar()
+
+    m.max(y)
+    m.st(x == array)
+    m.st(3*y + const <= rso.gmean(2.1*x + 1.5))
+
+    m.solve(eco)
+    target = ((np.prod(2.1*array + 1.5) ** (1/array.size) - const) / 3).min()
+
+    assert abs(m.get() - target) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    m = ro.Model()
+    x = m.dvar(shape)
+    y = m.dvar()
+    beta = np.arange(1, array.size+1)
+
+    m.max(y)
+    m.st(x == array)
+    m.st(3*y + const <= rso.gmean(2.1*x + 1.5, beta))
+
+    m.solve(eco)
+    target = ((np.prod((2.1*array + 1.5) ** beta) ** (1/beta.sum()) - const) / 3).min()
+
+    assert abs(m.get() - target) < 1e-4
+    primal_obj = m.do_math().solve(eco).objval
+    dual_obj = m.do_math(primal=False).solve(eco).objval
+    assert abs(primal_obj + dual_obj) < 1e-4
+
+    with pytest.raises(ValueError):
+        rso.gmean(x, beta) <= y
+    
+    with pytest.raises(ValueError):
+        rso.gmean(x, beta[:-1]) >= y
+    
+    with pytest.raises(ValueError):
+        X = m.dvar((3, 5))
+        rso.gmean(X) >= y
 
 
 rd.seed(2)

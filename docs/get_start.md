@@ -125,12 +125,14 @@ The RSOME package also supports several functions for specifying convex expressi
 |`entropy(x)`|The entropic expression `-sum(x*log(x))`. |`x` must be a vector.|
 |`exp(x)`|The element-wise natural exponential of `x`. | |
 |`fnorm(x1, x2, ...)`| The Frobenius norm expressed as `sqrt(sumsqr(x1, x2, ...))` | No need to match the shapes of `x1`, `x2`, ... | 
+|`gmean(x, beta)`| The weighted geometric mean expressed as `prod(x ** beta) ** (1/sum(beta))` | The weights `beta` must be all positive integers. The default value is an array of all ones. | 
 |`log(x)`|The element-wise natural logarithm of `x`.| |
-|`norm(x, degree)`| The norm of the `x`. |`x` must be a vector. `degree` can be 1, 2, or `numpy.inf`. The default value is `degree=2`, indicating an Euclidean norm. |
+|`norm(x, degree)`| The norm of the `x`. |`x` must be a vector. `degree` can be positive integers or fractional numbers larger than one,  or `numpy.inf`, or a tuple of two integers. The default value is `degree=2`, indicating an Euclidean norm. |
 |`pexp(x, y)`|The element-wise perspective natural exponential `y * exp(x/y)`. | |
 |`plog(x, y)`|The element-wise perspective natural logarithm `y * log(x/y)`. | |
+|`power(x, p, q)`|The element-wise exponentiation `x ** (p/q)`. | Both `p` and `q` must be positive integers and `q` must be larger than `q`. The default value of `q` is one. |
 |`quad(x, Q)`|The quadratic term `x @ Q @ x`. |`x` must be a 1-D array, and `Q` must be a positive semidefinite matrix (2-D array).|
-|`softplus(x)`|The element-wise softplus expression `log(1 + exp(x))`. | |
+|`softplus(x)`|The element-wise softplus term `log(1 + exp(x))`. | |
 |`square(x)`|The element-wise squared values of `x`. | |
 |`sumsqr(x1, x2, ...)`|The sum of squares of elements in arrays `x1`, `x2`, ... | No need to match the shapes of `x1`, `x2`, ... |
 

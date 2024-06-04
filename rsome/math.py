@@ -8,7 +8,7 @@ from numbers import Real
 import numpy as np
 
 
-def norm(affine, degree=2):
+def norm(affine, degree=2, method=None):
     """
     Return the first, second, or infinity norm of a 1-D array.
 
@@ -26,7 +26,59 @@ def norm(affine, degree=2):
         The norm of the given array.
     """
 
-    return affine.norm(degree)
+    return affine.norm(degree, method)
+
+
+def pnorm(affine, degree=2, method=None):
+    """
+    Return the p-norm of a 1-D array, where p is a real number larger
+    than 1. 
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. The array must be 1-D.
+    degree : int, float, numpy.inf
+        Order of the norm function. It must be a real number larger
+        than 1.
+    method : {'soc', 'exc'}
+        The reformulation method. 'soc' for reformulating the p-norm
+        constraint into second-order conic constraints. 'exc' for 
+        reformulating the p-norm constraint into exponential conic
+        constraints.
+
+    Returns
+    -------
+    out : Convex
+        The norm of the given array.
+    """
+
+    return affine.pnorm(degree, method)
+
+
+def gmean(affine, beta=None):
+    """
+    Return the weighted geometric mean of a 1-D array. The weights 
+    are specified by an array-like structure beta. It is expressed
+    as prod(affine ** beta) ** (1/sum(beta))
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array. The array must be 1-D.
+    beta : None of an iterable of integers.
+        The weight of each term in the geometric mean expression. Each
+        weight must be an integer no smaller than one. When beta is None
+        (by default), all weights are ones. 
+
+    Returns
+    -------
+    out : Convex
+        A convex expression representing the geometric mean of the given
+        array. 
+    """
+
+    return affine.gmean(beta)
 
 
 def fnorm(*args):
@@ -72,6 +124,29 @@ def square(affine):
     """
 
     return affine.to_affine().square()
+
+
+def power(affine, p, q=1):
+    """
+    Return the element-wise power of an array x, expressed
+    as abs(affine) ** (p/q)
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expression
+        Input array.
+    p : an integer or an array of integers.
+        Exponent values.
+    q : an integer or an array of integers.
+        Denominators of exponent values
+
+    Returns
+    -------
+    out : Convex
+        The element-wise powers of the given array
+    """
+
+    return affine.to_affine().power(p, q)
 
 
 def sumsqr(*args):
@@ -486,3 +561,43 @@ def triu(affine, k):
     """
 
     return affine.triu(k)
+
+def logdet(affine):
+    """
+    Return the log-determinant of a positive semidefinite matrix
+    expressed as a two-dimensional array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. It must be a 2-D array.
+
+    Returns
+    -------
+    out : Affine
+        The scalar representing the log-determinant of the given
+        two-dimensional array.
+    """
+
+    return affine.to_affine().logdet()
+
+def rootdet(affine):
+    """
+    Return the root-determinant of a positive semidefinite matrix
+    expressed as a two-dimensional array. The root-determinant is
+    expressed as (det(A))**(1/L), where L is the dimension of the
+    two-dimensinoal array.
+
+    Parameters
+    ----------
+    affine : an array of variables or affine expressions.
+        Input array. It must be a 2-D array.
+
+    Returns
+    -------
+    out : Affine
+        The scalar representing the root-determinant of the given
+        two-dimensional array.
+    """
+
+    return affine.to_affine().rootdet()

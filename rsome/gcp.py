@@ -1,5 +1,6 @@
-from .lp import Affine, CvxConstr, PCvxConstr, ExpConstr, KLConstr, LMIConstr
+from .lp import Affine, CvxConstr, PCvxConstr, ExpConstr, KLConstr, LMIConstr, IPCone
 from .lp import def_sol, Solution
+from .lp import rstack
 from .socp import Model as SOCModel
 from .socp import SOCProg
 import numpy as np
@@ -20,6 +21,7 @@ class Model(SOCModel):
         self.psd_vars = []
         self.exp_constr = []
         self.other_constr = []
+        self.det_constr = []
 
     def reset(self):
 
@@ -31,6 +33,7 @@ class Model(SOCModel):
         self.bounds = []
         self.aux_constr = []
         self.aux_bounds = []
+        self.aux_ipc = []
         self.cvx_constr = []
 
     def st(self, constr):
@@ -41,16 +44,20 @@ class Model(SOCModel):
         elif isinstance(constr, ExpConstr):
             self.exp_constr.append(constr)
         elif isinstance(constr, CvxConstr):
-            if constr.xtype in 'XLPF':
+            if constr.xtype in 'XLPFN':
                 self.other_constr.append(constr)
+            elif constr.xtype in 'OD':
+                self.det_constr.append(constr)
             else:
                 super().st(constr)
         elif isinstance(constr, KLConstr):
             self.other_constr.append(constr)
         elif isinstance(constr, LMIConstr):
             self.other_constr.append(constr)
-            expr = Affine(constr.model, constr.linear, constr.const)
-            super().st(expr == expr.T)
+            ##expr = Affine(constr.model, constr.linear, constr.const)
+            #super().st(expr == expr.T)
+            ##dim = expr.shape[0]
+            ##super().st(expr[np.triu_indices(dim, 1)] == expr.T[np.triu_indices(dim, 1)])
         else:
             super().st(constr)
 
@@ -90,18 +97,52 @@ class Model(SOCModel):
                 self.auxs = []
                 self.aux_constr = []
                 self.aux_bounds = []
+                self.aux_ipc = []
                 self.last = self.vars[-1].first + self.vars[-1].size
 
             more_exp = []
+            more_others = []
+            more_det = []
             if self.obj is not None:
                 obj_constr = (self.vars[0] - self.sign * self.obj >= 0)
                 if isinstance(obj_constr, CvxConstr):
                     constr = obj_constr
                     if constr.xtype in 'XLPF':
-                        self.other_constr.append(constr)
+                        more_others.append(constr)
+                    elif constr.xtype in 'OD':
+                        more_det.append(constr)
+            
+            for constr in self.det_constr + more_det:
+                if constr.xtype == 'O':
+                    affine_in = constr.affine_in
+                    affine_out = constr.affine_out * (1/constr.multiplier)
+                    dim = affine_in.shape[0]
 
+                    Zmat = self.dvar((dim, dim), aux=True).to_affine().tril()
+                    vec = self.dvar(dim, aux=True)
+
+                    self.aux_constr.append(vec.sum() - affine_out >= 0)
+                    more_others.append(vec <= Zmat.diag().log())
+                    more_others.append(rstack([affine_in, Zmat], 
+                                              [Zmat.T, Zmat.diag(fill=True)]) >> 0)
+                    more_others.append(affine_in >> 0)
+                elif constr.xtype == 'D':
+                    affine_in = constr.affine_in
+                    affine_out = constr.affine_out * (1/constr.multiplier)
+                    dim = affine_in.shape[0]
+
+                    Zmat = self.dvar((dim, dim), aux=True).to_affine().tril()
+                    val = self.dvar(1, aux=True)
+
+                    self.aux_constr.append(val - affine_out >= 0)
+                    # more_others.append(vec <= Zmat.diag().log())
+                    self.aux_ipc.append(IPCone(val, Zmat.diag(), [1]*dim))
+                    more_others.append(rstack([affine_in, Zmat], 
+                                              [Zmat.T, Zmat.diag(fill=True)]) >> 0)
+                    more_others.append(affine_in >> 0)
+                    
             lmi = []
-            for constr in self.other_constr:
+            for constr in self.other_constr + more_others:
                 if isinstance(constr, KLConstr):
                     ns = constr.p.size
                     aux_var = self.dvar(ns, aux=True)
@@ -178,10 +219,38 @@ class Model(SOCModel):
                                                         exprs[1],
                                                         aux_var[s, 1], 1)
                             self.exp_constr.append(exp_cone_constr)
+                    elif constr.xtype == 'N':
+                        affine_in = constr.affine_in
+                        affine_out = constr.affine_out * (1/constr.multiplier)
+                        order = constr.params
+                        dim_in = affine_in.size
+                        aux_xvar = self.dvar(dim_in).to_affine()
+                        aux_zvar = self.dvar(dim_in).to_affine()
+                        aux_rvar = self.dvar(dim_in).to_affine()
+                        aux_yvar = self.dvar().to_affine()
+                        self.aux_constr.append(affine_in <= aux_xvar)
+                        self.aux_constr.append(-affine_in <= aux_xvar)
+                        self.aux_constr.append(aux_zvar.sum() <= aux_yvar)
+                        self.aux_constr.append(aux_yvar + affine_out <= 0)
+                        for s in range(dim_in):
+                            exp_cone_constr = ExpConstr(constr.model,
+                                                        -aux_rvar[s] * (1/(order - 1)),
+                                                        aux_yvar,
+                                                        aux_xvar[s])
+                            self.exp_constr.append(exp_cone_constr)
+                            exp_cone_constr = ExpConstr(constr.model,
+                                                        aux_rvar[s],
+                                                        aux_zvar[s],
+                                                        aux_xvar[s])
+                            self.exp_constr.append(exp_cone_constr)
                 elif isinstance(constr, LMIConstr):
                     lmi.append({'linear': constr.linear,
                                 'const': constr.const,
                                 'dim': constr.dim})
+                    expr = Affine(constr.model, constr.linear, constr.const)
+                    dim = expr.shape[0]
+                    tridx = np.triu_indices(dim, 1)
+                    self.aux_constr.append(expr[tridx] == expr.T[tridx])
 
             xmat = []
             for constr in self.exp_constr + more_exp:
