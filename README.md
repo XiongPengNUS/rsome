@@ -45,7 +45,7 @@ The RSOME package transforms robust or distributionally robust optimization mode
 |[Gurobi](https://www.gurobi.com/documentation/9.0/quickstart_mac/ins_the_anaconda_python_di.html)| Commercial | >= 9.1.0 | `grb_solver` | Yes | No | No |
 |[Mosek](https://docs.mosek.com/9.2/pythonapi/install-interface.html) | Commercial | >= 10.0.44 | `msk_solver` | Yes | Yes | Yes |
 |[CPLEX](https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.8.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/set_up/Python_setup.html) | Commercial | >= 12.9.0.0 | `cpx_solver` | Yes | No | No |
-|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 7.0.3 | `cpt_solver` | Yes | No | Yes |
+|[COPT](https://www.shanshu.ai/copt) | Commercial | >= 7.2.2 | `cpt_solver` | Yes | Yes | Yes |
 
 ## Getting started <a id="section4"></a>
 
