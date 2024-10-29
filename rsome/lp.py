@@ -3613,7 +3613,7 @@ class DecVar(Vars):
                 sol_vec = np.array(dro_model.solution.x)[sp.col]
                 sol_indices = sp.row
 
-                coeff = np.array([np.NaN] * sp.shape[0])
+                coeff = np.array([np.nan] * sp.shape[0])
                 coeff[sol_indices] = sol_vec
 
                 rv_shape = rvar.to_affine().shape
@@ -5205,7 +5205,7 @@ class DecRule:
             if rvar.model.mtype != 'S':
                 raise ValueError('The input is not a random variable.')
             ldr_row, ldr_col = self.size, self.model.rc_model.vars[-1].last
-            ldr_coeff = np.array([[np.NaN] * ldr_col] * ldr_row)
+            ldr_coeff = np.array([[np.nan] * ldr_col] * ldr_row)
             rand_ind = rvar.get_ind()
             row_ind, col_ind = np.where(self.depend == 1)
             ldr_coeff[row_ind, col_ind] = self.var_coeff.get()
