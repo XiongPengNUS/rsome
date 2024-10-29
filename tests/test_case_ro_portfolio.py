@@ -20,7 +20,7 @@ def test_ro_model():
     z = model.rvar(n)
 
     model.maxmin((p + delta*z) @ x,
-                 rso.norm(z, np.infty) <= 1,
+                 rso.norm(z, np.inf) <= 1,
                  rso.norm(z, 1) <= Gamma)
     model.st(sum(x) == 1)
     model.st(x >= 0)
@@ -59,7 +59,7 @@ def test_dro_model():
     x = model.dvar(n)
     z = model.rvar(n)
     fset = model.ambiguity()
-    fset.suppset(rso.norm(z, np.infty) <= 1,
+    fset.suppset(rso.norm(z, np.inf) <= 1,
                  rso.norm(z, 1) <= Gamma)
 
     model.maxinf((p + delta*z) @ x, fset)
