@@ -713,9 +713,6 @@ model.solve(cpx)
 model.solve(cpt)
 ```
 
-    Cardinal Optimizer v7.0.3. Build date Nov 14 2023
-    Copyright Cardinal Operations 2023. All Rights Reserved
-
     Being solved by COPT...
     Solution status: 1
     Running time: 0.0028s
@@ -723,9 +720,9 @@ model.solve(cpt)
 It can be seen that as the model is solved, a three-line message is displayed in terms of 1) the solver used for solving the model; 2) the solution status; and 3) the solution time. This three-line message can be disabled by specifying the second argument `display` to be `False`.
 
 The third argument `params` is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The `params` argument is a `dict` type object in the format of `{<param1>: <value1>, <param2>: <value2>, <param3>: <value3>, ..., <paramk>: <valuek>}`. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.
-- Gurobi parameters: [https://www.gurobi.com/documentation/9.1/refman/parameters.html](https://www.gurobi.com/documentation/9.1/refman/parameters.html)
+- Gurobi parameters: [https://www.gurobi.com/documentation/current/refman/parameters.html](https://www.gurobi.com/documentation/current/refman/parameters.html)
 - MOSEK parameters: [https://docs.mosek.com/latest/pythonapi/parameters.html](https://docs.mosek.com/latest/pythonfusion/parameters.html)
-- CPLEX parameters: [https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters](https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters)
+- CPLEX parameters: [https://ibmdecisionoptimization.github.io/docplex-doc/cp/docplex.cp.parameters.py.html](https://ibmdecisionoptimization.github.io/docplex-doc/cp/docplex.cp.parameters.py.html)
 
 
 For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be `1e-3`.

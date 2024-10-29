@@ -1,5 +1,6 @@
 from .gcp import Model as GCPModel
-from .lp import LinConstr, Bounds, CvxConstr, ConeConstr, ExpConstr, KLConstr, LMIConstr, IPCone
+from .lp import LinConstr, Bounds, CvxConstr, ConeConstr
+from .lp import ExpConstr, KLConstr, LMIConstr, IPCone
 from .lp import Vars, VarSub, Affine, Convex
 from .lp import DecRule
 from .lp import RoAffine, RoConstr
@@ -283,7 +284,7 @@ class Model:
         -------
         constrs : RSOME constraints, iterables
             Constraints or collections of constraints that are added to
-            the model. The returned linear or bound constraints can be 
+            the model. The returned linear or bound constraints can be
             used for duality analysis after the model is solved.
 
         Notes
@@ -440,7 +441,7 @@ class Model:
                   display=True, log=False, params={}):
         """
         Solve the conic model with the selected solver interface, where the
-        exponential cone constraints are approximated by second-order cone 
+        exponential cone constraints are approximated by second-order cone
         constraints.
 
         Parameters

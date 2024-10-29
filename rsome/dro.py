@@ -607,7 +607,7 @@ class Model:
                 if isinstance(aff_out, RoAffine):
                     aff_out = aff_out.affine
                 ew_constr = CvxConstr(aff_in.model, aff_in, aff_out,
-                                      constr.multiplier, constr.xtype, 
+                                      constr.multiplier, constr.xtype,
                                       params=constr.params)
             elif isinstance(constr, DecExpConstr):
                 if isinstance(drule, RoAffine):

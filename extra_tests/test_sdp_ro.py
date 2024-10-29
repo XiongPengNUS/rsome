@@ -1,6 +1,7 @@
 import rsome as rso
 from rsome import ro
 from rsome import msk_solver as msk
+from rsome import cpt_solver as cpt
 import numpy as np
 
 
@@ -25,4 +26,7 @@ def test_log_det_ro():
     m.solve(msk)
 
     objval = np.linalg.det(A)
+    assert abs(objval - np.exp(m.get())) < 1e-5
+
+    m.solve(cpt)
     assert abs(objval - np.exp(m.get())) < 1e-5

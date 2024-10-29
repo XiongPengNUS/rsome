@@ -134,26 +134,26 @@ class Model(LPModel):
                         self.aux_constr.append(aux2 + constr.affine_out <= 0)
                         self.aux_constr.append(aux1.sum() <= aux2)
                         for j in range(constr.affine_in.size):
-                            more_cvx.extend(IPCone(affine_in[j], 
+                            more_cvx.extend(IPCone(affine_in[j],
                                                    concat((aux1[j], aux2)), beta).to_soc())
                     elif constr.xtype == 'T':
                         p, q = constr.params
                         affine_in = constr.affine_in
                         affine_out = constr.affine_out * (1/constr.multiplier)
-                        
-                        bd = np.broadcast(np.arange(affine_in.size).reshape(affine_in.shape), p, q)
+                        this_affine = np.arange(affine_in.size).reshape(affine_in.shape)
+                        bd = np.broadcast(this_affine, p, q)
                         size = bd.size
                         aux1 = self.dvar((size, 1), aux=True)
                         aux2 = self.dvar((size, 1), aux=True)
                         affine_array = affine_in.flatten()
-                        
+
                         for idx_var, (idx_affine, item_p, item_q) in enumerate(zip(*bd.iters)):
                             if item_p == item_q:
                                 self.aux_constr.append(affine_array[idx_affine] <= aux1[idx_var])
                                 self.aux_constr.append(affine_array[idx_affine] >= -aux1[idx_var])
                             else:
                                 beta = [item_q, item_p - item_q]
-                                more_cvx.extend(IPCone(affine_array[idx_affine], 
+                                more_cvx.extend(IPCone(affine_array[idx_affine],
                                                        concat((aux1[idx_var], aux2[idx_var])),
                                                        beta).to_soc())
                         self.aux_constr.append(aux2 == 1)
@@ -214,7 +214,7 @@ class Model(LPModel):
                     else:
                         self.aux_constr.append(bounds)
                     qmat.append([aux3.first] + [aux1.first] +
-                                list(aux2.first + np.arange(aux2.size)))    
+                                list(aux2.first + np.arange(aux2.size)))
                 elif constr.xtype == 'A':
                     affine_in = constr.affine_in * constr.multiplier
                     self.aux_constr.append(affine_in +
@@ -287,8 +287,8 @@ class Model(LPModel):
                 obj = np.concatenate((dual_lp.obj, np.zeros(extra_nvar)))
                 vtype = np.concatenate((dual_lp.vtype, np.array(['C']*extra_nvar)))
 
-                ub = np.concatenate((dual_lp.ub, np.ones(extra_nvar)*np.infty))
-                extra_lb = - np.ones(extra_nvar)*np.infty
+                ub = np.concatenate((dual_lp.ub, np.ones(extra_nvar)*np.inf))
+                extra_lb = - np.ones(extra_nvar)*np.inf
                 ind_pos = 0
                 for qc in primal.qmat:
                     extra_lb[ind_pos] = 0

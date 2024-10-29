@@ -54,10 +54,6 @@ class Model(SOCModel):
             self.other_constr.append(constr)
         elif isinstance(constr, LMIConstr):
             self.other_constr.append(constr)
-            ##expr = Affine(constr.model, constr.linear, constr.const)
-            #super().st(expr == expr.T)
-            ##dim = expr.shape[0]
-            ##super().st(expr[np.triu_indices(dim, 1)] == expr.T[np.triu_indices(dim, 1)])
         else:
             super().st(constr)
 
@@ -111,7 +107,7 @@ class Model(SOCModel):
                         more_others.append(constr)
                     elif constr.xtype in 'OD':
                         more_det.append(constr)
-            
+
             for constr in self.det_constr + more_det:
                 if constr.xtype == 'O':
                     affine_in = constr.affine_in
@@ -123,7 +119,7 @@ class Model(SOCModel):
 
                     self.aux_constr.append(vec.sum() - affine_out >= 0)
                     more_others.append(vec <= Zmat.diag().log())
-                    more_others.append(rstack([affine_in, Zmat], 
+                    more_others.append(rstack([affine_in, Zmat],
                                               [Zmat.T, Zmat.diag(fill=True)]) >> 0)
                     more_others.append(affine_in >> 0)
                 elif constr.xtype == 'D':
@@ -135,12 +131,11 @@ class Model(SOCModel):
                     val = self.dvar(1, aux=True)
 
                     self.aux_constr.append(val - affine_out >= 0)
-                    # more_others.append(vec <= Zmat.diag().log())
                     self.aux_ipc.append(IPCone(val, Zmat.diag(), [1]*dim))
-                    more_others.append(rstack([affine_in, Zmat], 
+                    more_others.append(rstack([affine_in, Zmat],
                                               [Zmat.T, Zmat.diag(fill=True)]) >> 0)
                     more_others.append(affine_in >> 0)
-                    
+
             lmi = []
             for constr in self.other_constr + more_others:
                 if isinstance(constr, KLConstr):

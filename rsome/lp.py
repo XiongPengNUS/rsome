@@ -580,8 +580,6 @@ class Model:
                                   self.lin_constr + self.aux_constr]
 
                     sense_list = [item.sense
-                                  #if isinstance(item.sense, np.ndarray) else
-                                  #np.array([item.sense])
                                   for item in self.lin_constr + self.aux_constr]
 
                 const = np.concatenate(tuple(const_list))
@@ -596,8 +594,8 @@ class Model:
                                     else np.array(list(item.vtype))
                                     for item in self.vars + self.auxs])
 
-            ub = np.array([np.infty] * self.last)
-            lb = np.array([-np.infty] * self.last)
+            ub = np.array([np.inf] * self.last)
+            lb = np.array([-np.inf] * self.last)
 
             for b in self.bounds + self.aux_bounds:
                 if b.btype == 'U':
@@ -631,9 +629,9 @@ class Model:
             primal_const = primal.const
             primal_sense = primal.sense
             indices_ub = np.where((primal.ub != 0) &
-                                  (primal.ub != np.infty))[0]
+                                  (primal.ub != np.inf))[0]
             indices_lb = np.where((primal.lb != 0) &
-                                  (primal.lb != - np.infty))[0]
+                                  (primal.lb != - np.inf))[0]
             indices_fixed = np.where(primal.lb == primal.ub)[0]
 
             nub = len(indices_ub)
@@ -673,12 +671,12 @@ class Model:
             dual_sense = np.zeros(dual_linear.shape[0])
             dual_sense[indices_free] = 1
             dual_ub = np.zeros(dual_linear.shape[1])
-            # dual_lb = - np.ones(ndv) * np.infty
-            dual_lb = - np.array([np.infty] * ndv)
+            # dual_lb = - np.ones(ndv) * np.inf
+            dual_lb = - np.array([np.inf] * ndv)
 
             indices_eq = np.where(primal_sense == 1)[0]
             if len(indices_eq):
-                dual_ub[indices_eq] = np.infty
+                dual_ub[indices_eq] = np.inf
 
             if len(indices_neg) > 0:
                 dual_linear[indices_neg, :] = - dual_linear[indices_neg, :]
@@ -938,11 +936,11 @@ class Vars:
         """
 
         return self.to_affine().norm(degree, method)
-    
+
     def pnorm(self, degree, method=None):
         """
         Return the p-norm of a 1-D array, where p is a real number
-        larger than 1. 
+        larger than 1.
 
         Refer to `rsome.math.pnorm` for full documentation
 
@@ -952,10 +950,10 @@ class Vars:
         """
 
         return self.to_affine().pnorm(degree, method)
-    
+
     def gmean(self, beta=None):
         """
-        Return the weighted geometric mean of a 1-D array. The weights 
+        Return the weighted geometric mean of a 1-D array. The weights
         are specified by an array-like structure beta. It is expressed
         as prod(affine ** beta) ** (1/sum(beta))
 
@@ -980,7 +978,7 @@ class Vars:
         """
 
         return self.to_affine().square()
-    
+
     def power(self, p, q=1):
         """
         Return the element-wise integer power of the given affine
@@ -1152,7 +1150,7 @@ class Vars:
         """
 
         return self.to_affine().trace()
-    
+
     def logdet(self):
         """
         Return the log-determinant of a positive semidefinite matrix
@@ -1166,7 +1164,7 @@ class Vars:
         """
 
         return self.to_affine().logdet()
-    
+
     def rootdet(self):
         """
         Return the root-determinant of a positive semidefinite matrix
@@ -1414,24 +1412,22 @@ class VarSub(Vars):
 
     def __le__(self, other):
 
-        upper = super().__le__(other)
-        if isinstance(upper, Bounds):
+        if isinstance(other, Real):
+            upper = upper = super().__le__(other)
             indices = self.indices.reshape((self.indices.size, ))
             bound_indices = upper.indices.reshape((upper.indices.size, ))[indices]
             bound_values = upper.values.reshape(upper.values.size)[indices]
-
             return Bounds(upper.model, bound_indices, bound_values, 'U')
         else:
             return self.to_affine().__le__(other)
 
     def __ge__(self, other):
 
-        lower = super().__ge__(other)
-        if isinstance(lower, Bounds):
+        if isinstance(other, Real):
+            lower = super().__ge__(other)
             indices = self.indices.reshape((self.indices.size, ))
             bound_indices = lower.indices.reshape((lower.indices.size, ))[indices]
             bound_values = lower.values.reshape((lower.indices.size, ))[indices]
-
             return Bounds(lower.model, bound_indices, bound_values, 'L')
         else:
             return self.to_affine().__ge__(other)
@@ -1701,18 +1697,18 @@ class Affine:
         new_shape = ()
         if degree == 1:
             return Convex(self, np.zeros(new_shape), 'M', 1)
-        elif degree == np.infty or degree == 'inf':
+        elif degree == np.inf or degree == 'inf':
             return Convex(self, np.zeros(new_shape), 'I', 1)
         elif degree == 2:
             return Convex(self, np.zeros(new_shape), 'E', 1)
         else:
             # raise ValueError('Invalid norm order for the array.')
             return self.pnorm(degree, method)
-    
+
     def pnorm(self, degree, method=None):
         """
         Return the p-norm of a 1-D array, where p is a real number
-        larger than 1. 
+        larger than 1.
 
         Refer to `rsome.math.pnorm` for full documentation
 
@@ -1734,7 +1730,7 @@ class Affine:
                 method = 'exc'
             else:
                 raise TypeError('The degree parameter must be a real number.')
-        
+
         if isinstance(degree, Iterable):
             a, b = degree
             if a <= b:
@@ -1746,7 +1742,7 @@ class Affine:
                 raise ValueError('The degree parameter must be larger than 1.')
         else:
             raise TypeError('The degree parameter can only one real number or two integers.')
-        
+
         if method == 'soc':
             if not isinstance(degree, (int, Iterable)):
                 raise TypeError('Unsupported degree for second-order conic expressions.')
@@ -1758,10 +1754,10 @@ class Affine:
             return Convex(self, np.zeros(new_shape), 'N', 1, params=degree)
         else:
             raise ValueError("The method can only be 'soc' or 'exc'.")
-    
+
     def gmean(self, beta=None):
         """
-        Return the weighted geometric mean of a 1-D array. The weights 
+        Return the weighted geometric mean of a 1-D array. The weights
         are specified by an array-like structure beta. It is expressed
         as prod(affine ** beta) ** (1/sum(beta))
 
@@ -1807,7 +1803,7 @@ class Affine:
         shape = self.shape
 
         return Convex(self.reshape((size,)), np.zeros(shape), 'S', 1)
-    
+
     def power(self, p, q=1):
         """
         Return the element-wise integer power of the given affine
@@ -1821,16 +1817,16 @@ class Affine:
         """
 
         p_array, q_array = np.array(p), np.array(q)
-        
+
         if (p_array == q_array).all():
             return self.__abs__()
         elif (p_array < q_array).any():
             raise ValueError('Exponent values must be no smaller than one.')
-        
+
         if (p_array % p_array.astype(int) > 0).any():
             raise TypeError('RSOME only supports integer exponents.')
         if (q_array % q_array.astype(int) > 0).any():
-            raise TypeError('RSOME only supports integer exponents.')    
+            raise TypeError('RSOME only supports integer exponents.')
 
         shape = np.broadcast(np.zeros(self.shape), p_array, q_array).shape
 
@@ -2076,7 +2072,7 @@ class Affine:
                 q = q.reshape(affine.shape)
 
         return KLConstr(affine, q, r)
-    
+
     def logdet(self):
         """
         Return the log-determinant of a positive semidefinite matrix
@@ -2092,7 +2088,7 @@ class Affine:
         new_shape = ()
 
         return Convex(self, np.zeros(new_shape), 'O', -1)
-    
+
     def rootdet(self):
         """
         Return the root-determinant of a positive semidefinite matrix
@@ -3209,9 +3205,9 @@ class KLConstr:
 
 
 class IPCone:
-    
+
     def __init__(self, x, r, beta):
-        
+
         if x.model != r.model:
             raise ValueError('Model mismatch.')
         self.model = x.model
@@ -3221,28 +3217,28 @@ class IPCone:
         self.right = r.flatten()
         if self.right.size != len(beta):
             raise ValueError('Variable dimension mismatches degrees.')
-        
+
         self.beta = list(beta)
-        
+
         self.branches = None
-    
+
     def __repr__(self):
-        
+
         return f"betas: {self.beta}"
-    
+
     def __str__(self):
-        
+
         return self.__repr__()
-    
+
     def to_pot(self):
-        
+
         model = self.model
-        
+
         beta = self.beta.copy()
         degree = sum(beta)
-        
+
         xbeta = int(2 ** np.ceil(np.log2(degree)) - degree)
-        
+
         if xbeta > 0:
             s = model.dvar(aux=True).flatten()
             right = concat((self.right, s))
@@ -3250,16 +3246,16 @@ class IPCone:
             return IPCone(s, right, beta), [s >= abs(self.left)]
         else:
             return IPCone(self.left, self.right, beta), []
-    
+
     def split(self):
-        
+
         model = self.model
-        
+
         beta = self.beta
         degree = sum(beta)
         left = self.left
         right = self.right
-        
+
         if len(beta) == 2 and beta[0] == beta[1]:
             return [left.rsocone(right[0], right[1])]
         elif max(beta) >= degree/2:
@@ -3272,18 +3268,18 @@ class IPCone:
                 idx = list(range(len(beta)))
                 idx.remove(index)
                 right1 = right[idx]
-                
+
             u = model.dvar()
-            
+
             b1 = IPCone(u, right1, beta1)
-            
+
             self.branches = [b1]
-            
+
             constr = [left.rsocone(u, right[index])]
             constr.extend(b1.split())
-            
+
             return constr
-            
+
         else:
             cum = np.cumsum(beta)
             index = np.argmax(cum >= degree/2)
@@ -3300,16 +3296,16 @@ class IPCone:
 
             u = model.dvar(aux=True)
             v = model.dvar(aux=True)
-            
+
             b1 = IPCone(u, right1, beta1)
             b2 = IPCone(v, right2, beta2)
-            
+
             self.branches = [b1, b2]
-            
+
             constr = [left.rsocone(u, v)]
             constr.extend(b1.split() + b2.split())
             return constr
-        
+
     def to_soc(self):
 
         if len(self.beta) == 1:
@@ -4003,11 +3999,11 @@ class DecAffine(Affine):
         expr = super().norm(degree, method)
 
         return DecConvex(expr, self.event_adapt)
-    
+
     def pnorm(self, degree, method=None):
         """
         Return p-norm of a 1-D array, where p is a real number
-        larger than 1. 
+        larger than 1.
 
         Refer to `rsome.math.pnorm` for full documentation
 
@@ -4164,7 +4160,7 @@ class DecAffine(Affine):
 
         return DecConvex(Convex(self, np.zeros(self.shape), 'X', 1),
                          self.event_adapt)
-    
+
     def power(self, p, q=1):
         """
         Return the element-wise integer power of the given affine
@@ -4180,10 +4176,10 @@ class DecAffine(Affine):
         expr = super().power(p, q)
 
         return DecConvex(expr, self.event_adapt)
-    
+
     def gmean(self, beta=None):
         """
-        Return the weighted geometric mean of a 1-D array. The weights 
+        Return the weighted geometric mean of a 1-D array. The weights
         are specified by an array-like structure beta. It is expressed
         as prod(affine ** beta) ** (1/sum(beta))
 
@@ -4197,7 +4193,6 @@ class DecAffine(Affine):
         expr = super().gmean(beta)
 
         return DecConvex(expr, self.event_adapt)
-
 
     def pexp(self, scale):
         """
@@ -4228,7 +4223,7 @@ class DecAffine(Affine):
 
         return DecConvex(Convex(self, np.zeros(self.shape), 'L', -1),
                          self.event_adapt)
-    
+
     def logdet(self):
         """
         Return the log-determinant of a positive semidefinite matrix
@@ -4244,12 +4239,12 @@ class DecAffine(Affine):
         expr = super().logdet()
 
         return DecConvex(expr, self.event_adapt)
-    
+
     def rootdet(self):
         """
         Return the root-determinant of a positive semidefinite matrix
         expressed as a two-dimensional array. The root-determinant is
-        expressed as (det(A))**(1/L), where L is the dimension of the 
+        expressed as (det(A))**(1/L), where L is the dimension of the
         two-dimensinoal array.
 
         Refer to `rsome.rootdet` for full documentation.
@@ -4439,7 +4434,7 @@ class DecConvex(Convex):
     def __init__(self, convex, event_adapt):
 
         super().__init__(convex.affine_in, convex.affine_out,
-                         convex.xtype, convex.sign, convex.multiplier, 
+                         convex.xtype, convex.sign, convex.multiplier,
                          params=convex.params)
         self.event_adapt = event_adapt
 
@@ -4912,7 +4907,7 @@ class DecCvxConstr(CvxConstr):
     def __init__(self, constr, event_adapt):
 
         super().__init__(constr.model, constr.affine_in,
-                         constr.affine_out, constr.multiplier, constr.xtype, 
+                         constr.affine_out, constr.multiplier, constr.xtype,
                          params=constr.params)
         self.event_adapt = event_adapt
 

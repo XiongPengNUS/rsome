@@ -140,12 +140,11 @@ def test_dvar_array_adapt(shape1, shape2):
     y = model.dvar(shape1)
     z = model.rvar(shape2)
 
-    fset = model.ambiguity()
+    # fset = model.ambiguity()
 
     x.adapt(['B', 'D'])
-    s = fset.s
-    y.adapt(s.loc[['A', 'C']])
-    y.adapt(s['E'])
+    y.adapt(['A', 'C'])
+    y.adapt(['E'])
     y.adapt(z)
 
     if y.shape != () and z.shape != ():

@@ -9,7 +9,7 @@ import warnings
 import time
 from scipy.sparse import csr_matrix, csc_matrix, vstack, hstack, identity
 from .socp import SOCProg
-# from .gcp import GCProg
+from .gcp import GCProg
 from .lp import Solution
 
 
@@ -28,41 +28,57 @@ def solve(form, display=True, log=False, params={}):
     if not log:
         m.setParam(cp.COPT.Param.Logging, log)
         m.setParam(cp.COPT.Param.LogToConsole, False)
-    
-    lmi = form.lmi
-    if lmi:
-        c = form.obj
+
+    if isinstance(form, GCProg):
+        lmi = form.lmi
+        is_sdp = len(lmi) > 0
+    else:
+        is_sdp = False
+    if is_sdp:
         vtype = form.vtype
+        if (vtype != 'C').any():
+            raise ValueError('The solver does not support mixed-integer SDP.')
+        c = form.obj
         lb = form.lb
         ub = form.ub
         idx_lb = np.argwhere(lb > -np.inf).flatten().tolist()
         idx_ub = np.argwhere(ub < np.inf).flatten().tolist()
         num_lb = len(idx_lb)
         num_ub = len(idx_ub)
-        
+
         A = form.linear
         new_cols = A.shape[1] + sum([mc['dim']*(mc['dim'] + 1)//2 for mc in lmi])
         cn = np.concatenate((c, np.zeros(new_cols - len(c))))
 
         b = form.const
         sense = form.sense
-        Aeq = A[sense==1, :]
+        Aeq = A[sense == 1, :]
         Aeq.resize((Aeq.shape[0], new_cols))
-        Aineq = A[sense==0, :]
+        Aineq = A[sense == 0, :]
         Aineq.resize((Aineq.shape[0], new_cols))
-        Abound = csr_matrix(([-1]*num_lb + [1]*num_ub, 
+        Abound = csr_matrix(([-1]*num_lb + [1]*num_ub,
                              (np.arange(num_lb + num_ub), idx_lb + idx_ub)),
                             shape=[num_lb + num_ub, new_cols])
 
         qmat = form.qmat
-        Smats = []
-        q_dim = []
+        Asoc = []
+        q_dims = []
         for q in qmat:
-            SOCmat = csr_matrix(([-1] * len(q), (np.arange(len(q)), q)),
-                                shape=(len(q), new_cols))
-            Smats.append(SOCmat)
-            q_dim.append(len(q))
-    
+            Asoc.append(csr_matrix(([-1] * len(q), (np.arange(len(q)), q)),
+                                   shape=(len(q), new_cols)))
+            q_dims.append(len(q))
+
+        xmat = form.xmat
+        Aexc = []
+        Axbound = []
+        for e in xmat:
+            xvalues = [-1, 1, 1, 1]
+            ix, jx = [0, 1, 1, 2], [e[1], e[0], e[2], e[2]]
+            Aexc.append(csr_matrix((xvalues, (ix, jx)), shape=(3, new_cols)))
+            Axbound.append(csr_matrix(([-1], ([0], [e[2]])),
+                                      shape=(1, new_cols)))
+        ep_num = len(xmat)
+
         Aeqmats = []
         beqvecs = []
         Pmats = []
@@ -72,7 +88,6 @@ def solve(form, display=True, log=False, params={}):
         for mc in lmi:
             dim = mc['dim']
             vdim = dim * (1+dim) // 2
-            
             i, j = np.triu_indices(dim)
             k = i*dim + j
             Aeq_psd = mc['linear'][k, :]
@@ -82,33 +97,30 @@ def solve(form, display=True, log=False, params={}):
             Aeq_psd.resize((Aeq_psd.shape[0], new_cols))
             Aeqmats.append(Aeq_psd)
             beqvecs.extend((mc['const'][i, j]).tolist())
-    
             values = - np.ones(vdim)
-    
             k = np.arange(vdim)
-            Pmats.append(csr_matrix((values, (k, col_count + k)), 
+            Pmats.append(csr_matrix((values, (k, col_count + k)),
                                     shape=(vdim, new_cols)))
-    
             col_count += vdim
             row_count += vdim
-    
             s_dims.append(dim)
 
-        Pvecs = [0] * col_count
-
-        Amat =  vstack([Aeq] + Aeqmats + [Aineq, Abound] + 
-                       Smats + Pmats).transpose()
-        bvec = np.array(b[sense==1].tolist() + beqvecs + 
-                        b[sense==0].tolist() + 
+        Pvecs = [0] * col_count if lmi else []
+        Amat = vstack([Aeq] + Aeqmats + [Aineq, Abound] + Axbound +
+                      Asoc + Aexc + Pmats).transpose()
+        bvec = np.array(b[sense == 1].tolist() + beqvecs +
+                        b[sense == 0].tolist() +
                         (-lb[idx_lb]).tolist() + (ub[idx_ub]).tolist() +
-                        [0]*sum(q_dim) + Pvecs)
+                        [0]*ep_num + [0]*sum(q_dims) + [0]*(3*ep_num) + Pvecs)
 
-        dims = {'f': int(sum(sense)) + row_count, 
-                'l': int(sum(1-sense) + num_lb + num_ub),
-                'q': q_dim, 'ep': 0, 's': s_dims, 'p': []}
-
+        dims = {'f': int(sum(sense)) + row_count,
+                'l': int(sum(1-sense) + num_lb + num_ub + ep_num),
+                'q': q_dims,
+                'ep': ep_num,
+                's': s_dims,
+                'p': []}
         m.loadConeMatrix(bvec, Amat, -cn, dims)
-        
+
         if display:
             print('', 'Being solved by COPT...', sep='', flush=True)
             time.sleep(0.2)
@@ -120,9 +132,9 @@ def solve(form, display=True, log=False, params={}):
             print('Running time: {0:0.4f}s'.format(stime))
 
         try:
-            x_sol = m.getDuals()        
+            x_sol = m.getDuals()
             objval = c @ x_sol
-            
+
             solution = Solution('COPT', objval, x_sol, status, stime, y=None)
         except cp.CoptError:
             warnings.warn('Fail to find the optimal solution.')
@@ -142,7 +154,7 @@ def solve(form, display=True, log=False, params={}):
         lb[vtype == 'B'] = 0
         ub[vtype == 'B'] = 1
         m.loadMatrix(c, csc_matrix(A), lhs, rhs, lb, ub, vtype)
-    
+
         if isinstance(form, SOCProg):
             sc_dim = []
             sc_indices = []
@@ -152,7 +164,15 @@ def solve(form, display=True, log=False, params={}):
             ncone = len(form.qmat)
             if ncone > 0:
                 m.loadCone(ncone, None, sc_dim, sc_indices)
-    
+
+        if isinstance(form, GCProg):
+            indices = []
+            for e in form.xmat:
+                indices.extend([e[1], e[2], e[0]])
+            ncone = len(form.xmat)
+            if ncone > 0:
+                m.loadExpCone(ncone, [cp.COPT.EXPCONE_PRIMAL]*ncone, indices)
+
         if display:
             print('', 'Being solved by COPT...', sep='', flush=True)
             time.sleep(0.2)
@@ -169,10 +189,9 @@ def solve(form, display=True, log=False, params={}):
         try:
             x_sol = np.array(m.getValues())
             objval = c @ x_sol
-            
             solution = Solution('COPT', objval, x_sol, status, stime, y=None)
         except cp.CoptError:
             warnings.warn('Fail to find the optimal solution.')
             solution = Solution('COPT', np.nan, None, status, stime)
-                
+
     return solution

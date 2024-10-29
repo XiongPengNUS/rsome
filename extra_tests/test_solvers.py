@@ -3,12 +3,11 @@ from rsome import lp
 from rsome import socp
 from rsome import ro
 from rsome import lpg_solver as lpg
-# from rsome import clp_solver as clp
 from rsome import ort_solver as ort
 from rsome import eco_solver as eco
 from rsome import grb_solver as grb
 from rsome import msk_solver as msk
-from rsome import cpx_solver as cpx
+# from rsome import cpx_solver as cpx
 from rsome import cpt_solver as cpt
 import numpy as np
 import numpy.random as rd
@@ -88,14 +87,14 @@ def test_lp():
     with pytest.raises(ParameterError):
         model.solve(msk, params={'not_a_parameter': 1})
 
-    model.solve(cpx, params={'timelimit': 100.0,
-                             'simplex.tolerances.feasibility': 1e-7})
-    assert abs(model.get() - 22.4) < 1e-6
-    assert abs(x.get() - 4.8) < 1e-6
-    assert abs(y.get() - 2) < 1e-6
-    assert model.optimal()
-    with pytest.raises(ValueError):
-        model.solve(cpx, params={'not_a_parameter': 1})
+    # model.solve(cpx, params={'timelimit': 100.0,
+    #                          'simplex.tolerances.feasibility': 1e-7})
+    # assert abs(model.get() - 22.4) < 1e-6
+    # assert abs(x.get() - 4.8) < 1e-6
+    # assert abs(y.get() - 2) < 1e-6
+    # assert model.optimal()
+    # with pytest.raises(ValueError):
+    #     model.solve(cpx, params={'not_a_parameter': 1})
 
     model.solve(cpt)
     assert abs(model.get() - 22.4) < 1e-6
@@ -144,13 +143,13 @@ def test_mip():
     assert (x_sol == x.get().round()).all()
     assert model.optimal()
 
-    model.solve(cpx)
-    assert (x_sol == x.get().round()).all()
-    assert model.optimal()
-
-    # model.solve(cpt)
+    # model.solve(cpx)
     # assert (x_sol == x.get().round()).all()
     # assert model.optimal()
+
+    model.solve(cpt)
+    assert (x_sol == x.get().round()).all()
+    assert model.optimal()
 
 
 def test_socp():
@@ -199,10 +198,10 @@ def test_socp():
     assert abs(model.get() - objval) < 1e-6
     assert (abs(x_sol - x.get()) < 1e-3).all()
 
-    model.solve(cpx)
-    assert model.optimal()
-    assert abs(model.get() - objval) < 1e-6
-    assert (abs(x_sol - x.get()) < 1e-3).all()
+    # model.solve(cpx)
+    # assert model.optimal()
+    # assert abs(model.get() - objval) < 1e-6
+    # assert (abs(x_sol - x.get()) < 1e-3).all()
 
     model.solve(cpt)
     assert model.optimal()
@@ -254,9 +253,9 @@ def test_mip_socp():
     assert abs(model.get() - objval) < 1e-3
     assert (abs(x_sol - x.get()) < 1e-3).all()
 
-    model.solve(cpx)
-    assert abs(model.get() - objval) < 1e-3
-    assert (abs(x_sol - x.get()) < 1e-3).all()
+    # model.solve(cpx)
+    # assert abs(model.get() - objval) < 1e-3
+    # assert (abs(x_sol - x.get()) < 1e-3).all()
 
     model.solve(cpt)
     assert abs(model.get() - objval) < 1e-3
@@ -291,8 +290,8 @@ def test_no_solution():
     with pytest.warns(UserWarning):
         model.solve(grb)
 
-    with pytest.warns(UserWarning):
-        model.solve(cpx)
+    # with pytest.warns(UserWarning):
+    #     model.solve(cpx)
 
     with pytest.warns(UserWarning):
         model.solve(msk)

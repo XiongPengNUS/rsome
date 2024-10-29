@@ -33,7 +33,7 @@ $$
 &\left(
 \begin{array}{cc}
 \pmb{P} & \pmb{Z} \\
-\pmb{Z} & \text{diag}(\pmb{Z})
+\pmb{Z}^{\top} & \text{diag}(\pmb{Z})
 \end{array}
 \right) \succeq 0 \\
 &\pmb{Z}\text{ if lower triangular}.
@@ -49,7 +49,7 @@ $$
 &\left(
 \begin{array}{cc}
 \pmb{P} & \pmb{Z} \\
-\pmb{Z} & \text{diag}(\pmb{Z})
+\pmb{Z}^{\top} & \text{diag}(\pmb{Z})
 \end{array}
 \right) \succeq 0 \\
 &\|\pmb{Px}_i - \pmb{c}\|_2 \leq 1, &i=1, 2, ..., m \\
@@ -74,7 +74,7 @@ The Python code for implementing the model above is presented below.
 
 ```python
 from rsome import ro
-from rsome import msk_solver as msk
+from rsome import cpt_solver as cpt
 import rsome as rso
 
 model = ro.Model()
@@ -92,13 +92,15 @@ for i in range(m):
     model.st(rso.norm(P@xs[i] - c) <= 1)
 model.st(P >> 0)
 
-model.solve(msk)
+model.solve(cpt)
+print(f'Determinant: {np.exp(model.get())}')
 ```
 
 ```
-Being solved by Mosek...
-Solution status: Optimal
-Running time: 0.0223s
+Being solved by COPT...
+Solution status: 1
+Running time: 0.0185s
+Determinant: 0.23537956658491654
 ```
 
 The boundary of the ellipsoid is achieved by the following code using the solution of \\(\pmb{P}\\) and \\(\pmb{c}\\).

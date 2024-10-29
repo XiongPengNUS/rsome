@@ -2,6 +2,7 @@ import rsome as rso
 from rsome import dro
 from rsome import E
 from rsome import msk_solver as msk
+from rsome import cpt_solver as cpt
 import numpy as np
 import pandas as pd
 
@@ -25,6 +26,11 @@ def test_log_det_dro():
     m.st(X == A)
 
     m.solve(msk)
+
+    objval = np.linalg.det(A)
+    assert abs(objval - np.exp(m.get())) < 1e-5
+
+    m.solve(cpt)
 
     objval = np.linalg.det(A)
     assert abs(objval - np.exp(m.get())) < 1e-5
@@ -71,4 +77,12 @@ def test_sw_log_det_dro():
                    pd.Series([np.linalg.det(A) for A in As])) < 1e-6)
 
     objval = np.log(np.array([np.linalg.det(A) for A in As])).mean()
-    abs(objval - m.get()) < 1e-5
+    assert abs(objval - m.get()) < 1e-5
+
+    m.solve(cpt)
+
+    assert all(abs(np.exp(v.sum()()) -
+                   pd.Series([np.linalg.det(A) for A in As])) < 1e-6)
+
+    objval = np.log(np.array([np.linalg.det(A) for A in As])).mean()
+    assert abs(objval - m.get()) < 1e-5

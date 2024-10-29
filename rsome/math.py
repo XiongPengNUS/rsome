@@ -32,7 +32,7 @@ def norm(affine, degree=2, method=None):
 def pnorm(affine, degree=2, method=None):
     """
     Return the p-norm of a 1-D array, where p is a real number larger
-    than 1. 
+    than 1.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def pnorm(affine, degree=2, method=None):
         than 1.
     method : {'soc', 'exc'}
         The reformulation method. 'soc' for reformulating the p-norm
-        constraint into second-order conic constraints. 'exc' for 
+        constraint into second-order conic constraints. 'exc' for
         reformulating the p-norm constraint into exponential conic
         constraints.
 
@@ -58,7 +58,7 @@ def pnorm(affine, degree=2, method=None):
 
 def gmean(affine, beta=None):
     """
-    Return the weighted geometric mean of a 1-D array. The weights 
+    Return the weighted geometric mean of a 1-D array. The weights
     are specified by an array-like structure beta. It is expressed
     as prod(affine ** beta) ** (1/sum(beta))
 
@@ -69,13 +69,13 @@ def gmean(affine, beta=None):
     beta : None of an iterable of integers.
         The weight of each term in the geometric mean expression. Each
         weight must be an integer no smaller than one. When beta is None
-        (by default), all weights are ones. 
+        (by default), all weights are ones.
 
     Returns
     -------
     out : Convex
         A convex expression representing the geometric mean of the given
-        array. 
+        array.
     """
 
     return affine.gmean(beta)
@@ -562,6 +562,7 @@ def triu(affine, k):
 
     return affine.triu(k)
 
+
 def logdet(affine):
     """
     Return the log-determinant of a positive semidefinite matrix
@@ -580,6 +581,7 @@ def logdet(affine):
     """
 
     return affine.to_affine().logdet()
+
 
 def rootdet(affine):
     """

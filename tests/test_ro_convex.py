@@ -744,10 +744,10 @@ def test_gmean(array, const):
 
     with pytest.raises(ValueError):
         rso.gmean(x, beta) <= y
-    
+
     with pytest.raises(ValueError):
         rso.gmean(x, beta[:-1]) >= y
-    
+
     with pytest.raises(ValueError):
         X = m.dvar((3, 5))
         rso.gmean(X) >= y

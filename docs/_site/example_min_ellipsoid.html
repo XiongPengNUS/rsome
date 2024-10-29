@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>Robust Stochastic Optimization Made Easy by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=552f0095bb978cceee79a8fd1480ca4a1ed0c4f7">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=35c6b54b256086c854e1efe39f9eb0491005f2a6">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -89,7 +89,7 @@
 &amp;\left(
 \begin{array}{cc}
 \pmb{P} &amp; \pmb{Z} \\
-\pmb{Z} &amp; \text{diag}(\pmb{Z})
+\pmb{Z}^{\top} &amp; \text{diag}(\pmb{Z})
 \end{array}
 \right) \succeq 0 \\
 &amp;\pmb{Z}\text{ if lower triangular}.
@@ -103,7 +103,7 @@
 &amp;\left(
 \begin{array}{cc}
 \pmb{P} &amp; \pmb{Z} \\
-\pmb{Z} &amp; \text{diag}(\pmb{Z})
+\pmb{Z}^{\top} &amp; \text{diag}(\pmb{Z})
 \end{array}
 \right) \succeq 0 \\
 &amp;\|\pmb{Px}_i - \pmb{c}\|_2 \leq 1, &amp;i=1, 2, ..., m \\
@@ -125,7 +125,7 @@
 <p>The Python code for implementing the model above is presented below.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">ro</span>
-<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">msk_solver</span> <span class="k">as</span> <span class="n">msk</span>
+<span class="kn">from</span> <span class="nn">rsome</span> <span class="kn">import</span> <span class="n">cpt_solver</span> <span class="k">as</span> <span class="n">cpt</span>
 <span class="kn">import</span> <span class="nn">rsome</span> <span class="k">as</span> <span class="n">rso</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">ro</span><span class="p">.</span><span class="n">Model</span><span class="p">()</span>
@@ -143,12 +143,14 @@
     <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">rso</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">P</span><span class="o">@</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">st</span><span class="p">(</span><span class="n">P</span> <span class="o">&gt;&gt;</span> <span class="mi">0</span><span class="p">)</span>
 
-<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'Determinant: </span><span class="si">{</span><span class="n">np</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">get</span><span class="p">())</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by Mosek...
-Solution status: Optimal
-Running time: 0.0223s
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by COPT...
+Solution status: 1
+Running time: 0.0185s
+Determinant: 0.23537956658491654
 </code></pre></div></div>
 
 <p>The boundary of the ellipsoid is achieved by the following code using the solution of \(\pmb{P}\) and \(\pmb{c}\).</p>

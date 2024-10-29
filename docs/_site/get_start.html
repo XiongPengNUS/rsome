@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png"  href="assets/img/favicon.png">
     <title>Robust Stochastic Optimization Made Easy by XiongPengNUS</title>
 
-    <link rel="stylesheet" href="/assets/css/styles.css?v=552f0095bb978cceee79a8fd1480ca4a1ed0c4f7">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=35c6b54b256086c854e1efe39f9eb0491005f2a6">
     <meta name="viewport" content="width=device-width">
 
     <!-- Place this tag in your head or just before your close body tag. -->
@@ -931,10 +931,7 @@ Running time: 0.0135s
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cardinal Optimizer v7.0.3. Build date Nov 14 2023
-Copyright Cardinal Operations 2023. All Rights Reserved
-
-Being solved by COPT...
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Being solved by COPT...
 Solution status: 1
 Running time: 0.0028s
 </code></pre></div></div>
@@ -943,9 +940,9 @@ Running time: 0.0028s
 
 <p>The third argument <code class="language-plaintext highlighter-rouge">params</code> is used to tune solver parameters. The current RSOME package enables users to adjust parameters for Gurobi, MOSEK, and CPLEX. The <code class="language-plaintext highlighter-rouge">params</code> argument is a <code class="language-plaintext highlighter-rouge">dict</code> type object in the format of <code class="language-plaintext highlighter-rouge">{&lt;param1&gt;: &lt;value1&gt;, &lt;param2&gt;: &lt;value2&gt;, &lt;param3&gt;: &lt;value3&gt;, ..., &lt;paramk&gt;: &lt;valuek&gt;}</code>. Information on solver parameters and their valid values are provided below. Please make sure that you are specifying parameters with the correct data type, otherwise error messages might be raised.</p>
 <ul>
-  <li>Gurobi parameters: <a href="https://www.gurobi.com/documentation/9.1/refman/parameters.html">https://www.gurobi.com/documentation/9.1/refman/parameters.html</a></li>
+  <li>Gurobi parameters: <a href="https://www.gurobi.com/documentation/current/refman/parameters.html">https://www.gurobi.com/documentation/current/refman/parameters.html</a></li>
   <li>MOSEK parameters: <a href="https://docs.mosek.com/latest/pythonfusion/parameters.html">https://docs.mosek.com/latest/pythonapi/parameters.html</a></li>
-  <li>CPLEX parameters: <a href="https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters">https://www.ibm.com/docs/en/icos/12.7.1.0?topic=cplex-list-parameters</a></li>
+  <li>CPLEX parameters: <a href="https://ibmdecisionoptimization.github.io/docplex-doc/cp/docplex.cp.parameters.py.html">https://ibmdecisionoptimization.github.io/docplex-doc/cp/docplex.cp.parameters.py.html</a></li>
 </ul>
 
 <p>For example, the following code solves the problem using Gurobi, MOSEK, and CPLEX, respectively, with the relative MIP gap tolerance to be <code class="language-plaintext highlighter-rouge">1e-3</code>.</p>
